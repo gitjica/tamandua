@@ -157,6 +157,13 @@ Describe 'Ajustes mal definidos e permissões' {
         Test-Path -LiteralPath $raiz | Should -BeFalse -Because 'nada pode ter sido escrito'
     }
 
+    It 'requerAdmin sem ser administrador: simular funciona (só lê)' {
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
+        $r = Set-TmdAjuste -Ajuste (New-Ajuste 'admin-sim' @(New-MudancaRegistro 'X' 1) -RequerAdmin $true) -RaizRegistro $raiz -Simular
+        $r.Status | Should -Be 'Simulado'
+        Test-Path -LiteralPath $raiz | Should -BeFalse
+    }
+
     It 'requerAdmin sem ser administrador: ignorado, nada escrito' {
         Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
         $r = Set-TmdAjuste -Ajuste (New-Ajuste 'admin' @(New-MudancaRegistro 'X' 1) -RequerAdmin $true) -RaizRegistro $raiz

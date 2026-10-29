@@ -102,6 +102,7 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 - `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
 - Variáveis não diferenciam maiúsculas: um `$catalogo` local sobrescreve o parâmetro `$Catalogo`.
 - `-and` e `-or` têm a mesma precedência (avaliados da esquerda para a direita): use parênteses.
+- Não use nomes de variáveis automáticas (`$home`, `$input`, `$args`, `$error`, `$host`, `$matches`) como variável própria.
 - Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
 - `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
   objetos vindos de JSON são lidos com `Get-Propriedade`.
@@ -555,6 +556,15 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
   é decidido pelo estado lido na hora, não pelo alvo); mudança por `dism /Enable-Feature ... /All` ou `/Disable-Feature`
   com `/NoRestart`, via `Invoke-TmdPrograma` no processo elevado. 3010 = feito, pede reinício. Recurso que não existe na
   edição aparece com o selo "não existe nesta edição", sem caixa. SMB 1.0 é risco alto, com a explicação do porquê.
+- **atualizacoes:** políticas do Windows Update como ajustes do motor (`modulos/atualizacoes/atualizacoes.json`, chaves em
+  `HKLM:\SOFTWARE\Policies`): adiar versões grandes por 365 dias, esperar 4 dias pelas mensais, não reiniciar sozinho com
+  alguém conectado, não instalar drivers, não compartilhar atualizações (`DODownloadMode = 0`). Presets "Equilibrado" e
+  "Mais controle". Reversíveis pelo Histórico. Um teste garante que **nada no catálogo desliga o Windows Update**
+  (`NoAutoUpdate`, `AUOptions`, serviços, servidor). No Windows Home, avisa que as políticas são ignoradas.
+  Ao escolher o valor de um ajuste, confira se ele não **afrouxa** uma configuração mais restrita que o usuário já tenha
+  (ex.: `DODownloadMode` 1 seria menos restrito que 0).
+- Desfazer pelo Histórico ou `tamandua desfazer` usa `Undo-TmdAjusteComAdmin`: ajustes que mexeram em HKLM, serviço ou
+  tarefa voltam num processo elevado (um UAC para o lote). Simular nunca exige admin, nem para aplicar nem para desfazer.
 
 ---
 
@@ -682,6 +692,10 @@ Cada etapa só começa com a anterior com testes verdes.
 8. **`analisar`**, 9. **`programas`**, 10. **`purgar`**, 11. **`instaladores`**, 12. **`desinstalar`**, 13. **`recursos`**, 14. **`otimizar`**, 15. **`reparos`**, 16. **`atualizacoes`**.
 
 Definição de pronto do MVP: etapas 1–7 entregues, interface e CLI funcionando, `-Simular` em tudo, log de operações, histórico com desfazer.
+
+**Situação:** MVP entregue e todas as etapas 8 a 16 concluídas — os 12 módulos do catálogo existem e estão disponíveis.
+Próximos passos naturais (fora do catálogo atual): barra de progresso para tarefas longas, abrir pasta/arquivo no Explorador
+a partir do `analisar`, mais ajustes (incluindo criar/apagar chaves inteiras no motor), atualização do próprio Tamanduá.
 
 ---
 

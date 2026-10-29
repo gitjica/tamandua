@@ -1,6 +1,6 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7) + módulos analisar, instaladores, purgar, programas, desinstalar, reparos, otimizar e recursos. Próximo: atualizações.
+Limpeza, ajustes e manutenção profunda para Windows. Todos os 12 módulos prontos: status, analisar, limpar, purgar, instaladores, desinstalar, programas, ajustes, recursos, atualizações, otimizar e reparos.
 
 ## Uso
 
@@ -17,6 +17,7 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 reparos -Itens sfc,dism   # pede admin uma vez e roda os reparos escolhidos
 .\tamandua.ps1 otimizar -Itens dns,icones   # cache de DNS e de ícones (sem admin)
 .\tamandua.ps1 recursos -Itens wsl,plataforma-vm   # liga (ou desliga) recursos do Windows; pede admin e reinício
+.\tamandua.ps1 atualizacoes -Preset Equilibrado -Simular   # política do Windows Update (nunca desliga as atualizações)
 .\tamandua.ps1 limpar -Simular   # quanto liberaria (temporários com mais de 24 h, despejos de falha)
 .\tamandua.ps1 limpar            # mostra, pergunta e limpa
 .\tamandua.ps1 ajustes -Preset Essencial -Simular   # o que o preset mudaria, e o que já está aplicado
@@ -28,7 +29,7 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 ajuda
 ```
 
-Por enquanto existem o núcleo e os módulos `status`, `analisar`, `limpar`, `purgar`, `instaladores`, `programas`, `desinstalar`, `ajustes`, `recursos`, `otimizar` e `reparos`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
+Se a pasta de um módulo faltar ou quebrar, o resto continua funcionando e `tamandua modulos` diz o que falta.
 
 ## Desenvolvimento
 

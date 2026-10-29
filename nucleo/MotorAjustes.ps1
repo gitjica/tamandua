@@ -27,7 +27,8 @@ function Invoke-TmdAplicarAjuste {
 
     $id = [string](Get-Propriedade $Ajuste 'id')
     $mudancas = @(Get-TmdMudancaAjuste -Ajuste $Ajuste)
-    if ((Get-Propriedade $Ajuste 'requerAdmin') -eq $true -and -not (Test-TmdAdministrador)) {
+    # Simular só lê (ler HKLM não precisa de admin); só escrever exige.
+    if (-not $Simular -and (Get-Propriedade $Ajuste 'requerAdmin') -eq $true -and -not (Test-TmdAdministrador)) {
         return New-TmdResultadoAjuste -Id $id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador'
     }
 
@@ -105,11 +106,11 @@ function Invoke-TmdDesfazerAjuste {
     # Onde desfazer: o lugar salvo no snapshot; snapshots antigos, sem isso, usam o -RaizRegistro recebido.
     foreach ($it in $itens) { if (-not $it.Raiz) { $it.Raiz = $RaizRegistro } }
     $precisaAdmin = @($itens | Where-Object { $_.Mudanca.Tipo -in 'Servico', 'Tarefa' -or ($_.Mudanca.Tipo -eq 'Registro' -and -not $_.Raiz -and $_.Mudanca.Caminho -like 'HKLM:*') }).Count -gt 0
+    $descricoes = @($itens | ForEach-Object { "volta $(Get-TmdChaveMudanca $_.Mudanca) para $(Format-TmdEstado -Mudanca $_.Mudanca -Estado $_.Antes)" })
+    if ($Simular) { return New-TmdResultadoAjuste -Id $Id -Status 'Simulado' -Mudancas $descricoes }
     if ($precisaAdmin -and -not (Test-TmdAdministrador)) {
         return New-TmdResultadoAjuste -Id $Id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador'
     }
-    $descricoes = @($itens | ForEach-Object { "volta $(Get-TmdChaveMudanca $_.Mudanca) para $(Format-TmdEstado -Mudanca $_.Mudanca -Estado $_.Antes)" })
-    if ($Simular) { return New-TmdResultadoAjuste -Id $Id -Status 'Simulado' -Mudancas $descricoes }
 
     $falhas = [System.Collections.Generic.List[object]]::new()
     $motivos = @()
@@ -156,6 +157,19 @@ function Invoke-TmdRestaurarPadrao {
     }
     if ($motivos.Count -gt 0) { return New-TmdResultadoAjuste -Id $id -Status 'Erro' -Motivo ($motivos -join '; ') -Mudancas $descricoes }
     New-TmdResultadoAjuste -Id $id -Status 'Feito' -Motivo $aviso -Mudancas $descricoes
+}
+
+# Desfazer este ajuste precisa de admin? (registro em HKLM fora da área de testes, serviço ou tarefa)
+function Test-TmdDesfazerPrecisaAdmin {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Id)
+    try { $entradas = Read-TmdSnapshot -Id $Id } catch { return $false }
+    foreach ($e in $entradas) {
+        $tipo = [string](Get-Propriedade $e 'Tipo')
+        if ($tipo -in 'Servico', 'Tarefa') { return $true }
+        if ($tipo -eq 'Registro' -and -not (Get-Propriedade $e 'RaizRegistro') -and ([string](Get-Propriedade $e 'Caminho')) -like 'HKLM:*') { return $true }
+    }
+    $false
 }
 
 # Aplicado | NaoAplicado | Parcial | Desconhecido, lido da máquina agora.

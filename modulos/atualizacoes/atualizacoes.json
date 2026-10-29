@@ -1,0 +1,64 @@
+[
+  {
+    "id": "wu-adiar-recursos",
+    "nome": "Adiar atualizações de recursos por 1 ano",
+    "descricao": "Versões grandes do Windows (ex.: 24H2 → 25H2) só chegam 365 dias depois. Correções de segurança continuam chegando normalmente.",
+    "categoria": "Quando atualizar",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Equilibrado", "Mais controle"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "DeferFeatureUpdates", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "DeferFeatureUpdatesPeriodInDays", "valor": 365, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "wu-adiar-qualidade",
+    "nome": "Esperar 4 dias antes das atualizações mensais",
+    "descricao": "Dá tempo de a Microsoft retirar uma atualização com problema. Em troca, correções de segurança chegam 4 dias depois.",
+    "categoria": "Quando atualizar",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Mais controle"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "DeferQualityUpdates", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "DeferQualityUpdatesPeriodInDays", "valor": 4, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "wu-sem-reinicio-automatico",
+    "nome": "Não reiniciar sozinho com você usando o computador",
+    "descricao": "O Windows espera você reiniciar quando houver alguém conectado, em vez de reiniciar sozinho fora do horário ativo.",
+    "categoria": "Reinício",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Equilibrado", "Mais controle"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "nome": "NoAutoRebootWithLoggedOnUsers", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "wu-sem-drivers",
+    "nome": "Não instalar drivers pelo Windows Update",
+    "descricao": "Drivers de vídeo, áudio e chipset ficam por sua conta (ou do fabricante). Evita o Windows trocar um driver que estava funcionando.",
+    "categoria": "O que atualizar",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Mais controle"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "ExcludeWUDriversInQualityUpdate", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "wu-sem-p2p",
+    "nome": "Não compartilhar atualizações com outros computadores",
+    "descricao": "Baixa as atualizações só da Microsoft. A Otimização de Entrega para de usar sua conexão para mandar atualizações a outros computadores (da internet ou da sua rede).",
+    "categoria": "O que atualizar",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Equilibrado", "Mais controle"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization", "nome": "DODownloadMode", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  }
+]

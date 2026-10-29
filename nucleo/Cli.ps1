@@ -21,7 +21,7 @@ function Invoke-TmdCli {
         Write-Host '-Preset e -Itens só valem junto com um módulo (ex.: tamandua ajustes -Preset Essencial).' -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
     }
-    if ($Comando -eq 'desfazer') { return Invoke-TmdDesfazer -Argumentos $Argumentos -Simular:$Simular -Sim:$Sim }
+    if ($Comando -eq 'desfazer') { return Invoke-TmdDesfazer -Argumentos $Argumentos -Simular:$Simular -Sim:$Sim -Raiz $Raiz }
     # Comando interno: o processo elevado (pedido do UAC) executa as ações de um lote. Não aparece na ajuda.
     if ($Comando -eq '__elevado') {
         try {
@@ -70,7 +70,7 @@ function Invoke-TmdCli {
 
 # tamandua desfazer <id-do-ajuste> [-Simular] [-Sim]: volta o ajuste para o valor salvo antes de ele ser aplicado.
 function Invoke-TmdDesfazer {
-    param([string[]]$Argumentos, [switch]$Simular, [switch]$Sim)
+    param([string[]]$Argumentos, [switch]$Simular, [switch]$Sim, [string]$Raiz = $script:RaizPadrao)
 
     if (@($Argumentos).Count -ne 1) {
         Write-Host 'Uso: tamandua desfazer <id-do-ajuste>   (os ids aparecem em: tamandua historico)' -ForegroundColor Yellow
@@ -89,7 +89,8 @@ function Invoke-TmdDesfazer {
         Write-Host 'Cancelado. Nada foi alterado.'
         return $script:CodigoSaida.Cancelado
     }
-    $r = Undo-TmdAjuste -Id $id -Modulo 'historico'
+    # Ajuste que mexeu em HKLM, serviço ou tarefa: pede o UAC para voltar.
+    $r = @(Undo-TmdAjusteComAdmin -Ids @($id) -Raiz $Raiz)[0]
     Write-TmdResultados -Resultados @($r) -Acao 'desfazer'
     if ($r.Status -eq 'Feito') { return $script:CodigoSaida.Ok }
     $script:CodigoSaida.Erro

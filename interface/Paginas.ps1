@@ -335,7 +335,7 @@ function Start-TmdAcao {
     $especial = (Get-ValorPropriedade (Get-TmdModuloAtual) 'Especial') -eq $true
     if ($especial) {
         $codigo = $script:ScriptDesfazer
-        $parametros = @{ Nucleo = $script:Estado.Nucleo; Ids = [string[]]@($resumo.Alvos | ForEach-Object { $_.IdAjuste }); Simular = $Simular }
+        $parametros = @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Ids = [string[]]@($resumo.Alvos | ForEach-Object { $_.IdAjuste }); Simular = $Simular }
     }
     else {
         $codigo = $script:ScriptExecutarAcao

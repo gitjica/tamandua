@@ -86,10 +86,12 @@ $script:ScriptHistorico = {
 }
 
 $script:ScriptDesfazer = {
-    param([string]$Nucleo, [string[]]$Ids, [bool]$Simular)
+    param([string]$Nucleo, [string]$Raiz, [string[]]$Ids, [bool]$Simular)
     $ErrorActionPreference = 'Stop'
     Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
-    foreach ($id in $Ids) { Undo-TmdAjuste -Id $id -Simular:$Simular -Modulo 'historico' }
+    if ($Simular) { foreach ($id in $Ids) { Undo-TmdAjuste -Id $id -Simular -Modulo 'historico' } }
+    # Ajuste que mexeu em HKLM, serviço ou tarefa precisa de admin para voltar: o núcleo pede o UAC uma vez.
+    else { Undo-TmdAjusteComAdmin -Ids $Ids -Raiz $Raiz }
 }
 
 $script:ScriptExecutarAcao = {

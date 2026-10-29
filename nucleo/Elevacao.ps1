@@ -33,6 +33,22 @@ function Invoke-TmdAcaoModulo {
     foreach ($a in $Alvos) { if ($porId.ContainsKey([string]$a.Id)) { $porId[[string]$a.Id] } }
 }
 
+# Desfaz ajustes pelo Id; os que precisam de admin (ex.: política em HKLM) vão juntos num processo elevado.
+function Undo-TmdAjusteComAdmin {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string[]]$Ids, [string]$Raiz = $script:RaizPadrao, [string]$Modulo = 'historico')
+
+    $admin = Test-TmdAdministrador
+    $elevar = @($Ids | Where-Object { -not $admin -and (Test-TmdDesfazerPrecisaAdmin -Id $_) })
+    $porId = @{}
+    foreach ($id in $Ids | Where-Object { $elevar -notcontains $_ }) { $porId[$id] = Undo-TmdAjuste -Id $id -Modulo $Modulo }
+    if ($elevar.Count -gt 0) {
+        $alvos = @($elevar | ForEach-Object { [pscustomobject]@{ Id = $_ } })
+        foreach ($r in @(Invoke-TmdAcaoElevada -Raiz $Raiz -Modulo '__desfazer' -Alvos $alvos)) { $porId[[string]$r.Id] = $r }
+    }
+    foreach ($id in $Ids) { if ($porId.ContainsKey($id)) { $porId[$id] } }
+}
+
 function Invoke-TmdAcaoElevada {
     param([Parameter(Mandatory)][string]$Raiz, [Parameter(Mandatory)][string]$Modulo, [Parameter(Mandatory)][object[]]$Alvos)
 
@@ -43,6 +59,7 @@ function Invoke-TmdAcaoElevada {
         foreach ($a in $Alvos) { [pscustomobject]@{ Id = [string]$a.Id; Status = 'Ignorado'; Liberado = [int64]0; Motivo = $m; Mudancas = @() } }
     }
     try {
+        # Modulo '__desfazer' = desfazer ajustes pelo Id (Histórico); qualquer outro = Invoke-Acao daquele módulo.
         $conteudo = [pscustomobject]@{ Modulo = $Modulo; Alvos = @($Alvos); Resposta = $resposta } | ConvertTo-Json -Depth 6
         [IO.File]::WriteAllText($pedido, $conteudo, (New-Object Text.UTF8Encoding $false))
         try {
@@ -77,9 +94,14 @@ function Invoke-TmdExecucaoElevada {
     Test-TmdTemporarioValido -Caminho $Pedido
     $dados = [IO.File]::ReadAllText($Pedido, [Text.Encoding]::UTF8) | ConvertFrom-Json
     Test-TmdTemporarioValido -Caminho ([string]$dados.Resposta)
-    $info = Get-TmdModulo -Raiz $Raiz -Nome ([string]$dados.Modulo)
-    if (-not $info -or $info.Estado -ne 'ok') { throw "módulo $($dados.Modulo) não está disponível" }
-    $resultados = @(& $info.Modulo.ExportedFunctions['Invoke-Acao'] -Alvos @($dados.Alvos))
+    if ([string]$dados.Modulo -eq '__desfazer') {
+        $resultados = @(foreach ($a in @($dados.Alvos)) { Undo-TmdAjuste -Id ([string]$a.Id) -Modulo 'historico' })
+    }
+    else {
+        $info = Get-TmdModulo -Raiz $Raiz -Nome ([string]$dados.Modulo)
+        if (-not $info -or $info.Estado -ne 'ok') { throw "módulo $($dados.Modulo) não está disponível" }
+        $resultados = @(& $info.Modulo.ExportedFunctions['Invoke-Acao'] -Alvos @($dados.Alvos))
+    }
     $json = if ($resultados.Count -eq 0) { '[]' } else { ConvertTo-Json -InputObject $resultados -Depth 6 }
     [IO.File]::WriteAllText([string]$dados.Resposta, $json, (New-Object Text.UTF8Encoding $false))
 }

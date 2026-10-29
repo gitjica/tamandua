@@ -36,6 +36,8 @@ Export-ModuleMember -Function @(
     'Confirm-TmdExecucao'
     'Test-TmdAdministrador'
     'Invoke-TmdAcaoModulo'
+    'Undo-TmdAjusteComAdmin'
+    'Test-TmdDesfazerPrecisaAdmin'
     'Invoke-TmdPrograma'
     'Set-TmdAjuste'
     'Undo-TmdAjuste'
