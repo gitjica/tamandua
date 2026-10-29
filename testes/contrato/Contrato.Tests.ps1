@@ -82,9 +82,10 @@ function Find-Alvos {
     [System.IO.File]::Delete('C:\y')
     reg add HKCU\Software\X
     Write-Host 'oi'
+    $chave.SetValue('x', 1)
 }
 '@
         $achados = @(Find-EscritaProibida -Pasta $pasta)
-        $achados.Count | Should -Be 4
+        $achados.Count | Should -Be 5
     }
 }

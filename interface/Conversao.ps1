@@ -14,7 +14,15 @@ $script:IconesModulo = @{
     atualizacoes = [string][char]0xE895
     otimizar     = [string][char]0xEC4A
     reparos      = [string][char]0xE90F
+    historico    = [string][char]0xE81C
 }
+
+# A página Histórico não é um módulo: é do núcleo, e a interface a acrescenta no fim da barra lateral.
+$script:PaginaHistorico = [pscustomobject]@{
+    Nome = 'historico'; Titulo = 'Histórico'; Grupo = 'Registro'; Estado = 'ok'; Motivo = ''; Escreve = $true
+    Descricao = 'O que o Tamanduá já fez. Ajustes podem ser desfeitos daqui.'; RotuloAcao = 'Desfazer'; Especial = $true
+}
+$script:CorStatusHistorico = @{ Erro = 'Critico'; Parcial = 'Atencao' }
 $script:IconePadrao = [string][char]0xE74C
 $script:MarcadorEstado = @{
     ok           = ''
@@ -91,7 +99,8 @@ function ConvertTo-LinhaAlvo {
         $linhas.Add((New-LinhaAlvo -Tipo 'Alvo' -Nome $nome -Categoria $categoria -Detalhe $detalhe -Estado $estado `
                     -Nivel $(if ($nivel) { $nivel } else { 'Normal' }) -Valor $(if ($temValor) { [double]$valor } else { 0 }) `
                     -TemValor $temValor -Selo $selo -Id ([string](Get-ValorPropriedade $a 'Id')) -Alvo $a `
-                    -TemCaixa $Escreve.IsPresent -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
+                    -TemCaixa ($Escreve -and (Get-ValorPropriedade $a 'Selecionavel') -ne $false) `
+                    -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
                     -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 })))
     }
     , $linhas.ToArray()
@@ -121,21 +130,67 @@ function Format-TamanhoTela {
     '{0:N1} {1}' -f $Bytes, $unidades[$i]
 }
 
-# "2 selecionados · 3,2 GB", contando só linhas de alvo marcadas.
+# "2 selecionados · 3,2 GB", contando só linhas de alvo marcadas (e que podem ser marcadas).
 function Get-ResumoSelecao {
     param([AllowEmptyCollection()][object[]]$Linhas = @())
-    $marcadas = @($Linhas | Where-Object { $_.Tipo -eq 'Alvo' -and $_.Selecionado })
+    $marcadas = @($Linhas | Where-Object { $_.Tipo -eq 'Alvo' -and $_.Selecionado -and $_.TemCaixa })
     $bytes = [int64]0
     foreach ($l in $marcadas) { $bytes += $l.Tamanho }
     $texto = if ($marcadas.Count -eq 1) { '1 selecionado' } else { "$($marcadas.Count) selecionados" }
     if ($bytes -gt 0) { $texto += " · $(Format-TamanhoTela $bytes)" }
-    [pscustomobject]@{ Quantidade = $marcadas.Count; Bytes = $bytes; Texto = $texto; Alvos = @($marcadas | ForEach-Object { $_.Alvo }) }
+    $alvos = @($marcadas | ForEach-Object { $_.Alvo })
+    [pscustomobject]@{
+        Quantidade      = $marcadas.Count
+        Bytes           = $bytes
+        Texto           = $texto
+        Alvos           = $alvos
+        Irreversiveis   = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $false }).Count
+    }
+}
+
+# Operações do log -> linhas da página Histórico, agrupadas por dia. Só ajustes reversíveis ganham caixa.
+function ConvertTo-AlvoHistorico {
+    param([AllowEmptyCollection()][object[]]$Operacoes = @())
+    $i = 0
+    foreach ($o in $Operacoes) {
+        $i++
+        $data = try { [datetime]$o.Data } catch { $null }
+        $acao = [string](Get-ValorPropriedade $o 'Acao')
+        $nome = if ($acao -in 'ajustar', 'desfazer') { "$(if ($acao -eq 'ajustar') { 'Ajuste' } else { 'Desfeito' }): $($o.Caminho)" } else { [string]$o.Caminho }
+        $partes = @([string]$o.Status)
+        if ($o.Simulado) { $partes[0] = 'Simulado' }
+        if ($o.Modulo) { $partes += [string]$o.Modulo }
+        if ($o.Liberado -gt 0) { $partes += Format-TamanhoTela $o.Liberado }
+        if ($data) { $partes += $data.ToString('HH:mm') }
+        if ($o.Motivo) { $partes += [string]$o.Motivo }
+        $reversivel = (Get-ValorPropriedade $o 'Reversivel') -eq $true
+        [pscustomobject]@{
+            Id           = "op-$i"
+            IdAjuste     = [string]$o.Id
+            Nome         = $nome
+            Categoria    = if ($data) { $data.ToString('dd/MM/yyyy') } else { 'sem data' }
+            Estado       = 'NaoSeAplica'
+            Detalhe      = $partes -join ' · '
+            Nivel        = if ($script:CorStatusHistorico.ContainsKey([string]$o.Status)) { $script:CorStatusHistorico[[string]$o.Status] } else { 'Normal' }
+            Selecionavel = $reversivel
+            Selecionado  = $false
+            Mudancas     = @(if ($reversivel) { "Desfazer volta o ajuste '$($o.Id)' para o valor salvo antes de ele ser aplicado." })
+        }
+    }
 }
 
 # Resumo de Invoke-Acao para a barra de status, com a cor (token do tema) que combina.
+# -Acao 'desfazer' fala de ajustes desfeitos em vez de espaço liberado.
 function Get-TextoResultado {
-    param([AllowEmptyCollection()][object[]]$Resultados = @(), [bool]$Simulado)
+    param([AllowEmptyCollection()][object[]]$Resultados = @(), [bool]$Simulado, [string]$Acao = 'liberar')
 
+    if ($Acao -eq 'desfazer') {
+        $ok = @($Resultados | Where-Object { $_.Status -in 'Feito', 'Simulado' }).Count
+        $falhas = @($Resultados | Where-Object { $_.Status -notin 'Feito', 'Simulado' })
+        if ($Simulado) { return [pscustomobject]@{ Texto = "Simulação: $ok ajuste(s) seriam desfeitos. Nada foi alterado."; Cor = 'TextoSecundario' } }
+        if ($falhas.Count -gt 0) { return [pscustomobject]@{ Texto = "Desfeitos: $ok · não desfeito: $($falhas[0].Motivo)"; Cor = 'Perigo' } }
+        return [pscustomobject]@{ Texto = "Desfeitos: $ok ajuste(s), de volta ao valor de antes."; Cor = 'Sucesso' }
+    }
     $bytes = [int64]0
     foreach ($r in $Resultados) { $bytes += [int64]$r.Liberado }
     if ($Simulado) {

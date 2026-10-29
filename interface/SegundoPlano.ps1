@@ -76,6 +76,20 @@ $script:ScriptCarregarModulos = {
     }
 }
 
+$script:ScriptHistorico = {
+    param([string]$Nucleo)
+    $ErrorActionPreference = 'Stop'
+    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    Get-TmdHistorico -Ultimos 300
+}
+
+$script:ScriptDesfazer = {
+    param([string]$Nucleo, [string[]]$Ids, [bool]$Simular)
+    $ErrorActionPreference = 'Stop'
+    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    foreach ($id in $Ids) { Undo-TmdAjuste -Id $id -Simular:$Simular -Modulo 'historico' }
+}
+
 $script:ScriptExecutarAcao = {
     param([string]$Nucleo, [string]$Raiz, [string]$Nome, [object[]]$Alvos, [bool]$Simular)
     $ErrorActionPreference = 'Stop'

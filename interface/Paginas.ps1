@@ -114,10 +114,11 @@ function Start-TmdCargaModulos {
                 Complete-TmdCargaInicial
                 return
             }
-            $script:Estado.Modulos = @($saida)
+            $modulos = @($saida)
+            $disponiveis = @($modulos | Where-Object { $_.Estado -eq 'ok' }).Count
+            $texto = "$disponiveis de $($modulos.Count) módulos disponíveis"
+            $script:Estado.Modulos = $modulos + $script:PaginaHistorico
             $script:Tela.Controles.ListaModulos.ItemsSource = ConvertTo-ItemNavegacao -Modulos $script:Estado.Modulos
-            $disponiveis = @($script:Estado.Modulos | Where-Object { $_.Estado -eq 'ok' }).Count
-            $texto = "$disponiveis de $($script:Estado.Modulos.Count) módulos disponíveis"
             if ($avisos) { Set-TmdStatus "$texto · $($avisos -join ' · ')" 'Aviso' } else { Set-TmdStatus $texto }
             Select-TmdModuloInicial
         })
@@ -130,7 +131,10 @@ function Select-TmdModuloInicial {
         Complete-TmdCargaInicial
         return
     }
-    $primeiro = @($itens | Where-Object { $_.Estado -eq 'ok' } | Select-Object -First 1)
+    # O primeiro módulo disponível; a página Histórico só abre de início se não houver nenhum módulo.
+    $modulos = @($itens | Where-Object { $_.Nome -ne $script:PaginaHistorico.Nome })
+    $primeiro = @($modulos | Where-Object { $_.Estado -eq 'ok' } | Select-Object -First 1)
+    if ($primeiro.Count -eq 0) { $primeiro = @($modulos | Select-Object -First 1) }
     if ($primeiro.Count -eq 0) { $primeiro = @($itens[0]) }
     $script:Tela.Controles.ListaModulos.SelectedItem = $primeiro[0]
 }
@@ -177,9 +181,11 @@ function Open-TmdPagina {
     Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Carregando $($modulo.Titulo)" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
     Set-TmdStatus 'Lendo…'
     Set-TmdOcupado $true
-    $script:Estado.TarefaPagina = Start-TmdTarefa -Script $script:ScriptBuscarAlvos `
-        -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $Nome } `
-        -Contexto @{ StatusDepois = $StatusDepois } `
+    $especial = (Get-ValorPropriedade $modulo 'Especial') -eq $true
+    $codigo = if ($especial) { $script:ScriptHistorico } else { $script:ScriptBuscarAlvos }
+    $parametros = if ($especial) { @{ Nucleo = $script:Estado.Nucleo } } else { @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $Nome } }
+    $script:Estado.TarefaPagina = Start-TmdTarefa -Script $codigo -Parametros $parametros `
+        -Contexto @{ StatusDepois = $StatusDepois; Especial = $especial } `
         -AoTerminar {
         param($saida, $erro)
         $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto
@@ -191,7 +197,7 @@ function Open-TmdPagina {
             Set-TmdStatus "Erro: $erro" 'Perigo'
         }
         else {
-            $script:Estado.Alvos = @($saida)
+            $script:Estado.Alvos = if ($contexto.Especial) { @(ConvertTo-AlvoHistorico -Operacoes @($saida)) } else { @($saida) }
             Update-TmdBusca
             $m = Get-TmdModuloAtual
             if ($contexto.StatusDepois) { Set-TmdStatus $contexto.StatusDepois.Texto $contexto.StatusDepois.Cor }
@@ -258,7 +264,8 @@ function Invoke-TmdBotaoAplicar {
         $script:Tela.Controles.BotaoSimular.Content = 'Voltar'
         $alvos = if ($resumo.Quantidade -eq 1) { '1 item' } else { "$($resumo.Quantidade) itens" }
         $tamanho = if ($resumo.Bytes -gt 0) { " ($(Format-TamanhoTela $resumo.Bytes))" } else { '' }
-        Set-TmdStatus "$($m.RotuloAcao): $alvos$tamanho. Isso não pode ser desfeito. Confirmar?" 'Aviso'
+        $aviso = if ($resumo.Irreversiveis -gt 0) { ' Isso não pode ser desfeito.' } else { '' }
+        Set-TmdStatus "$($m.RotuloAcao): $alvos$tamanho.$aviso Confirmar?" 'Aviso'
         return
     }
     Exit-TmdConfirmacao
@@ -280,9 +287,17 @@ function Start-TmdAcao {
     $c.BotaoSimular.IsEnabled = $false
     $c.BotaoAplicar.IsEnabled = $false
     Set-TmdStatus $(if ($Simular) { 'Simulando…' } else { 'Executando…' })
-    $script:Estado.TarefaAcao = Start-TmdTarefa -Script $script:ScriptExecutarAcao `
-        -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Alvos = $resumo.Alvos; Simular = $Simular } `
-        -Contexto @{ Nome = $nome; Simular = $Simular } `
+    $especial = (Get-ValorPropriedade (Get-TmdModuloAtual) 'Especial') -eq $true
+    if ($especial) {
+        $codigo = $script:ScriptDesfazer
+        $parametros = @{ Nucleo = $script:Estado.Nucleo; Ids = [string[]]@($resumo.Alvos | ForEach-Object { $_.IdAjuste }); Simular = $Simular }
+    }
+    else {
+        $codigo = $script:ScriptExecutarAcao
+        $parametros = @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Alvos = $resumo.Alvos; Simular = $Simular }
+    }
+    $script:Estado.TarefaAcao = Start-TmdTarefa -Script $codigo -Parametros $parametros `
+        -Contexto @{ Nome = $nome; Simular = $Simular; Acao = $(if ($especial) { 'desfazer' } else { 'liberar' }) } `
         -AoTerminar {
         param($saida, $erro)
         $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto
@@ -295,7 +310,7 @@ function Start-TmdAcao {
             Set-TmdStatus "Erro: $erro" 'Perigo'
             return
         }
-        $texto = Get-TextoResultado -Resultados @($saida) -Simulado $contexto.Simular
+        $texto = Get-TextoResultado -Resultados @($saida) -Simulado $contexto.Simular -Acao $contexto.Acao
         if ($contexto.Simular) {
             Set-TmdStatus $texto.Texto $texto.Cor
         }

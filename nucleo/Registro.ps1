@@ -38,6 +38,7 @@ function Write-TmdOperacao {
 }
 
 # Últimas N operações, da mais nova para a mais antiga. Linhas corrompidas são ignoradas.
+# Cada uma ganha Reversivel: é o ajuste aplicado mais recente daquele Id, sem desfazer depois, e há estado salvo.
 function Get-TmdHistorico {
     [CmdletBinding()]
     param([int]$Ultimos = 50)
@@ -46,9 +47,19 @@ function Get-TmdHistorico {
     if (-not (Test-Path -LiteralPath $arquivo)) { return }
     $linhas = [IO.File]::ReadAllLines($arquivo, [Text.Encoding]::UTF8)
     $saida = [System.Collections.Generic.List[object]]::new()
+    $vistos = @{}
     for ($i = $linhas.Count - 1; $i -ge 0 -and $saida.Count -lt $Ultimos; $i--) {
         if (-not $linhas[$i].Trim()) { continue }
-        try { $saida.Add(($linhas[$i] | ConvertFrom-Json)) } catch { Write-Verbose "linha $($i + 1) do log ignorada" }
+        try { $op = $linhas[$i] | ConvertFrom-Json } catch { Write-Verbose "linha $($i + 1) do log ignorada"; continue }
+        $reversivel = $false
+        $acao = [string](Get-Propriedade -Objeto $op -Nome 'Acao')
+        $idOp = [string](Get-Propriedade -Objeto $op -Nome 'Id')
+        if ($acao -in 'ajustar', 'desfazer' -and $idOp -and -not (Get-Propriedade -Objeto $op -Nome 'Simulado') -and -not $vistos.ContainsKey($idOp)) {
+            $vistos[$idOp] = $true
+            $reversivel = $acao -eq 'ajustar' -and (Get-Propriedade -Objeto $op -Nome 'Status') -eq 'Feito' -and (Test-TmdAjusteReversivel -Id $idOp)
+        }
+        $op | Add-Member -NotePropertyName Reversivel -NotePropertyValue $reversivel -Force
+        $saida.Add($op)
     }
     $saida.ToArray()
 }

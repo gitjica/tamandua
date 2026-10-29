@@ -173,7 +173,10 @@ function Find-EscritaProibida {
                     return $script:ComandosProibidos -contains $no.GetCommandName()
                 }
                 if ($no -is [System.Management.Automation.Language.InvokeMemberExpressionAst]) {
-                    return $no.Static -and ($no.Member.Extent.Text -in 'Delete', 'DeleteFile', 'DeleteDirectory')
+                    $membro = $no.Member.Extent.Text
+                    # Arquivos: [IO.File]::Delete etc. Registro: RegistryKey.SetValue/DeleteValue/CreateSubKey/DeleteSubKey.
+                    if ($no.Static -and $membro -in 'Delete', 'DeleteFile', 'DeleteDirectory') { return $true }
+                    return $membro -in 'SetValue', 'DeleteValue', 'CreateSubKey', 'DeleteSubKey', 'DeleteSubKeyTree'
                 }
                 $false
             }, $true)

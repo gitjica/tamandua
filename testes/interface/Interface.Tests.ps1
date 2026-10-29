@@ -189,7 +189,8 @@ Describe 'Janela de verdade' {
     It 'abre no projeto real, mostra os módulos e carrega o status' {
         $r = Invoke-InterfaceTeste -Raiz $script:RaizProjeto
         $r.Carregou | Should -BeTrue
-        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 12
+        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 13 -Because '12 do catálogo + a página Histórico'
+        @($r.Modulos | Where-Object Tipo -eq 'Modulo')[-1].Nome | Should -Be 'historico'
         $r.Titulo | Should -Be 'Status'
         $r.Mensagem | Should -BeNullOrEmpty
         @($r.Linhas | Where-Object { $_.Tipo -eq 'Alvo' -and $_.Id -eq 'saude' }).Count | Should -Be 1
@@ -247,6 +248,79 @@ Describe 'Seleção e resultado (funções puras)' {
             $parcial.Texto | Should -Match '2 pulado'
             (Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Erro'; Liberado = 0; Motivo = 'x' }) -Simulado $false).Cor | Should -Be 'Perigo'
         }
+    }
+}
+
+Describe 'Histórico (funções puras)' {
+    It 'só ajuste reversível ganha caixa; agrupa por dia; desfazer não diz que é irreversível' {
+        $ops = @(
+            [pscustomobject]@{ Data = '2026-10-29T14:03:00'; Modulo = 'ajustes'; Id = 'priv-x'; Acao = 'ajustar'; Caminho = 'Desativar X'; Status = 'Feito'; Liberado = 0; Motivo = ''; Simulado = $false; Reversivel = $true }
+            [pscustomobject]@{ Data = '2026-10-28T09:00:00'; Modulo = 'limpar'; Id = 'temp-usuario'; Acao = 'remover'; Caminho = 'C:\Temp\a'; Status = 'Parcial'; Liberado = 2048; Motivo = '1 em uso'; Simulado = $false; Reversivel = $false }
+        )
+        InModuleScope Interface -Parameters @{ O = $ops } {
+            param($O)
+            $alvos = @(ConvertTo-AlvoHistorico -Operacoes $O)
+            $alvos[0].Nome | Should -Be 'Ajuste: Desativar X'
+            $alvos[0].Categoria | Should -Be '29/10/2026'
+            $alvos[0].IdAjuste | Should -Be 'priv-x'
+            $alvos[1].Nivel | Should -Be 'Atencao'
+            $alvos[1].Detalhe | Should -Match 'Parcial · limpar · 2[,.]0 KB · 09:00 · 1 em uso'
+            $linhas = ConvertTo-LinhaAlvo -Alvos $alvos -Escreve
+            @($linhas | Where-Object { $_.Tipo -eq 'Alvo' } | ForEach-Object TemCaixa) | Should -Be @($true, $false)
+            $alvos[0].Selecionado = $true
+            $resumo = Get-ResumoSelecao -Linhas (ConvertTo-LinhaAlvo -Alvos $alvos -Escreve)
+            $resumo.Quantidade | Should -Be 1
+            $resumo.Irreversiveis | Should -Be 0
+            (Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Feito'; Liberado = 0 }) -Acao 'desfazer').Texto | Should -Match '^Desfeitos: 1'
+        }
+    }
+}
+
+Describe 'Desfazer pela página Histórico' {
+    It 'mostra o ajuste aplicado, desfaz com confirmação e o registro volta ao que era' {
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $chave = "HKCU:\Software\TamanduaTestes\janela-$([guid]::NewGuid().ToString('N'))"
+        Import-Module (Join-Path $script:RaizProjeto 'nucleo\Tamandua.Nucleo.psm1') -Force -DisableNameChecking -Global
+        $ajuste = [pscustomobject]@{ id = 'janela-teste'; nome = 'Ajuste da janela'; requerAdmin = $false
+            mudancas = @([pscustomobject]@{ tipo = 'Registro'; caminho = $chave; nome = 'Valor'; valor = 1; tipoValor = 'DWord' }) }
+        (Set-TmdAjuste -Ajuste $ajuste).Status | Should -Be 'Feito'
+        $projeto = New-ProjetoFalso -Pai $TestDrive -ComInterface
+        $passos = @{ Etapa = 0 }
+        try {
+            $aoCarregar = {
+                $tela = $args[0]
+                $p = $passos
+                $relogio = New-Object System.Windows.Threading.DispatcherTimer
+                $relogio.Interval = [TimeSpan]::FromMilliseconds(200)
+                $clicar = { param($b) $b.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent))) }
+                $relogio.Add_Tick({
+                        $c = $tela.Controles
+                        if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
+                        switch ($p.Etapa) {
+                            0 { $c.ListaModulos.SelectedItem = @($c.ListaModulos.ItemsSource | Where-Object { $_.Nome -eq 'historico' })[0] }
+                            1 {
+                                $linha = @($c.ListaAlvos.ItemsSource | Where-Object { $_.TemCaixa })[0]
+                                $p.Linha = $linha.Nome
+                                $linha.Alvo.Selecionado = $true
+                                & $clicar $c.BotaoAplicar
+                            }
+                            2 { $p.Confirmacao = $c.TextoStatus.Text; & $clicar $c.BotaoAplicar }
+                            3 { $p.Final = $c.TextoStatus.Text; $relogio.Stop(); $tela.Janela.Close() }
+                        }
+                        $p.Etapa++
+                    }.GetNewClosure())
+                $relogio.Start()
+            }.GetNewClosure()
+            Start-TmdInterface -Raiz $projeto -Tema 'claro' -AoCarregar $aoCarregar -FecharAposSeg 60
+        }
+        finally {
+            if (Test-Path -LiteralPath $chave) { Remove-Item -LiteralPath $chave -Recurse -Force }
+        }
+        $passos.Etapa | Should -Be 4
+        $passos.Linha | Should -Be 'Ajuste: Ajuste da janela'
+        $passos.Confirmacao | Should -Match '^Desfazer: 1 item\. Confirmar\?$'
+        $passos.Final | Should -Match '^Desfeitos: 1'
+        Test-TmdAjusteReversivel -Id 'janela-teste' | Should -BeFalse
     }
 }
 

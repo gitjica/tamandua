@@ -93,6 +93,9 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
   `.json` e `.xaml` em UTF-8 (lidos com `-Encoding UTF8` explícito).
 - Proibido: `&&`, `||`, `??`, `?.`, operador ternário, `ForEach-Object -Parallel`, `ConvertFrom-Json -AsHashtable`.
 - `Set-Content`/`Add-Content` sempre com `-Encoding UTF8`.
+- Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
+- `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
+  objetos vindos de JSON são lidos com `Get-Propriedade`.
 - Nada de `2>&1` em executáveis nativos.
 - `Import-PowerShellDataFile` (e outros cmdlets que no 5.1 são funções) ignoram o `$ErrorActionPreference` do chamador:
   sempre passar `-ErrorAction Stop` quando o erro precisa ser capturado.
@@ -358,6 +361,20 @@ Para cada mudança, na ordem:
 Desfazer usa o snapshot. Sem snapshot (ex.: ajuste aplicado por outra ferramenta), usa o `PadraoWindows`
 declarado no catálogo e avisa na tela que está restaurando o *padrão do Windows*, não o valor anterior.
 
+Implementação (`nucleo/MotorAjustes.ps1`, `nucleo/Estado.ps1`):
+
+- `Set-TmdAjuste -Ajuste <definição> [-Simular]`, `Undo-TmdAjuste -Id <id> [-Ajuste <definição>] [-Simular]`,
+  `Get-TmdEstadoAjuste -Ajuste <definição>` → `Aplicado | NaoAplicado | Parcial | Desconhecido`.
+- Mudança que já está como o ajuste quer é pulada e **não entra no snapshot** (não foi o Tamanduá que mudou).
+- Snapshot em `%LOCALAPPDATA%\Tamandua\estado\ajustes\<id>.json`, gravado de forma atômica; corrompido = não desfaz.
+- Registro por .NET (`RegistryKey`, visão de 64 bits, caminho literal), nunca por `Set-ItemProperty`.
+  `.reg` de cada chave em `%LOCALAPPDATA%\Tamandua\backup\` antes de mexer.
+- Serviços por `sc.exe config` (o `Set-Service` do 5.1 não sabe "automático atrasado"); tarefas por `Enable/Disable-ScheduledTask`.
+- `-RaizRegistro 'HKCU:\Software\TamanduaTestes\...'` redireciona HKCU e HKLM para uma chave de teste.
+- Histórico: cada `ajustar`/`desfazer` vai para o log; `Get-TmdHistorico` marca `Reversivel` no ajuste mais recente de cada Id
+  que ainda tem snapshot. CLI: `tamandua desfazer <id> [-Simular] [-Sim]`. Interface: página **Histórico** (do núcleo,
+  sempre no fim da barra lateral) com caixa só nos ajustes reversíveis e botão **Desfazer**.
+
 ### 7.4 Ponto de restauração
 
 Antes do **primeiro lote** de mudanças de sistema numa sessão (ajustes, recursos, atualizações, otimizar),
@@ -605,7 +622,10 @@ Definição de pronto do MVP: etapas 1–7 entregues, interface e CLI funcionand
   (vale para os processos filhos também). Os testes nunca criam nada em `%APPDATA%` ou `%LOCALAPPDATA%`.
 - Lixeira: simulada por `Mock`. O teste com a Lixeira real é opcional (`$env:TAMANDUA_TESTE_LIXEIRA = '1'`), porque deixa um arquivinho nela.
 - Registro: o motor aceita `-RaizRegistro`; nos testes, todo caminho `HKLM:\...`/`HKCU:\...` do catálogo é reescrito para
-  `HKCU:\Software\TamanduaTestes\<guid>\HKLM\...`, e a chave é apagada no `AfterAll`.
+  `HKCU:\Software\TamanduaTestes\<guid>\HKLM\...`, e a chave (inclusive a mãe `TamanduaTestes`, se vazia) é apagada no `AfterAll`.
+  Testes que rodam o processo filho usam um caminho que **já é** uma chave de teste, sem redirecionamento.
+- Mocks com estado (serviço/tarefa falsos) usam variáveis globais `$global:TmdTeste*`, removidas no `AfterAll`.
+  No Pester 6 um `Mock` com `-ParameterFilter` não cai no comando real: declare também um mock padrão.
 - Serviços, tarefas, Appx, winget, CIM, `Checkpoint-Computer`: isolados atrás de funções pequenas e substituídos por `Mock`.
 
 ### 12.2 Camadas

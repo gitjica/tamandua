@@ -22,7 +22,8 @@ if (-not $Rapido) {
         $regras = Import-PowerShellDataFile -LiteralPath (Join-Path $PSScriptRoot 'PSScriptAnalyzerSettings.psd1')
         # Nos testes, variáveis criadas em BeforeAll/BeforeEach são usadas em outro bloco; o analisador não enxerga isso.
         $regrasTestes = $regras.Clone()
-        $regrasTestes.ExcludeRules = @($regras.ExcludeRules) + 'PSUseDeclaredVarsMoreThanAssignments'
+        # Mocks que guardam estado (serviço/tarefa falsos) precisam de variável global.
+        $regrasTestes.ExcludeRules = @($regras.ExcludeRules) + 'PSUseDeclaredVarsMoreThanAssignments' + 'PSAvoidGlobalVars'
         $codigo = Get-ChildItem -LiteralPath $raiz | Where-Object {
             $_.Name -ne 'testes' -and ($_.PSIsContainer -or $_.Extension -in '.ps1', '.psm1', '.psd1')
         }

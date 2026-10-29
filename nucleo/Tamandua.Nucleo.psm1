@@ -5,7 +5,7 @@ $script:Versao = '0.1.0'
 $script:ContratoAtual = 1
 $script:RaizPadrao = Split-Path -Parent $PSScriptRoot
 
-foreach ($parte in 'Config', 'Seguranca', 'Remocao', 'Registro', 'Carregador', 'Saida', 'Cli') {
+foreach ($parte in 'Config', 'Elevacao', 'Seguranca', 'Remocao', 'Estado', 'MotorAjustes', 'Registro', 'Carregador', 'Saida', 'Cli') {
     . (Join-Path $PSScriptRoot "$parte.ps1")
 }
 
@@ -31,4 +31,9 @@ Export-ModuleMember -Function @(
     'Measure-TmdTamanho'
     'Get-TmdHistorico'
     'Confirm-TmdExecucao'
+    'Test-TmdAdministrador'
+    'Set-TmdAjuste'
+    'Undo-TmdAjuste'
+    'Get-TmdEstadoAjuste'
+    'Test-TmdAjusteReversivel'
 )

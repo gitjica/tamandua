@@ -13,6 +13,7 @@ function Invoke-TmdCli {
         [switch]$Sim
     )
 
+    if ($Comando -eq 'desfazer') { return Invoke-TmdDesfazer -Argumentos $Argumentos -Simular:$Simular -Sim:$Sim }
     if ($Argumentos) {
         Write-Host "Opções ainda não suportadas: $($Argumentos -join ' ')" -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
@@ -45,6 +46,33 @@ function Invoke-TmdCli {
         }
         default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz -Simular:$Simular -Sim:$Sim }
     }
+}
+
+# tamandua desfazer <id-do-ajuste> [-Simular] [-Sim]: volta o ajuste para o valor salvo antes de ele ser aplicado.
+function Invoke-TmdDesfazer {
+    param([string[]]$Argumentos, [switch]$Simular, [switch]$Sim)
+
+    if (@($Argumentos).Count -ne 1) {
+        Write-Host 'Uso: tamandua desfazer <id-do-ajuste>   (os ids aparecem em: tamandua historico)' -ForegroundColor Yellow
+        return $script:CodigoSaida.Erro
+    }
+    $id = $Argumentos[0]
+    if (-not (Test-TmdAjusteReversivel -Id $id)) {
+        Write-Host "Não há o que desfazer para '$id': nenhum estado salvo." -ForegroundColor Yellow
+        return $script:CodigoSaida.Erro
+    }
+    if ($Simular) {
+        Write-TmdResultados -Resultados @(Undo-TmdAjuste -Id $id -Simular -Modulo 'historico') -Simulado -Acao 'desfazer'
+        return $script:CodigoSaida.Ok
+    }
+    if (-not (Confirm-TmdExecucao -Pergunta "Desfazer o ajuste '$id'?" -Sim:$Sim)) {
+        Write-Host 'Cancelado. Nada foi alterado.'
+        return $script:CodigoSaida.Cancelado
+    }
+    $r = Undo-TmdAjuste -Id $id -Modulo 'historico'
+    Write-TmdResultados -Resultados @($r) -Acao 'desfazer'
+    if ($r.Status -eq 'Feito') { return $script:CodigoSaida.Ok }
+    $script:CodigoSaida.Erro
 }
 
 # Módulo de leitura: mostra os alvos. Módulo que escreve: mostra, simula ou confirma, executa e mostra o resultado.

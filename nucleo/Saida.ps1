@@ -81,7 +81,12 @@ $script:CorStatusOperacao = @{ Feito = 'Green'; Simulado = 'Cyan'; Ignorado = 'G
 # Resultado de Invoke-Acao: uma linha por alvo e o total liberado.
 function Write-TmdResultados {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Resultados, [switch]$Simulado)
+    param(
+        [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Resultados,
+        [switch]$Simulado,
+        # 'liberar' (limpeza: mostra espaço) ou 'desfazer'/'ajustar' (mostra as mudanças).
+        [string]$Acao = 'liberar'
+    )
 
     Write-Host $(if ($Simulado) { 'Simulação (nada foi alterado)' } else { 'Resultado' }) -ForegroundColor DarkYellow
     $total = [int64]0
@@ -90,10 +95,15 @@ function Write-TmdResultados {
         $cor = if ($script:CorStatusOperacao.ContainsKey([string]$r.Status)) { $script:CorStatusOperacao[[string]$r.Status] } else { 'Gray' }
         Write-Host ('  {0,-18}' -f $r.Id) -NoNewline
         Write-Host ('{0,-10}' -f $r.Status) -NoNewline -ForegroundColor $cor
-        Write-Host ('{0,10}' -f (Format-TmdTamanho $r.Liberado)) -NoNewline
+        if ($Acao -eq 'liberar') { Write-Host ('{0,10}' -f (Format-TmdTamanho $r.Liberado)) -NoNewline }
         if ($r.Motivo) { Write-Host "  $($r.Motivo)" -ForegroundColor DarkGray } else { Write-Host '' }
+        foreach ($m in @(Get-Propriedade -Objeto $r -Nome 'Mudancas' | Where-Object { $_ })) { Write-Host "      $m" -ForegroundColor Gray }
     }
     Write-Host ''
+    if ($Acao -ne 'liberar') {
+        if ($Simulado) { Write-Host 'Para fazer de verdade, rode sem -Simular.' }
+        return
+    }
     if ($Simulado) { Write-Host "Liberaria $(Format-TmdTamanho $total). Para fazer de verdade, rode sem -Simular." }
     else { Write-Host "Liberado: $(Format-TmdTamanho $total). Veja os detalhes em: tamandua historico" -ForegroundColor Green }
 }
@@ -113,7 +123,9 @@ function Write-TmdHistorico {
         Write-Host ("{0}  " -f $data) -NoNewline -ForegroundColor DarkGray
         Write-Host ('{0,-9}' -f $o.Status) -NoNewline -ForegroundColor $cor
         Write-Host ('{0,-13}{1,10}  ' -f $o.Modulo, $tamanho) -NoNewline
-        Write-Host $o.Caminho
+        $acao = [string](Get-Propriedade -Objeto $o -Nome 'Acao')
+        if ($acao -in 'ajustar', 'desfazer') { Write-Host "$acao $($o.Id): $($o.Caminho)" -NoNewline } else { Write-Host $o.Caminho -NoNewline }
+        if ((Get-Propriedade -Objeto $o -Nome 'Reversivel') -eq $true) { Write-Host "   (tamandua desfazer $($o.Id))" -ForegroundColor DarkYellow } else { Write-Host '' }
         if ($o.Motivo) { Write-Host "                   $($o.Motivo)" -ForegroundColor DarkGray }
     }
 }
@@ -137,7 +149,8 @@ function Write-TmdAjuda {
     Write-Host '  <módulo>        executa um módulo (veja a lista em: tamandua modulos)'
     Write-Host '    -Simular      mostra o que seria feito, sem alterar nada'
     Write-Host '    -Sim          confirma sem perguntar (para scripts)'
-    Write-Host '  historico       o que o Tamanduá já removeu, simulou ou pulou'
+    Write-Host '  historico       o que o Tamanduá já removeu, ajustou, simulou ou pulou'
+    Write-Host '  desfazer <id>   volta um ajuste ao valor que estava antes (-Simular para ver antes)'
     Write-Host '  protegidos      abre a sua lista de proteção (caminhos que nunca são apagados)'
     Write-Host '  ajuda           esta ajuda'
     Write-Host '  versao          versão'
