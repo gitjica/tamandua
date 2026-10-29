@@ -20,5 +20,7 @@ Export-ModuleMember -Function @(
     'Get-TmdCatalogo'
     'Get-TmdModulo'
     'Write-TmdModulos'
+    'Write-TmdAlvos'
+    'Format-TmdTamanho'
     'Invoke-TmdCli'
 )

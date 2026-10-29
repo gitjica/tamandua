@@ -22,7 +22,8 @@ if (-not (Test-Path -LiteralPath $nucleo -PathType Leaf)) {
     exit 1
 }
 try {
-    Import-Module -Name $nucleo -Force -DisableNameChecking
+    # -Global: os módulos usam funções exportadas do núcleo (ex.: Format-TmdTamanho).
+    Import-Module -Name $nucleo -Force -DisableNameChecking -Global
     $codigo = Invoke-TmdCli -Comando $Comando -Argumentos $Resto -Raiz $PSScriptRoot
 }
 catch {

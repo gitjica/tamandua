@@ -223,6 +223,9 @@ Regras:
 - `Find-Alvos` recebe `-Raizes` (pastas) ou `-RaizRegistro` com valor padrão real. Os testes passam a sandbox. **Nenhum caminho do sistema fica fixo dentro de função que não aceite override.**
 - Módulos **nunca** apagam arquivo, escrevem registro, mudam serviço ou tarefa agendada diretamente. Chamam `Remove-TmdItem` ou o motor de ajustes do núcleo, que validam, fazem snapshot, registram em log e respeitam `-Simular`.
 - Nenhum módulo chama outro módulo. Se dois precisam da mesma coisa, ela vai para o núcleo.
+  Módulos podem usar as funções **exportadas** do núcleo (ex.: `Format-TmdTamanho`); o `tamandua.ps1` importa o núcleo com `-Global` para isso.
+- Leitura do sistema (CIM, registro, processos) fica numa função pequena do módulo (ex.: `Get-LeituraSistema`),
+  e cada parte dela é lida isolada: se uma falhar, só aquela parte vira `Desconhecido`.
 - Nenhum módulo usa `Write-Host` nem toca em WPF. Retorna objetos; quem desenha é a CLI (`Saida.ps1`) ou a interface.
 - Progresso é reportado via `Write-Progress`-equivalente do núcleo (`Write-TmdProgresso`), que a CLI e a interface traduzem cada uma do seu jeito.
 - Erro em um alvo não para o módulo: o alvo vira `Status = 'Erro'` com `Motivo`, e segue para o próximo.
@@ -249,6 +252,13 @@ Regras:
     Mudancas    = @()                     # lista legível do que será alterado (painel de detalhes)
 }
 ```
+
+Propriedades **obrigatórias em todo alvo** (verificadas pelo teste de contrato): `Id` (único no módulo), `Nome`,
+`Categoria`, `Estado`, `Detalhe`. As demais são obrigatórias só para módulos que escrevem.
+Módulos de leitura (`status`, `analisar`) usam também:
+
+- `Nivel` — `Normal` | `Atencao` | `Critico`: cor na CLI e na interface.
+- `Valor` — número de 0 a 100 quando faz sentido (uso de CPU, % de disco), para barras na interface.
 
 **Resultado** (retornado por `Invoke-Acao` / `Undo-Acao`, um por alvo):
 

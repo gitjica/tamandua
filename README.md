@@ -1,15 +1,16 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. Em desenvolvimento (etapa 1 de 7 do MVP).
+Limpeza, ajustes e manutenção profunda para Windows. Em desenvolvimento (etapa 2 de 7 do MVP).
 
 ## Uso
 
 ```powershell
+.\tamandua.ps1 status     # painel do sistema: saúde, CPU, memória, discos, rede, bateria, processos
 .\tamandua.ps1 modulos    # estado de cada módulo
 .\tamandua.ps1 ajuda
 ```
 
-Por enquanto só o núcleo existe: todos os módulos aparecem como `faltando`, e o programa funciona assim mesmo.
+Por enquanto existem o núcleo e o módulo `status`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
 
 ## Desenvolvimento
 

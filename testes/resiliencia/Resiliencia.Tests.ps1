@@ -79,7 +79,7 @@ function Find-Alvos { @() }
     It 'o módulo bom roda mesmo com os outros quebrados' {
         $r = Invoke-Tamandua -Raiz $raiz -Argumentos 'bom'
         $r.Codigo | Should -Be 0
-        $r.Saida | Should -Match 'item-um'
+        $r.Saida | Should -Match 'Item um'
     }
 
     It 'módulo indisponível sai com código 2' {

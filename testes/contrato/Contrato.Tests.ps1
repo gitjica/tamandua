@@ -11,13 +11,37 @@ BeforeDiscovery {
 
 BeforeAll {
     . (Join-Path $PSScriptRoot '..\Ajudantes.ps1')
-    Import-Module (Join-Path $script:RaizProjeto 'nucleo\Tamandua.Nucleo.psm1') -Force -DisableNameChecking
+    Import-Module (Join-Path $script:RaizProjeto 'nucleo\Tamandua.Nucleo.psm1') -Force -DisableNameChecking -Global
+    $script:EstadosValidos = 'Aplicado', 'NaoAplicado', 'Parcial', 'Desconhecido', 'NaoSeAplica'
 }
 
 Describe 'Módulo <Nome>' -ForEach $modulos -AllowNullOrEmptyForEach {
-    It 'carrega como ok ou indisponível (nunca quebrado ou faltando)' {
+    BeforeAll {
         $m = Get-TmdModulo -Raiz $script:RaizProjeto -Nome $Nome
+    }
+
+    It 'carrega como ok ou indisponível (nunca quebrado ou faltando)' {
         $m.Estado | Should -BeIn 'ok', 'indisponivel' -Because $m.Motivo
+    }
+
+    It 'tem testes próprios em testes\modulos\<Nome>' {
+        $pasta = Join-Path $script:RaizProjeto "testes\modulos\$Nome"
+        @(Get-ChildItem -LiteralPath $pasta -Filter '*.Tests.ps1' -ErrorAction SilentlyContinue).Count | Should -BeGreaterThan 0
+    }
+
+    # Só módulos de leitura rodam Find-Alvos contra o sistema real aqui; os que escrevem são testados na sandbox.
+    It 'Find-Alvos devolve objetos no formato do contrato' {
+        if ($m.Estado -ne 'ok' -or $m.Manifesto['Escreve']) {
+            Set-ItResult -Skipped -Because 'só módulos de leitura disponíveis rodam aqui'
+            return
+        }
+        $alvos = @(& $m.Modulo.ExportedFunctions['Find-Alvos'])
+        foreach ($a in $alvos) {
+            $nomes = $a.PSObject.Properties.Name
+            foreach ($p in 'Id', 'Nome', 'Categoria', 'Estado', 'Detalhe') { $nomes | Should -Contain $p }
+            $a.Estado | Should -BeIn $script:EstadosValidos
+        }
+        @($alvos.Id | Select-Object -Unique).Count | Should -Be $alvos.Count -Because 'Id precisa ser único'
     }
 }
 

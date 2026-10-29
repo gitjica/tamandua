@@ -56,7 +56,7 @@ function Invoke-TmdComandoModulo {
         Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red
         return $script:CodigoSaida.Erro
     }
-    if ($alvos.Count -eq 0) { Write-Host 'Nada encontrado.' } else { $alvos | Format-Table -AutoSize | Out-Host }
+    Write-TmdAlvos -Alvos $alvos
     $script:CodigoSaida.Ok
 }
 

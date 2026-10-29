@@ -24,6 +24,56 @@ function Write-TmdModulos {
     Write-Host "$disponiveis de $($Modulos.Count) módulos disponíveis."
 }
 
+$script:CorNivel = @{ Normal = 'Gray'; Atencao = 'Yellow'; Critico = 'Red' }
+
+# Mostra os alvos de um módulo agrupados por Categoria, na ordem em que aparecem.
+function Write-TmdAlvos {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Alvos)
+
+    if ($Alvos.Count -eq 0) {
+        Write-Host 'Nada encontrado.'
+        return
+    }
+    $nomes = @($Alvos | ForEach-Object { [string](Get-Propriedade -Objeto $_ -Nome 'Nome') })
+    $largura = [Math]::Min(28, ($nomes | ForEach-Object Length | Measure-Object -Maximum).Maximum + 2)
+    $i = 0
+    $categoriaAtual = $null
+    foreach ($a in $Alvos) {
+        $categoria = [string](Get-Propriedade -Objeto $a -Nome 'Categoria')
+        if ($categoria -ne $categoriaAtual) {
+            if ($null -ne $categoriaAtual) { Write-Host '' }
+            $categoriaAtual = $categoria
+            Write-Host $categoria -ForegroundColor DarkYellow
+        }
+        $nivel = [string](Get-Propriedade -Objeto $a -Nome 'Nivel')
+        $cor = if ((Get-Propriedade -Objeto $a -Nome 'Estado') -eq 'Desconhecido') { 'DarkGray' }
+        elseif ($script:CorNivel.ContainsKey($nivel)) { $script:CorNivel[$nivel] }
+        else { 'Gray' }
+        $nome = $nomes[$i]
+        if ($nome.Length -gt $largura - 2) { $nome = $nome.Substring(0, $largura - 3) + '…' }
+        Write-Host ("  {0,-$largura}" -f $nome) -NoNewline
+        $i++
+        Write-Host ([string](Get-Propriedade -Objeto $a -Nome 'Detalhe')) -ForegroundColor $cor
+    }
+}
+
+# 1536 -> "1,5 KB". Usa a cultura atual para o separador decimal.
+function Format-TmdTamanho {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][double]$Bytes)
+
+    if ($Bytes -lt 0) { return 'desconhecido' }
+    $unidades = 'B', 'KB', 'MB', 'GB', 'TB'
+    $i = 0
+    while ($Bytes -ge 1024 -and $i -lt $unidades.Count - 1) {
+        $Bytes /= 1024
+        $i++
+    }
+    if ($i -eq 0) { return '{0:N0} B' -f $Bytes }
+    '{0:N1} {1}' -f $Bytes, $unidades[$i]
+}
+
 function Write-TmdEstadoModulo {
     param([Parameter(Mandatory)]$Modulo)
 
