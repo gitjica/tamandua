@@ -94,6 +94,10 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 - Proibido: `&&`, `||`, `??`, `?.`, operador ternário, `ForEach-Object -Parallel`, `ConvertFrom-Json -AsHashtable`.
 - `Set-Content`/`Add-Content` sempre com `-Encoding UTF8`.
 - `ConvertFrom-Json` de uma lista JSON devolve a lista inteira como **um** objeto no 5.1: desmonte com `foreach ($x in (... | ConvertFrom-Json)) { $x }`.
+- `$x = if (...) { @(...) } else { ... }` desmonta o array (um item vira escalar, nenhum vira `$null`): use `$x = @(if ...)`.
+- `@($param).Count` com um `[string[]]` nulo lança em StrictMode no 5.1: `$lista = @(); if ($param) { $lista = @($param) }`.
+- Loops pesados de arquivo vão para C# (`Add-Type`), como `Tamandua.Medidor` em `nucleo/Remocao.ps1`: mede ~95 mil arquivos em ~3 s.
+- Testes: nada de `<...>` no nome de `It`/`Describe` fora de `-ForEach` — o Pester tenta expandir como variável.
 - Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
 - `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
   objetos vindos de JSON são lidos com `Get-Propriedade`.
@@ -241,7 +245,11 @@ Regras:
 - Para testes, `Find-Alvos` e `Invoke-Acao` podem aceitar trocas de pasta (ex.: `-Pastas @{ 'temp-usuario' = '...' }`).
   O módulo lê as pastas padrão de variáveis de ambiente (`TEMP`, `LOCALAPPDATA`) quando possível, para os testes da CLI
   trocarem essas variáveis no processo filho e nunca tocarem nas pastas reais.
-- Manifesto pode ter `RotuloAcao` (ex.: `'Limpar'`): vira o texto do botão principal e da pergunta de confirmação.
+- Manifesto pode ter `RotuloAcao` (ex.: `'Limpar'`): vira o texto do botão principal e da pergunta de confirmação,
+  e `Resultado = 'Mudancas'` quando o resultado fala de mudanças (ajustes) em vez de espaço liberado.
+- **Módulos que navegam** (ex.: `analisar`): `Find-Alvos -Caminho <pasta>`; sem `-Caminho`, mostram um ponto de partida.
+  Alvos com `Navegavel = $true` e `Caminho` abrem com duplo clique/Enter na interface (o subtítulo mostra a pasta,
+  Atualizar/F5 continuam nela) e com `tamandua <módulo> <pasta>` na CLI. O núcleo só passa `-Caminho` se a função tiver esse parâmetro.
 - Nenhum módulo usa `Write-Host` nem toca em WPF. Retorna objetos; quem desenha é a CLI (`Saida.ps1`) ou a interface.
 - Progresso é reportado via `Write-Progress`-equivalente do núcleo (`Write-TmdProgresso`), que a CLI e a interface traduzem cada uma do seu jeito.
 - Erro em um alvo não para o módulo: o alvo vira `Status = 'Erro'` com `Motivo`, e segue para o próximo.

@@ -204,6 +204,23 @@ Describe 'Janela de verdade' {
         $r.Mensagem | Should -Be 'Módulo faltando'
     }
 
+    It 'módulo que devolve um item só ou nenhum: mostra sem erro' {
+        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'um' -ComInterface
+        New-ModuloFalso -Raiz $raiz -Nome 'um' -Codigo @'
+function Test-Requisitos { @{ Ok = $true } }
+function Find-Alvos { [pscustomobject]@{ Id = 'so'; Nome = 'Único'; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = 'd' } }
+'@ | Out-Null
+        $r = Invoke-InterfaceTeste -Raiz $raiz
+        $r.Status | Should -Not -Match 'Erro'
+        @($r.Linhas | Where-Object Tipo -eq 'Alvo').Count | Should -Be 1
+
+        $vazio = New-ProjetoFalso -Pai $TestDrive -Catalogo 'vazio' -ComInterface
+        New-ModuloFalso -Raiz $vazio -Nome 'vazio' | Out-Null
+        $r = Invoke-InterfaceTeste -Raiz $vazio
+        $r.Status | Should -Not -Match 'Erro'
+        $r.Mensagem | Should -Be 'Nada a fazer aqui'
+    }
+
     It 'módulo que falha ao buscar: a janela continua de pé e mostra o erro' {
         $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'ruim' -ComInterface
         New-ModuloFalso -Raiz $raiz -Nome 'ruim' -Codigo @'
@@ -367,6 +384,59 @@ Describe 'Ajustes pela janela de verdade' {
         $passos.Confirmacao | Should -Match '^Aplicar: 7 itens\. Dá para desfazer pelo Histórico\. Confirmar\?$'
         $passos.Final | Should -Match '^Aplicados: 7 ajuste'
         $passos.Aplicados | Should -Be 7
+    }
+}
+
+Describe 'Navegação por pastas na janela' {
+    It 'duplo clique abre a pasta do item, o subtítulo mostra o caminho e Atualizar continua nela' {
+        $projeto = New-ProjetoFalso -Pai $TestDrive -Catalogo 'nav' -ComInterface
+        # Módulo falso que "navega": devolve um item que abre a pasta X, e mostra a pasta recebida.
+        New-ModuloFalso -Raiz $projeto -Nome 'nav' -Codigo @'
+function Test-Requisitos { @{ Ok = $true } }
+function Find-Alvos {
+    param([string]$Caminho)
+    if (-not $Caminho) {
+        return [pscustomobject]@{ Id = 'ir'; Nome = 'Abrir X'; Categoria = 'Início'; Estado = 'NaoSeAplica'; Detalhe = ''; Caminho = 'C:\X'; Navegavel = $true }
+    }
+    [pscustomobject]@{ Id = 'dentro'; Nome = "Dentro de $Caminho"; Categoria = 'Pasta'; Estado = 'NaoSeAplica'; Detalhe = ''; Caminho = ''; Navegavel = $false }
+}
+'@ | Out-Null
+        $passos = @{ Etapa = 0 }
+        $aoCarregar = {
+            $tela = $args[0]
+            $p = $passos
+            $relogio = New-Object System.Windows.Threading.DispatcherTimer
+            $relogio.Interval = [TimeSpan]::FromMilliseconds(200)
+            $relogio.Add_Tick({
+                    $c = $tela.Controles
+                    if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
+                    switch ($p.Etapa) {
+                        0 {
+                            $c.ListaAlvos.SelectedItem = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Id -eq 'ir' })[0]
+                            $duplo = New-Object System.Windows.Input.MouseButtonEventArgs([System.Windows.Input.Mouse]::PrimaryDevice, 0, [System.Windows.Input.MouseButton]::Left)
+                            $duplo.RoutedEvent = [System.Windows.Controls.Control]::MouseDoubleClickEvent
+                            $c.ListaAlvos.RaiseEvent($duplo)
+                        }
+                        1 {
+                            $p.Subtitulo = $c.SubtituloPagina.Text
+                            $p.Dentro = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Tipo -eq 'Alvo' })[0].Nome
+                            $c.BotaoAtualizar.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
+                        }
+                        2 {
+                            $p.DepoisDeAtualizar = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Tipo -eq 'Alvo' })[0].Nome
+                            $relogio.Stop()
+                            $tela.Janela.Close()
+                        }
+                    }
+                    $p.Etapa++
+                }.GetNewClosure())
+            $relogio.Start()
+        }.GetNewClosure()
+        Start-TmdInterface -Raiz $projeto -Tema 'claro' -AoCarregar $aoCarregar -FecharAposSeg 60
+        $passos.Etapa | Should -Be 3
+        $passos.Subtitulo | Should -Match 'C:\\X$'
+        $passos.Dentro | Should -Be 'Dentro de C:\X'
+        $passos.DepoisDeAtualizar | Should -Be 'Dentro de C:\X'
     }
 }
 

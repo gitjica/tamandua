@@ -22,11 +22,12 @@ function Invoke-TmdCli {
         return $script:CodigoSaida.Erro
     }
     if ($Comando -eq 'desfazer') { return Invoke-TmdDesfazer -Argumentos $Argumentos -Simular:$Simular -Sim:$Sim }
-    if ($Argumentos) {
+    $comandosDoNucleo = 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao'
+    # Argumento solto só vale para módulo que aceita -Caminho (ex.: tamandua analisar C:\Users).
+    if ($Argumentos -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in $comandosDoNucleo)) {
         Write-Host "Opções ainda não suportadas: $($Argumentos -join ' ')" -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
     }
-    $comandosDoNucleo = 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao'
     if (($Simular -or $Sim) -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in $comandosDoNucleo)) {
         Write-Host '-Simular e -Sim só valem junto com um módulo (ex.: tamandua limpar -Simular).' -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
@@ -52,7 +53,7 @@ function Invoke-TmdCli {
             Write-Host "Tamanduá $script:Versao"
             return $script:CodigoSaida.Ok
         }
-        default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz -Simular:$Simular -Sim:$Sim -Preset $Preset -Itens $Itens }
+        default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz -Simular:$Simular -Sim:$Sim -Preset $Preset -Itens $Itens -Argumentos $Argumentos }
     }
 }
 
@@ -87,7 +88,7 @@ function Invoke-TmdDesfazer {
 function Invoke-TmdComandoModulo {
     param(
         [Parameter(Mandatory)][string]$Nome, [Parameter(Mandatory)][string]$Raiz,
-        [switch]$Simular, [switch]$Sim, [string]$Preset, [string[]]$Itens
+        [switch]$Simular, [switch]$Sim, [string]$Preset, [string[]]$Itens, [string[]]$Argumentos
     )
 
     $info = Get-TmdModulo -Raiz $Raiz -Nome $Nome
@@ -106,8 +107,20 @@ function Invoke-TmdComandoModulo {
         Write-Host "O módulo '$Nome' só lê o sistema; -Simular, -Sim, -Preset e -Itens não se aplicam." -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
     }
+    $buscar = $info.Modulo.ExportedFunctions['Find-Alvos']
+    $argumentosBusca = @{}
+    # [string[]] nulo em StrictMode: @($Argumentos).Count lança no 5.1, então monta a lista à mão.
+    $soltos = @()
+    if ($Argumentos) { $soltos = @($Argumentos) }
+    if ($soltos.Count -gt 0) {
+        if ($soltos.Count -gt 1 -or -not $buscar.Parameters.ContainsKey('Caminho')) {
+            Write-Host "O módulo '$Nome' não aceita: $($soltos -join ' ')" -ForegroundColor Yellow
+            return $script:CodigoSaida.Erro
+        }
+        $argumentosBusca.Caminho = $soltos[0]
+    }
     try {
-        $alvos = @(& $info.Modulo.ExportedFunctions['Find-Alvos'])
+        $alvos = @(& $buscar @argumentosBusca)
     }
     catch {
         Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red

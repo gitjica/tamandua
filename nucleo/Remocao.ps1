@@ -185,25 +185,41 @@ function Measure-TmdTamanho {
     }
     if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { return $total }
 
-    $pilha = [System.Collections.Generic.Stack[IO.DirectoryInfo]]::new()
-    $pilha.Push($item)
-    while ($pilha.Count -gt 0) {
-        $pasta = $pilha.Pop()
-        try {
-            foreach ($f in $pasta.EnumerateFileSystemInfos()) {
-                if ($f.Attributes -band [IO.FileAttributes]::ReparsePoint) { continue }
-                if ($f -is [IO.DirectoryInfo]) { $pilha.Push($f) }
-                else {
-                    $total.Bytes += $f.Length
-                    $total.Arquivos++
+    # Em C#: um loop em PowerShell leva dezenas de segundos numa pasta com centenas de milhares de arquivos.
+    $medida = [Tamandua.Medidor]::Medir($item.FullName)
+    $total.Bytes = $medida[0]
+    $total.Arquivos = [int]$medida[1]
+    $total.Inacessiveis = [int]$medida[2]
+    $total
+}
+
+# Soma recursiva sem entrar em links; pasta que não dá para listar conta em [2] e segue.
+if (-not ('Tamandua.Medidor' -as [type])) {
+    Add-Type -TypeDefinition @'
+namespace Tamandua {
+    public static class Medidor {
+        // [0] = bytes, [1] = arquivos, [2] = pastas sem acesso
+        public static long[] Medir(string caminho) {
+            long[] t = new long[3];
+            var pilha = new System.Collections.Generic.Stack<System.IO.DirectoryInfo>();
+            pilha.Push(new System.IO.DirectoryInfo(caminho));
+            while (pilha.Count > 0) {
+                var pasta = pilha.Pop();
+                System.IO.FileSystemInfo[] itens;
+                try { itens = pasta.GetFileSystemInfos(); }
+                catch { t[2]++; continue; }
+                foreach (var i in itens) {
+                    if ((i.Attributes & System.IO.FileAttributes.ReparsePoint) != 0) continue;
+                    var sub = i as System.IO.DirectoryInfo;
+                    if (sub != null) { pilha.Push(sub); continue; }
+                    try { t[0] += ((System.IO.FileInfo)i).Length; t[1]++; } catch { }
                 }
             }
-        }
-        catch {
-            $total.Inacessiveis++
+            return t;
         }
     }
-    $total
+}
+'@
 }
 
 # Lixeira pela API do Explorer (SHFileOperation), sem nenhuma janela ou pergunta.

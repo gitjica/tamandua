@@ -101,10 +101,12 @@ $script:ScriptExecutarAcao = {
 }
 
 $script:ScriptBuscarAlvos = {
-    param([string]$Nucleo, [string]$Raiz, [string]$Nome)
+    param([string]$Nucleo, [string]$Raiz, [string]$Nome, [string]$Caminho)
     $ErrorActionPreference = 'Stop'
     Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
     $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome
     if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
-    & $m.Modulo.ExportedFunctions['Find-Alvos']
+    $buscar = $m.Modulo.ExportedFunctions['Find-Alvos']
+    # Módulos que navegam (ex.: analisar) recebem a pasta aberta.
+    if ($Caminho -and $buscar.Parameters.ContainsKey('Caminho')) { & $buscar -Caminho $Caminho } else { & $buscar }
 }

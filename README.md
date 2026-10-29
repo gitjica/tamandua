@@ -1,12 +1,14 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7). Próximos módulos: analisar, programas, purgar, instaladores, desinstalar, recursos, otimizar, reparos, atualizações.
+Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7) + módulo analisar. Próximos módulos: programas, purgar, instaladores, desinstalar, recursos, otimizar, reparos, atualizações.
 
 ## Uso
 
 ```powershell
 .\tamandua.ps1            # abre a interface (ou o menu de texto, se a pasta interface faltar)
 .\tamandua.ps1 status     # painel do sistema: saúde, CPU, memória, discos, rede, bateria, processos
+.\tamandua.ps1 analisar          # unidades e atalhos; na janela, duplo clique abre a pasta
+.\tamandua.ps1 analisar C:\Users\voce   # o que ocupa espaço nessa pasta, do maior para o menor
 .\tamandua.ps1 limpar -Simular   # quanto liberaria (temporários com mais de 24 h, despejos de falha)
 .\tamandua.ps1 limpar            # mostra, pergunta e limpa
 .\tamandua.ps1 ajustes -Preset Essencial -Simular   # o que o preset mudaria, e o que já está aplicado
@@ -18,7 +20,7 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 ajuda
 ```
 
-Por enquanto existem o núcleo e os módulos `status`, `limpar` e `ajustes`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
+Por enquanto existem o núcleo e os módulos `status`, `analisar`, `limpar` e `ajustes`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
 
 ## Desenvolvimento
 
