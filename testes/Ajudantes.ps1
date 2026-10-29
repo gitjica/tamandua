@@ -16,7 +16,7 @@ function Find-Alvos { @() }
 
 # Copia o núcleo e o ponto de entrada para uma pasta nova. Com -Catalogo, troca o catálogo pelos nomes dados.
 function New-ProjetoFalso {
-    param([Parameter(Mandatory)][string]$Pai, [string[]]$Catalogo, [switch]$ComInterface)
+    param([Parameter(Mandatory)][string]$Pai, [string[]]$Catalogo, [switch]$ComInterface, [string[]]$ModulosReais = @())
 
     $raiz = Join-Path $Pai ([guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path (Join-Path $raiz 'modulos') -Force | Out-Null
@@ -24,6 +24,9 @@ function New-ProjetoFalso {
     Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'tamandua.ps1') -Destination $raiz
     Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'config') -Destination $raiz -Recurse
     if ($ComInterface) { Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'interface') -Destination $raiz -Recurse }
+    foreach ($m in $ModulosReais) {
+        Copy-Item -LiteralPath (Join-Path $script:RaizProjeto "modulos\$m") -Destination (Join-Path $raiz 'modulos') -Recurse
+    }
     if ($PSBoundParameters.ContainsKey('Catalogo')) {
         $linhas = foreach ($n in $Catalogo) { "        @{ Nome = '$n'; Grupo = 'Teste'; Descricao = 'Módulo $n' }" }
         $texto = "@{`r`n    Modulos = @(`r`n$($linhas -join "`r`n")`r`n    )`r`n}"
@@ -81,9 +84,11 @@ function ConvertTo-Psd1 {
 
 # Roda tamandua.ps1 num processo separado, sem console interativo, e devolve código e saída.
 function Invoke-Tamandua {
-    param([Parameter(Mandatory)][string]$Raiz, [string[]]$Argumentos = @())
+    param([Parameter(Mandatory)][string]$Raiz, [string[]]$Argumentos = @(), [hashtable]$Ambiente = @{})
 
     $psi = New-Object System.Diagnostics.ProcessStartInfo
+    # Variáveis de ambiente só do processo filho (ex.: TEMP apontando para a sandbox).
+    foreach ($k in $Ambiente.Keys) { $psi.EnvironmentVariables[$k] = $Ambiente[$k] }
     $psi.FileName = Join-Path $PSHOME 'powershell.exe'
     $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $Raiz 'tamandua.ps1')`" $($Argumentos -join ' ')"
     $psi.UseShellExecute = $false
@@ -119,6 +124,12 @@ function New-ArvoreFalsa {
         [IO.File]::WriteAllText($caminho, [string]$Arquivos[$rel])
     }
     $Pasta
+}
+
+# Muda a data de modificação (para testar regras de idade, ex.: "só mais velhos que 24 h").
+function Set-Idade {
+    param([Parameter(Mandatory)][string]$Caminho, [Parameter(Mandatory)][double]$Horas)
+    (Get-Item -LiteralPath $Caminho -Force).LastWriteTime = (Get-Date).AddHours(-$Horas)
 }
 
 # Hash de todos os arquivos (caminho relativo + conteúdo), para provar que nada mudou.

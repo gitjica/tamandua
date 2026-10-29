@@ -43,8 +43,9 @@
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource Acento}"/>
                         </Trigger>
+                        <!-- Opacidade, não cor: funciona igual no botão comum e no principal. -->
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                            <Setter TargetName="Caixa" Property="Opacity" Value="0.45"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -153,6 +154,36 @@
                         <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3"
                                 HorizontalAlignment="Left"/>
                     </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Caixa de seleção nas cores do tema. -->
+    <Style x:Key="Caixa" TargetType="CheckBox">
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Border x:Name="Quadro" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
+                            BorderBrush="{DynamicResource TextoSutil}" Background="{DynamicResource Superficie}">
+                        <TextBlock x:Name="Marca" FontFamily="{StaticResource FonteIcones}" Text="&#xE73E;" FontSize="11"
+                                   Foreground="{DynamicResource NoAcento}" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="Collapsed"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Quadro" Property="Background" Value="{DynamicResource Acento}"/>
+                            <Setter TargetName="Quadro" Property="BorderBrush" Value="{DynamicResource Acento}"/>
+                            <Setter TargetName="Marca" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Quadro" Property="BorderBrush" Value="{DynamicResource Acento}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Quadro" Property="BorderBrush" Value="{DynamicResource Acento}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

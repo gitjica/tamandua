@@ -221,7 +221,7 @@ Todo `.psm1` exporta estas funções (nomes fixos; o núcleo chama cada uma pela
 |---|---|---|---|
 | `Test-Requisitos` | sim | Diz se pode rodar aqui. Retorna `@{ Ok = $bool; Motivo = 'texto' }` | **não** |
 | `Find-Alvos` | sim | Descobre o que seria feito e o **estado atual** de cada item. Retorna lista de `Alvo` | **não** |
-| `Invoke-Acao` | se `Escreve = $true` | Executa a ação **somente** nos alvos recebidos | sim, via núcleo |
+| `Invoke-Acao` | se `Escreve = $true` | `-Alvos <objetos de Find-Alvos> [-Simular]`. Executa **somente** nos alvos recebidos e devolve um `Resultado` por alvo | sim, via núcleo |
 | `Undo-Acao` | se o módulo altera configuração (ajustes, recursos, atualizações, otimizar) | Desfaz a partir do snapshot | sim, via núcleo |
 
 Regras:
@@ -232,6 +232,12 @@ Regras:
   Módulos podem usar as funções **exportadas** do núcleo (ex.: `Format-TmdTamanho`); o `tamandua.ps1` importa o núcleo com `-Global` para isso.
 - Leitura do sistema (CIM, registro, processos) fica numa função pequena do módulo (ex.: `Get-LeituraSistema`),
   e cada parte dela é lida isolada: se uma falhar, só aquela parte vira `Desconhecido`.
+- `Invoke-Acao` **não confia** em caminhos vindos nos alvos (podem ter sido alterados no caminho): recalcula a partir do `Id`
+  com as regras do próprio módulo. Ex.: o `limpar` usa só o `Id` da categoria para achar a pasta.
+- Para testes, `Find-Alvos` e `Invoke-Acao` podem aceitar trocas de pasta (ex.: `-Pastas @{ 'temp-usuario' = '...' }`).
+  O módulo lê as pastas padrão de variáveis de ambiente (`TEMP`, `LOCALAPPDATA`) quando possível, para os testes da CLI
+  trocarem essas variáveis no processo filho e nunca tocarem nas pastas reais.
+- Manifesto pode ter `RotuloAcao` (ex.: `'Limpar'`): vira o texto do botão principal e da pergunta de confirmação.
 - Nenhum módulo usa `Write-Host` nem toca em WPF. Retorna objetos; quem desenha é a CLI (`Saida.ps1`) ou a interface.
 - Progresso é reportado via `Write-Progress`-equivalente do núcleo (`Write-TmdProgresso`), que a CLI e a interface traduzem cada uma do seu jeito.
 - Erro em um alvo não para o módulo: o alvo vira `Status = 'Erro'` com `Motivo`, e segue para o próximo.
@@ -524,6 +530,11 @@ Base do WinUtil (abas, busca, seleção em lote), reorganizada:
 - `Start-TmdInterface -AoCarregar {...} -FecharAposSeg N` existe para testes e capturas: os testes abrem a janela de verdade
   e ela fecha sozinha mesmo se algo travar.
 - Estilo implícito de `TextBlock` não atravessa `DataTemplate`: a cor do texto em listas vem do `Foreground` do item.
+- Callbacks de tarefa **não** usam `GetNewClosure()` (perderiam o acesso às funções e ao `$script:` do módulo);
+  o que precisam vai em `Start-TmdTarefa -Contexto`, entregue como 4º argumento.
+- Módulo que escreve: caixa de seleção por linha (a marca fica no próprio alvo e sobrevive à busca), **Simular** roda direto,
+  o botão principal pede confirmação na barra de status ("…Isso não pode ser desfeito. Confirmar?") e só o segundo clique executa.
+  Depois de executar, a página é relida e o resultado fica na barra de status.
 - Revisão visual: `.\ferramentas\capturar-interface.ps1 -Saida tela.png -Tema escuro -Modulo limpar`.
 
 ### 10.4 Paleta "Tamanduá"

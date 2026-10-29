@@ -8,11 +8,18 @@ function Invoke-TmdCli {
     param(
         [string]$Comando,
         [string[]]$Argumentos,
-        [string]$Raiz = $script:RaizPadrao
+        [string]$Raiz = $script:RaizPadrao,
+        [switch]$Simular,
+        [switch]$Sim
     )
 
     if ($Argumentos) {
         Write-Host "Opções ainda não suportadas: $($Argumentos -join ' ')" -ForegroundColor Yellow
+        return $script:CodigoSaida.Erro
+    }
+    $comandosDoNucleo = 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao'
+    if (($Simular -or $Sim) -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in $comandosDoNucleo)) {
+        Write-Host '-Simular e -Sim só valem junto com um módulo (ex.: tamandua limpar -Simular).' -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
     }
     if ([string]::IsNullOrWhiteSpace($Comando)) { return Start-TmdPrincipal -Raiz $Raiz }
@@ -36,12 +43,13 @@ function Invoke-TmdCli {
             Write-Host "Tamanduá $script:Versao"
             return $script:CodigoSaida.Ok
         }
-        default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz }
+        default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz -Simular:$Simular -Sim:$Sim }
     }
 }
 
+# Módulo de leitura: mostra os alvos. Módulo que escreve: mostra, simula ou confirma, executa e mostra o resultado.
 function Invoke-TmdComandoModulo {
-    param([Parameter(Mandatory)][string]$Nome, [Parameter(Mandatory)][string]$Raiz)
+    param([Parameter(Mandatory)][string]$Nome, [Parameter(Mandatory)][string]$Raiz, [switch]$Simular, [switch]$Sim)
 
     $info = Get-TmdModulo -Raiz $Raiz -Nome $Nome
     if (-not $info) {
@@ -54,6 +62,11 @@ function Invoke-TmdComandoModulo {
         Write-TmdEstadoModulo -Modulo $info
         return $script:CodigoSaida.Indisponivel
     }
+    $escreve = [bool]$info.Manifesto['Escreve']
+    if (-not $escreve -and ($Simular -or $Sim)) {
+        Write-Host "O módulo '$Nome' só lê o sistema; -Simular e -Sim não se aplicam." -ForegroundColor Yellow
+        return $script:CodigoSaida.Erro
+    }
     try {
         $alvos = @(& $info.Modulo.ExportedFunctions['Find-Alvos'])
     }
@@ -62,6 +75,37 @@ function Invoke-TmdComandoModulo {
         return $script:CodigoSaida.Erro
     }
     Write-TmdAlvos -Alvos $alvos
+    if (-not $escreve) { return $script:CodigoSaida.Ok }
+
+    $selecionados = @($alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'Selecionado') -eq $true })
+    Write-Host ''
+    if ($selecionados.Count -eq 0) {
+        Write-Host 'Nada selecionado para fazer.'
+        return $script:CodigoSaida.Ok
+    }
+    $bytes = [int64]0
+    foreach ($a in $selecionados) { $t = Get-Propriedade -Objeto $a -Nome 'Tamanho'; if ($t -gt 0) { $bytes += $t } }
+    $rotulo = if ($info.Manifesto['RotuloAcao']) { [string]$info.Manifesto['RotuloAcao'] } else { 'Aplicar' }
+    $acao = $info.Modulo.ExportedFunctions['Invoke-Acao']
+
+    try {
+        if ($Simular) {
+            Write-TmdResultados -Resultados @(& $acao -Alvos $selecionados -Simular) -Simulado
+            return $script:CodigoSaida.Ok
+        }
+        $pergunta = "$rotulo $($selecionados.Count) item(ns)" + $(if ($bytes -gt 0) { " ($(Format-TmdTamanho $bytes))" } else { '' }) + '?'
+        if (-not (Confirm-TmdExecucao -Pergunta $pergunta -Sim:$Sim)) {
+            Write-Host 'Cancelado. Nada foi alterado.'
+            return $script:CodigoSaida.Cancelado
+        }
+        $resultados = @(& $acao -Alvos $selecionados)
+    }
+    catch {
+        Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red
+        return $script:CodigoSaida.Erro
+    }
+    Write-TmdResultados -Resultados $resultados
+    if (@($resultados | Where-Object { $_.Status -eq 'Erro' }).Count -gt 0) { return $script:CodigoSaida.Erro }
     $script:CodigoSaida.Ok
 }
 

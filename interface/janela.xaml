@@ -118,18 +118,22 @@
                                            Visibility="Collapsed"/>
                                 <Grid x:Name="LinhaAlvo">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="210"/>
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Nome}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                    <CheckBox x:Name="Caixa" Grid.Column="0" Style="{DynamicResource Caixa}" IsChecked="{Binding Selecionado, Mode=OneWay}"
+                                              Margin="0,0,10,0" VerticalAlignment="Center" Visibility="Collapsed"
+                                              AutomationProperties.Name="{Binding Nome}"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Nome}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
                                                ToolTip="{Binding Nome}"/>
-                                    <ProgressBar x:Name="Barra" Grid.Column="1" Style="{DynamicResource BarraValor}" Value="{Binding Valor}"
+                                    <ProgressBar x:Name="Barra" Grid.Column="2" Style="{DynamicResource BarraValor}" Value="{Binding Valor}"
                                                  Margin="0,0,14,0" VerticalAlignment="Center" Visibility="Collapsed"/>
-                                    <TextBlock x:Name="Detalhe" Grid.Column="2" Text="{Binding Detalhe}" Foreground="{DynamicResource TextoSecundario}"
+                                    <TextBlock x:Name="Detalhe" Grid.Column="3" Text="{Binding Detalhe}" Foreground="{DynamicResource TextoSecundario}"
                                                TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                    <Border x:Name="Selo" Grid.Column="3" CornerRadius="4" Padding="7,1" Margin="10,0,0,0"
+                                    <Border x:Name="Selo" Grid.Column="4" CornerRadius="4" Padding="7,1" Margin="10,0,0,0"
                                             Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
                                         <TextBlock x:Name="TextoSelo" Text="{Binding Selo}" FontSize="11" Foreground="{DynamicResource TextoSecundario}"/>
                                     </Border>
@@ -142,6 +146,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding TemValor}" Value="True">
                                     <Setter TargetName="Barra" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TemCaixa}" Value="True">
+                                    <Setter TargetName="Caixa" Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding TemSelo}" Value="True">
                                     <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>

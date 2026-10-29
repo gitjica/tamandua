@@ -7,14 +7,17 @@ function Start-TmdTarefa {
     param(
         [Parameter(Mandatory)][scriptblock]$Script,
         [hashtable]$Parametros = @{},
-        [Parameter(Mandatory)][scriptblock]$AoTerminar
+        # Chamado com (saida, erro, avisos, contexto). Não use GetNewClosure: o bloco perderia acesso ao estado deste módulo.
+        [Parameter(Mandatory)][scriptblock]$AoTerminar,
+        # Dados que o AoTerminar precisa (ex.: qual página pediu), devolvidos como 4º argumento.
+        $Contexto = $null
     )
 
     $ps = [powershell]::Create()
     # Passa o texto, não o scriptblock: um scriptblock fica preso ao runspace onde foi criado.
     [void]$ps.AddScript($Script.ToString())
     foreach ($k in $Parametros.Keys) { [void]$ps.AddParameter($k, $Parametros[$k]) }
-    $tarefa = [pscustomobject]@{ PS = $ps; Async = $ps.BeginInvoke(); AoTerminar = $AoTerminar; Cancelada = $false }
+    $tarefa = [pscustomobject]@{ PS = $ps; Async = $ps.BeginInvoke(); AoTerminar = $AoTerminar; Contexto = $Contexto; Cancelada = $false }
     $script:Tarefas.Add($tarefa)
     $tarefa
 }
@@ -46,7 +49,7 @@ function Update-TmdTarefa {
         finally {
             $t.PS.Dispose()
         }
-        if (-not $t.Cancelada) { & $t.AoTerminar $saida $erro $avisos }
+        if (-not $t.Cancelada) { & $t.AoTerminar $saida $erro $avisos $t.Contexto }
     }
 }
 
@@ -68,8 +71,18 @@ $script:ScriptCarregarModulos = {
             Estado    = $m.Estado
             Motivo    = $m.Motivo
             Escreve   = [bool]($m.Manifesto -and $m.Manifesto['Escreve'])
+            RotuloAcao = if ($m.Manifesto -and $m.Manifesto['RotuloAcao']) { [string]$m.Manifesto['RotuloAcao'] } else { 'Aplicar' }
         }
     }
+}
+
+$script:ScriptExecutarAcao = {
+    param([string]$Nucleo, [string]$Raiz, [string]$Nome, [object[]]$Alvos, [bool]$Simular)
+    $ErrorActionPreference = 'Stop'
+    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome
+    if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
+    & $m.Modulo.ExportedFunctions['Invoke-Acao'] -Alvos $Alvos -Simular:$Simular
 }
 
 $script:ScriptBuscarAlvos = {

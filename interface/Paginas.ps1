@@ -15,6 +15,8 @@ function Initialize-TmdTela {
         ModuloAtual   = $null
         Alvos         = @()
         TarefaPagina  = $null
+        TarefaAcao    = $null
+        Confirmando   = $false
         AoCarregar    = $AoCarregar
         JaAvisouCarga = $false
     }
@@ -28,6 +30,17 @@ function Initialize-TmdTela {
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
     $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual } })
     $c.BotaoCancelar.Add_Click({ Invoke-TmdProtegido { Stop-TmdCargaPagina } })
+    $c.BotaoSimular.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoSimular } })
+    $c.BotaoAplicar.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoAplicar } })
+    # Caixas de seleção dentro das linhas: um único ouvinte na lista para todos os cliques.
+    $c.ListaAlvos.AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler] {
+            Invoke-TmdProtegido {
+                $caixa = $args[1].OriginalSource
+                if ($caixa -is [System.Windows.Controls.CheckBox] -and $caixa.DataContext) {
+                    Set-TmdSelecao -Linha $caixa.DataContext -Selecionado ([bool]$caixa.IsChecked)
+                }
+            }
+        })
     $c.BotaoTema.Add_Click({
             Invoke-TmdProtegido {
                 $novo = if ($script:Tela.Tema -eq 'claro') { 'escuro' } else { 'claro' }
@@ -128,8 +141,13 @@ function Open-TmdPaginaSelecionada {
     Open-TmdPagina -Nome $item.Nome
 }
 
+function Get-TmdModuloAtual {
+    @($script:Estado.Modulos | Where-Object { $_.Nome -eq $script:Estado.ModuloAtual })[0]
+}
+
+# -StatusDepois: texto (e cor) para a barra de status quando a página terminar de carregar, no lugar do padrão.
 function Open-TmdPagina {
-    param([string]$Nome)
+    param([string]$Nome, $StatusDepois)
     if (-not $Nome) { return }
 
     $modulo = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $Nome })[0]
@@ -137,10 +155,13 @@ function Open-TmdPagina {
     Stop-TmdCargaPagina -Silencioso
     $script:Estado.ModuloAtual = $Nome
     $script:Estado.Alvos = @()
+    Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
     $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
     $c.BotaoSimular.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoAplicar.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
+    $c.BotaoSimular.IsEnabled = $false
+    $c.BotaoAplicar.IsEnabled = $false
     Show-TmdDetalhe
 
     $mensagem = Get-MensagemModulo -Modulo $modulo
@@ -153,13 +174,16 @@ function Open-TmdPagina {
     }
 
     $c.BotaoAtualizar.IsEnabled = $true
-    Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Lendo $($modulo.Titulo.ToLower())" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
+    Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Carregando $($modulo.Titulo)" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
     Set-TmdStatus 'Lendo…'
     Set-TmdOcupado $true
     $script:Estado.TarefaPagina = Start-TmdTarefa -Script $script:ScriptBuscarAlvos `
         -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $Nome } `
+        -Contexto @{ StatusDepois = $StatusDepois } `
         -AoTerminar {
         param($saida, $erro)
+        $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto
+        $c = $script:Tela.Controles
         $script:Estado.TarefaPagina = $null
         Set-TmdOcupado $false
         if ($erro) {
@@ -169,10 +193,119 @@ function Open-TmdPagina {
         else {
             $script:Estado.Alvos = @($saida)
             Update-TmdBusca
-            $m = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $script:Estado.ModuloAtual })[0]
-            Set-TmdStatus (Get-TextoStatusPagina -Quantidade $script:Estado.Alvos.Count -Escreve $m.Escreve -Quando (Get-Date))
+            $m = Get-TmdModuloAtual
+            if ($contexto.StatusDepois) { Set-TmdStatus $contexto.StatusDepois.Texto $contexto.StatusDepois.Cor }
+            elseif ($m.Escreve) { Update-TmdBarraAcao }
+            else { Set-TmdStatus (Get-TextoStatusPagina -Quantidade $script:Estado.Alvos.Count -Escreve $false -Quando (Get-Date)) }
+            if ($m.Escreve) {
+                $c.BotaoSimular.IsEnabled = $true
+                $c.BotaoAplicar.IsEnabled = $true
+            }
         }
         Complete-TmdCargaInicial
+    }
+}
+
+# Marca ou desmarca um alvo. A marca fica no próprio alvo, então sobrevive à busca.
+function Set-TmdSelecao {
+    param([Parameter(Mandatory)]$Linha, [bool]$Selecionado)
+    if ($Linha.Tipo -ne 'Alvo') { return }
+    $Linha.Selecionado = $Selecionado
+    if ($Linha.Alvo -and $Linha.Alvo.PSObject.Properties['Selecionado']) { $Linha.Alvo.Selecionado = $Selecionado }
+    Exit-TmdConfirmacao
+    Update-TmdBarraAcao
+}
+
+function Get-TmdResumoAtual {
+    Get-ResumoSelecao -Linhas (ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Escreve)
+}
+
+function Update-TmdBarraAcao {
+    $m = Get-TmdModuloAtual
+    if (-not $m -or -not $m.Escreve -or $script:Estado.Confirmando) { return }
+    Set-TmdStatus "$((Get-TmdResumoAtual).Texto) · nada é alterado sem confirmação"
+}
+
+function Exit-TmdConfirmacao {
+    $c = $script:Tela.Controles
+    $script:Estado.Confirmando = $false
+    $m = Get-TmdModuloAtual
+    $c.BotaoAplicar.Content = if ($m -and $m.RotuloAcao) { $m.RotuloAcao } else { 'Aplicar' }
+    $c.BotaoSimular.Content = 'Simular'
+}
+
+# Simular: roda já. Durante a confirmação, o mesmo botão vira "Voltar".
+function Invoke-TmdBotaoSimular {
+    if ($script:Estado.Confirmando) {
+        Exit-TmdConfirmacao
+        Update-TmdBarraAcao
+        return
+    }
+    Start-TmdAcao -Simular $true
+}
+
+# Primeiro clique mostra o resumo e pede confirmação; o segundo (Confirmar) executa.
+function Invoke-TmdBotaoAplicar {
+    $resumo = Get-TmdResumoAtual
+    if ($resumo.Quantidade -eq 0) {
+        Set-TmdStatus 'Escolha pelo menos um item.' 'Aviso'
+        return
+    }
+    if (-not $script:Estado.Confirmando) {
+        $m = Get-TmdModuloAtual
+        $script:Estado.Confirmando = $true
+        $script:Tela.Controles.BotaoAplicar.Content = 'Confirmar'
+        $script:Tela.Controles.BotaoSimular.Content = 'Voltar'
+        $alvos = if ($resumo.Quantidade -eq 1) { '1 item' } else { "$($resumo.Quantidade) itens" }
+        $tamanho = if ($resumo.Bytes -gt 0) { " ($(Format-TamanhoTela $resumo.Bytes))" } else { '' }
+        Set-TmdStatus "$($m.RotuloAcao): $alvos$tamanho. Isso não pode ser desfeito. Confirmar?" 'Aviso'
+        return
+    }
+    Exit-TmdConfirmacao
+    Start-TmdAcao -Simular $false
+}
+
+function Start-TmdAcao {
+    param([bool]$Simular)
+
+    $resumo = Get-TmdResumoAtual
+    if ($resumo.Quantidade -eq 0) {
+        Set-TmdStatus 'Escolha pelo menos um item.' 'Aviso'
+        return
+    }
+    $c = $script:Tela.Controles
+    $nome = $script:Estado.ModuloAtual
+    Set-TmdOcupado $true
+    $c.BotaoCancelar.Visibility = 'Collapsed'
+    $c.BotaoSimular.IsEnabled = $false
+    $c.BotaoAplicar.IsEnabled = $false
+    Set-TmdStatus $(if ($Simular) { 'Simulando…' } else { 'Executando…' })
+    $script:Estado.TarefaAcao = Start-TmdTarefa -Script $script:ScriptExecutarAcao `
+        -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Alvos = $resumo.Alvos; Simular = $Simular } `
+        -Contexto @{ Nome = $nome; Simular = $Simular } `
+        -AoTerminar {
+        param($saida, $erro)
+        $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto
+        $c = $script:Tela.Controles
+        $script:Estado.TarefaAcao = $null
+        Set-TmdOcupado $false
+        $c.BotaoSimular.IsEnabled = $true
+        $c.BotaoAplicar.IsEnabled = $true
+        if ($erro) {
+            Set-TmdStatus "Erro: $erro" 'Perigo'
+            return
+        }
+        $texto = Get-TextoResultado -Resultados @($saida) -Simulado $contexto.Simular
+        if ($contexto.Simular) {
+            Set-TmdStatus $texto.Texto $texto.Cor
+        }
+        elseif ($script:Estado.ModuloAtual -eq $contexto.Nome) {
+            # Relê a página para mostrar o que sobrou, mantendo o resultado na barra de status.
+            Open-TmdPagina -Nome $contexto.Nome -StatusDepois $texto
+        }
+        else {
+            Set-TmdStatus $texto.Texto $texto.Cor
+        }
     }
 }
 
@@ -197,7 +330,7 @@ function Update-TmdBusca {
     $modulo = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $script:Estado.ModuloAtual })[0]
     if ($modulo.Estado -ne 'ok') { return }
 
-    $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca
+    $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca -Escreve:$modulo.Escreve
     if ($linhas.Count -eq 0) {
         if ($busca) {
             Show-TmdMensagem -Icone ([string][char]0xE721) -Titulo 'Nada encontrado' -Texto "Nenhum item desta página corresponde a “$busca”."
@@ -236,7 +369,11 @@ function Show-TmdDetalhe {
     $c.PainelDetalhe.Visibility = 'Visible'
     $c.DetalheNome.Text = $linha.Nome
     $c.DetalheCategoria.Text = $linha.Categoria
-    $c.DetalheTexto.Text = $linha.Detalhe
+    $mudancas = @(Get-ValorPropriedade $linha.Alvo 'Mudancas' | Where-Object { $_ })
+    $c.DetalheTexto.Text = if ($mudancas.Count -gt 0) {
+        "$($linha.Detalhe)`n`nO que acontece:`n• $($mudancas -join "`n• ")"
+    }
+    else { $linha.Detalhe }
     $c.DetalheEstado.Text = Get-TextoEstadoAlvo -Linha $linha
     $c.DetalheId.Text = "id: $($linha.Id)"
 }

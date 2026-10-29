@@ -215,3 +215,89 @@ function Find-Alvos { throw 'disco sumiu' }
         $r.Status | Should -Match 'disco sumiu'
     }
 }
+
+Describe 'Seleção e resultado (funções puras)' {
+    It 'módulo que escreve: linhas com caixa, marcadas conforme o alvo' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'a'; Nome = 'Temp'; Categoria = 'T'; Estado = 'NaoSeAplica'; Detalhe = 'x'; Tamanho = 2048; Selecionado = $true }
+            [pscustomobject]@{ Id = 'b'; Nome = 'Dumps'; Categoria = 'T'; Estado = 'NaoSeAplica'; Detalhe = 'y'; Tamanho = 0; Selecionado = $false }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            $linhas = ConvertTo-LinhaAlvo -Alvos $A -Escreve
+            @($linhas | Where-Object Tipo -eq 'Alvo' | ForEach-Object TemCaixa) | Should -Be @($true, $true)
+            ($linhas | Where-Object Id -eq 'a').Selecionado | Should -BeTrue
+            ($linhas | Where-Object Id -eq 'b').Selecionado | Should -BeFalse
+            $r = Get-ResumoSelecao -Linhas $linhas
+            $r.Quantidade | Should -Be 1
+            $r.Bytes | Should -Be 2048
+            $r.Texto | Should -Match '^1 selecionado · 2[,.]0 KB$'
+            $r.Alvos[0].Id | Should -Be 'a'
+            ((ConvertTo-LinhaAlvo -Alvos $A) | Where-Object Tipo -eq 'Alvo' | ForEach-Object TemCaixa) | Should -Not -Contain $true -Because 'módulo de leitura não tem caixa'
+        }
+    }
+
+    It 'texto do resultado: simulação, sucesso, parcial e erro' {
+        InModuleScope Interface {
+            $sim = Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Simulado'; Liberado = 1048576; Motivo = '' }) -Simulado $true
+            $sim.Texto | Should -Match '^Simulação: liberaria 1[,.]0 MB\. Nada foi alterado\.$'
+            (Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Feito'; Liberado = 1024; Motivo = '' }) -Simulado $false).Cor | Should -Be 'Sucesso'
+            $parcial = Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Parcial'; Liberado = 10; Motivo = '2 pulado(s)' }) -Simulado $false
+            $parcial.Cor | Should -Be 'Aviso'
+            $parcial.Texto | Should -Match '2 pulado'
+            (Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Erro'; Liberado = 0; Motivo = 'x' }) -Simulado $false).Cor | Should -Be 'Perigo'
+        }
+    }
+}
+
+Describe 'Limpar pela janela de verdade' {
+    It 'Simular não apaga; Limpar pede confirmação; Confirmar apaga o velho e mantém o recente' {
+        $base = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $temp = New-ArvoreFalsa -Pasta (Join-Path $base 'Temp') -Arquivos @{ 'velho.tmp' = 'aaaa'; 'recente.tmp' = 'b' }
+        New-ArvoreFalsa -Pasta (Join-Path $base 'Local\CrashDumps') -Arquivos @{ 'x.dmp' = 'cc' } | Out-Null
+        Set-Idade "$temp\velho.tmp" 48
+        $projeto = New-ProjetoFalso -Pai $TestDrive -Catalogo 'limpar' -ComInterface -ModulosReais 'limpar'
+
+        # As tarefas da janela rodam neste processo e leem TEMP/LOCALAPPDATA daqui: aponta para a sandbox durante o teste.
+        $originais = @{ TEMP = $env:TEMP; TMP = $env:TMP; LOCALAPPDATA = $env:LOCALAPPDATA }
+        $env:TEMP = $temp; $env:TMP = $temp; $env:LOCALAPPDATA = Join-Path $base 'Local'
+        $passos = @{ Etapa = 0 }
+        try {
+            $aoCarregar = {
+                # GetNewClosure só captura variáveis locais: copia para locais o que o relógio vai usar.
+                $tela = $args[0]
+                $p = $passos
+                $pastaTemp = $temp
+                $relogio = New-Object System.Windows.Threading.DispatcherTimer
+                $relogio.Interval = [TimeSpan]::FromMilliseconds(200)
+                $clicar = { param($b) $b.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent))) }
+                $relogio.Add_Tick({
+                        $c = $tela.Controles
+                        if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
+                        switch ($p.Etapa) {
+                            0 { & $clicar $c.BotaoSimular }
+                            1 { $p.Simulacao = $c.TextoStatus.Text; $p.VelhoDepoisDeSimular = Test-Path "$pastaTemp\velho.tmp"; & $clicar $c.BotaoAplicar }
+                            2 { $p.Confirmacao = $c.TextoStatus.Text; $p.RotuloConfirmar = $c.BotaoAplicar.Content; & $clicar $c.BotaoAplicar }
+                            3 { $p.Final = $c.TextoStatus.Text; $relogio.Stop(); $tela.Janela.Close() }
+                        }
+                        $p.Etapa++
+                    }.GetNewClosure())
+                $relogio.Start()
+            }.GetNewClosure()
+            Start-TmdInterface -Raiz $projeto -Tema 'claro' -AoCarregar $aoCarregar -FecharAposSeg 60
+        }
+        finally {
+            $env:TEMP = $originais.TEMP; $env:TMP = $originais.TMP; $env:LOCALAPPDATA = $originais.LOCALAPPDATA
+        }
+
+        $passos.Etapa | Should -Be 4 -Because 'a sequência inteira precisa ter rodado'
+        $passos.Simulacao | Should -Match 'Simulação: liberaria'
+        $passos.VelhoDepoisDeSimular | Should -BeTrue
+        $passos.RotuloConfirmar | Should -Be 'Confirmar'
+        $passos.Confirmacao | Should -Match 'Limpar: 2 itens .* Confirmar\?'
+        $passos.Final | Should -Match '^Liberado'
+        Test-Path "$temp\velho.tmp" | Should -BeFalse
+        Test-Path "$temp\recente.tmp" | Should -BeTrue
+        Test-Path (Join-Path $base 'Local\CrashDumps\x.dmp') | Should -BeFalse
+    }
+}

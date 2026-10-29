@@ -65,8 +65,9 @@ function ConvertTo-ItemNavegacao {
 }
 
 # Linhas da lista de alvos, com um cabeçalho por categoria. -Busca filtra por nome, detalhe ou categoria.
+# -Escreve: módulo que altera o sistema; cada linha ganha uma caixa de seleção.
 function ConvertTo-LinhaAlvo {
-    param([AllowEmptyCollection()][object[]]$Alvos = @(), [string]$Busca)
+    param([AllowEmptyCollection()][object[]]$Alvos = @(), [string]$Busca, [switch]$Escreve)
 
     $termo = if ($Busca) { $Busca.Trim() } else { '' }
     $linhas = [System.Collections.Generic.List[object]]::new()
@@ -86,9 +87,12 @@ function ConvertTo-LinhaAlvo {
         $valor = Get-ValorPropriedade $a 'Valor'
         $temValor = $null -ne $valor -and ($valor -is [int] -or $valor -is [long] -or $valor -is [double] -or $valor -is [decimal])
         $selo = if ($script:TextoSelo.ContainsKey($estado)) { $script:TextoSelo[$estado] } else { '' }
+        $tamanho = Get-ValorPropriedade $a 'Tamanho'
         $linhas.Add((New-LinhaAlvo -Tipo 'Alvo' -Nome $nome -Categoria $categoria -Detalhe $detalhe -Estado $estado `
                     -Nivel $(if ($nivel) { $nivel } else { 'Normal' }) -Valor $(if ($temValor) { [double]$valor } else { 0 }) `
-                    -TemValor $temValor -Selo $selo -Id ([string](Get-ValorPropriedade $a 'Id')) -Alvo $a))
+                    -TemValor $temValor -Selo $selo -Id ([string](Get-ValorPropriedade $a 'Id')) -Alvo $a `
+                    -TemCaixa $Escreve.IsPresent -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
+                    -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 })))
     }
     , $linhas.ToArray()
 }
@@ -97,12 +101,60 @@ function ConvertTo-LinhaAlvo {
 function New-LinhaAlvo {
     param(
         [string]$Tipo, [string]$Nome, [string]$Categoria = '', [string]$Detalhe = '', [string]$Estado = '',
-        [string]$Nivel = 'Normal', [double]$Valor = 0, [bool]$TemValor = $false, [string]$Selo = '', [string]$Id = '', $Alvo = $null
+        [string]$Nivel = 'Normal', [double]$Valor = 0, [bool]$TemValor = $false, [string]$Selo = '', [string]$Id = '', $Alvo = $null,
+        [bool]$TemCaixa = $false, [bool]$Selecionado = $false, [int64]$Tamanho = 0
     )
     [pscustomobject]@{
         Tipo = $Tipo; Id = $Id; Nome = $Nome; Categoria = $Categoria; Detalhe = $Detalhe; Estado = $Estado; Nivel = $Nivel
         Valor = $Valor; TemValor = $TemValor; Selo = $Selo; TemSelo = [bool]$Selo; Alvo = $Alvo
+        TemCaixa = $TemCaixa; Selecionado = $Selecionado; Tamanho = $Tamanho
     }
+}
+
+# Igual ao Format-TmdTamanho do núcleo; a interface não carrega o núcleo na thread da janela.
+function Format-TamanhoTela {
+    param([double]$Bytes)
+    $unidades = 'B', 'KB', 'MB', 'GB', 'TB'
+    $i = 0
+    while ($Bytes -ge 1024 -and $i -lt $unidades.Count - 1) { $Bytes /= 1024; $i++ }
+    if ($i -eq 0) { return '{0:N0} B' -f $Bytes }
+    '{0:N1} {1}' -f $Bytes, $unidades[$i]
+}
+
+# "2 selecionados · 3,2 GB", contando só linhas de alvo marcadas.
+function Get-ResumoSelecao {
+    param([AllowEmptyCollection()][object[]]$Linhas = @())
+    $marcadas = @($Linhas | Where-Object { $_.Tipo -eq 'Alvo' -and $_.Selecionado })
+    $bytes = [int64]0
+    foreach ($l in $marcadas) { $bytes += $l.Tamanho }
+    $texto = if ($marcadas.Count -eq 1) { '1 selecionado' } else { "$($marcadas.Count) selecionados" }
+    if ($bytes -gt 0) { $texto += " · $(Format-TamanhoTela $bytes)" }
+    [pscustomobject]@{ Quantidade = $marcadas.Count; Bytes = $bytes; Texto = $texto; Alvos = @($marcadas | ForEach-Object { $_.Alvo }) }
+}
+
+# Resumo de Invoke-Acao para a barra de status, com a cor (token do tema) que combina.
+function Get-TextoResultado {
+    param([AllowEmptyCollection()][object[]]$Resultados = @(), [bool]$Simulado)
+
+    $bytes = [int64]0
+    foreach ($r in $Resultados) { $bytes += [int64]$r.Liberado }
+    if ($Simulado) {
+        return [pscustomobject]@{ Texto = "Simulação: liberaria $(Format-TamanhoTela $bytes). Nada foi alterado."; Cor = 'TextoSecundario' }
+    }
+    $erros = @($Resultados | Where-Object { $_.Status -eq 'Erro' })
+    $parciais = @($Resultados | Where-Object { $_.Status -in 'Parcial', 'Ignorado' })
+    $texto = "Liberado: $(Format-TamanhoTela $bytes)"
+    $cor = 'Sucesso'
+    if ($parciais.Count -gt 0) {
+        $motivos = @($parciais | ForEach-Object { $_.Motivo } | Where-Object { $_ })
+        if ($motivos.Count -gt 0) { $texto += " · $($motivos[0])" }
+        $cor = 'Aviso'
+    }
+    if ($erros.Count -gt 0) {
+        $texto += " · erro: $($erros[0].Motivo)"
+        $cor = 'Perigo'
+    }
+    [pscustomobject]@{ Texto = $texto; Cor = $cor }
 }
 
 # O que mostrar no lugar da lista quando o módulo não está ok.

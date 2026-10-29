@@ -8,6 +8,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)][string]$Comando,
+    # Mostra o que seria feito, sem alterar nada.
+    [switch]$Simular,
+    # Confirma sem perguntar (para scripts).
+    [switch]$Sim,
     [Parameter(ValueFromRemainingArguments = $true)][string[]]$Resto
 )
 
@@ -24,7 +28,7 @@ if (-not (Test-Path -LiteralPath $nucleo -PathType Leaf)) {
 try {
     # -Global: os módulos usam funções exportadas do núcleo (ex.: Format-TmdTamanho).
     Import-Module -Name $nucleo -Force -DisableNameChecking -Global
-    $codigo = Invoke-TmdCli -Comando $Comando -Argumentos $Resto -Raiz $PSScriptRoot
+    $codigo = Invoke-TmdCli -Comando $Comando -Argumentos $Resto -Raiz $PSScriptRoot -Simular:$Simular -Sim:$Sim
 }
 catch {
     [Console]::Error.WriteLine("Tamanduá: erro inesperado: $($_.Exception.Message)")

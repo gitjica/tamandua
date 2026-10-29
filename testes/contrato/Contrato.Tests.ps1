@@ -29,19 +29,38 @@ Describe 'Módulo <Nome>' -ForEach $modulos -AllowNullOrEmptyForEach {
         @(Get-ChildItem -LiteralPath $pasta -Filter '*.Tests.ps1' -ErrorAction SilentlyContinue).Count | Should -BeGreaterThan 0
     }
 
-    # Só módulos de leitura rodam Find-Alvos contra o sistema real aqui; os que escrevem são testados na sandbox.
+    # Find-Alvos só lê, então roda contra o sistema real em todo módulo disponível. Invoke-Acao nunca roda aqui.
     It 'Find-Alvos devolve objetos no formato do contrato' {
-        if ($m.Estado -ne 'ok' -or $m.Manifesto['Escreve']) {
-            Set-ItResult -Skipped -Because 'só módulos de leitura disponíveis rodam aqui'
+        if ($m.Estado -ne 'ok') {
+            Set-ItResult -Skipped -Because 'módulo indisponível nesta máquina'
             return
         }
+        $escreve = [bool]$m.Manifesto['Escreve']
+        $obrigatorias = @('Id', 'Nome', 'Categoria', 'Estado', 'Detalhe')
+        if ($escreve) { $obrigatorias += 'Caminho', 'Tamanho', 'Risco', 'Selecionado', 'Destino', 'RequerAdmin', 'Reversivel', 'Mudancas' }
         $alvos = @(& $m.Modulo.ExportedFunctions['Find-Alvos'])
         foreach ($a in $alvos) {
             $nomes = $a.PSObject.Properties.Name
-            foreach ($p in 'Id', 'Nome', 'Categoria', 'Estado', 'Detalhe') { $nomes | Should -Contain $p }
+            foreach ($p in $obrigatorias) { $nomes | Should -Contain $p -Because "alvo $($a.Id)" }
             $a.Estado | Should -BeIn $script:EstadosValidos
+            if ($escreve) {
+                $a.Risco | Should -BeIn 'Baixo', 'Medio', 'Alto'
+                $a.Destino | Should -BeIn 'Permanente', 'Lixeira', 'NaoSeAplica'
+                if ($a.Risco -eq 'Alto') { $a.Selecionado | Should -BeFalse -Because 'risco alto nunca vem marcado' }
+            }
         }
         @($alvos.Id | Select-Object -Unique).Count | Should -Be $alvos.Count -Because 'Id precisa ser único'
+    }
+
+    It 'Invoke-Acao aceita -Alvos e -Simular' {
+        if ($m.Estado -ne 'ok' -or -not $m.Manifesto['Escreve']) {
+            Set-ItResult -Skipped -Because 'só módulos que escrevem'
+            return
+        }
+        $parametros = $m.Modulo.ExportedFunctions['Invoke-Acao'].Parameters
+        $parametros.Keys | Should -Contain 'Alvos'
+        $parametros.Keys | Should -Contain 'Simular'
+        $parametros['Simular'].ParameterType | Should -Be ([switch])
     }
 }
 

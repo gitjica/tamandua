@@ -52,7 +52,9 @@ function Write-TmdAlvos {
         else { 'Gray' }
         $nome = $nomes[$i]
         if ($nome.Length -gt $largura - 2) { $nome = $nome.Substring(0, $largura - 3) + '…' }
-        Write-Host ("  {0,-$largura}" -f $nome) -NoNewline
+        $selecionado = Get-Propriedade -Objeto $a -Nome 'Selecionado'
+        $marca = if ($null -eq $selecionado) { '  ' } elseif ($selecionado) { '[x] ' } else { '[ ] ' }
+        Write-Host ("$marca{0,-$largura}" -f $nome) -NoNewline
         $i++
         Write-Host ([string](Get-Propriedade -Objeto $a -Nome 'Detalhe')) -ForegroundColor $cor
     }
@@ -75,6 +77,26 @@ function Format-TmdTamanho {
 }
 
 $script:CorStatusOperacao = @{ Feito = 'Green'; Simulado = 'Cyan'; Ignorado = 'Gray'; Parcial = 'Yellow'; Erro = 'Red' }
+
+# Resultado de Invoke-Acao: uma linha por alvo e o total liberado.
+function Write-TmdResultados {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Resultados, [switch]$Simulado)
+
+    Write-Host $(if ($Simulado) { 'Simulação (nada foi alterado)' } else { 'Resultado' }) -ForegroundColor DarkYellow
+    $total = [int64]0
+    foreach ($r in $Resultados) {
+        $total += [int64]$r.Liberado
+        $cor = if ($script:CorStatusOperacao.ContainsKey([string]$r.Status)) { $script:CorStatusOperacao[[string]$r.Status] } else { 'Gray' }
+        Write-Host ('  {0,-18}' -f $r.Id) -NoNewline
+        Write-Host ('{0,-10}' -f $r.Status) -NoNewline -ForegroundColor $cor
+        Write-Host ('{0,10}' -f (Format-TmdTamanho $r.Liberado)) -NoNewline
+        if ($r.Motivo) { Write-Host "  $($r.Motivo)" -ForegroundColor DarkGray } else { Write-Host '' }
+    }
+    Write-Host ''
+    if ($Simulado) { Write-Host "Liberaria $(Format-TmdTamanho $total). Para fazer de verdade, rode sem -Simular." }
+    else { Write-Host "Liberado: $(Format-TmdTamanho $total). Veja os detalhes em: tamandua historico" -ForegroundColor Green }
+}
 
 function Write-TmdHistorico {
     [CmdletBinding()]
@@ -113,6 +135,8 @@ function Write-TmdAjuda {
     Write-Host '  menu            menu de texto'
     Write-Host '  modulos         estado de cada módulo'
     Write-Host '  <módulo>        executa um módulo (veja a lista em: tamandua modulos)'
+    Write-Host '    -Simular      mostra o que seria feito, sem alterar nada'
+    Write-Host '    -Sim          confirma sem perguntar (para scripts)'
     Write-Host '  historico       o que o Tamanduá já removeu, simulou ou pulou'
     Write-Host '  protegidos      abre a sua lista de proteção (caminhos que nunca são apagados)'
     Write-Host '  ajuda           esta ajuda'
