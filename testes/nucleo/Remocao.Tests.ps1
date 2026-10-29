@@ -186,6 +186,27 @@ Describe 'Remove-TmdItem' {
     }
 }
 
+Describe 'Temporários do próprio Tamanduá' {
+    It 'cria e apaga só "tamandua-*" direto na pasta temporária' {
+        $arq = New-TmdArquivoTemporario -Extensao '.json'
+        (Split-Path -Leaf $arq) | Should -BeLike 'tamandua-*.json'
+        Set-Content -LiteralPath $arq -Value '{}'
+        Remove-TmdArquivoTemporario -Caminho $arq
+        Test-Path -LiteralPath $arq | Should -BeFalse
+    }
+
+    It 'recusa qualquer outro arquivo' {
+        $outro = Join-Path $TestDrive 'tamandua-dentro-de-subpasta.txt'
+        Set-Content -LiteralPath $outro -Value 'x'
+        { Remove-TmdArquivoTemporario -Caminho $outro } | Should -Throw '*não é um temporário*'
+        $semPrefixo = Join-Path ([IO.Path]::GetTempPath()) "outro-$([guid]::NewGuid().ToString('N')).txt"
+        Set-Content -LiteralPath $semPrefixo -Value 'x'
+        try { { Remove-TmdArquivoTemporario -Caminho $semPrefixo } | Should -Throw '*não é um temporário*' }
+        finally { [IO.File]::Delete($semPrefixo) }
+        Test-Path -LiteralPath $outro | Should -BeTrue
+    }
+}
+
 Describe 'Measure-TmdTamanho' {
     It 'soma arquivos de subpastas e não entra em links' {
         $pasta = New-ArvoreFalsa -Pasta (Join-Path $TestDrive 'medir') -Arquivos @{ 'a' = '123'; 's\b' = '4567' }

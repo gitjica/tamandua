@@ -94,7 +94,9 @@ function ConvertTo-LinhaAlvo {
         $nivel = [string](Get-ValorPropriedade $a 'Nivel')
         $valor = Get-ValorPropriedade $a 'Valor'
         $temValor = $null -ne $valor -and ($valor -is [int] -or $valor -is [long] -or $valor -is [double] -or $valor -is [decimal])
-        $selo = if ($script:TextoSelo.ContainsKey($estado)) { $script:TextoSelo[$estado] } else { '' }
+        # O módulo pode trocar o texto do selo (ex.: "instalado", "atualizar para 1.2"); a cor continua vindo do Estado.
+        $seloProprio = [string](Get-ValorPropriedade $a 'Selo')
+        $selo = if ($seloProprio) { $seloProprio } elseif ($script:TextoSelo.ContainsKey($estado)) { $script:TextoSelo[$estado] } else { '' }
         $tamanho = Get-ValorPropriedade $a 'Tamanho'
         $linhas.Add((New-LinhaAlvo -Tipo 'Alvo' -Nome $nome -Categoria $categoria -Detalhe $detalhe -Estado $estado `
                     -Nivel $(if ($nivel) { $nivel } else { 'Normal' }) -Valor $(if ($temValor) { [double]$valor } else { 0 }) `
@@ -219,17 +221,19 @@ function ConvertTo-AlvoHistorico {
 # Resumo de Invoke-Acao para a barra de status, com a cor (token do tema) que combina.
 # -Acao 'desfazer' fala de ajustes desfeitos em vez de espaço liberado.
 function Get-TextoResultado {
-    param([AllowEmptyCollection()][object[]]$Resultados = @(), [bool]$Simulado, [string]$Acao = 'liberar')
+    param([AllowEmptyCollection()][object[]]$Resultados = @(), [bool]$Simulado, [string]$Acao = 'liberar', [bool]$DaParaDesfazer = $true)
 
     if ($Acao -eq 'ajustar') {
         $ok = @($Resultados | Where-Object { $_.Status -in 'Feito', 'Simulado' }).Count
         $falhas = @($Resultados | Where-Object { $_.Status -notin 'Feito', 'Simulado' })
-        if ($Simulado) { return [pscustomobject]@{ Texto = "Simulação: $ok ajuste(s) seriam aplicados. Nada foi alterado."; Cor = 'TextoSecundario' } }
+        $palavra = if ($DaParaDesfazer) { 'ajuste(s)' } else { 'item(ns)' }
+        if ($Simulado) { return [pscustomobject]@{ Texto = "Simulação: $ok $palavra seriam aplicados. Nada foi alterado."; Cor = 'TextoSecundario' } }
         if ($falhas.Count -gt 0) {
             $cor = if (@($falhas | Where-Object Status -eq 'Erro').Count -gt 0) { 'Perigo' } else { 'Aviso' }
-            return [pscustomobject]@{ Texto = "Aplicados: $ok · não aplicado ($($falhas[0].Id)): $($falhas[0].Motivo)"; Cor = $cor }
+            return [pscustomobject]@{ Texto = "Concluídos: $ok · não concluído ($($falhas[0].Id)): $($falhas[0].Motivo)"; Cor = $cor }
         }
-        return [pscustomobject]@{ Texto = "Aplicados: $ok ajuste(s). Dá para desfazer pelo Histórico."; Cor = 'Sucesso' }
+        if ($DaParaDesfazer) { return [pscustomobject]@{ Texto = "Aplicados: $ok ajuste(s). Dá para desfazer pelo Histórico."; Cor = 'Sucesso' } }
+        return [pscustomobject]@{ Texto = "Concluídos: $ok item(ns)."; Cor = 'Sucesso' }
     }
     if ($Acao -eq 'desfazer') {
         $ok = @($Resultados | Where-Object { $_.Status -in 'Feito', 'Simulado' }).Count

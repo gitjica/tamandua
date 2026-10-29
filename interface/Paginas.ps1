@@ -308,6 +308,8 @@ function Invoke-TmdBotaoAplicar {
         $alvos = if ($resumo.Quantidade -eq 1) { '1 item' } else { "$($resumo.Quantidade) itens" }
         $tamanho = if ($resumo.Bytes -gt 0) { " ($(Format-TamanhoTela $resumo.Bytes))" } else { '' }
         $aviso = Get-AvisoConfirmacao -Resumo $resumo -Especial ((Get-ValorPropriedade $m 'Especial') -eq $true)
+        $avisoModulo = [string](Get-ValorPropriedade $m 'AvisoConfirmacao')
+        if ($avisoModulo) { $aviso += " $avisoModulo" }
         Set-TmdStatus "$($m.RotuloAcao): $alvos$tamanho.$aviso Confirmar?" 'Aviso'
         return
     }
@@ -340,7 +342,10 @@ function Start-TmdAcao {
         $parametros = @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Alvos = $resumo.Alvos; Simular = $Simular }
     }
     $script:Estado.TarefaAcao = Start-TmdTarefa -Script $codigo -Parametros $parametros `
-        -Contexto @{ Nome = $nome; Simular = $Simular; Acao = $(if ($especial) { 'desfazer' } elseif (Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado') { Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado' } else { 'liberar' }) } `
+        -Contexto @{
+        Nome = $nome; Simular = $Simular; DaParaDesfazer = ($resumo.Reversiveis -eq $resumo.Quantidade)
+        Acao = $(if ($especial) { 'desfazer' } elseif (Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado') { Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado' } else { 'liberar' })
+    } `
         -AoTerminar {
         param($saida, $erro)
         $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto
@@ -353,7 +358,7 @@ function Start-TmdAcao {
             Set-TmdStatus "Erro: $erro" 'Perigo'
             return
         }
-        $texto = Get-TextoResultado -Resultados @($saida) -Simulado $contexto.Simular -Acao $contexto.Acao
+        $texto = Get-TextoResultado -Resultados @($saida) -Simulado $contexto.Simular -Acao $contexto.Acao -DaParaDesfazer $contexto.DaParaDesfazer
         if ($contexto.Simular) {
             Set-TmdStatus $texto.Texto $texto.Cor
         }

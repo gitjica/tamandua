@@ -61,7 +61,11 @@ function Write-TmdAlvos {
         $i++
         $estado = [string](Get-Propriedade -Objeto $a -Nome 'Estado')
         if ($script:RotuloEstadoAlvo.ContainsKey($estado)) {
-            Write-Host ('{0,-15}' -f $script:RotuloEstadoAlvo[$estado]) -NoNewline -ForegroundColor $script:CorEstadoAlvo[$estado]
+            # O módulo pode dar um texto próprio (ex.: "instalado", "atualizar para 1.2"); a cor continua vindo do Estado.
+            $selo = [string](Get-Propriedade -Objeto $a -Nome 'Selo')
+            if (-not $selo) { $selo = $script:RotuloEstadoAlvo[$estado] }
+            Write-Host ('{0,-15}' -f $selo) -NoNewline -ForegroundColor $script:CorEstadoAlvo[$estado]
+            if ($selo.Length -ge 15) { Write-Host ' ' -NoNewline }
         }
         Write-Host ([string](Get-Propriedade -Objeto $a -Nome 'Detalhe')) -ForegroundColor $cor
     }

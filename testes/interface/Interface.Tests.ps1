@@ -314,6 +314,18 @@ Describe 'Presets (funções puras)' {
     }
 }
 
+Describe 'Selo e resultado de módulos que não se desfazem pelo Histórico' {
+    It 'selo próprio do módulo substitui o padrão; resultado sem "desfazer"' {
+        $alvos = @([pscustomobject]@{ Id = 'vlc'; Nome = 'VLC'; Categoria = 'M'; Estado = 'Parcial'; Selo = 'atualizar para 3.1'; Detalhe = '' })
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            ((ConvertTo-LinhaAlvo -Alvos $A -Escreve) | Where-Object Tipo -eq 'Alvo').Selo | Should -Be 'atualizar para 3.1'
+            $t = Get-TextoResultado -Resultados @([pscustomobject]@{ Id = 'vlc'; Status = 'Feito'; Liberado = 0 }) -Acao 'ajustar' -DaParaDesfazer $false
+            $t.Texto | Should -Be 'Concluídos: 1 item(ns).'
+        }
+    }
+}
+
 Describe 'Ajustes pela janela de verdade' {
     It 'preset Essencial, confirmação dizendo que dá para desfazer, aplica e a página mostra "aplicado"' {
         $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))

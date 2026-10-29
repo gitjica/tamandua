@@ -154,6 +154,7 @@ function Invoke-TmdComandoModulo {
             return $script:CodigoSaida.Ok
         }
         $pergunta = "$rotulo $($selecionados.Count) item(ns)" + $(if ($bytes -gt 0) { " ($(Format-TmdTamanho $bytes))" } else { '' }) + '?'
+        if ($info.Manifesto['AvisoConfirmacao']) { Write-Host ([string]$info.Manifesto['AvisoConfirmacao']) -ForegroundColor Yellow }
         if (-not (Confirm-TmdExecucao -Pergunta $pergunta -Sim:$Sim)) {
             Write-Host 'Cancelado. Nada foi alterado.'
             return $script:CodigoSaida.Cancelado
@@ -165,7 +166,8 @@ function Invoke-TmdComandoModulo {
         return $script:CodigoSaida.Erro
     }
     Write-TmdResultados -Resultados $resultados -Acao $tipoResultado
-    if ($tipoResultado -eq 'ajustar') { Write-Host 'Para voltar um ajuste: tamandua desfazer <id> (os ids estão em: tamandua historico).' }
+    $reversiveis = @($selecionados | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'Reversivel') -eq $true }).Count
+    if ($reversiveis -gt 0) { Write-Host 'Para voltar um ajuste: tamandua desfazer <id> (os ids estão em: tamandua historico).' }
     if (@($resultados | Where-Object { $_.Status -eq 'Erro' }).Count -gt 0) { return $script:CodigoSaida.Erro }
     $script:CodigoSaida.Ok
 }

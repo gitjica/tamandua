@@ -1,6 +1,6 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7) + módulos analisar, instaladores e purgar. Próximos: programas, desinstalar, recursos, otimizar, reparos, atualizações.
+Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7) + módulos analisar, instaladores, purgar e programas. Próximos: desinstalar, recursos, otimizar, reparos, atualizações.
 
 ## Uso
 
@@ -11,6 +11,8 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 analisar C:\Users\voce   # o que ocupa espaço nessa pasta, do maior para o menor
 .\tamandua.ps1 instaladores -Simular   # instaladores, ISOs e compactados esquecidos em Downloads (vão para a Lixeira)
 .\tamandua.ps1 purgar D:\dev -Simular   # node_modules, target, bin/obj... dos seus projetos, agrupados por projeto
+.\tamandua.ps1 programas -Itens vlc,7zip   # instala (ou atualiza) pelo winget, perguntando antes
+.\tamandua.ps1 programas -Itens atualizar-tudo   # winget upgrade --all
 .\tamandua.ps1 limpar -Simular   # quanto liberaria (temporários com mais de 24 h, despejos de falha)
 .\tamandua.ps1 limpar            # mostra, pergunta e limpa
 .\tamandua.ps1 ajustes -Preset Essencial -Simular   # o que o preset mudaria, e o que já está aplicado
@@ -22,7 +24,7 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 ajuda
 ```
 
-Por enquanto existem o núcleo e os módulos `status`, `analisar`, `limpar`, `purgar`, `instaladores` e `ajustes`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
+Por enquanto existem o núcleo e os módulos `status`, `analisar`, `limpar`, `purgar`, `instaladores`, `programas` e `ajustes`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
 
 ## Desenvolvimento
 

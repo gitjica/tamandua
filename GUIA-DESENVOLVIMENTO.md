@@ -100,6 +100,7 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 - Testes: nada de `<...>` no nome de `It`/`Describe` fora de `-ForEach` — o Pester tenta expandir como variável.
 - Testes: `-Skip:(...)` é avaliado na descoberta; o que ele usa vem de `BeforeDiscovery`, não de `BeforeAll`.
 - `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
+- Variáveis não diferenciam maiúsculas: um `$catalogo` local sobrescreve o parâmetro `$Catalogo`.
 - Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
 - `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
   objetos vindos de JSON são lidos com `Get-Propriedade`.
@@ -248,7 +249,11 @@ Regras:
   O módulo lê as pastas padrão de variáveis de ambiente (`TEMP`, `LOCALAPPDATA`) quando possível, para os testes da CLI
   trocarem essas variáveis no processo filho e nunca tocarem nas pastas reais.
 - Manifesto pode ter `RotuloAcao` (ex.: `'Limpar'`): vira o texto do botão principal e da pergunta de confirmação,
-  e `Resultado = 'Mudancas'` quando o resultado fala de mudanças (ajustes) em vez de espaço liberado.
+  `Resultado = 'Mudancas'` quando o resultado fala de mudanças (ajustes, programas) em vez de espaço liberado, e
+  `AvisoConfirmacao` (texto que vai junto da pergunta de confirmação, na CLI e na interface).
+- Alvo pode ter `Selo` (texto do selo, ex.: "instalado"); a cor continua vindo do `Estado`.
+- Módulo que registra operação sem apagar nada (ex.: programas) usa `Write-TmdOperacao`; arquivo temporário próprio usa
+  `New-TmdArquivoTemporario` / `Remove-TmdArquivoTemporario` (só `tamandua-*` direto no TEMP).
 - **Módulos que navegam** (ex.: `analisar`): `Find-Alvos -Caminho <pasta>`; sem `-Caminho`, mostram um ponto de partida.
   Alvos com `Navegavel = $true` e `Caminho` abrem com duplo clique/Enter na interface (o subtítulo mostra a pasta,
   Atualizar/F5 continuam nela) e com `tamandua <módulo> <pasta>` na CLI. O núcleo só passa `-Caminho` se a função tiver esse parâmetro.
@@ -516,6 +521,12 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
   Testes: `TAMANDUA_DOWNLOADS_TESTE` e `TAMANDUA_LIXEIRA_TESTE` (ambas só aceitas dentro do TEMP) trocam Downloads e Lixeira.
 - **desinstalar:** restos com `Risco = Medio`, desmarcados se o nome for ambíguo.
 - **programas:** só IDs exatos do winget (`--exact --id`), com `--accept-source-agreements` apenas depois de o usuário aceitar na primeira execução.
+  Implementado: catálogo `modulos/programas/programas.json` (37 programas, IDs conferidos no winget). Instalados pelo
+  `winget export --source winget` (JSON), atualizações pelo `winget upgrade` lendo as colunas pela **posição das palavras do
+  cabeçalho** (um Id longo encosta na versão com um espaço só). Nada vem marcado; o selo diz "instalado",
+  "atualizar para X" ou "não instalado". "Atualizar tudo" roda `winget upgrade --all`. Os termos são aceitos (`--accept-*`)
+  só na confirmação, que avisa disso pelo `AvisoConfirmacao` do manifesto. Todo acesso ao winget passa por `Invoke-Winget`
+  (Mock nos testes); códigos "nenhuma atualização" e "já instalado" contam como sucesso.
 - **otimizar / reparos:** cada tarefa é um alvo próprio; tarefa longa (SFC, DISM) mostra progresso e pode ser cancelada antes de começar, nunca no meio.
 
 ---

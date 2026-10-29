@@ -1,0 +1,45 @@
+[
+  { "id": "firefox", "nome": "Firefox", "descricao": "Navegador da Mozilla.", "categoria": "Navegadores", "wingetId": "Mozilla.Firefox", "livre": true },
+  { "id": "brave", "nome": "Brave", "descricao": "Navegador com bloqueio de anúncios embutido.", "categoria": "Navegadores", "wingetId": "Brave.Brave", "livre": true },
+  { "id": "librewolf", "nome": "LibreWolf", "descricao": "Firefox com foco em privacidade.", "categoria": "Navegadores", "wingetId": "LibreWolf.LibreWolf", "livre": true },
+  { "id": "chrome", "nome": "Google Chrome", "descricao": "Navegador do Google.", "categoria": "Navegadores", "wingetId": "Google.Chrome", "livre": false },
+
+  { "id": "7zip", "nome": "7-Zip", "descricao": "Abre e cria .zip, .7z, .rar e outros.", "categoria": "Utilitários", "wingetId": "7zip.7zip", "livre": true },
+  { "id": "everything", "nome": "Everything", "descricao": "Acha qualquer arquivo do disco na hora.", "categoria": "Utilitários", "wingetId": "voidtools.Everything", "livre": false },
+  { "id": "powertoys", "nome": "PowerToys", "descricao": "Utilitários da Microsoft: FancyZones, PowerRename, Seletor de Cor...", "categoria": "Utilitários", "wingetId": "Microsoft.PowerToys", "livre": true },
+  { "id": "wiztree", "nome": "WizTree", "descricao": "Mapa de uso do disco, muito rápido.", "categoria": "Utilitários", "wingetId": "AntibodySoftware.WizTree", "livre": false },
+  { "id": "sharex", "nome": "ShareX", "descricao": "Captura e gravação de tela.", "categoria": "Utilitários", "wingetId": "ShareX.ShareX", "livre": true },
+  { "id": "localsend", "nome": "LocalSend", "descricao": "Manda arquivos para outros aparelhos na mesma rede.", "categoria": "Utilitários", "wingetId": "LocalSend.LocalSend", "livre": true },
+  { "id": "qbittorrent", "nome": "qBittorrent", "descricao": "Cliente de torrent sem anúncios.", "categoria": "Utilitários", "wingetId": "qBittorrent.qBittorrent", "livre": true },
+
+  { "id": "bitwarden", "nome": "Bitwarden", "descricao": "Gerenciador de senhas na nuvem.", "categoria": "Segurança", "wingetId": "Bitwarden.Bitwarden", "livre": true },
+  { "id": "keepassxc", "nome": "KeePassXC", "descricao": "Gerenciador de senhas local.", "categoria": "Segurança", "wingetId": "KeePassXCTeam.KeePassXC", "livre": true },
+
+  { "id": "git", "nome": "Git", "descricao": "Controle de versão.", "categoria": "Desenvolvimento", "wingetId": "Git.Git", "livre": true },
+  { "id": "github-cli", "nome": "GitHub CLI", "descricao": "GitHub pela linha de comando (gh).", "categoria": "Desenvolvimento", "wingetId": "GitHub.cli", "livre": true },
+  { "id": "vscode", "nome": "Visual Studio Code", "descricao": "Editor de código.", "categoria": "Desenvolvimento", "wingetId": "Microsoft.VisualStudioCode", "livre": false },
+  { "id": "notepadpp", "nome": "Notepad++", "descricao": "Editor de texto leve.", "categoria": "Desenvolvimento", "wingetId": "Notepad++.Notepad++", "livre": true },
+  { "id": "python", "nome": "Python 3.13", "descricao": "Linguagem Python.", "categoria": "Desenvolvimento", "wingetId": "Python.Python.3.13", "livre": true },
+  { "id": "nodejs", "nome": "Node.js LTS", "descricao": "JavaScript fora do navegador (versão de longo suporte).", "categoria": "Desenvolvimento", "wingetId": "OpenJS.NodeJS.LTS", "livre": true },
+  { "id": "terminal", "nome": "Windows Terminal", "descricao": "Terminal moderno com abas.", "categoria": "Desenvolvimento", "wingetId": "Microsoft.WindowsTerminal", "livre": true },
+
+  { "id": "vlc", "nome": "VLC", "descricao": "Toca qualquer vídeo ou música.", "categoria": "Multimídia", "wingetId": "VideoLAN.VLC", "livre": true },
+  { "id": "obs", "nome": "OBS Studio", "descricao": "Gravação e transmissão de tela.", "categoria": "Multimídia", "wingetId": "OBSProject.OBSStudio", "livre": true },
+  { "id": "gimp", "nome": "GIMP 3", "descricao": "Edição de imagens.", "categoria": "Multimídia", "wingetId": "GIMP.GIMP.3", "livre": true },
+  { "id": "handbrake", "nome": "HandBrake", "descricao": "Converte e comprime vídeos.", "categoria": "Multimídia", "wingetId": "HandBrake.HandBrake", "livre": true },
+  { "id": "audacity", "nome": "Audacity", "descricao": "Edição de áudio.", "categoria": "Multimídia", "wingetId": "Audacity.Audacity", "livre": true },
+  { "id": "spotify", "nome": "Spotify", "descricao": "Música por streaming.", "categoria": "Multimídia", "wingetId": "Spotify.Spotify", "livre": false },
+
+  { "id": "discord", "nome": "Discord", "descricao": "Chat de voz e texto.", "categoria": "Comunicação", "wingetId": "Discord.Discord", "livre": false },
+  { "id": "telegram", "nome": "Telegram", "descricao": "Mensagens.", "categoria": "Comunicação", "wingetId": "Telegram.TelegramDesktop", "livre": true },
+  { "id": "zoom", "nome": "Zoom", "descricao": "Videochamadas.", "categoria": "Comunicação", "wingetId": "Zoom.Zoom", "livre": false },
+
+  { "id": "libreoffice", "nome": "LibreOffice", "descricao": "Pacote de escritório (texto, planilha, apresentação).", "categoria": "Documentos", "wingetId": "TheDocumentFoundation.LibreOffice", "livre": true },
+  { "id": "onlyoffice", "nome": "ONLYOFFICE", "descricao": "Pacote de escritório compatível com o Office.", "categoria": "Documentos", "wingetId": "ONLYOFFICE.DesktopEditors", "livre": true },
+  { "id": "sumatrapdf", "nome": "SumatraPDF", "descricao": "Leitor de PDF leve.", "categoria": "Documentos", "wingetId": "SumatraPDF.SumatraPDF", "livre": true },
+  { "id": "obsidian", "nome": "Obsidian", "descricao": "Notas em Markdown.", "categoria": "Documentos", "wingetId": "Obsidian.Obsidian", "livre": false },
+
+  { "id": "steam", "nome": "Steam", "descricao": "Loja e biblioteca de jogos.", "categoria": "Jogos", "wingetId": "Valve.Steam", "livre": false },
+  { "id": "heroic", "nome": "Heroic", "descricao": "Jogos da Epic, GOG e Amazon num lugar só.", "categoria": "Jogos", "wingetId": "HeroicGamesLauncher.HeroicGamesLauncher", "livre": true },
+  { "id": "epic", "nome": "Epic Games Launcher", "descricao": "Loja da Epic.", "categoria": "Jogos", "wingetId": "EpicGames.EpicGamesLauncher", "livre": false }
+]

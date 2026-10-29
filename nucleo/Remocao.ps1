@@ -90,6 +90,24 @@ function Get-TmdExcecaoInterna {
     $Excecao
 }
 
+# Arquivo temporário do próprio Tamanduá (ex.: o JSON do "winget export"): só nomes "tamandua-*" direto na pasta temporária.
+function New-TmdArquivoTemporario {
+    [CmdletBinding()]
+    param([string]$Extensao = '.tmp')
+    Join-Path ([IO.Path]::GetTempPath()) "tamandua-$([guid]::NewGuid().ToString('N'))$Extensao"
+}
+
+function Remove-TmdArquivoTemporario {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Caminho)
+    $completo = [IO.Path]::GetFullPath($Caminho)
+    $temp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
+    if ((Split-Path -Parent $completo) -ne $temp -or (Split-Path -Leaf $completo) -notlike 'tamandua-*') {
+        throw "não é um temporário do Tamanduá: $Caminho"
+    }
+    if (Test-Path -LiteralPath $completo -PathType Leaf) { [IO.File]::Delete($completo) }
+}
+
 function Test-TmdProtegidoPorPadrao {
     param([string]$Caminho, [string[]]$Protecao)
     foreach ($p in $Protecao) { if ($Caminho -like $p) { return $true } }
