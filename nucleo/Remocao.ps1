@@ -223,8 +223,20 @@ namespace Tamandua {
 }
 
 # Lixeira pela API do Explorer (SHFileOperation), sem nenhuma janela ou pergunta.
+# Testes: TAMANDUA_LIXEIRA_TESTE (uma pasta dentro do TEMP) recebe os itens no lugar da Lixeira real.
 function Move-TmdParaLixeira {
     param([Parameter(Mandatory)][string]$Caminho)
+
+    $falsa = $env:TAMANDUA_LIXEIRA_TESTE
+    if ($falsa) {
+        $temp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
+        $falsa = [IO.Path]::GetFullPath($falsa).TrimEnd('\')
+        if (-not $falsa.StartsWith($temp + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'TAMANDUA_LIXEIRA_TESTE precisa estar dentro da pasta temporária' }
+        [void][IO.Directory]::CreateDirectory($falsa)
+        $destino = Join-Path $falsa ("{0}-{1}" -f [guid]::NewGuid().ToString('N').Substring(0, 8), (Split-Path -Leaf $Caminho))
+        if (Test-Path -LiteralPath $Caminho -PathType Container) { [IO.Directory]::Move($Caminho, $destino) } else { [IO.File]::Move($Caminho, $destino) }
+        return
+    }
 
     if (-not ('Tamandua.Lixeira' -as [type])) {
         Add-Type -Namespace Tamandua -Name Lixeira -MemberDefinition @'

@@ -146,7 +146,17 @@ function Get-ResumoSelecao {
         Alvos           = $alvos
         Irreversiveis   = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $false }).Count
         Reversiveis     = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $true }).Count
+        NaLixeira       = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Destino') -eq 'Lixeira' }).Count
     }
+}
+
+# Frase que fecha a pergunta de confirmação: diz se dá para voltar atrás, e como.
+function Get-AvisoConfirmacao {
+    param([Parameter(Mandatory)]$Resumo, [bool]$Especial)
+    if ($Resumo.Irreversiveis -gt 0) { return ' Isso não pode ser desfeito.' }
+    if ($Resumo.Quantidade -gt 0 -and $Resumo.NaLixeira -eq $Resumo.Quantidade) { return ' Vai para a Lixeira (dá para recuperar de lá).' }
+    if ($Resumo.Quantidade -gt 0 -and $Resumo.Reversiveis -eq $Resumo.Quantidade -and -not $Especial) { return ' Dá para desfazer pelo Histórico.' }
+    ''
 }
 
 # Nomes de preset que aparecem nos alvos, na ordem em que surgem, mais "Nenhum" para desmarcar tudo.

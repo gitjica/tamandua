@@ -307,9 +307,7 @@ function Invoke-TmdBotaoAplicar {
         $script:Tela.Controles.BotaoSimular.Content = 'Voltar'
         $alvos = if ($resumo.Quantidade -eq 1) { '1 item' } else { "$($resumo.Quantidade) itens" }
         $tamanho = if ($resumo.Bytes -gt 0) { " ($(Format-TamanhoTela $resumo.Bytes))" } else { '' }
-        $aviso = if ($resumo.Irreversiveis -gt 0) { ' Isso não pode ser desfeito.' }
-        elseif ($resumo.Reversiveis -eq $resumo.Quantidade -and -not (Get-ValorPropriedade $m 'Especial')) { ' Dá para desfazer pelo Histórico.' }
-        else { '' }
+        $aviso = Get-AvisoConfirmacao -Resumo $resumo -Especial ((Get-ValorPropriedade $m 'Especial') -eq $true)
         Set-TmdStatus "$($m.RotuloAcao): $alvos$tamanho.$aviso Confirmar?" 'Aviso'
         return
     }

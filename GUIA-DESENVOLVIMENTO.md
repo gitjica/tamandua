@@ -499,7 +499,12 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
 
 - **purgar:** só com marcador de projeto ao lado (`package.json`, `Cargo.toml`, `*.csproj`, `pyproject.toml`...). Pula se houver arquivos versionados no Git. Modificado nos últimos 7 dias → **desmarcado**. `bin`/`obj` só com `*.csproj`/`*.fsproj` irmão.
 - **limpar (navegadores):** navegador aberto → pula com motivo. Nunca toca em `Cookies`, `Login Data`, `History`, `Bookmarks`, `Local Storage`.
-- **instaladores:** reconfirma tamanho + data imediatamente antes de remover; se mudou, pula.
+- **instaladores:** reconfirma tamanho + data imediatamente antes de remover; se mudou, pula. O caminho sai do `Id` e a
+  extensão é conferida de novo (alvo forjado com `.pdf` ou `..\` é ignorado). Só vem marcado `.exe/.msi/.msix/.appx/.iso`
+  baixado há 7 dias ou mais; `.zip/.7z/.rar/.img` são risco médio. `.exe` numa subpasta com outros arquivos (ex.: `.dll`)
+  é tratado como **programa portátil já extraído**: risco médio, nunca marcado. Busca com mais de 20 mil arquivos não marca nada.
+  Lê a pasta Downloads real do registro (pode ter sido movida). Tudo vai para a Lixeira.
+  Testes: `TAMANDUA_DOWNLOADS_TESTE` e `TAMANDUA_LIXEIRA_TESTE` (ambas só aceitas dentro do TEMP) trocam Downloads e Lixeira.
 - **desinstalar:** restos com `Risco = Medio`, desmarcados se o nome for ambíguo.
 - **programas:** só IDs exatos do winget (`--exact --id`), com `--accept-source-agreements` apenas depois de o usuário aceitar na primeira execução.
 - **otimizar / reparos:** cada tarefa é um alvo próprio; tarefa longa (SFC, DISM) mostra progresso e pode ser cancelada antes de começar, nunca no meio.
@@ -641,7 +646,8 @@ Definição de pronto do MVP: etapas 1–7 entregues, interface e CLI funcionand
 - Arquivos: `$TestDrive` (sandbox do Pester), passado via `-Raizes`.
 - Configuração e log: `testes/Ajudantes.ps1` aponta `TAMANDUA_CONFIG` e `TAMANDUA_DADOS` para a sandbox
   (vale para os processos filhos também). Os testes nunca criam nada em `%APPDATA%` ou `%LOCALAPPDATA%`.
-- Lixeira: simulada por `Mock`. O teste com a Lixeira real é opcional (`$env:TAMANDUA_TESTE_LIXEIRA = '1'`), porque deixa um arquivinho nela.
+- Lixeira: simulada por `Mock` no processo, ou por `TAMANDUA_LIXEIRA_TESTE` (pasta dentro do TEMP que recebe os itens) quando
+  o teste roda a CLI ou a janela. O teste com a Lixeira real é opcional (`$env:TAMANDUA_TESTE_LIXEIRA = '1'`), porque deixa um arquivinho nela.
 - Registro: o motor aceita `-RaizRegistro`; nos testes, todo caminho `HKLM:\...`/`HKCU:\...` do catálogo é reescrito para
   `HKCU:\Software\TamanduaTestes\<guid>\HKLM\...`, e a chave (inclusive a mãe `TamanduaTestes`, se vazia) é apagada no `AfterAll`.
   Testes que rodam o processo filho usam um caminho que **já é** uma chave de teste, sem redirecionamento.
