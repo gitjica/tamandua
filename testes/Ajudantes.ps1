@@ -9,12 +9,13 @@ function Find-Alvos { @() }
 
 # Copia o núcleo e o ponto de entrada para uma pasta nova. Com -Catalogo, troca o catálogo pelos nomes dados.
 function New-ProjetoFalso {
-    param([Parameter(Mandatory)][string]$Pai, [string[]]$Catalogo)
+    param([Parameter(Mandatory)][string]$Pai, [string[]]$Catalogo, [switch]$ComInterface)
 
     $raiz = Join-Path $Pai ([guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory -Path (Join-Path $raiz 'modulos') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'nucleo') -Destination $raiz -Recurse
     Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'tamandua.ps1') -Destination $raiz
+    if ($ComInterface) { Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'interface') -Destination $raiz -Recurse }
     if ($PSBoundParameters.ContainsKey('Catalogo')) {
         $linhas = foreach ($n in $Catalogo) { "        @{ Nome = '$n'; Grupo = 'Teste'; Descricao = 'Módulo $n' }" }
         $texto = "@{`r`n    Modulos = @(`r`n$($linhas -join "`r`n")`r`n    )`r`n}"

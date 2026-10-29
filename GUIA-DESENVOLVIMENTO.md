@@ -121,11 +121,17 @@ Tamandua/
 │  ├─ Config.ps1                # config do usuário e lista de proteção
 │  └─ catalogo.psd1             # lista dos módulos que o Tamanduá conhece
 ├─ interface/                   # OPCIONAL: sem esta pasta, só a CLI funciona
-│  ├─ Interface.psm1            # abre a janela, liga eventos
-│  ├─ janela.xaml               # layout principal
-│  ├─ tema.xaml                 # cores e estilos (claro/escuro)
-│  ├─ Segundo-Plano.ps1         # fila de tarefas em runspace + progresso + cancelar
-│  └─ paginas/                  # uma página por módulo (opcional por módulo)
+│  ├─ Interface.psm1            # Start-TmdInterface: monta a janela e mostra
+│  ├─ janela.xaml               # layout principal (sem eventos; tudo por x:Name)
+│  ├─ tema-claro.xaml           # cores do tema claro (único lugar com cor fixa, junto com o escuro)
+│  ├─ tema-escuro.xaml          # mesmas chaves, tema escuro
+│  ├─ estilos.xaml              # estilos; cores só por DynamicResource
+│  ├─ Janela.ps1                # carrega XAML, troca tema, barra de título escura
+│  ├─ Paginas.ps1               # barra lateral, página, detalhes, busca, barra de ação
+│  ├─ Conversao.ps1             # funções puras: dados do núcleo -> linhas da tela
+│  └─ SegundoPlano.ps1          # tarefas em runspace + relógio que entrega na thread da janela
+├─ ferramentas/
+│  └─ capturar-interface.ps1    # salva PNG da janela (revisão visual)
 ├─ modulos/
 │  ├─ status/                   # cada módulo é uma pasta
 │  │  ├─ modulo.psd1            # manifesto
@@ -503,6 +509,13 @@ Base do WinUtil (abas, busca, seleção em lote), reorganizada:
 - Estado da janela num objeto pequeno e explícito (`$Estado.Selecao`, `$Estado.Pagina`), não um `$sync` global com tudo.
 - Toda chamada ao núcleo passa por `Segundo-Plano.ps1` (runspace); atualizações de tela voltam via `Dispatcher.Invoke`.
 - Lógica de tela testável fora da janela: funções que transformam `Alvo` em linhas da lista, montam o resumo de confirmação etc. são puras e têm teste.
+- Tarefas em segundo plano recebem o **texto** do script e importam o núcleo do zero no próprio runspace;
+  devolvem só dados. Um `DispatcherTimer` (100 ms) entrega o resultado na thread da janela — nada de WPF é tocado de outra thread.
+- Todo evento passa por `Invoke-TmdProtegido`: erro vira texto na barra de status, a janela nunca cai.
+- `Start-TmdInterface -AoCarregar {...} -FecharAposSeg N` existe para testes e capturas: os testes abrem a janela de verdade
+  e ela fecha sozinha mesmo se algo travar.
+- Estilo implícito de `TextBlock` não atravessa `DataTemplate`: a cor do texto em listas vem do `Foreground` do item.
+- Revisão visual: `.\ferramentas\capturar-interface.ps1 -Saida tela.png -Tema escuro -Modulo limpar`.
 
 ### 10.4 Paleta "Tamanduá"
 
@@ -522,7 +535,7 @@ Os tons foram ajustados a partir dos da foto para atingir contraste AA.
 | Musgo | `#56632F` |
 | Ferrugem | `#963A2E` |
 
-Tokens (definidos só em `interface/tema.xaml`; nenhuma cor fixa fora dele):
+Tokens (definidos só em `interface/tema-claro.xaml` e `tema-escuro.xaml`; nenhuma cor fixa fora deles):
 
 | Token | Claro | Escuro | Uso |
 |---|---|---|---|

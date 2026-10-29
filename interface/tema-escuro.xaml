@@ -1,0 +1,22 @@
+<!-- Paleta "Tamanduá", tema escuro. Mesmas chaves de tema-claro.xaml (um teste garante). -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="Fundo" Color="#1A1716"/>
+    <SolidColorBrush x:Key="Superficie" Color="#232020"/>
+    <SolidColorBrush x:Key="SuperficieLateral" Color="#2B2624"/>
+    <SolidColorBrush x:Key="Borda" Color="#443E39"/>
+    <SolidColorBrush x:Key="Texto" Color="#F3E9DC"/>
+    <SolidColorBrush x:Key="TextoSecundario" Color="#C4B09C"/>
+    <SolidColorBrush x:Key="TextoSutil" Color="#8F8072"/>
+    <SolidColorBrush x:Key="Acento" Color="#D99A72"/>
+    <SolidColorBrush x:Key="AcentoFundo" Color="#4A3125"/>
+    <SolidColorBrush x:Key="NoAcento" Color="#232020"/>
+    <SolidColorBrush x:Key="Sucesso" Color="#A9B57A"/>
+    <SolidColorBrush x:Key="SucessoFundo" Color="#33361F"/>
+    <SolidColorBrush x:Key="Aviso" Color="#D9B46F"/>
+    <SolidColorBrush x:Key="AvisoFundo" Color="#41331A"/>
+    <SolidColorBrush x:Key="Perigo" Color="#E38B7B"/>
+    <SolidColorBrush x:Key="PerigoFundo" Color="#4A231E"/>
+    <SolidColorBrush x:Key="FaixaEscura" Color="#0C0B09"/>
+    <SolidColorBrush x:Key="FaixaClara" Color="#DFBFA1"/>
+</ResourceDictionary>

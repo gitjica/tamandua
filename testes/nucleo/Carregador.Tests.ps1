@@ -12,8 +12,9 @@ Describe 'Catálogo real' {
         @($nomes | Select-Object -Unique).Count | Should -Be 12
     }
 
-    It 'toda entrada tem Grupo e Descricao' {
+    It 'toda entrada tem Titulo, Grupo e Descricao' {
         foreach ($m in (Get-TmdCatalogo -Raiz $script:RaizProjeto).Modulos) {
+            $m['Titulo'] | Should -Not -BeNullOrEmpty
             $m['Grupo'] | Should -Not -BeNullOrEmpty
             $m['Descricao'] | Should -Not -BeNullOrEmpty
         }
@@ -158,6 +159,7 @@ function Find-Alvos { @() }
         $m.Grupo | Should -Be 'Extras'
         $m.NoCatalogo | Should -BeFalse
         $m.Descricao | Should -Be 'Módulo falso gama'
+        $m.Titulo | Should -Be 'Gama'
     }
 
     It 'continua funcionando com catálogo corrompido, avisando' {

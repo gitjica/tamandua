@@ -1,0 +1,206 @@
+<!-- Estilos da interface. Só usa cores por DynamicResource, para a troca de tema valer na hora. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <FontFamily x:Key="FonteIcones">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+    <Style TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+    </Style>
+
+    <Style x:Key="Icone" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FonteIcones}"/>
+        <Setter Property="FontSize" Value="14"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextoSecundario}"/>
+    </Style>
+
+    <Style x:Key="RotuloGrupo" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+        <Setter Property="Margin" Value="10,14,0,4"/>
+    </Style>
+
+    <!-- Botão padrão: contorno discreto. -->
+    <Style TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="Background" Value="{DynamicResource Superficie}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borda}"/>
+        <Setter Property="Padding" Value="14,6"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Caixa" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource Fundo}"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource Acento}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Uma ação principal por tela. -->
+    <Style x:Key="BotaoPrincipal" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Foreground" Value="{DynamicResource NoAcento}"/>
+        <Setter Property="Background" Value="{DynamicResource Acento}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Acento}"/>
+    </Style>
+
+    <Style x:Key="BotaoIcone" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Padding" Value="8,6"/>
+    </Style>
+
+    <Style x:Key="CampoBusca" TargetType="TextBox">
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="CaretBrush" Value="{DynamicResource Texto}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <!-- Barra lateral: grupos não são clicáveis; módulos ficam com fundo de acento quando escolhidos. -->
+    <!-- Estilos implícitos de TextBlock não atravessam DataTemplate: a cor do texto vem do Foreground herdado do item. -->
+    <Style x:Key="ItemNavegacao" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="Margin" Value="6,1"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Caixa" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource Fundo}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource AcentoFundo}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tipo}" Value="Grupo">
+                <Setter Property="IsHitTestVisible" Value="False"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Padding" Value="4,10,0,2"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Linhas da lista de alvos: cabeçalhos de categoria não são clicáveis. -->
+    <Style x:Key="ItemAlvo" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Caixa" Background="Transparent" BorderBrush="{DynamicResource Borda}"
+                            BorderThickness="0,0,0,1" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource Fundo}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource AcentoFundo}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tipo}" Value="Categoria">
+                <Setter Property="IsHitTestVisible" Value="False"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Padding" Value="12,16,12,4"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Barra de valor (0 a 100). A cor vem do Foreground, definido por nível na linha. -->
+    <Style x:Key="BarraValor" TargetType="ProgressBar">
+        <Setter Property="Height" Value="6"/>
+        <Setter Property="Minimum" Value="0"/>
+        <Setter Property="Maximum" Value="100"/>
+        <Setter Property="Foreground" Value="{DynamicResource Acento}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid>
+                        <Border x:Name="PART_Track" Background="{DynamicResource SuperficieLateral}" CornerRadius="3"/>
+                        <Border x:Name="PART_Indicator" Background="{TemplateBinding Foreground}" CornerRadius="3"
+                                HorizontalAlignment="Left"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Barra de rolagem fina, nas cores do tema (a padrão do Windows fica cinza-clara no escuro). -->
+    <ControlTemplate x:Key="PolegarRolagem" TargetType="Thumb">
+        <Border Background="{DynamicResource Borda}" CornerRadius="4" Margin="2"/>
+    </ControlTemplate>
+    <Style TargetType="ScrollBar">
+        <Setter Property="Width" Value="10"/>
+        <Setter Property="MinWidth" Value="10"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Track x:Name="PART_Track" IsDirectionReversed="True">
+                        <Track.Thumb>
+                            <Thumb Template="{StaticResource PolegarRolagem}"/>
+                        </Track.Thumb>
+                    </Track>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto"/>
+                <Setter Property="MinWidth" Value="0"/>
+                <Setter Property="Height" Value="10"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ScrollBar">
+                            <Track x:Name="PART_Track">
+                                <Track.Thumb>
+                                    <Thumb Template="{StaticResource PolegarRolagem}"/>
+                                </Track.Thumb>
+                            </Track>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Barra de progresso de tarefa em segundo plano. -->
+    <Style x:Key="BarraTarefa" TargetType="ProgressBar">
+        <Setter Property="Height" Value="4"/>
+        <Setter Property="Foreground" Value="{DynamicResource Acento}"/>
+        <Setter Property="Background" Value="{DynamicResource SuperficieLateral}"/>
+        <Setter Property="BorderThickness" Value="0"/>
+    </Style>
+</ResourceDictionary>

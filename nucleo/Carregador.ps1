@@ -56,7 +56,7 @@ function Get-TmdModulo {
     $conhecidos = @{}
     foreach ($c in $catalogo.Modulos) {
         $conhecidos[$c['Nome']] = $true
-        $infos.Add((New-InfoModulo -Nome $c['Nome'] -Grupo $c['Grupo'] -Descricao $c['Descricao'] `
+        $infos.Add((New-InfoModulo -Nome $c['Nome'] -Titulo $c['Titulo'] -Grupo $c['Grupo'] -Descricao $c['Descricao'] `
                     -Caminho (Join-Path $pastaModulos $c['Nome']) -NoCatalogo $true))
     }
     if (Test-Path -LiteralPath $pastaModulos -PathType Container) {
@@ -75,10 +75,13 @@ function Get-TmdModulo {
 }
 
 function New-InfoModulo {
-    param([string]$Nome, [string]$Grupo, [string]$Descricao, [string]$Caminho, [bool]$NoCatalogo)
+    param([string]$Nome, [string]$Titulo, [string]$Grupo, [string]$Descricao, [string]$Caminho, [bool]$NoCatalogo)
+    # Sem título no catálogo (módulo extra), usa o nome com inicial maiúscula.
+    if (-not $Titulo) { $Titulo = $Nome.Substring(0, 1).ToUpper() + $Nome.Substring(1) }
     [pscustomobject]@{
         PSTypeName = 'Tamandua.InfoModulo'
         Nome       = $Nome
+        Titulo     = $Titulo
         Grupo      = $Grupo
         Descricao  = $Descricao
         Caminho    = $Caminho

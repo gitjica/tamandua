@@ -1,0 +1,238 @@
+<!-- Janela principal. Sem eventos nem code-behind: Interface.psm1 liga tudo pelos x:Name.
+     Cores e estilos só por DynamicResource (tema-*.xaml e estilos.xaml são carregados depois). -->
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Tamanduá" Width="1180" Height="740" MinWidth="1024" MinHeight="700"
+        WindowStartupLocation="CenterScreen" FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="13"
+        Background="{DynamicResource Superficie}" UseLayoutRounding="True">
+    <Grid Background="{DynamicResource Superficie}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="52"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Topo: logo, busca, tema -->
+        <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Background="{DynamicResource Superficie}">
+            <DockPanel Margin="16,0" LastChildFill="False">
+                <Canvas DockPanel.Dock="Left" Width="26" Height="26" VerticalAlignment="Center" AutomationProperties.Name="Logo do Tamanduá">
+                    <Canvas.Clip>
+                        <EllipseGeometry Center="13,13" RadiusX="12" RadiusY="12"/>
+                    </Canvas.Clip>
+                    <Ellipse Width="26" Height="26" Fill="{DynamicResource SuperficieLateral}"/>
+                    <Polygon Points="2,18 18,2 25,9 9,25" Fill="{DynamicResource FaixaClara}"/>
+                    <Polygon Points="5,21 21,5 23,7 7,23" Fill="{DynamicResource FaixaEscura}"/>
+                    <Ellipse Width="26" Height="26" Stroke="{DynamicResource Borda}" StrokeThickness="1"/>
+                </Canvas>
+                <TextBlock DockPanel.Dock="Left" Text="Tamanduá" FontSize="15" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center"/>
+
+                <Button x:Name="BotaoTema" DockPanel.Dock="Right" Style="{DynamicResource BotaoIcone}" VerticalAlignment="Center"
+                        ToolTip="Alternar tema claro/escuro" AutomationProperties.Name="Alternar tema">
+                    <TextBlock x:Name="IconeTema" Style="{DynamicResource Icone}" Text="&#xE706;"/>
+                </Button>
+                <TextBlock x:Name="IconeAdmin" DockPanel.Dock="Right" Style="{DynamicResource Icone}" Text="&#xE83D;" Margin="0,0,10,0"
+                           ToolTip="Rodando sem permissão de administrador" AutomationProperties.Name="Sem admin"/>
+                <Border DockPanel.Dock="Right" Width="260" Height="32" Margin="0,0,12,0" CornerRadius="6" VerticalAlignment="Center"
+                        Background="{DynamicResource Fundo}" BorderBrush="{DynamicResource Borda}" BorderThickness="1">
+                    <Grid Margin="10,0">
+                        <TextBlock Style="{DynamicResource Icone}" Text="&#xE721;" Foreground="{DynamicResource TextoSutil}" FontSize="12"/>
+                        <TextBlock x:Name="DicaBusca" Text="Buscar nesta página (Ctrl+F)" Margin="22,0,0,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource TextoSutil}" IsHitTestVisible="False"/>
+                        <TextBox x:Name="CampoBusca" Style="{DynamicResource CampoBusca}" Margin="20,0,0,0"
+                                 AutomationProperties.Name="Buscar nesta página"/>
+                    </Grid>
+                </Border>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="210"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="290"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Barra lateral com o estado real de cada módulo -->
+            <Border Grid.Column="0" Background="{DynamicResource SuperficieLateral}" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,1,0">
+                <ListBox x:Name="ListaModulos" Background="Transparent" BorderThickness="0" Padding="0,6"
+                         ItemContainerStyle="{DynamicResource ItemNavegacao}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         AutomationProperties.Name="Módulos">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock x:Name="RotuloGrupo" Text="{Binding Rotulo}" Style="{DynamicResource RotuloGrupo}" Margin="0" Visibility="Collapsed"/>
+                                <DockPanel x:Name="LinhaModulo">
+                                    <TextBlock DockPanel.Dock="Left" Style="{DynamicResource Icone}" Text="{Binding Icone}" Width="22"/>
+                                    <TextBlock x:Name="Marcador" DockPanel.Dock="Right" Style="{DynamicResource Icone}" FontSize="12"
+                                               Text="{Binding Marcador}" ToolTip="{Binding Motivo}"/>
+                                    <TextBlock x:Name="Nome" Text="{Binding Rotulo}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Tipo}" Value="Grupo">
+                                    <Setter TargetName="RotuloGrupo" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="LinhaModulo" Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Estado}" Value="faltando">
+                                    <Setter TargetName="Nome" Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                                    <Setter TargetName="Marcador" Property="Foreground" Value="{DynamicResource Perigo}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Estado}" Value="quebrado">
+                                    <Setter TargetName="Nome" Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                                    <Setter TargetName="Marcador" Property="Foreground" Value="{DynamicResource Perigo}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Estado}" Value="indisponivel">
+                                    <Setter TargetName="Nome" Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                                    <Setter TargetName="Marcador" Property="Foreground" Value="{DynamicResource Aviso}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
+                                    <Setter TargetName="Nome" Property="Foreground" Value="{DynamicResource Acento}"/>
+                                    <Setter TargetName="Nome" Property="FontWeight" Value="SemiBold"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <!-- Página do módulo -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Padding="16,12">
+                    <StackPanel>
+                        <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <ListBox x:Name="ListaAlvos" Grid.Row="1" Background="Transparent" BorderThickness="0"
+                         ItemContainerStyle="{DynamicResource ItemAlvo}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         AutomationProperties.Name="Itens do módulo">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <TextBlock x:Name="RotuloCategoria" Text="{Binding Nome}" FontSize="11" Foreground="{DynamicResource TextoSutil}"
+                                           Visibility="Collapsed"/>
+                                <Grid x:Name="LinhaAlvo">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="210"/>
+                                        <ColumnDefinition Width="110"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Nome}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                               ToolTip="{Binding Nome}"/>
+                                    <ProgressBar x:Name="Barra" Grid.Column="1" Style="{DynamicResource BarraValor}" Value="{Binding Valor}"
+                                                 Margin="0,0,14,0" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    <TextBlock x:Name="Detalhe" Grid.Column="2" Text="{Binding Detalhe}" Foreground="{DynamicResource TextoSecundario}"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                    <Border x:Name="Selo" Grid.Column="3" CornerRadius="4" Padding="7,1" Margin="10,0,0,0"
+                                            Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
+                                        <TextBlock x:Name="TextoSelo" Text="{Binding Selo}" FontSize="11" Foreground="{DynamicResource TextoSecundario}"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding Tipo}" Value="Categoria">
+                                    <Setter TargetName="RotuloCategoria" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="LinhaAlvo" Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TemValor}" Value="True">
+                                    <Setter TargetName="Barra" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TemSelo}" Value="True">
+                                    <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Nivel}" Value="Atencao">
+                                    <Setter TargetName="Detalhe" Property="Foreground" Value="{DynamicResource Aviso}"/>
+                                    <Setter TargetName="Barra" Property="Foreground" Value="{DynamicResource Aviso}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Nivel}" Value="Critico">
+                                    <Setter TargetName="Detalhe" Property="Foreground" Value="{DynamicResource Perigo}"/>
+                                    <Setter TargetName="Barra" Property="Foreground" Value="{DynamicResource Perigo}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Estado}" Value="Aplicado">
+                                    <Setter TargetName="Selo" Property="Background" Value="{DynamicResource SucessoFundo}"/>
+                                    <Setter TargetName="TextoSelo" Property="Foreground" Value="{DynamicResource Sucesso}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Estado}" Value="Parcial">
+                                    <Setter TargetName="Selo" Property="Background" Value="{DynamicResource AvisoFundo}"/>
+                                    <Setter TargetName="TextoSelo" Property="Foreground" Value="{DynamicResource Aviso}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Estado}" Value="Desconhecido">
+                                    <Setter TargetName="Detalhe" Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Mensagem no lugar da lista: carregando, módulo faltando/quebrado/indisponível, vazio, erro -->
+                <StackPanel x:Name="PainelMensagem" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center"
+                            MaxWidth="420" Visibility="Collapsed">
+                    <TextBlock x:Name="IconeMensagem" Style="{DynamicResource Icone}" FontSize="30" HorizontalAlignment="Center"/>
+                    <TextBlock x:Name="TituloMensagem" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,10,0,4"/>
+                    <TextBlock x:Name="TextoMensagem" Foreground="{DynamicResource TextoSecundario}" TextWrapping="Wrap"
+                               TextAlignment="Center" LineHeight="20"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Painel de detalhes -->
+            <Border Grid.Column="2" Background="{DynamicResource Fundo}" BorderBrush="{DynamicResource Borda}" BorderThickness="1,0,0,0" Padding="16">
+                <StackPanel>
+                    <TextBlock Text="Detalhes" FontSize="11" Foreground="{DynamicResource TextoSutil}" Margin="0,0,0,8"/>
+                    <StackPanel x:Name="PainelSemSelecao">
+                        <TextBlock Text="Escolha um item para ver exatamente o que ele mostra ou altera." TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextoSutil}" LineHeight="20"/>
+                        <StackPanel Margin="0,16,0,0">
+                            <DockPanel Margin="0,0,0,6">
+                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Aviso}" Margin="0,0,8,0"/>
+                                <TextBlock Text="atenção" Foreground="{DynamicResource TextoSecundario}"/>
+                            </DockPanel>
+                            <DockPanel Margin="0,0,0,6">
+                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Perigo}" Margin="0,0,8,0"/>
+                                <TextBlock Text="crítico, faltando ou quebrado" Foreground="{DynamicResource TextoSecundario}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Sucesso}" Margin="0,0,8,0"/>
+                                <TextBlock Text="aplicado" Foreground="{DynamicResource TextoSecundario}"/>
+                            </DockPanel>
+                        </StackPanel>
+                    </StackPanel>
+                    <StackPanel x:Name="PainelDetalhe" Visibility="Collapsed">
+                        <TextBlock x:Name="DetalheNome" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="DetalheCategoria" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,12"/>
+                        <TextBlock x:Name="DetalheTexto" TextWrapping="Wrap" LineHeight="20"/>
+                        <TextBlock x:Name="DetalheEstado" Foreground="{DynamicResource TextoSecundario}" Margin="0,12,0,0"/>
+                        <TextBlock x:Name="DetalheId" FontFamily="Cascadia Mono, Consolas" FontSize="11"
+                                   Foreground="{DynamicResource TextoSutil}" Margin="0,12,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Barra de ação -->
+        <Border Grid.Row="2" BorderBrush="{DynamicResource Borda}" BorderThickness="0,1,0,0" Background="{DynamicResource Superficie}">
+            <StackPanel>
+                <ProgressBar x:Name="BarraTarefa" Style="{DynamicResource BarraTarefa}" IsIndeterminate="True" Visibility="Hidden"/>
+                <DockPanel Margin="16,10" LastChildFill="True">
+                    <Button x:Name="BotaoAplicar" DockPanel.Dock="Right" Style="{DynamicResource BotaoPrincipal}" Content="Aplicar"
+                            Margin="8,0,0,0" Visibility="Collapsed"/>
+                    <Button x:Name="BotaoSimular" DockPanel.Dock="Right" Content="Simular" Margin="8,0,0,0" Visibility="Collapsed"/>
+                    <Button x:Name="BotaoAtualizar" DockPanel.Dock="Right" Margin="8,0,0,0" AutomationProperties.Name="Atualizar">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{DynamicResource Icone}" Text="&#xE72C;" FontSize="12" Margin="0,0,6,0" Foreground="{DynamicResource Texto}"/>
+                            <TextBlock Text="Atualizar"/>
+                        </StackPanel>
+                    </Button>
+                    <Button x:Name="BotaoCancelar" DockPanel.Dock="Right" Content="Cancelar" Visibility="Collapsed"/>
+                    <TextBlock x:Name="TextoStatus" VerticalAlignment="Center" Foreground="{DynamicResource TextoSecundario}"
+                               TextTrimming="CharacterEllipsis"/>
+                </DockPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
