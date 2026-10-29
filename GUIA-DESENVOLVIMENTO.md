@@ -98,6 +98,8 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 - `@($param).Count` com um `[string[]]` nulo lança em StrictMode no 5.1: `$lista = @(); if ($param) { $lista = @($param) }`.
 - Loops pesados de arquivo vão para C# (`Add-Type`), como `Tamandua.Medidor` em `nucleo/Remocao.ps1`: mede ~95 mil arquivos em ~3 s.
 - Testes: nada de `<...>` no nome de `It`/`Describe` fora de `-ForEach` — o Pester tenta expandir como variável.
+- Testes: `-Skip:(...)` é avaliado na descoberta; o que ele usa vem de `BeforeDiscovery`, não de `BeforeAll`.
+- `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
 - Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
 - `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
   objetos vindos de JSON são lidos com `Get-Propriedade`.
@@ -498,6 +500,13 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
 ### Proteções específicas
 
 - **purgar:** só com marcador de projeto ao lado (`package.json`, `Cargo.toml`, `*.csproj`, `pyproject.toml`...). Pula se houver arquivos versionados no Git. Modificado nos últimos 7 dias → **desmarcado**. `bin`/`obj` só com `*.csproj`/`*.fsproj` irmão.
+  Implementado: regras por nome de pasta em `modulos/purgar/purgar.psm1` (com o comando para recriar), `.venv`/`venv` exigem
+  `pyvenv.cfg` dentro, artefato com outro repositório `.git` dentro (até 2 níveis) fica de fora, versionado vira um aviso
+  ("N pastas deixadas de fora"). Sem git instalado: risco médio e desmarcado. Busca em Documentos, Área de Trabalho e
+  `~\source|Projects|Projetos|dev|code|repos|git|GitHub|workspace|src` (ou na pasta de `tamandua purgar <pasta>`), até 6 níveis,
+  sem entrar em links, `.git`, `AppData` nem pastas do Windows. `Invoke-Acao` reconfere tudo pelo caminho do `Id`.
+- **Lista de proteção vale dentro das pastas:** ao apagar uma pasta, o que estiver dentro e bater com a lista (ex.: uma `chave.pem`
+  num `target\deploy`) fica, e o resultado vira `Parcial` com "N protegido(s) pela lista de proteção".
 - **limpar (navegadores):** navegador aberto → pula com motivo. Nunca toca em `Cookies`, `Login Data`, `History`, `Bookmarks`, `Local Storage`.
 - **instaladores:** reconfirma tamanho + data imediatamente antes de remover; se mudou, pula. O caminho sai do `Id` e a
   extensão é conferida de novo (alvo forjado com `.pdf` ou `..\` é ignorado). Só vem marcado `.exe/.msi/.msix/.appx/.iso`

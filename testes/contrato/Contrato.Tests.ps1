@@ -49,7 +49,8 @@ Describe 'Módulo <Nome>' -ForEach $modulos -AllowNullOrEmptyForEach {
                 if ($a.Risco -eq 'Alto') { $a.Selecionado | Should -BeFalse -Because 'risco alto nunca vem marcado' }
             }
         }
-        @($alvos.Id | Select-Object -Unique).Count | Should -Be $alvos.Count -Because 'Id precisa ser único'
+        # ForEach-Object em vez de $alvos.Id: lista vazia não tem a propriedade em StrictMode.
+        @($alvos | ForEach-Object { $_.Id } | Select-Object -Unique).Count | Should -Be $alvos.Count -Because 'Id precisa ser único'
     }
 
     It 'Invoke-Acao aceita -Alvos e -Simular' {

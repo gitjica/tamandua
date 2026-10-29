@@ -58,7 +58,7 @@ function Remove-TmdItem {
         }
         else {
             $totais = New-TmdTotais
-            Remove-TmdConteudo -Pasta $item -Totais $totais
+            Remove-TmdConteudo -Pasta $item -Totais $totais -Protecao $protecao
             Remove-TmdPastaVazia -Pasta $item -Totais $totais
             $resultado.Liberado = $totais.Bytes
             $resultado.Motivo = Get-TmdMotivoPulados $totais
@@ -81,13 +81,19 @@ function Complete-TmdRemocao {
 }
 
 function New-TmdTotais {
-    [pscustomobject]@{ Bytes = [int64]0; Removidos = 0; EmUso = 0; SemAcesso = 0; Links = 0; Outros = 0; PrimeiroErro = '' }
+    [pscustomobject]@{ Bytes = [int64]0; Removidos = 0; EmUso = 0; SemAcesso = 0; Links = 0; Protegidos = 0; Outros = 0; PrimeiroErro = '' }
 }
 
 function Get-TmdExcecaoInterna {
     param($Excecao)
     while ($Excecao.InnerException) { $Excecao = $Excecao.InnerException }
     $Excecao
+}
+
+function Test-TmdProtegidoPorPadrao {
+    param([string]$Caminho, [string[]]$Protecao)
+    foreach ($p in $Protecao) { if ($Caminho -like $p) { return $true } }
+    $false
 }
 
 function Remove-TmdArquivo {
@@ -105,8 +111,9 @@ function Remove-TmdArquivo {
 }
 
 # Apaga o conteúdo de uma pasta. Links são pulados (nunca seguidos nem apagados); erros contam e seguem.
+# A lista de proteção vale também para o que está DENTRO da pasta (ex.: uma chave .pem esquecida num cache).
 function Remove-TmdConteudo {
-    param([Parameter(Mandatory)][IO.DirectoryInfo]$Pasta, [Parameter(Mandatory)]$Totais)
+    param([Parameter(Mandatory)][IO.DirectoryInfo]$Pasta, [Parameter(Mandatory)]$Totais, [string[]]$Protecao = @())
 
     try {
         $itens = @($Pasta.EnumerateFileSystemInfos())
@@ -120,8 +127,12 @@ function Remove-TmdConteudo {
             $Totais.Links++
             continue
         }
+        if (Test-TmdProtegidoPorPadrao -Caminho $item.FullName -Protecao $Protecao) {
+            $Totais.Protegidos++
+            continue
+        }
         if ($item -is [IO.DirectoryInfo]) {
-            Remove-TmdConteudo -Pasta $item -Totais $Totais
+            Remove-TmdConteudo -Pasta $item -Totais $Totais -Protecao $Protecao
             Remove-TmdPastaVazia -Pasta $item -Totais $Totais
             continue
         }
@@ -165,6 +176,7 @@ function Get-TmdMotivoPulados {
     if ($Totais.EmUso) { $partes += "$($Totais.EmUso) em uso" }
     if ($Totais.SemAcesso) { $partes += "$($Totais.SemAcesso) sem acesso" }
     if ($Totais.Links) { $partes += "$($Totais.Links) link(s) ignorado(s)" }
+    if ($Totais.Protegidos) { $partes += "$($Totais.Protegidos) protegido(s) pela lista de proteção" }
     if ($Totais.Outros) { $partes += "$($Totais.Outros) com erro ($($Totais.PrimeiroErro))" }
     if ($partes.Count -eq 0) { return '' }
     "pulados: $($partes -join ', ')"

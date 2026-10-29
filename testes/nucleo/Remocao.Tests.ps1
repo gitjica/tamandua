@@ -56,6 +56,15 @@ Describe 'Remove-TmdItem' {
         Get-AssinaturaPasta $fora | Should -Be $antes
     }
 
+    It 'arquivo dentro da pasta que bate com a lista de proteção fica; o resto vai' {
+        New-ArvoreFalsa -Pasta "$raiz\cache" -Arquivos @{ 'cofre\senhas.kdbx' = 'k' } | Out-Null
+        $r = Remove-TmdItem -Caminho "$raiz\cache" -Raizes $raiz
+        $r.Status | Should -Be 'Parcial'
+        $r.Motivo | Should -Match '1 protegido\(s\) pela lista de proteção'
+        Test-Path "$raiz\cache\cofre\senhas.kdbx" | Should -BeTrue
+        Test-Path "$raiz\cache\a.bin" | Should -BeFalse
+    }
+
     It 'item que já não existe é ignorado' {
         $r = Remove-TmdItem -Caminho "$raiz\nao-existe.tmp" -Raizes $raiz
         $r.Status | Should -Be 'Ignorado'
