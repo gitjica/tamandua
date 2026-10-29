@@ -101,6 +101,7 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 - Testes: `-Skip:(...)` é avaliado na descoberta; o que ele usa vem de `BeforeDiscovery`, não de `BeforeAll`.
 - `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
 - Variáveis não diferenciam maiúsculas: um `$catalogo` local sobrescreve o parâmetro `$Catalogo`.
+- `-and` e `-or` têm a mesma precedência (avaliados da esquerda para a direita): use parênteses.
 - Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
 - `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
   objetos vindos de JSON são lidos com `Get-Propriedade`.
@@ -520,6 +521,13 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
   Lê a pasta Downloads real do registro (pode ter sido movida). Tudo vai para a Lixeira.
   Testes: `TAMANDUA_DOWNLOADS_TESTE` e `TAMANDUA_LIXEIRA_TESTE` (ambas só aceitas dentro do TEMP) trocam Downloads e Lixeira.
 - **desinstalar:** restos com `Risco = Medio`, desmarcados se o nome for ambíguo.
+  Implementado: lista das chaves Uninstall (HKLM 64 e 32 bits, HKCU), sem componentes de sistema nem atualizações; runtimes,
+  redistribuíveis, drivers e afins são risco alto. Nada vem marcado. O comando sai do registro na hora de executar (não do alvo);
+  `MsiExec /I{GUID}` vira `/x {GUID}`. Roda o desinstalador do próprio programa (a janela dele abre) e espera até 90 s o
+  programa sumir da lista; se não sumiu, é erro. Restos: só pastas com o **nome exato** do programa (sem versão/arquitetura)
+  ou `Editor\Programa` em `%APPDATA%`, `%LOCALAPPDATA%` e `%ProgramData%`, **só de programas que o Tamanduá desinstalou**
+  (guardados em `estado\restos.json`); aparecem desmarcados e vão para a Lixeira. Restos em Arquivos de Programas não são
+  oferecidos (árvore protegida). Desinstalador e lista do registro passam por `Start-Desinstalador` e `Get-RegistroPrograma` (Mock nos testes).
 - **programas:** só IDs exatos do winget (`--exact --id`), com `--accept-source-agreements` apenas depois de o usuário aceitar na primeira execução.
   Implementado: catálogo `modulos/programas/programas.json` (37 programas, IDs conferidos no winget). Instalados pelo
   `winget export --source winget` (JSON), atualizações pelo `winget upgrade` lendo as colunas pela **posição das palavras do
