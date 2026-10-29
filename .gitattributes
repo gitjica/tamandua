@@ -1,0 +1,4 @@
+# Scripts do Windows com CRLF no checkout; BOM é preservado (o git não mexe nele).
+* text=auto eol=crlf
+*.png binary
+*.jpg binary
