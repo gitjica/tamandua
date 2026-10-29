@@ -311,8 +311,14 @@ Antes de qualquer remoção, o caminho precisa passar por **todas** as checagens
 1. Caminho absoluto, normalizado (`[IO.Path]::GetFullPath`), sem curingas.
 2. **Não é reparse point** (junction, symlink, placeholder do OneDrive). Nunca seguir links — é o jeito clássico de um limpador apagar a pasta errada no Windows.
 3. Está **dentro** de uma das raízes permitidas declaradas pelo alvo. Comparação com caminho completo + `\`, para `C:\Temp2` não passar como filho de `C:\Temp`.
-4. **Não é** um caminho protegido nem pai de um: `C:\`, `C:\Windows`, `System32`, `Program Files`, `Program Files (x86)`, `ProgramData` (raiz), `C:\Users`, raiz do perfil, `Documentos`, `Desktop`, `Imagens`, `OneDrive`, etc.
-5. Não bate com nenhum padrão da lista de proteção (padrão + usuário).
+4. **Não é** um caminho protegido nem pai de um. Dois tipos (`nucleo/Seguranca.ps1`):
+   - **Pontos protegidos** — a pasta e seus pais são intocáveis, o conteúdo pode ser limpo: raiz de unidade, `C:\Users`,
+     perfil, `AppData\Roaming`, `AppData\Local`, `ProgramData`, `Documentos`, `Área de Trabalho`, `Downloads`, `Temp`, menu Iniciar.
+   - **Árvores protegidas** — nada dentro pode ser removido: `Windows` (exceto `Windows\Temp` e `SoftwareDistribution\Download`),
+     `Arquivos de Programas` (os dois), `Imagens`, `Músicas`, `Vídeos`, `OneDrive` e a própria pasta do Tamanduá.
+5. Não bate com nenhum padrão da lista de proteção: `config/protegidos.padrao.txt` (dados de navegador que não são cache,
+   chaves, carteiras, `.git`) + `%APPDATA%\Tamandua\protegidos.txt` (`tamandua protegidos` abre). Se a lista do usuário
+   existe mas não pode ser lida, nada é removido.
 
 Falhou em qualquer item → `Ignorado` com motivo. Nunca lança exceção para o usuário.
 
@@ -320,8 +326,11 @@ Falhou em qualquer item → `Ignorado` com motivo. Nunca lança exceção para o
 
 - Único ponto do código que apaga arquivos. Teste de contrato verifica
   (`Remove-Item`, `[IO.File]::Delete`, `rd`, `del` fora de `nucleo/Remocao.ps1` → teste falha).
-- `Destino = 'Lixeira'` usa `Microsoft.VisualBasic.FileIO.FileSystem` com `SendToRecycleBin`.
-- Arquivo em uso / acesso negado → pula, conta, informa no `Motivo` (`Parcial`).
+- Apaga com .NET, item por item. **Nunca** `Remove-Item -Recurse`: no 5.1 ele segue junctions e apaga o destino.
+  Links encontrados dentro de uma pasta são pulados (nem seguidos, nem apagados) e contados no `Motivo`.
+- `Destino = 'Lixeira'` usa `SHFileOperation` (shell32) com `FOF_ALLOWUNDO`, sem janela nem pergunta, e confere que o item saiu do lugar.
+- Arquivo somente leitura: tira o atributo e apaga.
+- Arquivo em uso / acesso negado → pula, conta, informa no `Motivo` (`Parcial` se algo foi apagado, `Ignorado` se nada).
 - `-Simular` não toca no disco.
 - Todo item removido (ou simulado) vai para o log de operações.
 
@@ -581,6 +590,9 @@ Definição de pronto do MVP: etapas 1–7 entregues, interface e CLI funcionand
 **Nenhum teste toca o sistema real.**
 
 - Arquivos: `$TestDrive` (sandbox do Pester), passado via `-Raizes`.
+- Configuração e log: `testes/Ajudantes.ps1` aponta `TAMANDUA_CONFIG` e `TAMANDUA_DADOS` para a sandbox
+  (vale para os processos filhos também). Os testes nunca criam nada em `%APPDATA%` ou `%LOCALAPPDATA%`.
+- Lixeira: simulada por `Mock`. O teste com a Lixeira real é opcional (`$env:TAMANDUA_TESTE_LIXEIRA = '1'`), porque deixa um arquivinho nela.
 - Registro: o motor aceita `-RaizRegistro`; nos testes, todo caminho `HKLM:\...`/`HKCU:\...` do catálogo é reescrito para
   `HKCU:\Software\TamanduaTestes\<guid>\HKLM\...`, e a chave é apagada no `AfterAll`.
 - Serviços, tarefas, Appx, winget, CIM, `Checkpoint-Computer`: isolados atrás de funções pequenas e substituídos por `Mock`.

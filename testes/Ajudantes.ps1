@@ -2,6 +2,13 @@
 
 $script:RaizProjeto = Split-Path -Parent $PSScriptRoot
 
+# Configuração e log dos testes vão para a sandbox, nunca para %APPDATA% / %LOCALAPPDATA% reais.
+# Vale também para os processos filhos (Invoke-Tamandua), que herdam o ambiente.
+if ($TestDrive) {
+    $env:TAMANDUA_CONFIG = Join-Path $TestDrive 'config-usuario'
+    $env:TAMANDUA_DADOS = Join-Path $TestDrive 'dados-usuario'
+}
+
 $script:CodigoModuloValido = @'
 function Test-Requisitos { @{ Ok = $true; Motivo = '' } }
 function Find-Alvos { @() }
@@ -15,6 +22,7 @@ function New-ProjetoFalso {
     New-Item -ItemType Directory -Path (Join-Path $raiz 'modulos') -Force | Out-Null
     Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'nucleo') -Destination $raiz -Recurse
     Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'tamandua.ps1') -Destination $raiz
+    Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'config') -Destination $raiz -Recurse
     if ($ComInterface) { Copy-Item -LiteralPath (Join-Path $script:RaizProjeto 'interface') -Destination $raiz -Recurse }
     if ($PSBoundParameters.ContainsKey('Catalogo')) {
         $linhas = foreach ($n in $Catalogo) { "        @{ Nome = '$n'; Grupo = 'Teste'; Descricao = 'Módulo $n' }" }
@@ -100,6 +108,28 @@ function Invoke-Tamandua {
         Erro   = $erro.Result
         Tudo   = $saida.Result + $erro.Result
     }
+}
+
+# Árvore de arquivos para testes de remoção: { 'a.txt' = 'conteúdo'; 'sub\b.bin' = 'x' }. Devolve a pasta.
+function New-ArvoreFalsa {
+    param([Parameter(Mandatory)][string]$Pasta, [Parameter(Mandatory)][hashtable]$Arquivos)
+    foreach ($rel in $Arquivos.Keys) {
+        $caminho = Join-Path $Pasta $rel
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $caminho))
+        [IO.File]::WriteAllText($caminho, [string]$Arquivos[$rel])
+    }
+    $Pasta
+}
+
+# Hash de todos os arquivos (caminho relativo + conteúdo), para provar que nada mudou.
+function Get-AssinaturaPasta {
+    param([Parameter(Mandatory)][string]$Pasta)
+    if (-not (Test-Path -LiteralPath $Pasta)) { return '' }
+    $linhas = Get-ChildItem -LiteralPath $Pasta -Recurse -Force | Sort-Object FullName | ForEach-Object {
+        $rel = $_.FullName.Substring($Pasta.Length)
+        if ($_.PSIsContainer) { "D $rel" } else { "F $rel $((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash)" }
+    }
+    $linhas -join "`n"
 }
 
 # Comandos que escrevem no sistema e só podem aparecer no núcleo (Remocao.ps1 / MotorAjustes.ps1).

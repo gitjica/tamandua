@@ -1,0 +1,33 @@
+# Padrões que o Tamanduá nunca apaga, em nenhum módulo.
+# Um padrão por linha, no formato do -like do PowerShell (* e ?), comparado com o caminho completo.
+# Variáveis de ambiente funcionam: %USERPROFILE%\Projetos\importante*
+# Para acrescentar os seus, use: tamandua protegidos
+
+# Dados de navegador que não são cache
+*\Cookies
+*\Cookies\*
+*\Login Data
+*\Login Data For Account
+*\Web Data
+*\History
+*\Bookmarks
+*\Favicons
+*\Local Storage\*
+*\IndexedDB\*
+*\Session Storage\*
+*\Extensions\*
+*\places.sqlite
+*\key4.db
+*\logins.json
+
+# Chaves, senhas e carteiras
+*\.ssh\*
+*\.gnupg\*
+*.kdbx
+*.pem
+*.pfx
+*\wallet.dat
+
+# Repositórios git
+*\.git
+*\.git\*

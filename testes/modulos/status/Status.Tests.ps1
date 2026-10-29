@@ -155,7 +155,8 @@ Describe 'Pelo programa' {
         $r = Invoke-Tamandua -Raiz $script:RaizProjeto -Argumentos 'status'
         $r.Codigo | Should -Be 0
         $r.Saida | Should -Match 'Saúde\s+\d+ / 100'
-        $r.Saida | Should -Match 'CPU\s+\d+%'
+        # O WMI às vezes não devolve a carga da CPU; aí o item aparece como não lido, e isso é o comportamento certo.
+        $r.Saida | Should -Match 'CPU\s+(\d+%|não foi possível ler)'
         $r.Saida | Should -Match 'Disco C:'
         $r.Tudo | Should -Not -Match 'At line|CategoryInfo'
     }

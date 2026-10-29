@@ -5,7 +5,7 @@ $script:Versao = '0.1.0'
 $script:ContratoAtual = 1
 $script:RaizPadrao = Split-Path -Parent $PSScriptRoot
 
-foreach ($parte in 'Carregador', 'Saida', 'Cli') {
+foreach ($parte in 'Config', 'Seguranca', 'Remocao', 'Registro', 'Carregador', 'Saida', 'Cli') {
     . (Join-Path $PSScriptRoot "$parte.ps1")
 }
 
@@ -23,4 +23,12 @@ Export-ModuleMember -Function @(
     'Write-TmdAlvos'
     'Format-TmdTamanho'
     'Invoke-TmdCli'
+    'Get-TmdPastaConfig'
+    'Get-TmdPastaDados'
+    'Get-TmdListaProtecao'
+    'Test-TmdCaminhoSeguro'
+    'Remove-TmdItem'
+    'Measure-TmdTamanho'
+    'Get-TmdHistorico'
+    'Confirm-TmdExecucao'
 )

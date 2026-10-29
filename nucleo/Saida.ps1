@@ -74,6 +74,28 @@ function Format-TmdTamanho {
     '{0:N1} {1}' -f $Bytes, $unidades[$i]
 }
 
+$script:CorStatusOperacao = @{ Feito = 'Green'; Simulado = 'Cyan'; Ignorado = 'Gray'; Parcial = 'Yellow'; Erro = 'Red' }
+
+function Write-TmdHistorico {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Operacoes)
+
+    if ($Operacoes.Count -eq 0) {
+        Write-Host 'Nenhuma operação registrada ainda.'
+        return
+    }
+    foreach ($o in $Operacoes) {
+        $data = try { ([datetime]$o.Data).ToString('dd/MM HH:mm') } catch { '?' }
+        $cor = if ($script:CorStatusOperacao.ContainsKey([string]$o.Status)) { $script:CorStatusOperacao[[string]$o.Status] } else { 'Gray' }
+        $tamanho = if ($o.Liberado -gt 0) { Format-TmdTamanho $o.Liberado } else { '' }
+        Write-Host ("{0}  " -f $data) -NoNewline -ForegroundColor DarkGray
+        Write-Host ('{0,-9}' -f $o.Status) -NoNewline -ForegroundColor $cor
+        Write-Host ('{0,-13}{1,10}  ' -f $o.Modulo, $tamanho) -NoNewline
+        Write-Host $o.Caminho
+        if ($o.Motivo) { Write-Host "                   $($o.Motivo)" -ForegroundColor DarkGray }
+    }
+}
+
 function Write-TmdEstadoModulo {
     param([Parameter(Mandatory)]$Modulo)
 
@@ -91,6 +113,8 @@ function Write-TmdAjuda {
     Write-Host '  menu            menu de texto'
     Write-Host '  modulos         estado de cada módulo'
     Write-Host '  <módulo>        executa um módulo (veja a lista em: tamandua modulos)'
+    Write-Host '  historico       o que o Tamanduá já removeu, simulou ou pulou'
+    Write-Host '  protegidos      abre a sua lista de proteção (caminhos que nunca são apagados)'
     Write-Host '  ajuda           esta ajuda'
     Write-Host '  versao          versão'
 }

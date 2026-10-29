@@ -23,6 +23,11 @@ function Invoke-TmdCli {
             return $script:CodigoSaida.Ok
         }
         'menu' { return Start-TmdMenu -Raiz $Raiz }
+        'historico' {
+            Write-TmdHistorico -Operacoes @(Get-TmdHistorico -Ultimos 40)
+            return $script:CodigoSaida.Ok
+        }
+        'protegidos' { return Open-TmdListaProtecao }
         'ajuda' {
             Write-TmdAjuda
             return $script:CodigoSaida.Ok
@@ -91,6 +96,38 @@ function Start-InterfaceGrafica {
 
 function Test-TmdInterativo {
     [Environment]::UserInteractive -and -not [Console]::IsInputRedirected
+}
+
+# Sem -Sim e sem console interativo, a resposta é sempre não: script nenhum apaga nada sem dizer -Sim.
+function Confirm-TmdExecucao {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Pergunta, [switch]$Sim)
+
+    if ($Sim) { return $true }
+    if (-not (Test-TmdInterativo)) {
+        Write-Host 'Sem console interativo: nada foi alterado. Em scripts, confirme com -Sim.' -ForegroundColor Yellow
+        return $false
+    }
+    $resposta = Read-Host "$Pergunta [s/N]"
+    $resposta -match '^\s*(s|sim)\s*$'
+}
+
+# Garante que a lista de proteção do usuário existe, mostra onde está e abre no Bloco de Notas se houver console.
+function Open-TmdListaProtecao {
+    $arquivo = Get-TmdArquivoProtecaoUsuario
+    if (-not (Test-Path -LiteralPath $arquivo)) {
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $arquivo))
+        $modelo = @(
+            '# Sua lista de proteção: o Tamanduá nunca apaga caminhos que batem com estes padrões.'
+            '# Um padrão por linha (* e ?), comparado com o caminho completo. Ex.:'
+            '# %USERPROFILE%\Projetos\cliente-importante\*'
+            '# *\node_modules\pacote-que-demora-pra-baixar*'
+        )
+        [IO.File]::WriteAllLines($arquivo, $modelo, (New-Object Text.UTF8Encoding $true))
+    }
+    Write-Host "Lista de proteção: $arquivo"
+    if (Test-TmdInterativo) { Start-Process -FilePath 'notepad.exe' -ArgumentList "`"$arquivo`"" }
+    $script:CodigoSaida.Ok
 }
 
 function Start-TmdMenu {
