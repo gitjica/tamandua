@@ -551,6 +551,10 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
   Implementado (otimizar): limpar cache de DNS e reconstruir o cache de ícones (fecha o Explorador, apaga
   `IconCache.db`/`iconcache_*.db` pelo núcleo, reabre o Explorador num `finally`) rodam como o usuário; `defrag C: /O`
   e `DISM /StartComponentCleanup` (sem `/ResetBase`) pedem admin.
+- **recursos:** estado lido sem admin por `Win32_OptionalFeature` (CIM); marcar um item **inverte** o estado (o que fazer
+  é decidido pelo estado lido na hora, não pelo alvo); mudança por `dism /Enable-Feature ... /All` ou `/Disable-Feature`
+  com `/NoRestart`, via `Invoke-TmdPrograma` no processo elevado. 3010 = feito, pede reinício. Recurso que não existe na
+  edição aparece com o selo "não existe nesta edição", sem caixa. SMB 1.0 é risco alto, com a explicação do porquê.
 
 ---
 

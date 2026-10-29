@@ -104,7 +104,7 @@ function ConvertTo-LinhaAlvo {
                     -TemCaixa ($Escreve -and (Get-ValorPropriedade $a 'Selecionavel') -ne $false) `
                     -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
                     -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 }) `
-                    -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true)))
+                    -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent))
     }
     , $linhas.ToArray()
 }
@@ -114,12 +114,14 @@ function New-LinhaAlvo {
     param(
         [string]$Tipo, [string]$Nome, [string]$Categoria = '', [string]$Detalhe = '', [string]$Estado = '',
         [string]$Nivel = 'Normal', [double]$Valor = 0, [bool]$TemValor = $false, [string]$Selo = '', [string]$Id = '', $Alvo = $null,
-        [bool]$TemCaixa = $false, [bool]$Selecionado = $false, [int64]$Tamanho = 0, [bool]$RequerAdmin = $false
+        [bool]$TemCaixa = $false, [bool]$Selecionado = $false, [int64]$Tamanho = 0, [bool]$RequerAdmin = $false,
+        # Em página de módulo que escreve, item sem caixa ainda guarda o espaço dela (as colunas não desalinham).
+        [bool]$ReservaCaixa = $false
     )
     [pscustomobject]@{
         Tipo = $Tipo; Id = $Id; Nome = $Nome; Categoria = $Categoria; Detalhe = $Detalhe; Estado = $Estado; Nivel = $Nivel
         Valor = $Valor; TemValor = $TemValor; Selo = $Selo; TemSelo = [bool]$Selo; Alvo = $Alvo
-        TemCaixa = $TemCaixa; Selecionado = $Selecionado; Tamanho = $Tamanho; RequerAdmin = $RequerAdmin
+        TemCaixa = $TemCaixa; Selecionado = $Selecionado; Tamanho = $Tamanho; RequerAdmin = $RequerAdmin; ReservaCaixa = $ReservaCaixa
     }
 }
 

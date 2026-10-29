@@ -1,6 +1,6 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7) + módulos analisar, instaladores, purgar, programas, desinstalar, reparos e otimizar. Próximos: recursos, atualizações.
+Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 7) + módulos analisar, instaladores, purgar, programas, desinstalar, reparos, otimizar e recursos. Próximo: atualizações.
 
 ## Uso
 
@@ -16,6 +16,7 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 desinstalar      # programas instalados; na janela, marque e confirme (o desinstalador de cada um abre)
 .\tamandua.ps1 reparos -Itens sfc,dism   # pede admin uma vez e roda os reparos escolhidos
 .\tamandua.ps1 otimizar -Itens dns,icones   # cache de DNS e de ícones (sem admin)
+.\tamandua.ps1 recursos -Itens wsl,plataforma-vm   # liga (ou desliga) recursos do Windows; pede admin e reinício
 .\tamandua.ps1 limpar -Simular   # quanto liberaria (temporários com mais de 24 h, despejos de falha)
 .\tamandua.ps1 limpar            # mostra, pergunta e limpa
 .\tamandua.ps1 ajustes -Preset Essencial -Simular   # o que o preset mudaria, e o que já está aplicado
@@ -27,7 +28,7 @@ Limpeza, ajustes e manutenção profunda para Windows. MVP completo (etapas 1 a 
 .\tamandua.ps1 ajuda
 ```
 
-Por enquanto existem o núcleo e os módulos `status`, `analisar`, `limpar`, `purgar`, `instaladores`, `programas`, `desinstalar`, `ajustes`, `otimizar` e `reparos`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
+Por enquanto existem o núcleo e os módulos `status`, `analisar`, `limpar`, `purgar`, `instaladores`, `programas`, `desinstalar`, `ajustes`, `recursos`, `otimizar` e `reparos`. Os outros aparecem como `faltando`, e o programa funciona assim mesmo.
 
 ## Desenvolvimento
 

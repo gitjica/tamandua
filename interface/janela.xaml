@@ -170,6 +170,9 @@
                                 <DataTrigger Binding="{Binding TemValor}" Value="True">
                                     <Setter TargetName="Barra" Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding ReservaCaixa}" Value="True">
+                                    <Setter TargetName="Caixa" Property="Visibility" Value="Hidden"/>
+                                </DataTrigger>
                                 <DataTrigger Binding="{Binding TemCaixa}" Value="True">
                                     <Setter TargetName="Caixa" Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
