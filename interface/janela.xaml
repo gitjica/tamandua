@@ -137,7 +137,7 @@
                                 <Grid x:Name="LinhaAlvo">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="210"/>
+                                        <ColumnDefinition Width="270"/>
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>

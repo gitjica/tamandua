@@ -417,6 +417,11 @@ Na interface: o botão de executar sempre abre um resumo ("Vai alterar 7 itens, 
 - O programa roda sem admin. Alvos com `RequerAdmin = $true` aparecem marcados com um escudo.
 - Ao executar, os alvos que precisam de admin vão num **único** processo elevado (um só prompt do UAC por lote),
   que roda o mesmo núcleo e devolve os `Resultado` por arquivo JSON temporário.
+  Implementado (`nucleo/Elevacao.ps1`): CLI e interface chamam `Invoke-TmdAcaoModulo`; se o manifesto tem `RequerAdmin = $true`
+  e o processo não é admin, ele grava o pedido num `tamandua-*.json` do TEMP e roda `tamandua.ps1 __elevado <pedido>` com
+  `-Verb RunAs` (`Start-TmdProcessoElevado`, o único ponto que pede o UAC). O lado elevado só aceita pedido e resposta que
+  sejam temporários do Tamanduá. UAC negado = tudo `Ignorado` com o motivo. `-Simular` nunca eleva.
+- Programas do sistema (`sfc`, `DISM`, `netsh`, `net`...) rodam por `Invoke-TmdPrograma`, que devolve código e saída e registra no log.
 - Serviços do Windows: parar só se necessário, e sempre religar no `finally`.
 
 ---
@@ -536,6 +541,10 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
   só na confirmação, que avisa disso pelo `AvisoConfirmacao` do manifesto. Todo acesso ao winget passa por `Invoke-Winget`
   (Mock nos testes); códigos "nenhuma atualização" e "já instalado" contam como sucesso.
 - **otimizar / reparos:** cada tarefa é um alvo próprio; tarefa longa (SFC, DISM) mostra progresso e pode ser cancelada antes de começar, nunca no meio.
+  Implementado (reparos): `chkdsk C: /scan` (só verifica; problema que precisa de reinício vira Parcial com a instrução),
+  `sfc /scannow`, `DISM /Online /Cleanup-Image /RestoreHealth`, `netsh winsock reset` + `int ip reset` (pede reinício) e
+  "destravar o Windows Update" (para `wuauserv` e `bits`, apaga `SoftwareDistribution\Download` pelo núcleo e religa os
+  serviços num `finally`). Nada vem marcado. Ainda sem barra de progresso: a interface mostra "Executando…".
 
 ---
 

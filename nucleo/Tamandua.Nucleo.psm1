@@ -35,6 +35,8 @@ Export-ModuleMember -Function @(
     'Remove-TmdArquivoTemporario'
     'Confirm-TmdExecucao'
     'Test-TmdAdministrador'
+    'Invoke-TmdAcaoModulo'
+    'Invoke-TmdPrograma'
     'Set-TmdAjuste'
     'Undo-TmdAjuste'
     'Get-TmdEstadoAjuste'

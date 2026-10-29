@@ -98,7 +98,8 @@ $script:ScriptExecutarAcao = {
     Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
     $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome
     if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
-    & $m.Modulo.ExportedFunctions['Invoke-Acao'] -Alvos $Alvos -Simular:$Simular
+    # Pelo núcleo: módulo com RequerAdmin roda elevado (um pedido do UAC por lote).
+    Invoke-TmdAcaoModulo -Info $m -Alvos $Alvos -Simular:$Simular -Raiz $Raiz
 }
 
 $script:ScriptBuscarAlvos = {

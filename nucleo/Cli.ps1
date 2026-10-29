@@ -22,6 +22,17 @@ function Invoke-TmdCli {
         return $script:CodigoSaida.Erro
     }
     if ($Comando -eq 'desfazer') { return Invoke-TmdDesfazer -Argumentos $Argumentos -Simular:$Simular -Sim:$Sim }
+    # Comando interno: o processo elevado (pedido do UAC) executa as ações de um lote. Não aparece na ajuda.
+    if ($Comando -eq '__elevado') {
+        try {
+            Invoke-TmdExecucaoElevada -Pedido $Argumentos[0] -Raiz $Raiz
+            return $script:CodigoSaida.Ok
+        }
+        catch {
+            [Console]::Error.WriteLine("Tamanduá (admin): $($_.Exception.Message)")
+            return $script:CodigoSaida.Erro
+        }
+    }
     $comandosDoNucleo = 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao'
     # Argumento solto só vale para módulo que aceita -Caminho (ex.: tamandua analisar C:\Users).
     if ($Argumentos -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in $comandosDoNucleo)) {
@@ -159,7 +170,8 @@ function Invoke-TmdComandoModulo {
             Write-Host 'Cancelado. Nada foi alterado.'
             return $script:CodigoSaida.Cancelado
         }
-        $resultados = @(& $acao -Alvos $selecionados)
+        # Módulo com RequerAdmin: o núcleo pede o UAC uma vez e roda o lote elevado.
+        $resultados = @(Invoke-TmdAcaoModulo -Info $info -Alvos $selecionados -Raiz $Raiz)
     }
     catch {
         Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red
