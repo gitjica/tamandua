@@ -106,7 +106,7 @@ Describe 'Desfazer que precisa de admin' {
         Mock Test-TmdDesfazerPrecisaAdmin -ModuleName Tamandua.Nucleo { $Id -eq 'wu-sem-drivers' }
         Mock Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo {
             $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Script`"", '__elevado', "`"$Pedido`"")
-            (Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -Wait -PassThru).ExitCode
+            Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -PassThru
         }
         $r = @(Undo-TmdAjusteComAdmin -Ids 'wu-sem-drivers', 'wu-sem-reinicio-automatico' -Raiz $script:RaizProjeto)
         ($r | ForEach-Object Id) -join ',' | Should -Be 'wu-sem-drivers,wu-sem-reinicio-automatico'

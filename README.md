@@ -29,6 +29,8 @@ Limpeza, ajustes e manutenção profunda para Windows. Todos os 12 módulos pron
 .\tamandua.ps1 ajuda
 ```
 
+Tarefas demoradas (SFC, DISM, instalações...) mostram em qual item estão, quantos faltam e há quanto tempo rodam, na barra da janela e no console. Isso inclui o que roda como administrador.
+
 Se a pasta de um módulo faltar ou quebrar, o resto continua funcionando e `tamandua modulos` diz o que falta.
 
 ## Desenvolvimento

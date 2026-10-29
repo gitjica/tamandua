@@ -321,3 +321,29 @@ function Get-TextoStatusPagina {
     $modo = if ($Escreve) { 'nada é alterado sem confirmação' } else { 'módulo só de leitura' }
     "$itens · atualizado às $($Quando.ToString('HH:mm:ss')) · $modo"
 }
+
+# "45 s", "3 min 05 s", "1 h 02 min": quanto tempo a tarefa já está rodando.
+function Format-TempoDecorrido {
+    param([Parameter(Mandatory)][timespan]$Tempo)
+    $s = [int][math]::Floor($Tempo.TotalSeconds)
+    if ($s -lt 60) { return "$s s" }
+    if ($s -lt 3600) { return '{0} min {1:00} s' -f [math]::Floor($s / 60), ($s % 60) }
+    '{0} h {1:00} min' -f [math]::Floor($s / 3600), [math]::Floor(($s % 3600) / 60)
+}
+
+# Traduz um registro de Write-Progress do núcleo (Status = item, CurrentOperation = "2 de 5") para a barra.
+# Com um item só não há fração a mostrar: a barra fica indeterminada e o texto diz o que está rodando.
+function ConvertFrom-TmdProgresso {
+    param([Parameter(Mandatory)]$Registro, [Parameter(Mandatory)][timespan]$Decorrido, [string]$Verbo = 'Executando')
+    $atual = 0
+    $total = 0
+    if ([string]$Registro.CurrentOperation -match '^(\d+) de (\d+)$') { $atual = [int]$Matches[1]; $total = [int]$Matches[2] }
+    $partes = @("$Verbo $($Registro.StatusDescription)…")
+    if ($total -gt 1) { $partes += "$atual de $total" }
+    $partes += "há $(Format-TempoDecorrido -Tempo $Decorrido)"
+    [pscustomobject]@{
+        Texto         = $partes -join ' · '
+        Indeterminado = ($total -le 1 -or $Registro.PercentComplete -lt 0)
+        Porcento      = [math]::Max(0, [int]$Registro.PercentComplete)
+    }
+}

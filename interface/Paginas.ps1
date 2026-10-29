@@ -110,6 +110,9 @@ function Set-TmdOcupado {
     param([bool]$Ocupado)
     $c = $script:Tela.Controles
     $c.BarraTarefa.Visibility = if ($Ocupado) { 'Visible' } else { 'Hidden' }
+    # Volta ao "girando" até a próxima tarefa dizer em qual item está.
+    $c.BarraTarefa.IsIndeterminate = $true
+    $c.BarraTarefa.Value = 0
     $c.BotaoCancelar.Visibility = if ($Ocupado) { 'Visible' } else { 'Collapsed' }
     $c.BotaoAtualizar.IsEnabled = -not $Ocupado
 }
@@ -345,6 +348,16 @@ function Start-TmdAcao {
         -Contexto @{
         Nome = $nome; Simular = $Simular; DaParaDesfazer = ($resumo.Reversiveis -eq $resumo.Quantidade)
         Acao = $(if ($especial) { 'desfazer' } elseif (Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado') { Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado' } else { 'liberar' })
+        Inicio = Get-Date
+    } `
+        -AoProgresso {
+        param($registro, $contexto)
+        $verbo = if ($contexto.Acao -eq 'desfazer') { 'Desfazendo' } else { 'Executando' }
+        $p = ConvertFrom-TmdProgresso -Registro $registro -Decorrido ((Get-Date) - $contexto.Inicio) -Verbo $verbo
+        $barra = $script:Tela.Controles.BarraTarefa
+        $barra.IsIndeterminate = $p.Indeterminado
+        if (-not $p.Indeterminado) { $barra.Value = $p.Porcento }
+        Set-TmdStatus $p.Texto
     } `
         -AoTerminar {
         param($saida, $erro)

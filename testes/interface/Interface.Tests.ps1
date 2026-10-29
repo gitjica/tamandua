@@ -183,6 +183,55 @@ Describe 'Tarefas em segundo plano' {
         ($r.Saida | Where-Object Nome -eq 'status').Estado | Should -Be 'ok'
         ($r.Saida | Where-Object Nome -eq 'atualizacoes').Titulo | Should -Be 'Atualizações'
     }
+
+    It 'repassa o progresso enquanto roda (o item atual), e não depois do fim' {
+        $r = @{ Vistos = [System.Collections.Generic.List[string]]::new(); Terminou = $false; ProgressoDepois = $false }
+        $ao = { $r.Terminou = $true }.GetNewClosure()
+        $aoProgresso = { param($registro) if ($r.Terminou) { $r.ProgressoDepois = $true }; $r.Vistos.Add("$($registro.StatusDescription)|$($registro.CurrentOperation)") }.GetNewClosure()
+        InModuleScope Interface -Parameters @{ Ao = $ao; AoP = $aoProgresso } {
+            param($Ao, $AoP)
+            $script = {
+                foreach ($i in 1..3) { Write-Progress -Activity 'Tamanduá' -Status "item $i" -CurrentOperation "$i de 3" -PercentComplete (($i - 1) * 33); Start-Sleep -Milliseconds 400 }
+                Write-Progress -Activity 'Tamanduá' -Completed
+                'fim'
+            }
+            [void](Start-TmdTarefa -Script $script -AoTerminar $Ao -AoProgresso $AoP)
+        }
+        Wait-Tarefas
+        $r.Terminou | Should -BeTrue
+        $r.ProgressoDepois | Should -BeFalse
+        $r.Vistos | Should -Contain 'item 1|1 de 3'
+        $r.Vistos | Should -Contain 'item 3|3 de 3'
+        $r.Vistos | Should -Not -Contain '|' -Because 'o registro "Completed" não é mostrado'
+    }
+}
+
+Describe 'Progresso na barra (funções puras)' {
+    It 'tempo decorrido em segundos, minutos e horas' -TestCases @(
+        @{ S = 0; Texto = '0 s' }, @{ S = 59; Texto = '59 s' }, @{ S = 65; Texto = '1 min 05 s' }, @{ S = 3725; Texto = '1 h 02 min' }
+    ) {
+        param($S, $Texto)
+        InModuleScope Interface -Parameters @{ S = $S } { param($S) Format-TempoDecorrido -Tempo ([timespan]::FromSeconds($S)) } | Should -Be $Texto
+    }
+
+    It 'vários itens: barra com a fração, texto com o item, a posição e o tempo' {
+        $reg = [System.Management.Automation.ProgressRecord]::new(0, 'Tamanduá', 'Verificar arquivos (SFC)')
+        $reg.CurrentOperation = '2 de 4'
+        $reg.PercentComplete = 25
+        $p = InModuleScope Interface -Parameters @{ R = $reg } { param($R) ConvertFrom-TmdProgresso -Registro $R -Decorrido ([timespan]::FromSeconds(75)) }
+        $p.Texto | Should -Be 'Executando Verificar arquivos (SFC)… · 2 de 4 · há 1 min 15 s'
+        $p.Indeterminado | Should -BeFalse
+        $p.Porcento | Should -Be 25
+    }
+
+    It 'um item só: barra indeterminada (não fica parada em 0%)' {
+        $reg = [System.Management.Automation.ProgressRecord]::new(0, 'Tamanduá', 'DISM')
+        $reg.CurrentOperation = '1 de 1'
+        $reg.PercentComplete = 0
+        $p = InModuleScope Interface -Parameters @{ R = $reg } { param($R) ConvertFrom-TmdProgresso -Registro $R -Decorrido ([timespan]::FromSeconds(3)) -Verbo 'Desfazendo' }
+        $p.Texto | Should -Be 'Desfazendo DISM… · há 3 s'
+        $p.Indeterminado | Should -BeTrue
+    }
 }
 
 Describe 'Janela de verdade' {

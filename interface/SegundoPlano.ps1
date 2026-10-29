@@ -10,16 +10,35 @@ function Start-TmdTarefa {
         # Chamado com (saida, erro, avisos, contexto). Não use GetNewClosure: o bloco perderia acesso ao estado deste módulo.
         [Parameter(Mandatory)][scriptblock]$AoTerminar,
         # Dados que o AoTerminar precisa (ex.: qual página pediu), devolvidos como 4º argumento.
-        $Contexto = $null
+        $Contexto = $null,
+        # Chamado com (registro de Write-Progress, contexto) a cada novo progresso, enquanto a tarefa roda.
+        [scriptblock]$AoProgresso
     )
 
     $ps = [powershell]::Create()
     # Passa o texto, não o scriptblock: um scriptblock fica preso ao runspace onde foi criado.
     [void]$ps.AddScript($Script.ToString())
     foreach ($k in $Parametros.Keys) { [void]$ps.AddParameter($k, $Parametros[$k]) }
-    $tarefa = [pscustomobject]@{ PS = $ps; Async = $ps.BeginInvoke(); AoTerminar = $AoTerminar; Contexto = $Contexto; Cancelada = $false }
+    $tarefa = [pscustomobject]@{
+        PS = $ps; Async = $ps.BeginInvoke(); AoTerminar = $AoTerminar; Contexto = $Contexto; Cancelada = $false
+        AoProgresso = $AoProgresso; ProgressosVistos = 0; UltimoProgresso = $null
+    }
     $script:Tarefas.Add($tarefa)
     $tarefa
+}
+
+# Último progresso ainda em andamento (ignora o "Completed"), ou $null se não chegou nada novo.
+function Get-TmdNovoProgresso {
+    param([Parameter(Mandatory)]$Tarefa)
+    $registros = $Tarefa.PS.Streams.Progress
+    $total = $registros.Count
+    if ($total -le $Tarefa.ProgressosVistos) { return $null }
+    $Tarefa.ProgressosVistos = $total
+    for ($i = $total - 1; $i -ge 0; $i--) {
+        $r = $registros[$i]
+        if ($r.RecordType -ne 'Completed') { return $r }
+    }
+    $null
 }
 
 function Stop-TmdTarefa {
@@ -32,7 +51,15 @@ function Stop-TmdTarefa {
 # Entrega as tarefas concluídas: chama AoTerminar(saida, erro, avisos). Tarefa cancelada é descartada.
 function Update-TmdTarefa {
     foreach ($t in @($script:Tarefas)) {
-        if (-not $t.Async.IsCompleted) { continue }
+        if (-not $t.Async.IsCompleted) {
+            # Chama a cada volta (não só quando muda), para o tempo decorrido andar mesmo num item demorado.
+            if ($t.AoProgresso -and -not $t.Cancelada) {
+                $p = Get-TmdNovoProgresso -Tarefa $t
+                if ($p) { $t.UltimoProgresso = $p }
+                if ($t.UltimoProgresso) { & $t.AoProgresso $t.UltimoProgresso $t.Contexto }
+            }
+            continue
+        }
         [void]$script:Tarefas.Remove($t)
         $saida = $null
         $erro = $null

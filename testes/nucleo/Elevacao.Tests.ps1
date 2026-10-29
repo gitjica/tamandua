@@ -6,7 +6,7 @@ BeforeAll {
     Import-Module (Join-Path $script:RaizProjeto 'nucleo\Tamandua.Nucleo.psm1') -Force -DisableNameChecking -Global
 
     function New-ProjetoComAdmin {
-        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'precisa', 'comum'
+        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'precisa', 'comum', 'lento'
         $codigo = @'
 function Test-Requisitos { @{ Ok = $true } }
 function Find-Alvos { [pscustomobject]@{ Id = 'a'; Nome = 'A'; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = ''; Caminho = ''; Tamanho = [int64]0; Risco = 'Baixo'; Selecionado = $true; Destino = 'NaoSeAplica'; RequerAdmin = $true; Reversivel = $false; Mudancas = @() } }
@@ -17,7 +17,55 @@ function Invoke-Acao {
 '@
         New-ModuloFalso -Raiz $raiz -Nome 'precisa' -Manifesto @{ Escreve = $true; RequerAdmin = $true } -Codigo $codigo | Out-Null
         New-ModuloFalso -Raiz $raiz -Nome 'comum' -Manifesto @{ Escreve = $true } -Codigo $codigo | Out-Null
+        # Cada item demora, para dar tempo de o processo normal ver o progresso do elevado.
+        New-ModuloFalso -Raiz $raiz -Nome 'lento' -Manifesto @{ Escreve = $true; RequerAdmin = $true } `
+            -Codigo $codigo.Replace('foreach ($a in $Alvos) {', 'foreach ($a in $Alvos) { Start-Sleep -Milliseconds 900;') | Out-Null
         $raiz
+    }
+}
+
+Describe 'Progresso item a item' {
+    BeforeEach {
+        $raiz = New-ProjetoComAdmin
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
+        $global:TmdTesteProgresso = [System.Collections.Generic.List[string]]::new()
+        Mock Write-TmdProgresso -ModuleName Tamandua.Nucleo { $global:TmdTesteProgresso.Add("$Texto|$Atual|$Total") }
+    }
+    AfterEach { Remove-Variable -Name TmdTesteProgresso, TmdTestePedido -Scope Global -ErrorAction SilentlyContinue }
+
+    It 'roda um alvo por vez e avisa cada um pelo nome (ou Id, sem nome)' {
+        $info = Get-TmdModulo -Raiz $raiz -Nome 'comum'
+        $r = @(Invoke-TmdAcaoModulo -Info $info -Raiz $raiz -Alvos @(
+                [pscustomobject]@{ Id = 'a'; Nome = 'Primeiro' }
+                [pscustomobject]@{ Id = 'b'; Nome = 'Segundo' }
+                [pscustomobject]@{ Id = 'c' }
+            ))
+        ($r | ForEach-Object Id) -join ',' | Should -Be 'a,b,c'
+        $global:TmdTesteProgresso -join ';' | Should -Be 'Primeiro|1|3;Segundo|2|3;c|3|3'
+    }
+
+    It 'simular não emite progresso (é rápido e vai de uma vez)' {
+        $info = Get-TmdModulo -Raiz $raiz -Nome 'comum'
+        [void](Invoke-TmdAcaoModulo -Info $info -Raiz $raiz -Simular -Alvos @([pscustomobject]@{ Id = 'a' }, [pscustomobject]@{ Id = 'b' }))
+        $global:TmdTesteProgresso.Count | Should -Be 0
+    }
+
+    It 'o progresso do processo elevado chega aqui; o arquivo de progresso some no fim' {
+        Mock Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo {
+            $global:TmdTestePedido = [IO.File]::ReadAllText($Pedido) | ConvertFrom-Json
+            $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Script`"", '__elevado', "`"$Pedido`"")
+            Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -PassThru
+        }
+        $info = Get-TmdModulo -Raiz $raiz -Nome 'lento'
+        $r = @(Invoke-TmdAcaoModulo -Info $info -Raiz $raiz -Alvos @(
+                [pscustomobject]@{ Id = 'sfc'; Nome = 'Verificar arquivos'; RequerAdmin = $true }
+                [pscustomobject]@{ Id = 'dism'; Nome = 'Reparar imagem'; RequerAdmin = $true }
+            ))
+        @($r | Where-Object Status -eq 'Feito').Count | Should -Be 2
+        $global:TmdTesteProgresso | Should -Contain 'Verificar arquivos|1|2'
+        $global:TmdTesteProgresso | Should -Contain 'Reparar imagem|2|2'
+        $global:TmdTestePedido.Progresso | Should -Match 'tamandua-.*\.json$'
+        Test-Path -LiteralPath $global:TmdTestePedido.Progresso | Should -BeFalse
     }
 }
 
@@ -38,7 +86,7 @@ Describe 'Invoke-TmdAcaoModulo' {
         Mock Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo {
             $global:TmdTestePedido = $Pedido
             $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Script`"", '__elevado', "`"$Pedido`"")
-            (Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -Wait -PassThru).ExitCode
+            Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -PassThru
         }
         $info = Get-TmdModulo -Raiz $raiz -Nome 'precisa'
         $r = @(Invoke-TmdAcaoModulo -Info $info -Alvos @([pscustomobject]@{ Id = 'a'; RequerAdmin = $true }, [pscustomobject]@{ Id = 'b'; RequerAdmin = $true }) -Raiz $raiz)
@@ -54,7 +102,7 @@ Describe 'Invoke-TmdAcaoModulo' {
     It 'só os itens que pedem admin vão para o processo elevado; a ordem dos resultados é a dos alvos' {
         Mock Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo {
             $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Script`"", '__elevado', "`"$Pedido`"")
-            (Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -Wait -PassThru).ExitCode
+            Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -PassThru
         }
         $info = Get-TmdModulo -Raiz $raiz -Nome 'precisa'
         $r = @(Invoke-TmdAcaoModulo -Info $info -Raiz $raiz -Alvos @(

@@ -260,7 +260,10 @@ Regras:
   Alvos com `Navegavel = $true` e `Caminho` abrem com duplo clique/Enter na interface (o subtítulo mostra a pasta,
   Atualizar/F5 continuam nela) e com `tamandua <módulo> <pasta>` na CLI. O núcleo só passa `-Caminho` se a função tiver esse parâmetro.
 - Nenhum módulo usa `Write-Host` nem toca em WPF. Retorna objetos; quem desenha é a CLI (`Saida.ps1`) ou a interface.
-- Progresso é reportado via `Write-Progress`-equivalente do núcleo (`Write-TmdProgresso`), que a CLI e a interface traduzem cada uma do seu jeito.
+- Progresso: na execução de verdade o núcleo chama `Invoke-Acao` **um alvo por vez** e, antes de cada um, `Write-TmdProgresso`
+  (Status = nome do alvo, CurrentOperation = "2 de 5"). Módulos não precisam fazer nada. A CLI mostra a barra do console; a
+  interface lê `Streams.Progress` da tarefa (`Start-TmdTarefa -AoProgresso`) e mostra a fração na barra de baixo, com o item e o
+  tempo decorrido no status (com um item só, a barra fica indeterminada). `-Simular` continua de uma vez, sem progresso.
 - Erro em um alvo não para o módulo: o alvo vira `Status = 'Erro'` com `Motivo`, e segue para o próximo.
 - Cancelamento: funções longas checam `Test-TmdCancelado` entre itens.
 
@@ -425,6 +428,9 @@ Na interface: o botão de executar sempre abre um resumo ("Vai alterar 7 itens, 
   Só os alvos com `RequerAdmin = $true` vão para o processo elevado; os outros rodam como o usuário (ex.: reiniciar o
   Explorador elevado deixaria a área de trabalho rodando como admin). Os resultados voltam na ordem dos alvos.
   Na interface, esses alvos mostram um escudo ao lado do nome.
+  O processo elevado também grava o progresso num terceiro temporário (`Progresso` no pedido, validado igual à resposta);
+  `Start-TmdProcessoElevado` devolve o processo sem esperar, e `Invoke-TmdAcaoElevada` lê esse arquivo a cada 300 ms
+  e repassa por `Write-TmdProgresso` até o processo sair. Mocks de teste devem devolver `Start-Process ... -PassThru` (sem `-Wait`).
 - Programas do sistema (`sfc`, `DISM`, `netsh`, `net`...) rodam por `Invoke-TmdPrograma`, que devolve código e saída e registra no log.
 - Serviços do Windows: parar só se necessário, e sempre religar no `finally`.
 

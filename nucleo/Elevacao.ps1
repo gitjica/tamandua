@@ -21,16 +21,66 @@ function Invoke-TmdAcaoModulo {
         [string]$Raiz = $script:RaizPadrao
     )
     $acao = $Info.Modulo.ExportedFunctions['Invoke-Acao']
-    # Simular não muda nada: roda aqui mesmo, sem pedir admin.
-    if ($Simular -or -not $Info.Manifesto['RequerAdmin'] -or (Test-TmdAdministrador)) {
-        return @(& $acao -Alvos $Alvos -Simular:$Simular)
+    # Simular não muda nada e é rápido: roda aqui mesmo, de uma vez, sem pedir admin.
+    if ($Simular) { return @(& $acao -Alvos $Alvos -Simular) }
+    if (-not $Info.Manifesto['RequerAdmin'] -or (Test-TmdAdministrador)) {
+        return @(Invoke-TmdAcaoPorItem -Acao $acao -Alvos $Alvos)
     }
     $elevar = @($Alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'RequerAdmin') -eq $true })
     $aqui = @($Alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'RequerAdmin') -ne $true })
     $porId = @{}
-    if ($aqui.Count -gt 0) { foreach ($r in @(& $acao -Alvos $aqui)) { $porId[[string]$r.Id] = $r } }
+    if ($aqui.Count -gt 0) { foreach ($r in @(Invoke-TmdAcaoPorItem -Acao $acao -Alvos $aqui)) { $porId[[string]$r.Id] = $r } }
     if ($elevar.Count -gt 0) { foreach ($r in @(Invoke-TmdAcaoElevada -Raiz $Raiz -Modulo $Info.Nome -Alvos $elevar)) { $porId[[string]$r.Id] = $r } }
     foreach ($a in $Alvos) { if ($porId.ContainsKey([string]$a.Id)) { $porId[[string]$a.Id] } }
+}
+
+# Um alvo por vez, avisando o progresso antes de cada um ("2 de 5: Temporários do usuário").
+# -Progresso: arquivo onde o processo elevado deixa o progresso para o processo normal mostrar.
+function Invoke-TmdAcaoPorItem {
+    param([Parameter(Mandatory)]$Acao, [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Alvos, [string]$Progresso)
+    $total = $Alvos.Count
+    $i = 0
+    foreach ($a in $Alvos) {
+        $i++
+        $nome = [string](Get-Propriedade -Objeto $a -Nome 'Nome')
+        if (-not $nome) { $nome = [string]$a.Id }
+        Write-TmdProgresso -Texto $nome -Atual $i -Total $total
+        if ($Progresso) { Save-TmdProgresso -Arquivo $Progresso -Texto $nome -Atual $i -Total $total }
+        @(& $Acao -Alvos @($a))
+    }
+    Complete-TmdProgresso
+}
+
+# Progresso pelo canal normal do PowerShell: a CLI mostra a barra do console; a interface lê das tarefas.
+function Write-TmdProgresso {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Texto, [int]$Atual, [int]$Total)
+    $porcento = if ($Total -gt 0) { [int](100 * ($Atual - 1) / $Total) } else { -1 }
+    Write-Progress -Activity 'Tamanduá' -Status $Texto -CurrentOperation "$Atual de $Total" -PercentComplete $porcento
+}
+
+function Complete-TmdProgresso {
+    Write-Progress -Activity 'Tamanduá' -Completed
+}
+
+function Save-TmdProgresso {
+    param([string]$Arquivo, [string]$Texto, [int]$Atual, [int]$Total)
+    try {
+        $json = [pscustomobject]@{ Texto = $Texto; Atual = $Atual; Total = $Total } | ConvertTo-Json -Compress
+        [IO.File]::WriteAllText($Arquivo, $json, (New-Object Text.UTF8Encoding $false))
+    }
+    catch { Write-Verbose "progresso não gravado: $($_.Exception.Message)" }
+}
+
+function Read-TmdProgresso {
+    param([string]$Arquivo)
+    try {
+        if (-not (Test-Path -LiteralPath $Arquivo)) { return $null }
+        $texto = [IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8)
+        if (-not $texto) { return $null }
+        $texto | ConvertFrom-Json
+    }
+    catch { $null }   # pode estar no meio de uma gravação; lê de novo na próxima volta
 }
 
 # Desfaz ajustes pelo Id; os que precisam de admin (ex.: política em HKLM) vão juntos num processo elevado.
@@ -41,7 +91,14 @@ function Undo-TmdAjusteComAdmin {
     $admin = Test-TmdAdministrador
     $elevar = @($Ids | Where-Object { -not $admin -and (Test-TmdDesfazerPrecisaAdmin -Id $_) })
     $porId = @{}
-    foreach ($id in $Ids | Where-Object { $elevar -notcontains $_ }) { $porId[$id] = Undo-TmdAjuste -Id $id -Modulo $Modulo }
+    $locais = @($Ids | Where-Object { $elevar -notcontains $_ })
+    $i = 0
+    foreach ($id in $locais) {
+        $i++
+        Write-TmdProgresso -Texto $id -Atual $i -Total $locais.Count
+        $porId[$id] = Undo-TmdAjuste -Id $id -Modulo $Modulo
+    }
+    if ($locais.Count -gt 0) { Complete-TmdProgresso }
     if ($elevar.Count -gt 0) {
         $alvos = @($elevar | ForEach-Object { [pscustomobject]@{ Id = $_ } })
         foreach ($r in @(Invoke-TmdAcaoElevada -Raiz $Raiz -Modulo '__desfazer' -Alvos $alvos)) { $porId[[string]$r.Id] = $r }
@@ -54,20 +111,32 @@ function Invoke-TmdAcaoElevada {
 
     $pedido = New-TmdArquivoTemporario -Extensao '.json'
     $resposta = New-TmdArquivoTemporario -Extensao '.json'
+    $progresso = New-TmdArquivoTemporario -Extensao '.json'
     $semAdmin = {
         param($m)
         foreach ($a in $Alvos) { [pscustomobject]@{ Id = [string]$a.Id; Status = 'Ignorado'; Liberado = [int64]0; Motivo = $m; Mudancas = @() } }
     }
     try {
         # Modulo '__desfazer' = desfazer ajustes pelo Id (Histórico); qualquer outro = Invoke-Acao daquele módulo.
-        $conteudo = [pscustomobject]@{ Modulo = $Modulo; Alvos = @($Alvos); Resposta = $resposta } | ConvertTo-Json -Depth 6
+        $conteudo = [pscustomobject]@{ Modulo = $Modulo; Alvos = @($Alvos); Resposta = $resposta; Progresso = $progresso } | ConvertTo-Json -Depth 6
         [IO.File]::WriteAllText($pedido, $conteudo, (New-Object Text.UTF8Encoding $false))
         try {
-            [void](Start-TmdProcessoElevado -Script (Join-Path $Raiz 'tamandua.ps1') -Pedido $pedido)
+            $processo = Start-TmdProcessoElevado -Script (Join-Path $Raiz 'tamandua.ps1') -Pedido $pedido
         }
         catch {
             return & $semAdmin "permissão de administrador negada ou cancelada ($((Get-TmdExcecaoInterna $_.Exception).Message))"
         }
+        # Enquanto o processo elevado trabalha, repassa o progresso que ele deixa no arquivo.
+        $ultimo = ''
+        while (-not $processo.HasExited) {
+            $p = Read-TmdProgresso -Arquivo $progresso
+            if ($p) {
+                $chave = "$($p.Atual)|$($p.Texto)"
+                if ($chave -ne $ultimo) { Write-TmdProgresso -Texto ([string]$p.Texto) -Atual ([int]$p.Atual) -Total ([int]$p.Total); $ultimo = $chave }
+            }
+            Start-Sleep -Milliseconds 300
+        }
+        Complete-TmdProgresso
         if (-not (Test-Path -LiteralPath $resposta) -or (Get-Item -LiteralPath $resposta).Length -eq 0) {
             return & $semAdmin 'o processo de administrador não devolveu resultado'
         }
@@ -76,14 +145,15 @@ function Invoke-TmdAcaoElevada {
     finally {
         Remove-TmdArquivoTemporario -Caminho $pedido
         Remove-TmdArquivoTemporario -Caminho $resposta
+        Remove-TmdArquivoTemporario -Caminho $progresso
     }
 }
 
-# Único ponto que pede o UAC (Mock nos testes). Espera o processo elevado terminar.
+# Único ponto que pede o UAC (Mock nos testes). Devolve o processo, sem esperar: quem chama acompanha o progresso.
 function Start-TmdProcessoElevado {
     param([Parameter(Mandatory)][string]$Script, [Parameter(Mandatory)][string]$Pedido)
     $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Script`"", '__elevado', "`"$Pedido`"")
-    (Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentos -WindowStyle Hidden -Wait -PassThru).ExitCode
+    Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentos -WindowStyle Hidden -PassThru
 }
 
 # Lado elevado: lê o pedido, roda o Invoke-Acao do módulo e grava os resultados na resposta.
@@ -94,14 +164,17 @@ function Invoke-TmdExecucaoElevada {
     Test-TmdTemporarioValido -Caminho $Pedido
     $dados = [IO.File]::ReadAllText($Pedido, [Text.Encoding]::UTF8) | ConvertFrom-Json
     Test-TmdTemporarioValido -Caminho ([string]$dados.Resposta)
+    $progresso = [string](Get-Propriedade -Objeto $dados -Nome 'Progresso')
+    if ($progresso) { Test-TmdTemporarioValido -Caminho $progresso }
     if ([string]$dados.Modulo -eq '__desfazer') {
-        $resultados = @(foreach ($a in @($dados.Alvos)) { Undo-TmdAjuste -Id ([string]$a.Id) -Modulo 'historico' })
+        $acao = { param([object[]]$Alvos) foreach ($a in $Alvos) { Undo-TmdAjuste -Id ([string]$a.Id) -Modulo 'historico' } }
     }
     else {
         $info = Get-TmdModulo -Raiz $Raiz -Nome ([string]$dados.Modulo)
         if (-not $info -or $info.Estado -ne 'ok') { throw "módulo $($dados.Modulo) não está disponível" }
-        $resultados = @(& $info.Modulo.ExportedFunctions['Invoke-Acao'] -Alvos @($dados.Alvos))
+        $acao = $info.Modulo.ExportedFunctions['Invoke-Acao']
     }
+    $resultados = @(Invoke-TmdAcaoPorItem -Acao $acao -Alvos @($dados.Alvos) -Progresso $progresso)
     $json = if ($resultados.Count -eq 0) { '[]' } else { ConvertTo-Json -InputObject $resultados -Depth 6 }
     [IO.File]::WriteAllText([string]$dados.Resposta, $json, (New-Object Text.UTF8Encoding $false))
 }
