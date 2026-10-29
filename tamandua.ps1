@@ -12,6 +12,10 @@ param(
     [switch]$Simular,
     # Confirma sem perguntar (para scripts).
     [switch]$Sim,
+    # Marca os itens de um preset do módulo (ex.: tamandua ajustes -Preset Essencial).
+    [string]$Preset,
+    # Marca exatamente estes itens, pelo id (ex.: -Itens priv-id-anuncios,expl-extensoes).
+    [string[]]$Itens,
     [Parameter(ValueFromRemainingArguments = $true)][string[]]$Resto
 )
 
@@ -28,7 +32,7 @@ if (-not (Test-Path -LiteralPath $nucleo -PathType Leaf)) {
 try {
     # -Global: os módulos usam funções exportadas do núcleo (ex.: Format-TmdTamanho).
     Import-Module -Name $nucleo -Force -DisableNameChecking -Global
-    $codigo = Invoke-TmdCli -Comando $Comando -Argumentos $Resto -Raiz $PSScriptRoot -Simular:$Simular -Sim:$Sim
+    $codigo = Invoke-TmdCli -Comando $Comando -Argumentos $Resto -Raiz $PSScriptRoot -Simular:$Simular -Sim:$Sim -Preset $Preset -Itens $Itens
 }
 catch {
     [Console]::Error.WriteLine("Tamanduá: erro inesperado: $($_.Exception.Message)")

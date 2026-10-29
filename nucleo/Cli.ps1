@@ -10,9 +10,17 @@ function Invoke-TmdCli {
         [string[]]$Argumentos,
         [string]$Raiz = $script:RaizPadrao,
         [switch]$Simular,
-        [switch]$Sim
+        [switch]$Sim,
+        [string]$Preset,
+        [string[]]$Itens
     )
 
+    # Pelo "powershell -File", "-Itens a,b" chega como um texto só: separa pela vírgula.
+    $Itens = @($Itens | Where-Object { $_ } | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    if (($Preset -or $Itens) -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao', 'desfazer')) {
+        Write-Host '-Preset e -Itens só valem junto com um módulo (ex.: tamandua ajustes -Preset Essencial).' -ForegroundColor Yellow
+        return $script:CodigoSaida.Erro
+    }
     if ($Comando -eq 'desfazer') { return Invoke-TmdDesfazer -Argumentos $Argumentos -Simular:$Simular -Sim:$Sim }
     if ($Argumentos) {
         Write-Host "Opções ainda não suportadas: $($Argumentos -join ' ')" -ForegroundColor Yellow
@@ -44,7 +52,7 @@ function Invoke-TmdCli {
             Write-Host "Tamanduá $script:Versao"
             return $script:CodigoSaida.Ok
         }
-        default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz -Simular:$Simular -Sim:$Sim }
+        default { return Invoke-TmdComandoModulo -Nome $Comando -Raiz $Raiz -Simular:$Simular -Sim:$Sim -Preset $Preset -Itens $Itens }
     }
 }
 
@@ -77,7 +85,10 @@ function Invoke-TmdDesfazer {
 
 # Módulo de leitura: mostra os alvos. Módulo que escreve: mostra, simula ou confirma, executa e mostra o resultado.
 function Invoke-TmdComandoModulo {
-    param([Parameter(Mandatory)][string]$Nome, [Parameter(Mandatory)][string]$Raiz, [switch]$Simular, [switch]$Sim)
+    param(
+        [Parameter(Mandatory)][string]$Nome, [Parameter(Mandatory)][string]$Raiz,
+        [switch]$Simular, [switch]$Sim, [string]$Preset, [string[]]$Itens
+    )
 
     $info = Get-TmdModulo -Raiz $Raiz -Nome $Nome
     if (-not $info) {
@@ -91,8 +102,8 @@ function Invoke-TmdComandoModulo {
         return $script:CodigoSaida.Indisponivel
     }
     $escreve = [bool]$info.Manifesto['Escreve']
-    if (-not $escreve -and ($Simular -or $Sim)) {
-        Write-Host "O módulo '$Nome' só lê o sistema; -Simular e -Sim não se aplicam." -ForegroundColor Yellow
+    if (-not $escreve -and ($Simular -or $Sim -or $Preset -or $Itens)) {
+        Write-Host "O módulo '$Nome' só lê o sistema; -Simular, -Sim, -Preset e -Itens não se aplicam." -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
     }
     try {
@@ -101,6 +112,13 @@ function Invoke-TmdComandoModulo {
     catch {
         Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red
         return $script:CodigoSaida.Erro
+    }
+    if ($Preset -or $Itens) {
+        $erroSelecao = Set-TmdSelecaoCli -Alvos $alvos -Preset $Preset -Itens $Itens
+        if ($erroSelecao) {
+            Write-Host $erroSelecao -ForegroundColor Yellow
+            return $script:CodigoSaida.Erro
+        }
     }
     Write-TmdAlvos -Alvos $alvos
     if (-not $escreve) { return $script:CodigoSaida.Ok }
@@ -114,11 +132,12 @@ function Invoke-TmdComandoModulo {
     $bytes = [int64]0
     foreach ($a in $selecionados) { $t = Get-Propriedade -Objeto $a -Nome 'Tamanho'; if ($t -gt 0) { $bytes += $t } }
     $rotulo = if ($info.Manifesto['RotuloAcao']) { [string]$info.Manifesto['RotuloAcao'] } else { 'Aplicar' }
+    $tipoResultado = if ($info.Manifesto['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
     $acao = $info.Modulo.ExportedFunctions['Invoke-Acao']
 
     try {
         if ($Simular) {
-            Write-TmdResultados -Resultados @(& $acao -Alvos $selecionados -Simular) -Simulado
+            Write-TmdResultados -Resultados @(& $acao -Alvos $selecionados -Simular) -Simulado -Acao $tipoResultado
             return $script:CodigoSaida.Ok
         }
         $pergunta = "$rotulo $($selecionados.Count) item(ns)" + $(if ($bytes -gt 0) { " ($(Format-TmdTamanho $bytes))" } else { '' }) + '?'
@@ -132,9 +151,35 @@ function Invoke-TmdComandoModulo {
         Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red
         return $script:CodigoSaida.Erro
     }
-    Write-TmdResultados -Resultados $resultados
+    Write-TmdResultados -Resultados $resultados -Acao $tipoResultado
+    if ($tipoResultado -eq 'ajustar') { Write-Host 'Para voltar um ajuste: tamandua desfazer <id> (os ids estão em: tamandua historico).' }
     if (@($resultados | Where-Object { $_.Status -eq 'Erro' }).Count -gt 0) { return $script:CodigoSaida.Erro }
     $script:CodigoSaida.Ok
+}
+
+# -Preset marca os alvos cuja lista Presets tem o nome; -Itens marca exatamente os ids. Devolve a mensagem de erro, se houver.
+function Set-TmdSelecaoCli {
+    param([object[]]$Alvos, [string]$Preset, [string[]]$Itens)
+
+    if ($Preset) {
+        $conhecidos = @($Alvos | ForEach-Object { Get-Propriedade -Objeto $_ -Nome 'Presets' } | Where-Object { $_ } | Select-Object -Unique)
+        if ($conhecidos -notcontains $Preset) {
+            if ($conhecidos.Count -eq 0) { return 'Este módulo não tem presets.' }
+            return "Preset desconhecido: $Preset. Disponíveis: $($conhecidos -join ', ')"
+        }
+    }
+    if ($Itens) {
+        $ids = @($Alvos | ForEach-Object { $_.Id })
+        $faltando = @($Itens | Where-Object { $ids -notcontains $_ })
+        if ($faltando.Count -gt 0) { return "Itens desconhecidos: $($faltando -join ', '). Veja os ids com: tamandua <módulo> -Simular" }
+    }
+    foreach ($a in $Alvos) {
+        $marcar = $false
+        if ($Preset -and @(Get-Propriedade -Objeto $a -Nome 'Presets') -contains $Preset) { $marcar = $true }
+        if ($Itens -and $Itens -contains $a.Id) { $marcar = $true }
+        if ($a.PSObject.Properties['Selecionado']) { $a.Selecionado = $marcar }
+    }
+    $null
 }
 
 function Start-TmdPrincipal {

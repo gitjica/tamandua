@@ -46,7 +46,7 @@ function Invoke-TmdAplicarAjuste {
     foreach ($e in $snapshotOriginal) { $entradas.Add($e) }
     $chaves = @($snapshotOriginal | ForEach-Object { $_.Chave })
     foreach ($p in $pendentes) {
-        $entrada = New-TmdEntradaSnapshot -Mudanca $p.Mudanca -Antes $p.Antes
+        $entrada = New-TmdEntradaSnapshot -Mudanca $p.Mudanca -Antes $p.Antes -RaizRegistro $RaizRegistro
         if ($chaves -notcontains $entrada.Chave) { $entradas.Add($entrada) }
     }
     Save-TmdSnapshot -Id $id -Entradas $entradas.ToArray()
@@ -102,7 +102,9 @@ function Invoke-TmdDesfazerAjuste {
         return Invoke-TmdRestaurarPadrao -Ajuste $Ajuste -Simular $Simular -RaizRegistro $RaizRegistro
     }
     $itens = @($entradas | ForEach-Object { ConvertFrom-TmdEntradaSnapshot -Entrada $_ })
-    $precisaAdmin = @($itens | Where-Object { $_.Mudanca.Tipo -in 'Servico', 'Tarefa' -or ($_.Mudanca.Tipo -eq 'Registro' -and -not $RaizRegistro -and $_.Mudanca.Caminho -like 'HKLM:*') }).Count -gt 0
+    # Onde desfazer: o lugar salvo no snapshot; snapshots antigos, sem isso, usam o -RaizRegistro recebido.
+    foreach ($it in $itens) { if (-not $it.Raiz) { $it.Raiz = $RaizRegistro } }
+    $precisaAdmin = @($itens | Where-Object { $_.Mudanca.Tipo -in 'Servico', 'Tarefa' -or ($_.Mudanca.Tipo -eq 'Registro' -and -not $_.Raiz -and $_.Mudanca.Caminho -like 'HKLM:*') }).Count -gt 0
     if ($precisaAdmin -and -not (Test-TmdAdministrador)) {
         return New-TmdResultadoAjuste -Id $Id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador'
     }
@@ -114,9 +116,9 @@ function Invoke-TmdDesfazerAjuste {
     for ($i = $itens.Count - 1; $i -ge 0; $i--) {
         $it = $itens[$i]
         try {
-            Restore-TmdMudanca -Mudanca $it.Mudanca -Antes $it.Antes -RaizRegistro $RaizRegistro
+            Restore-TmdMudanca -Mudanca $it.Mudanca -Antes $it.Antes -RaizRegistro $it.Raiz
             if ($it.Mudanca.Tipo -ne 'Script') {
-                $agora = Read-TmdMudanca -Mudanca $it.Mudanca -RaizRegistro $RaizRegistro
+                $agora = Read-TmdMudanca -Mudanca $it.Mudanca -RaizRegistro $it.Raiz
                 if (-not (Test-TmdEstadoIgual -Mudanca $it.Mudanca -A $agora -B $it.Antes)) { throw 'a conferência depois de voltar falhou' }
             }
         }
@@ -318,10 +320,11 @@ function Get-TmdEstadoPadrao {
     }
 }
 
+# Guarda também onde a mudança foi feita (RaizRegistro): desfazer volta no mesmo lugar, mesmo que quem desfaz não saiba.
 function New-TmdEntradaSnapshot {
-    param([Parameter(Mandatory)]$Mudanca, [Parameter(Mandatory)]$Antes)
+    param([Parameter(Mandatory)]$Mudanca, [Parameter(Mandatory)]$Antes, [string]$RaizRegistro = '')
     [pscustomobject]@{
-        Chave = Get-TmdChaveMudanca $Mudanca; Tipo = $Mudanca.Tipo; Indice = $Mudanca.Indice
+        Chave = Get-TmdChaveMudanca $Mudanca; Tipo = $Mudanca.Tipo; Indice = $Mudanca.Indice; RaizRegistro = $RaizRegistro
         Caminho = $Mudanca.Caminho; Nome = $Mudanca.Nome; Desfazer = $Mudanca.Desfazer
         Existia = [bool]$Antes.Existe
         Valor = if ($Mudanca.Tipo -eq 'Registro') { $Antes.Valor } else { $null }
@@ -343,7 +346,7 @@ function ConvertFrom-TmdEntradaSnapshot {
         'Tarefa' { [pscustomobject]@{ Existe = [bool]$Entrada.Existia; Habilitada = $Entrada.Habilitada } }
         default { [pscustomobject]@{ Existe = $true } }
     }
-    [pscustomobject]@{ Mudanca = $m; Antes = $antes }
+    [pscustomobject]@{ Mudanca = $m; Antes = $antes; Raiz = [string](Get-Propriedade $Entrada 'RaizRegistro') }
 }
 
 function Format-TmdEstado {
@@ -381,7 +384,8 @@ function Split-TmdCaminhoRegistro {
     $hive = $Matches[1]
     $sub = $Matches[2].TrimEnd('\')
     if ($RaizRegistro) {
-        if ($RaizRegistro -notmatch '^HKCU:\\(.+)$') { throw 'RaizRegistro precisa estar em HKCU:\' }
+        # Redirecionamento só existe para testes: nunca aponta para fora da área de testes.
+        if ($RaizRegistro -notmatch '^HKCU:\\(Software\\TamanduaTestes\\.+)$') { throw 'RaizRegistro precisa estar em HKCU:\Software\TamanduaTestes\' }
         $sub = "$($Matches[1].TrimEnd('\'))\$hive\$sub"
         $hive = 'HKCU'
     }

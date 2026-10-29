@@ -72,6 +72,7 @@ $script:ScriptCarregarModulos = {
             Motivo    = $m.Motivo
             Escreve   = [bool]($m.Manifesto -and $m.Manifesto['Escreve'])
             RotuloAcao = if ($m.Manifesto -and $m.Manifesto['RotuloAcao']) { [string]$m.Manifesto['RotuloAcao'] } else { 'Aplicar' }
+            Resultado = if ($m.Manifesto -and $m.Manifesto['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
         }
     }
 }

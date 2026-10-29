@@ -2,7 +2,7 @@
 
 $script:NomesControles = @(
     'BotaoTema', 'IconeTema', 'IconeAdmin', 'CampoBusca', 'DicaBusca', 'ListaModulos'
-    'TituloPagina', 'SubtituloPagina', 'ListaAlvos', 'PainelMensagem', 'IconeMensagem', 'TituloMensagem', 'TextoMensagem'
+    'TituloPagina', 'SubtituloPagina', 'PainelPresets', 'ListaPresets', 'ListaAlvos', 'PainelMensagem', 'IconeMensagem', 'TituloMensagem', 'TextoMensagem'
     'PainelSemSelecao', 'PainelDetalhe', 'DetalheNome', 'DetalheCategoria', 'DetalheTexto', 'DetalheEstado', 'DetalheId'
     'BarraTarefa', 'BotaoAplicar', 'BotaoSimular', 'BotaoAtualizar', 'BotaoCancelar', 'TextoStatus'
 )

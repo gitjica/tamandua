@@ -25,6 +25,9 @@ function Write-TmdModulos {
 }
 
 $script:CorNivel = @{ Normal = 'Gray'; Atencao = 'Yellow'; Critico = 'Red' }
+# Desconhecido não ganha rótulo: o Detalhe já diz "não foi possível ler" e sai em cinza.
+$script:RotuloEstadoAlvo = @{ Aplicado = 'aplicado'; NaoAplicado = 'não aplicado'; Parcial = 'parcial' }
+$script:CorEstadoAlvo = @{ Aplicado = 'Green'; NaoAplicado = 'DarkGray'; Parcial = 'Yellow' }
 
 # Mostra os alvos de um módulo agrupados por Categoria, na ordem em que aparecem.
 function Write-TmdAlvos {
@@ -56,6 +59,10 @@ function Write-TmdAlvos {
         $marca = if ($null -eq $selecionado) { '  ' } elseif ($selecionado) { '[x] ' } else { '[ ] ' }
         Write-Host ("$marca{0,-$largura}" -f $nome) -NoNewline
         $i++
+        $estado = [string](Get-Propriedade -Objeto $a -Nome 'Estado')
+        if ($script:RotuloEstadoAlvo.ContainsKey($estado)) {
+            Write-Host ('{0,-15}' -f $script:RotuloEstadoAlvo[$estado]) -NoNewline -ForegroundColor $script:CorEstadoAlvo[$estado]
+        }
         Write-Host ([string](Get-Propriedade -Objeto $a -Nome 'Detalhe')) -ForegroundColor $cor
     }
 }
@@ -90,10 +97,11 @@ function Write-TmdResultados {
 
     Write-Host $(if ($Simulado) { 'Simulação (nada foi alterado)' } else { 'Resultado' }) -ForegroundColor DarkYellow
     $total = [int64]0
+    $largura = [Math]::Max(18, (@($Resultados | ForEach-Object { ([string]$_.Id).Length }) + 0 | Measure-Object -Maximum).Maximum + 2)
     foreach ($r in $Resultados) {
         $total += [int64]$r.Liberado
         $cor = if ($script:CorStatusOperacao.ContainsKey([string]$r.Status)) { $script:CorStatusOperacao[[string]$r.Status] } else { 'Gray' }
-        Write-Host ('  {0,-18}' -f $r.Id) -NoNewline
+        Write-Host ("  {0,-$largura}" -f $r.Id) -NoNewline
         Write-Host ('{0,-10}' -f $r.Status) -NoNewline -ForegroundColor $cor
         if ($Acao -eq 'liberar') { Write-Host ('{0,10}' -f (Format-TmdTamanho $r.Liberado)) -NoNewline }
         if ($r.Motivo) { Write-Host "  $($r.Motivo)" -ForegroundColor DarkGray } else { Write-Host '' }
@@ -149,6 +157,8 @@ function Write-TmdAjuda {
     Write-Host '  <módulo>        executa um módulo (veja a lista em: tamandua modulos)'
     Write-Host '    -Simular      mostra o que seria feito, sem alterar nada'
     Write-Host '    -Sim          confirma sem perguntar (para scripts)'
+    Write-Host '    -Preset X     marca os itens do preset X (ex.: tamandua ajustes -Preset Essencial)'
+    Write-Host '    -Itens a,b    marca exatamente estes itens, pelo id'
     Write-Host '  historico       o que o Tamanduá já removeu, ajustou, simulou ou pulou'
     Write-Host '  desfazer <id>   volta um ajuste ao valor que estava antes (-Simular para ver antes)'
     Write-Host '  protegidos      abre a sua lista de proteção (caminhos que nunca são apagados)'

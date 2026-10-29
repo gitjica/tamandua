@@ -145,7 +145,34 @@ function Get-ResumoSelecao {
         Texto           = $texto
         Alvos           = $alvos
         Irreversiveis   = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $false }).Count
+        Reversiveis     = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $true }).Count
     }
+}
+
+# Nomes de preset que aparecem nos alvos, na ordem em que surgem, mais "Nenhum" para desmarcar tudo.
+function Get-PresetAlvo {
+    param([AllowEmptyCollection()][object[]]$Alvos = @())
+    $nomes = [System.Collections.Generic.List[string]]::new()
+    foreach ($a in $Alvos) {
+        foreach ($p in @(Get-ValorPropriedade $a 'Presets')) {
+            if ($p -and -not $nomes.Contains([string]$p)) { $nomes.Add([string]$p) }
+        }
+    }
+    if ($nomes.Count -eq 0) { return , @() }
+    $nomes.Add('Nenhum')
+    , $nomes.ToArray()
+}
+
+# Marca exatamente os alvos do preset (e desmarca o resto). Devolve quantos ficaram marcados.
+function Set-SelecaoPreset {
+    param([AllowEmptyCollection()][object[]]$Alvos = @(), [Parameter(Mandatory)][string]$Preset)
+    $n = 0
+    foreach ($a in $Alvos) {
+        if (-not $a.PSObject.Properties['Selecionado']) { continue }
+        $a.Selecionado = $Preset -ne 'Nenhum' -and @(Get-ValorPropriedade $a 'Presets') -contains $Preset
+        if ($a.Selecionado) { $n++ }
+    }
+    $n
 }
 
 # Operações do log -> linhas da página Histórico, agrupadas por dia. Só ajustes reversíveis ganham caixa.
@@ -184,6 +211,16 @@ function ConvertTo-AlvoHistorico {
 function Get-TextoResultado {
     param([AllowEmptyCollection()][object[]]$Resultados = @(), [bool]$Simulado, [string]$Acao = 'liberar')
 
+    if ($Acao -eq 'ajustar') {
+        $ok = @($Resultados | Where-Object { $_.Status -in 'Feito', 'Simulado' }).Count
+        $falhas = @($Resultados | Where-Object { $_.Status -notin 'Feito', 'Simulado' })
+        if ($Simulado) { return [pscustomobject]@{ Texto = "Simulação: $ok ajuste(s) seriam aplicados. Nada foi alterado."; Cor = 'TextoSecundario' } }
+        if ($falhas.Count -gt 0) {
+            $cor = if (@($falhas | Where-Object Status -eq 'Erro').Count -gt 0) { 'Perigo' } else { 'Aviso' }
+            return [pscustomobject]@{ Texto = "Aplicados: $ok · não aplicado ($($falhas[0].Id)): $($falhas[0].Motivo)"; Cor = $cor }
+        }
+        return [pscustomobject]@{ Texto = "Aplicados: $ok ajuste(s). Dá para desfazer pelo Histórico."; Cor = 'Sucesso' }
+    }
     if ($Acao -eq 'desfazer') {
         $ok = @($Resultados | Where-Object { $_.Status -in 'Feito', 'Simulado' }).Count
         $falhas = @($Resultados | Where-Object { $_.Status -notin 'Feito', 'Simulado' })

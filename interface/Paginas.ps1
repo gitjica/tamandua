@@ -32,10 +32,19 @@ function Initialize-TmdTela {
     $c.BotaoCancelar.Add_Click({ Invoke-TmdProtegido { Stop-TmdCargaPagina } })
     $c.BotaoSimular.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoSimular } })
     $c.BotaoAplicar.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoAplicar } })
+    # $args é lido aqui fora: dentro do bloco do Invoke-TmdProtegido ele seria o $args daquele bloco (vazio).
+    $c.ListaPresets.AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler] {
+            $evento = $args[1]
+            Invoke-TmdProtegido {
+                $nome = [string]$evento.OriginalSource.DataContext
+                if ($nome) { Select-TmdPreset -Preset $nome }
+            }
+        })
     # Caixas de seleção dentro das linhas: um único ouvinte na lista para todos os cliques.
     $c.ListaAlvos.AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler] {
+            $evento = $args[1]
             Invoke-TmdProtegido {
-                $caixa = $args[1].OriginalSource
+                $caixa = $evento.OriginalSource
                 if ($caixa -is [System.Windows.Controls.CheckBox] -and $caixa.DataContext) {
                     Set-TmdSelecao -Linha $caixa.DataContext -Selecionado ([bool]$caixa.IsChecked)
                 }
@@ -166,6 +175,8 @@ function Open-TmdPagina {
     $c.BotaoAplicar.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoSimular.IsEnabled = $false
     $c.BotaoAplicar.IsEnabled = $false
+    $c.PainelPresets.Visibility = 'Collapsed'
+    $c.ListaPresets.ItemsSource = $null
     Show-TmdDetalhe
 
     $mensagem = Get-MensagemModulo -Modulo $modulo
@@ -206,6 +217,11 @@ function Open-TmdPagina {
             if ($m.Escreve) {
                 $c.BotaoSimular.IsEnabled = $true
                 $c.BotaoAplicar.IsEnabled = $true
+                $presets = Get-PresetAlvo -Alvos $script:Estado.Alvos
+                if ($presets.Count -gt 0) {
+                    $c.ListaPresets.ItemsSource = $presets
+                    $c.PainelPresets.Visibility = 'Visible'
+                }
             }
         }
         Complete-TmdCargaInicial
@@ -220,6 +236,15 @@ function Set-TmdSelecao {
     if ($Linha.Alvo -and $Linha.Alvo.PSObject.Properties['Selecionado']) { $Linha.Alvo.Selecionado = $Selecionado }
     Exit-TmdConfirmacao
     Update-TmdBarraAcao
+}
+
+function Select-TmdPreset {
+    param([Parameter(Mandatory)][string]$Preset)
+    $n = Set-SelecaoPreset -Alvos $script:Estado.Alvos -Preset $Preset
+    Exit-TmdConfirmacao
+    Update-TmdBusca
+    Update-TmdBarraAcao
+    if ($Preset -ne 'Nenhum') { Set-TmdStatus "Preset $($Preset): $n marcado(s) · $((Get-TmdResumoAtual).Texto) · nada é alterado sem confirmação" }
 }
 
 function Get-TmdResumoAtual {
@@ -264,7 +289,9 @@ function Invoke-TmdBotaoAplicar {
         $script:Tela.Controles.BotaoSimular.Content = 'Voltar'
         $alvos = if ($resumo.Quantidade -eq 1) { '1 item' } else { "$($resumo.Quantidade) itens" }
         $tamanho = if ($resumo.Bytes -gt 0) { " ($(Format-TamanhoTela $resumo.Bytes))" } else { '' }
-        $aviso = if ($resumo.Irreversiveis -gt 0) { ' Isso não pode ser desfeito.' } else { '' }
+        $aviso = if ($resumo.Irreversiveis -gt 0) { ' Isso não pode ser desfeito.' }
+        elseif ($resumo.Reversiveis -eq $resumo.Quantidade -and -not (Get-ValorPropriedade $m 'Especial')) { ' Dá para desfazer pelo Histórico.' }
+        else { '' }
         Set-TmdStatus "$($m.RotuloAcao): $alvos$tamanho.$aviso Confirmar?" 'Aviso'
         return
     }
@@ -297,7 +324,7 @@ function Start-TmdAcao {
         $parametros = @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Alvos = $resumo.Alvos; Simular = $Simular }
     }
     $script:Estado.TarefaAcao = Start-TmdTarefa -Script $codigo -Parametros $parametros `
-        -Contexto @{ Nome = $nome; Simular = $Simular; Acao = $(if ($especial) { 'desfazer' } else { 'liberar' }) } `
+        -Contexto @{ Nome = $nome; Simular = $Simular; Acao = $(if ($especial) { 'desfazer' } elseif (Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado') { Get-ValorPropriedade (Get-TmdModuloAtual) 'Resultado' } else { 'liberar' }) } `
         -AoTerminar {
         param($saida, $erro)
         $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto

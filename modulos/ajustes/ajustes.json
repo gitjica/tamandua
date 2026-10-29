@@ -1,0 +1,173 @@
+[
+  {
+    "id": "priv-id-anuncios",
+    "nome": "Desativar o ID de anúncios",
+    "descricao": "Impede que apps usem um identificador seu para mostrar anúncios personalizados.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-sugestoes-iniciar",
+    "nome": "Sem sugestões no menu Iniciar",
+    "descricao": "Tira os apps \"sugeridos\" (propaganda) do menu Iniciar.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SystemPaneSuggestionsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-dicas-windows",
+    "nome": "Sem dicas e truques do Windows",
+    "descricao": "Para as notificações de \"dicas, truques e sugestões\" enquanto você usa o Windows.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-338389Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-apps-sugeridos",
+    "nome": "Não instalar apps sugeridos sozinho",
+    "descricao": "Impede o Windows de instalar, sem perguntar, apps promovidos pela Microsoft Store.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SilentInstalledAppsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-experiencias-personalizadas",
+    "nome": "Sem experiências personalizadas",
+    "descricao": "A Microsoft deixa de usar seus dados de diagnóstico para dicas e anúncios sob medida.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy", "nome": "TailoredExperiencesWithDiagnosticDataEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-bing-iniciar",
+    "nome": "Sem Bing na busca do Iniciar",
+    "descricao": "A busca do menu Iniciar procura só no computador, sem mandar o que você digita para o Bing.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "nome": "BingSearchEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-extensoes",
+    "nome": "Mostrar extensões de arquivo",
+    "descricao": "Mostra o .exe, .pdf, .jpg no nome dos arquivos. Ajuda a não cair em \"foto.jpg.exe\".",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "HideFileExt", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "expl-ocultos",
+    "nome": "Mostrar arquivos ocultos",
+    "descricao": "Mostra pastas como AppData. Arquivos protegidos do sistema continuam escondidos.",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Hidden", "valor": 1, "tipoValor": "DWord", "padraoWindows": 2 }
+    ]
+  },
+  {
+    "id": "expl-abrir-este-computador",
+    "nome": "Explorador abre em \"Este Computador\"",
+    "descricao": "Abre direto nas unidades e pastas do computador em vez de Início/Acesso rápido.",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "LaunchTo", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-finalizar-tarefa",
+    "nome": "\"Finalizar tarefa\" no botão direito da barra de tarefas",
+    "descricao": "Fecha um programa travado direto pela barra de tarefas (Windows 11 23H2 ou mais novo).",
+    "categoria": "Barra de tarefas",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings", "nome": "TaskbarEndTask", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-icones-esquerda",
+    "nome": "Ícones da barra de tarefas à esquerda",
+    "descricao": "Volta o botão Iniciar e os ícones para o canto esquerdo (Windows 11).",
+    "categoria": "Barra de tarefas",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "TaskbarAl", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "aparencia-tema-escuro",
+    "nome": "Tema escuro",
+    "descricao": "Windows e apps no modo escuro.",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "nome": "AppsUseLightTheme", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "nome": "SystemUsesLightTheme", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "acess-teclas-aderentes",
+    "nome": "Shift 5 vezes não liga as Teclas de Aderência",
+    "descricao": "Desliga o atalho que abre as Teclas de Aderência ao apertar Shift cinco vezes (comum em jogos).",
+    "categoria": "Acessibilidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility\\StickyKeys", "nome": "Flags", "valor": "506", "tipoValor": "String", "padraoWindows": "510" }
+    ]
+  },
+  {
+    "id": "mouse-sem-aceleracao",
+    "nome": "Mouse sem aceleração",
+    "descricao": "O ponteiro anda sempre a mesma distância para o mesmo movimento (\"Aumentar precisão do ponteiro\" desligado). Vale no próximo login.",
+    "categoria": "Mouse e teclado",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Mouse", "nome": "MouseSpeed", "valor": "0", "tipoValor": "String", "padraoWindows": "1" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Mouse", "nome": "MouseThreshold1", "valor": "0", "tipoValor": "String", "padraoWindows": "6" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Mouse", "nome": "MouseThreshold2", "valor": "0", "tipoValor": "String", "padraoWindows": "10" }
+    ]
+  }
+]

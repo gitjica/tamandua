@@ -102,10 +102,28 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Padding="16,12">
-                    <StackPanel>
-                        <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
-                        <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>
-                    </StackPanel>
+                    <DockPanel>
+                        <!-- Presets do módulo (ex.: Essencial). Só aparece se algum alvo tiver Presets. -->
+                        <StackPanel x:Name="PainelPresets" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock Text="Marcar:" Foreground="{DynamicResource TextoSecundario}" VerticalAlignment="Center"/>
+                            <ItemsControl x:Name="ListaPresets" AutomationProperties.Name="Presets">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Content="{Binding}" Margin="6,0,0,0" Padding="10,4" ToolTip="Marca só os itens deste grupo"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </DockPanel>
                 </Border>
 
                 <ListBox x:Name="ListaAlvos" Grid.Row="1" Background="Transparent" BorderThickness="0"

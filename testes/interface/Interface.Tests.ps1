@@ -276,6 +276,100 @@ Describe 'Histórico (funções puras)' {
     }
 }
 
+Describe 'Presets (funções puras)' {
+    It 'lista os presets na ordem em que aparecem, com Nenhum no fim, e marca só os do preset' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'a'; Presets = @('Essencial', 'Privacidade'); Selecionado = $false }
+            [pscustomobject]@{ Id = 'b'; Presets = @('Privacidade'); Selecionado = $true }
+            [pscustomobject]@{ Id = 'c'; Presets = @(); Selecionado = $true }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            (Get-PresetAlvo -Alvos $A) -join ',' | Should -Be 'Essencial,Privacidade,Nenhum'
+            Set-SelecaoPreset -Alvos $A -Preset 'Essencial' | Should -Be 1
+            ($A | ForEach-Object Selecionado) -join ',' | Should -Be 'True,False,False'
+            Set-SelecaoPreset -Alvos $A -Preset 'Nenhum' | Should -Be 0
+            (Get-PresetAlvo -Alvos @([pscustomobject]@{ Id = 'x' })).Count | Should -Be 0
+            $t = Get-TextoResultado -Resultados @([pscustomobject]@{ Id = 'a'; Status = 'Feito'; Liberado = 0; Motivo = '' }) -Acao 'ajustar'
+            $t.Texto | Should -Be 'Aplicados: 1 ajuste(s). Dá para desfazer pelo Histórico.'
+            $t.Cor | Should -Be 'Sucesso'
+        }
+    }
+}
+
+Describe 'Ajustes pela janela de verdade' {
+    It 'preset Essencial, confirmação dizendo que dá para desfazer, aplica e a página mostra "aplicado"' {
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $raizReg = "HKCU:\Software\TamanduaTestes\janela-ajustes-$([guid]::NewGuid().ToString('N'))"
+        $projeto = New-ProjetoFalso -Pai $TestDrive -Catalogo 'ajustes' -ComInterface -ModulosReais 'ajustes'
+        $env:TAMANDUA_REGISTRO_TESTE = $raizReg
+        $passos = @{ Etapa = 0 }
+        try {
+            $aoCarregar = {
+                $tela = $args[0]
+                $p = $passos
+                $relogio = New-Object System.Windows.Threading.DispatcherTimer
+                $relogio.Interval = [TimeSpan]::FromMilliseconds(200)
+                $clicar = { param($b) $b.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent))) }
+                $relogio.Add_Tick({
+                        $c = $tela.Controles
+                        if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
+                        switch ($p.Etapa) {
+                            0 {
+                                $p.Presets = @($c.ListaPresets.ItemsSource) -join ','
+                                $p.PresetsVisivel = [string]$c.PainelPresets.Visibility
+                                $recipiente = $c.ListaPresets.ItemContainerGenerator.ContainerFromIndex(0)
+                                & $clicar ([System.Windows.Media.VisualTreeHelper]::GetChild($recipiente, 0))
+                            }
+                            1 {
+                                $p.Marcados = $c.TextoStatus.Text
+                                # Marca mais um item clicando na caixa de verdade (fora do preset).
+                                $linha = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Id -eq 'priv-bing-iniciar' })[0]
+                                $fila = [System.Collections.Generic.Queue[object]]::new()
+                                $fila.Enqueue($c.ListaAlvos.ItemContainerGenerator.ContainerFromItem($linha))
+                                $caixa = $null
+                                while ($fila.Count -gt 0 -and -not $caixa) {
+                                    $no = $fila.Dequeue()
+                                    if ($no -is [System.Windows.Controls.CheckBox]) { $caixa = $no; break }
+                                    for ($k = 0; $k -lt [System.Windows.Media.VisualTreeHelper]::GetChildrenCount($no); $k++) {
+                                        $fila.Enqueue([System.Windows.Media.VisualTreeHelper]::GetChild($no, $k))
+                                    }
+                                }
+                                $caixa.IsChecked = $true
+                                & $clicar $caixa
+                            }
+                            2 { $p.MaisUm = $c.TextoStatus.Text; & $clicar $c.BotaoAplicar }
+                            3 { $p.Confirmacao = $c.TextoStatus.Text; & $clicar $c.BotaoAplicar }
+                            4 {
+                                $p.Final = $c.TextoStatus.Text
+                                $p.Aplicados = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Estado -eq 'Aplicado' }).Count
+                                $relogio.Stop()
+                                $tela.Janela.Close()
+                            }
+                        }
+                        $p.Etapa++
+                    }.GetNewClosure())
+                $relogio.Start()
+            }.GetNewClosure()
+            Start-TmdInterface -Raiz $projeto -Tema 'escuro' -AoCarregar $aoCarregar -FecharAposSeg 60
+        }
+        finally {
+            Remove-Item Env:\TAMANDUA_REGISTRO_TESTE -ErrorAction SilentlyContinue
+            if (Test-Path -LiteralPath $raizReg) { Remove-Item -LiteralPath $raizReg -Recurse -Force }
+            $mae = 'HKCU:\Software\TamanduaTestes'
+            if ((Test-Path -LiteralPath $mae) -and @(Get-ChildItem -LiteralPath $mae).Count -eq 0) { Remove-Item -LiteralPath $mae -Force }
+        }
+        $passos.Etapa | Should -Be 5
+        $passos.PresetsVisivel | Should -Be 'Visible'
+        $passos.Presets | Should -Be 'Essencial,Privacidade,Explorador,Nenhum'
+        $passos.Marcados | Should -Match '^Preset Essencial: 6 marcado'
+        $passos.MaisUm | Should -Match '^7 selecionados'
+        $passos.Confirmacao | Should -Match '^Aplicar: 7 itens\. Dá para desfazer pelo Histórico\. Confirmar\?$'
+        $passos.Final | Should -Match '^Aplicados: 7 ajuste'
+        $passos.Aplicados | Should -Be 7
+    }
+}
+
 Describe 'Desfazer pela página Histórico' {
     It 'mostra o ajuste aplicado, desfaz com confirmação e o registro volta ao que era' {
         $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))

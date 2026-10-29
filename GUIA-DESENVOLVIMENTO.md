@@ -93,6 +93,7 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
   `.json` e `.xaml` em UTF-8 (lidos com `-Encoding UTF8` explícito).
 - Proibido: `&&`, `||`, `??`, `?.`, operador ternário, `ForEach-Object -Parallel`, `ConvertFrom-Json -AsHashtable`.
 - `Set-Content`/`Add-Content` sempre com `-Encoding UTF8`.
+- `ConvertFrom-Json` de uma lista JSON devolve a lista inteira como **um** objeto no 5.1: desmonte com `foreach ($x in (... | ConvertFrom-Json)) { $x }`.
 - Função que devolve array tipado (`[byte[]]`, `[string[]]`) usa `return , $array`; sem a vírgula vira `Object[]`.
 - `StrictMode Latest` lança em índice fora do array (`$a[-1]` em array vazio) e em propriedade que não existe:
   objetos vindos de JSON são lidos com `Get-Propriedade`.
@@ -370,7 +371,10 @@ Implementação (`nucleo/MotorAjustes.ps1`, `nucleo/Estado.ps1`):
 - Registro por .NET (`RegistryKey`, visão de 64 bits, caminho literal), nunca por `Set-ItemProperty`.
   `.reg` de cada chave em `%LOCALAPPDATA%\Tamandua\backup\` antes de mexer.
 - Serviços por `sc.exe config` (o `Set-Service` do 5.1 não sabe "automático atrasado"); tarefas por `Enable/Disable-ScheduledTask`.
-- `-RaizRegistro 'HKCU:\Software\TamanduaTestes\...'` redireciona HKCU e HKLM para uma chave de teste.
+- `-RaizRegistro 'HKCU:\Software\TamanduaTestes\...'` redireciona HKCU e HKLM para uma chave de teste. Só aceita caminhos
+  dentro de `HKCU:\Software\TamanduaTestes\`, e o snapshot guarda onde a mudança foi feita: desfazer volta no mesmo lugar
+  mesmo quando quem desfaz não sabe do redirecionamento. No módulo `ajustes`, `TAMANDUA_REGISTRO_TESTE` faz o mesmo para
+  processos filhos (CLI) e para a janela.
 - Histórico: cada `ajustar`/`desfazer` vai para o log; `Get-TmdHistorico` marca `Reversivel` no ajuste mais recente de cada Id
   que ainda tem snapshot. CLI: `tamandua desfazer <id> [-Simular] [-Sim]`. Interface: página **Histórico** (do núcleo,
   sempre no fim da barra lateral) com caixa só nos ajustes reversíveis e botão **Desfazer**.
@@ -447,8 +451,16 @@ Categorias iniciais (seleção revisada do que o WinUtil oferece):
 - **Sistema** (médio/alto): hibernação, Armazenamento Reservado, Storage Sense, caminhos longos, BSoD/logon detalhados, IPv4 preferido, remover widgets, Copilot/recursos de IA.
 - **Remoções** (alto, desmarcado, não reversível pelo motor): OneDrive, Edge, apps pré-instalados (Appx).
 
-**Presets** (`presets.json`): lista de `id`s. Iniciais: `Essencial` (só risco baixo), `Privacidade`, `Desempenho`.
-Aplicar preset **só marca** os itens; o usuário ainda revisa e confirma.
+**Presets**: cada ajuste lista os presets de que faz parte (`"presets": ["Essencial", "Privacidade"]`), sem arquivo separado.
+Iniciais: `Essencial` (só risco baixo), `Privacidade`, `Explorador`. Aplicar preset **só marca** os itens; o usuário ainda
+revisa e confirma. O mecanismo é genérico: qualquer módulo cujos alvos tenham `Presets` ganha os botões "Marcar:" na interface
+e `-Preset <nome>` na CLI; `-Itens a,b` marca por id.
+
+Primeira versão do catálogo (`modulos/ajustes/ajustes.json`): 14 ajustes, todos em `HKCU`, sem admin. Cada ajuste tem teste
+de ida e volta (aplica → `Aplicado` → desfaz → nenhum valor sobra) gerado automaticamente a partir do catálogo.
+
+Ainda não suportado pelo motor (fica para quando houver necessidade): criar/apagar **chaves** inteiras (ex.: menu de contexto
+clássico do Windows 11, que depende da existência de uma chave) e remoção de Appx.
 
 **Perfis**: o usuário pode exportar/importar sua seleção (ajustes + programas) como JSON em `%APPDATA%\Tamandua\perfis\` —
 útil para configurar uma máquina nova igual à antiga.
@@ -547,6 +559,7 @@ Base do WinUtil (abas, busca, seleção em lote), reorganizada:
 - `Start-TmdInterface -AoCarregar {...} -FecharAposSeg N` existe para testes e capturas: os testes abrem a janela de verdade
   e ela fecha sozinha mesmo se algo travar.
 - Estilo implícito de `TextBlock` não atravessa `DataTemplate`: a cor do texto em listas vem do `Foreground` do item.
+- Em handlers de evento, leia `$args` **antes** de entrar no `Invoke-TmdProtegido { ... }`: dentro do bloco, `$args` é o do bloco (vazio).
 - Callbacks de tarefa **não** usam `GetNewClosure()` (perderiam o acesso às funções e ao `$script:` do módulo);
   o que precisam vai em `Start-TmdTarefa -Contexto`, entregue como 4º argumento.
 - Módulo que escreve: caixa de seleção por linha (a marca fica no próprio alvo e sobrevive à busca), **Simular** roda direto,
