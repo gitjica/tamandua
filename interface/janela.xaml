@@ -145,8 +145,13 @@
                                     <CheckBox x:Name="Caixa" Grid.Column="0" Style="{DynamicResource Caixa}" IsChecked="{Binding Selecionado, Mode=OneWay}"
                                               Margin="0,0,10,0" VerticalAlignment="Center" Visibility="Collapsed"
                                               AutomationProperties.Name="{Binding Nome}"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Nome}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
-                                               ToolTip="{Binding Nome}"/>
+                                    <DockPanel Grid.Column="1">
+                                        <TextBlock x:Name="Escudo" DockPanel.Dock="Right" Style="{DynamicResource Icone}" Text="&#xE83D;" FontSize="12"
+                                                   Margin="6,0,10,0" Visibility="Collapsed" ToolTip="Pede permissão de administrador"
+                                                   AutomationProperties.Name="Pede administrador"/>
+                                        <TextBlock Text="{Binding Nome}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                                   ToolTip="{Binding Nome}"/>
+                                    </DockPanel>
                                     <ProgressBar x:Name="Barra" Grid.Column="2" Style="{DynamicResource BarraValor}" Value="{Binding Valor}"
                                                  Margin="0,0,14,0" VerticalAlignment="Center" Visibility="Collapsed"/>
                                     <TextBlock x:Name="Detalhe" Grid.Column="3" Text="{Binding Detalhe}" Foreground="{DynamicResource TextoSecundario}"
@@ -167,6 +172,9 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding TemCaixa}" Value="True">
                                     <Setter TargetName="Caixa" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding RequerAdmin}" Value="True">
+                                    <Setter TargetName="Escudo" Property="Visibility" Value="Visible"/>
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding TemSelo}" Value="True">
                                     <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
@@ -221,9 +229,13 @@
                                 <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Perigo}" Margin="0,0,8,0"/>
                                 <TextBlock Text="crítico, faltando ou quebrado" Foreground="{DynamicResource TextoSecundario}"/>
                             </DockPanel>
-                            <DockPanel>
+                            <DockPanel Margin="0,0,0,6">
                                 <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Sucesso}" Margin="0,0,8,0"/>
                                 <TextBlock Text="aplicado" Foreground="{DynamicResource TextoSecundario}"/>
+                            </DockPanel>
+                            <DockPanel>
+                                <TextBlock Style="{DynamicResource Icone}" Text="&#xE83D;" FontSize="11" Width="10" Margin="0,0,8,0"/>
+                                <TextBlock Text="pede permissão de administrador" Foreground="{DynamicResource TextoSecundario}"/>
                             </DockPanel>
                         </StackPanel>
                     </StackPanel>

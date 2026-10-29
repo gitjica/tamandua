@@ -9,7 +9,9 @@ function Test-TmdAdministrador {
     (New-Object Security.Principal.WindowsPrincipal($identidade)).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
-# Executa Invoke-Acao do módulo; se o módulo pede admin e este processo não é admin, executa elevado.
+# Executa Invoke-Acao do módulo. Se o manifesto tem RequerAdmin e este processo não é admin, só os alvos com
+# RequerAdmin = $true vão para o processo elevado; os outros rodam aqui (ex.: reiniciar o Explorer não deve virar admin).
+# Os resultados voltam na ordem dos alvos.
 function Invoke-TmdAcaoModulo {
     [CmdletBinding()]
     param(
@@ -23,7 +25,12 @@ function Invoke-TmdAcaoModulo {
     if ($Simular -or -not $Info.Manifesto['RequerAdmin'] -or (Test-TmdAdministrador)) {
         return @(& $acao -Alvos $Alvos -Simular:$Simular)
     }
-    Invoke-TmdAcaoElevada -Raiz $Raiz -Modulo $Info.Nome -Alvos $Alvos
+    $elevar = @($Alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'RequerAdmin') -eq $true })
+    $aqui = @($Alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'RequerAdmin') -ne $true })
+    $porId = @{}
+    if ($aqui.Count -gt 0) { foreach ($r in @(& $acao -Alvos $aqui)) { $porId[[string]$r.Id] = $r } }
+    if ($elevar.Count -gt 0) { foreach ($r in @(Invoke-TmdAcaoElevada -Raiz $Raiz -Modulo $Info.Nome -Alvos $elevar)) { $porId[[string]$r.Id] = $r } }
+    foreach ($a in $Alvos) { if ($porId.ContainsKey([string]$a.Id)) { $porId[[string]$a.Id] } }
 }
 
 function Invoke-TmdAcaoElevada {

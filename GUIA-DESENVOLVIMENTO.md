@@ -421,6 +421,9 @@ Na interface: o botão de executar sempre abre um resumo ("Vai alterar 7 itens, 
   e o processo não é admin, ele grava o pedido num `tamandua-*.json` do TEMP e roda `tamandua.ps1 __elevado <pedido>` com
   `-Verb RunAs` (`Start-TmdProcessoElevado`, o único ponto que pede o UAC). O lado elevado só aceita pedido e resposta que
   sejam temporários do Tamanduá. UAC negado = tudo `Ignorado` com o motivo. `-Simular` nunca eleva.
+  Só os alvos com `RequerAdmin = $true` vão para o processo elevado; os outros rodam como o usuário (ex.: reiniciar o
+  Explorador elevado deixaria a área de trabalho rodando como admin). Os resultados voltam na ordem dos alvos.
+  Na interface, esses alvos mostram um escudo ao lado do nome.
 - Programas do sistema (`sfc`, `DISM`, `netsh`, `net`...) rodam por `Invoke-TmdPrograma`, que devolve código e saída e registra no log.
 - Serviços do Windows: parar só se necessário, e sempre religar no `finally`.
 
@@ -545,6 +548,9 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
   `sfc /scannow`, `DISM /Online /Cleanup-Image /RestoreHealth`, `netsh winsock reset` + `int ip reset` (pede reinício) e
   "destravar o Windows Update" (para `wuauserv` e `bits`, apaga `SoftwareDistribution\Download` pelo núcleo e religa os
   serviços num `finally`). Nada vem marcado. Ainda sem barra de progresso: a interface mostra "Executando…".
+  Implementado (otimizar): limpar cache de DNS e reconstruir o cache de ícones (fecha o Explorador, apaga
+  `IconCache.db`/`iconcache_*.db` pelo núcleo, reabre o Explorador num `finally`) rodam como o usuário; `defrag C: /O`
+  e `DISM /StartComponentCleanup` (sem `/ResetBase`) pedem admin.
 
 ---
 
@@ -607,7 +613,8 @@ Base do WinUtil (abas, busca, seleção em lote), reorganizada:
   devolvem só dados. Um `DispatcherTimer` (100 ms) entrega o resultado na thread da janela — nada de WPF é tocado de outra thread.
 - Todo evento passa por `Invoke-TmdProtegido`: erro vira texto na barra de status, a janela nunca cai.
 - `Start-TmdInterface -AoCarregar {...} -FecharAposSeg N` existe para testes e capturas: os testes abrem a janela de verdade
-  e ela fecha sozinha mesmo se algo travar.
+  e ela fecha sozinha mesmo se algo travar. O relógio de `-FecharAposSeg` é desligado quando a janela fecha (antes, ele
+  disparava depois e fechava a janela do teste seguinte).
 - Estilo implícito de `TextBlock` não atravessa `DataTemplate`: a cor do texto em listas vem do `Foreground` do item.
 - Em handlers de evento, leia `$args` **antes** de entrar no `Invoke-TmdProtegido { ... }`: dentro do bloco, `$args` é o do bloco (vazio).
 - Callbacks de tarefa **não** usam `GetNewClosure()` (perderiam o acesso às funções e ao `$script:` do módulo);

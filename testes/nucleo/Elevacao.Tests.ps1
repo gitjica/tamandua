@@ -41,7 +41,7 @@ Describe 'Invoke-TmdAcaoModulo' {
             (Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -Wait -PassThru).ExitCode
         }
         $info = Get-TmdModulo -Raiz $raiz -Nome 'precisa'
-        $r = @(Invoke-TmdAcaoModulo -Info $info -Alvos @([pscustomobject]@{ Id = 'a' }, [pscustomobject]@{ Id = 'b' }) -Raiz $raiz)
+        $r = @(Invoke-TmdAcaoModulo -Info $info -Alvos @([pscustomobject]@{ Id = 'a'; RequerAdmin = $true }, [pscustomobject]@{ Id = 'b'; RequerAdmin = $true }) -Raiz $raiz)
         $r.Count | Should -Be 2
         ($r | ForEach-Object Id) -join ',' | Should -Be 'a,b'
         $r[0].Status | Should -Be 'Feito'
@@ -49,6 +49,24 @@ Describe 'Invoke-TmdAcaoModulo' {
         $r[0].Motivo | Should -Not -Be "processo $PID" -Because 'rodou em outro processo'
         Should -Invoke Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo -Times 1 -Exactly
         Test-Path -LiteralPath $global:TmdTestePedido | Should -BeFalse
+    }
+
+    It 'só os itens que pedem admin vão para o processo elevado; a ordem dos resultados é a dos alvos' {
+        Mock Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo {
+            $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$Script`"", '__elevado', "`"$Pedido`"")
+            (Start-Process -FilePath 'powershell.exe' -ArgumentList $argumentos -WindowStyle Hidden -Wait -PassThru).ExitCode
+        }
+        $info = Get-TmdModulo -Raiz $raiz -Nome 'precisa'
+        $r = @(Invoke-TmdAcaoModulo -Info $info -Raiz $raiz -Alvos @(
+                [pscustomobject]@{ Id = 'usuario1'; RequerAdmin = $false }
+                [pscustomobject]@{ Id = 'admin'; RequerAdmin = $true }
+                [pscustomobject]@{ Id = 'usuario2' }
+            ))
+        ($r | ForEach-Object Id) -join ',' | Should -Be 'usuario1,admin,usuario2'
+        ($r | Where-Object Id -eq 'usuario1').Motivo | Should -Be "processo $PID"
+        ($r | Where-Object Id -eq 'usuario2').Motivo | Should -Be "processo $PID"
+        ($r | Where-Object Id -eq 'admin').Motivo | Should -Not -Be "processo $PID"
+        Should -Invoke Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo -Times 1 -Exactly
     }
 
     It 'simular nunca pede admin' {
@@ -60,7 +78,7 @@ Describe 'Invoke-TmdAcaoModulo' {
     It 'UAC negado: tudo ignorado, com o motivo, sem exceção' {
         Mock Start-TmdProcessoElevado -ModuleName Tamandua.Nucleo { throw 'A operação foi cancelada pelo usuário' }
         $info = Get-TmdModulo -Raiz $raiz -Nome 'precisa'
-        $r = @(Invoke-TmdAcaoModulo -Info $info -Alvos @([pscustomobject]@{ Id = 'a' }) -Raiz $raiz)
+        $r = @(Invoke-TmdAcaoModulo -Info $info -Alvos @([pscustomobject]@{ Id = 'a'; RequerAdmin = $true }) -Raiz $raiz)
         $r[0].Status | Should -Be 'Ignorado'
         $r[0].Motivo | Should -Match 'permissão de administrador negada'
     }

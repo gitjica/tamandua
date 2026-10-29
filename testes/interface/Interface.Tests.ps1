@@ -320,6 +320,9 @@ Describe 'Selo e resultado de módulos que não se desfazem pelo Histórico' {
         InModuleScope Interface -Parameters @{ A = $alvos } {
             param($A)
             ((ConvertTo-LinhaAlvo -Alvos $A -Escreve) | Where-Object Tipo -eq 'Alvo').Selo | Should -Be 'atualizar para 3.1'
+            ((ConvertTo-LinhaAlvo -Alvos $A -Escreve) | Where-Object Tipo -eq 'Alvo').RequerAdmin | Should -BeFalse
+            ((ConvertTo-LinhaAlvo -Alvos @([pscustomobject]@{ Id = 'x'; Nome = 'X'; Categoria = 'C'; RequerAdmin = $true }) -Escreve) |
+                Where-Object Tipo -eq 'Alvo').RequerAdmin | Should -BeTrue
             $t = Get-TextoResultado -Resultados @([pscustomobject]@{ Id = 'vlc'; Status = 'Feito'; Liberado = 0 }) -Acao 'ajustar' -DaParaDesfazer $false
             $t.Texto | Should -Be 'Concluídos: 1 item(ns).'
         }

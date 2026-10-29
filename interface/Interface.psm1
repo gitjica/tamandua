@@ -31,6 +31,8 @@ function Start-TmdInterface {
         $script:RelogioFechar.Interval = [TimeSpan]::FromSeconds($FecharAposSeg)
         $script:RelogioFechar.Add_Tick({ $script:RelogioFechar.Stop(); $script:Tela.Janela.Close() })
         $script:RelogioFechar.Start()
+        # Desliga junto com a janela: senão ele dispara depois e fecha a PRÓXIMA janela aberta neste processo.
+        $tela.Janela.Add_Closed({ if ($script:RelogioFechar) { $script:RelogioFechar.Stop() } })
     }
     [void]$tela.Janela.ShowDialog()
 }
