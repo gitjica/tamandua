@@ -314,6 +314,10 @@ function Show-TmdPaginaLida {
     Update-TmdBusca
     $m = Get-TmdModuloAtual
     if ($StatusDepois) { Set-TmdStatus $StatusDepois.Texto $StatusDepois.Cor }
+    elseif ((Get-ValorPropriedade $m 'Especial') -eq $true -and $script:Estado.Alvos.Count -gt 0 -and
+        @($script:Estado.Alvos | Where-Object { (Get-ValorPropriedade $_ 'Selecionavel') -ne $false }).Count -eq 0) {
+        Set-TmdStatus 'Nada aqui pode ser desfeito (clique numa linha para ver o motivo). Ajuste que já estava aplicado se desfaz na página Ajustes.' 'Aviso'
+    }
     elseif ($m.Escreve) { Update-TmdBarraAcao }
     else { Set-TmdStatus (Get-TextoStatusPagina -Quantidade $script:Estado.Alvos.Count -Escreve $false -Quando $Quando) }
     if ($m.Escreve) {

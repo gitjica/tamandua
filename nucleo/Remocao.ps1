@@ -353,7 +353,14 @@ function Get-TmdIconePng {
     $arquivo = [Environment]::ExpandEnvironmentVariables($arquivo.Trim().Trim('"'))
     $png = $null
     try {
-        if ([IO.File]::Exists($arquivo)) {
+        # Atalho (.lnk): o ícone é o que o atalho mostra (IconLocation) ou o do programa para onde ele aponta. Só lê.
+        if ($arquivo -like '*.lnk' -and [IO.File]::Exists($arquivo)) {
+            $atalho = (New-Object -ComObject WScript.Shell).CreateShortcut($arquivo)
+            $local = [string]$atalho.IconLocation
+            $alvo = if ($local -and $local -notmatch '^,\s*-?\d+$') { $local } else { [string]$atalho.TargetPath }
+            if ($alvo -and $alvo -notlike '*.lnk') { $png = Get-TmdIconePng -Caminho $alvo }
+        }
+        elseif ([IO.File]::Exists($arquivo)) {
             Initialize-TmdTipos
             $png = [Tamandua.Icones]::Png($arquivo, $indice)
         }
@@ -364,7 +371,76 @@ function Get-TmdIconePng {
     , $png
 }
 
-# Programas instalados (chaves Uninstall de 64 e 32 bits e do usuário): nome simplificado -> DisplayIcon.
+# O primeiro dos -Caminhos que tem ícone (ver Get-TmdCandidatosIcone).
+function Get-TmdIconePngPrimeiro {
+    [CmdletBinding()]
+    param([AllowEmptyCollection()][string[]]$Caminhos = @())
+    foreach ($c in $Caminhos) {
+        $png = Get-TmdIconePng -Caminho $c
+        if ($null -ne $png) { return , $png }
+    }
+    $null
+}
+
+# Onde achar o ícone de um programa instalado, na ordem: DisplayIcon; o .ico que o instalador MSI deixa em
+# Windows\Installer\{código}; o .exe da pasta de instalação com nome parecido; o atalho do menu Iniciar; o desinstalador
+# (que muitas vezes tem o ícone do programa). Só monta a lista (barato); extrair fica para Get-TmdIconePngPrimeiro.
+function Get-TmdCandidatosIcone {
+    [CmdletBinding()]
+    param([string]$DisplayIcon, [string]$Chave, [string]$Nome, [string]$Pasta, [string]$Desinstalador)
+    $lista = [System.Collections.Generic.List[string]]::new()
+    if ($DisplayIcon) { $lista.Add($DisplayIcon) }
+    try {
+        if ($Chave -match '^\{[0-9A-Fa-f-]{36}\}$') {
+            $msi = Join-Path $env:SystemRoot "Installer\$Chave"
+            if ([IO.Directory]::Exists($msi)) {
+                foreach ($f in [IO.Directory]::GetFiles($msi)) { if ($f -match '\.(ico|exe)$') { $lista.Add($f) } }
+            }
+        }
+        $simples = ConvertTo-TmdNomeSimples $Nome
+        $pastaReal = if ($Pasta) { [Environment]::ExpandEnvironmentVariables($Pasta.Trim().Trim('"')) } else { '' }
+        if ($pastaReal -and [IO.Directory]::Exists($pastaReal)) {
+            $exes = @([IO.Directory]::GetFiles($pastaReal, '*.exe') | Where-Object { [IO.Path]::GetFileName($_) -notmatch '^(unins|uninst|setup|install|update|crash|helper|elevate)' })
+            # Primeiro o que tem o nome do programa ("KeePassXC.exe" para "KeePassXC"), depois os outros.
+            foreach ($e in $exes) { $n = ConvertTo-TmdNomeSimples ([IO.Path]::GetFileNameWithoutExtension($e)); if ($n.Length -ge 3 -and $simples.StartsWith($n)) { $lista.Add($e) } }
+            foreach ($e in $exes) { if (-not $lista.Contains($e)) { $lista.Add($e) } }
+        }
+        foreach ($l in Find-TmdAtalhoIniciar -Simples $simples) { $lista.Add($l) }
+        if ($Desinstalador -and $Desinstalador -notmatch '(?i)msiexec|rundll32') {
+            $exe = if ($Desinstalador -match '^\s*"([^"]+)"') { $Matches[1] } elseif ($Desinstalador -match '^\s*(.+?\.exe)') { $Matches[1] } else { '' }
+            if ($exe) { $lista.Add($exe) }
+        }
+    }
+    catch { Write-Verbose "candidatos de ícone para $Nome`: $($_.Exception.Message)" }
+    # Sai item a item: quem chama embrulha com @( ).
+    $lista | Select-Object -Unique
+}
+
+# Atalhos do menu Iniciar (de todos e do usuário) cujo nome bate com o do programa ("LibreOffice" para
+# "LibreOffice 26.8.1.1"). A lista de atalhos é lida uma vez.
+$script:AtalhosIniciar = $null
+function Find-TmdAtalhoIniciar {
+    param([string]$Simples)
+    if (-not $Simples) { return }
+    if ($null -eq $script:AtalhosIniciar) {
+        $script:AtalhosIniciar = @(foreach ($p in [Environment]::GetFolderPath('CommonPrograms'), [Environment]::GetFolderPath('Programs')) {
+                if ($p -and [IO.Directory]::Exists($p)) {
+                    foreach ($l in [IO.Directory]::GetFiles($p, '*.lnk', [IO.SearchOption]::AllDirectories)) {
+                        [pscustomobject]@{ Simples = ConvertTo-TmdNomeSimples ([IO.Path]::GetFileNameWithoutExtension($l)); Caminho = $l }
+                    }
+                }
+            })
+    }
+    foreach ($a in $script:AtalhosIniciar) {
+        if ($a.Simples -eq $Simples) { $a.Caminho }
+    }
+    foreach ($a in $script:AtalhosIniciar) {
+        if ($a.Simples -ne $Simples -and $a.Simples.Length -ge 4 -and $a.Simples -notmatch '^(uninstall|desinstalar|readme|leiame|help|ajuda)' -and
+            ($Simples.StartsWith($a.Simples) -or $a.Simples.StartsWith($Simples))) { $a.Caminho }
+    }
+}
+
+# Programas instalados (chaves Uninstall de 64 e 32 bits e do usuário): nome simplificado -> candidatos de ícone.
 function Get-TmdIconesInstalados {
     [CmdletBinding()]
     param()
@@ -379,8 +455,11 @@ function Get-TmdIconesInstalados {
                     $k = $raiz.OpenSubKey($n, $false)
                     if (-not $k) { continue }
                     try {
-                        $nome = [string]$k.GetValue('DisplayName'); $icone = [string]$k.GetValue('DisplayIcon')
-                        if ($nome -and $icone) { $mapa[(ConvertTo-TmdNomeSimples $nome)] = $icone }
+                        $nome = [string]$k.GetValue('DisplayName')
+                        if ($nome) {
+                            $mapa[(ConvertTo-TmdNomeSimples $nome)] = @(Get-TmdCandidatosIcone -DisplayIcon ([string]$k.GetValue('DisplayIcon')) -Chave $n -Nome $nome `
+                                    -Pasta ([string]$k.GetValue('InstallLocation')) -Desinstalador ([string]$k.GetValue('UninstallString')))
+                        }
                     }
                     finally { $k.Close() }
                 }
@@ -399,8 +478,9 @@ function Get-TmdAlvosParaTela {
     param([Parameter(Mandatory)]$Info)
     $grade = $Info.Manifesto -and $Info.Manifesto['Visualizacao'] -eq 'Grade'
     foreach ($a in & $Info.Modulo.ExportedFunctions['Find-Alvos']) {
+        # Icone: um caminho ou a lista de candidatos (Get-TmdCandidatosIcone); vale o primeiro que tiver ícone.
         if ($grade -and $a.PSObject.Properties['Icone'] -and $a.Icone) {
-            $a | Add-Member -NotePropertyName IconePng -NotePropertyValue (Get-TmdIconePng -Caminho $a.Icone) -Force
+            $a | Add-Member -NotePropertyName IconePng -NotePropertyValue (Get-TmdIconePngPrimeiro -Caminhos @($a.Icone)) -Force
         }
         $a
     }

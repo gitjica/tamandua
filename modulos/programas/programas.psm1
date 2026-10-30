@@ -93,18 +93,19 @@ function Find-Alvos {
     }
 }
 
-# Ícone do programa instalado com esse nome ("7-Zip" acha "7-Zip 24.08 (x64)"). Não instalado: sem ícone (a tela mostra a inicial).
+# Onde achar o ícone do programa instalado com esse nome ("7-Zip" acha "7-Zip 24.08 (x64)"); sem registro com esse
+# nome, o atalho do menu Iniciar. Não instalado: sem ícone (não há arquivo dele no disco; a tela mostra a inicial).
 function Find-IconePrograma {
     param([hashtable]$Icones, [string]$Nome, [bool]$Instalado)
-    if (-not $Instalado -or -not $Icones) { return '' }
+    if (-not $Instalado) { return , @() }
     $simples = ConvertTo-TmdNomeSimples $Nome
-    if (-not $simples) { return '' }
-    foreach ($k in $Icones.Keys) { if ($k.StartsWith($simples)) { return [string]$Icones[$k] } }
-    ''
+    if (-not $simples) { return , @() }
+    if ($Icones) { foreach ($k in $Icones.Keys) { if ($k.StartsWith($simples)) { return , @($Icones[$k]) } } }
+    , @(Get-TmdCandidatosIcone -Nome $Nome)
 }
 
 function New-AlvoPrograma {
-    param([string]$Id, [string]$Nome, [string]$Categoria, [string]$Estado, [string]$Selo, [string]$Detalhe, [string[]]$Mudancas, [string]$Icone = '')
+    param([string]$Id, [string]$Nome, [string]$Categoria, [string]$Estado, [string]$Selo, [string]$Detalhe, [string[]]$Mudancas, [string[]]$Icone = @())
     [pscustomobject]@{
         Id = $Id; Nome = $Nome; Categoria = $Categoria; Caminho = ''; Tamanho = [int64]0; Estado = $Estado; Selo = $Selo
         Detalhe = $Detalhe; Nivel = 'Normal'; Valor = $null; Risco = 'Baixo'; Selecionado = $false; Destino = 'NaoSeAplica'

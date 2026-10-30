@@ -51,10 +51,13 @@ Export-ModuleMember -Function @(
     'Get-TmdTextoIndireto'
     'Get-TmdIconePng'
     'Get-TmdAlvosParaTela'
+    'Get-TmdIconePngPrimeiro'
+    'Get-TmdCandidatosIcone'
     'Get-TmdIconesInstalados'
     'ConvertTo-TmdNomeSimples'
     'Restart-TmdExplorador'
     'Undo-TmdAjuste'
     'Get-TmdEstadoAjuste'
     'Test-TmdAjusteReversivel'
+    'Get-TmdTextoDesfaz'
 )

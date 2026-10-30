@@ -343,6 +343,39 @@ Describe 'Seleção e resultado (funções puras)' {
         }
     }
 
+    It 'preset nunca marca item já aplicado (Desfaz); marcado à mão, a confirmação avisa que desfaz' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'novo'; Nome = 'Novo'; Categoria = 'T'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Presets = @('P'); Reversivel = $true }
+            [pscustomobject]@{ Id = 'feito'; Nome = 'Feito'; Categoria = 'T'; Estado = 'Aplicado'; Detalhe = ''; Selecionado = $false; Presets = @('P'); Reversivel = $true; Desfaz = $true }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            Set-SelecaoPreset -Alvos $A -Preset 'P' | Should -Be 1
+            ($A | Where-Object Id -eq 'feito').Selecionado | Should -BeFalse
+            ($A | Where-Object Id -eq 'feito').Selecionado = $true
+            $resumo = Get-ResumoSelecao -Linhas (ConvertTo-LinhaAlvo -Alvos $A -Escreve)
+            $resumo.Desfazendo | Should -Be 1
+            Get-AvisoConfirmacao -Resumo $resumo | Should -Match '^ 1 já aplicado\(s\) será\(ão\) DESFEITO\(S\)\. Dá para desfazer pelo Histórico\.$'
+        }
+    }
+
+    It 'Histórico: cada linha sem caixa diz por que não dá para desfazer' {
+        InModuleScope Interface {
+            $ops = @(
+                [pscustomobject]@{ Data = '2026-10-29T10:00:00'; Modulo = 'ajustes'; Id = 'a'; Acao = 'ajustar'; Caminho = 'A'; Status = 'Feito'; Motivo = ''; Simulado = $true; Liberado = 0; Reversivel = $false }
+                [pscustomobject]@{ Data = '2026-10-29T10:00:00'; Modulo = 'ajustes'; Id = 'b'; Acao = 'ajustar'; Caminho = 'B'; Status = 'Feito'; Motivo = 'já estava aplicado'; Simulado = $false; Liberado = 0; Reversivel = $false }
+                [pscustomobject]@{ Data = '2026-10-29T10:00:00'; Modulo = 'limpar'; Id = 'c'; Acao = 'remover'; Caminho = 'C'; Status = 'Feito'; Motivo = ''; Simulado = $false; Liberado = 10; Reversivel = $false }
+                [pscustomobject]@{ Data = '2026-10-29T10:00:00'; Modulo = 'ajustes'; Id = 'd'; Acao = 'ajustar'; Caminho = 'D'; Status = 'Feito'; Motivo = ''; Simulado = $false; Liberado = 0; Reversivel = $true }
+            )
+            $linhas = @(ConvertTo-AlvoHistorico -Operacoes $ops)
+            $linhas[0].Mudancas[0] | Should -Match 'simulação'
+            $linhas[1].Mudancas[0] | Should -Match 'Já estava aplicado antes.*página Ajustes'
+            $linhas[2].Mudancas[0] | Should -Match 'Lixeira'
+            $linhas[3].Selecionavel | Should -BeTrue
+            $linhas[3].Mudancas[0] | Should -Match 'valor salvo'
+        }
+    }
+
     It 'texto do resultado: simulação, sucesso, parcial e erro' {
         InModuleScope Interface {
             $sim = Get-TextoResultado -Resultados @([pscustomobject]@{ Status = 'Simulado'; Liberado = 1048576; Motivo = '' }) -Simulado $true

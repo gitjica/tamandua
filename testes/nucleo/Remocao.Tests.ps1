@@ -297,3 +297,35 @@ Describe 'Ícones para a grade (só leitura)' {
         ConvertTo-TmdNomeSimples 'Mozilla Firefox (x64 pt-BR)' | Should -Be 'mozillafirefoxx64ptbr'
     }
 }
+
+Describe 'Onde achar o ícone de um programa (só leitura)' {
+    It 'ordem: DisplayIcon, .ico do MSI, exe com o nome do programa, outros exe, desinstalador; nunca msiexec nem unins*' {
+        $sr = Join-Path $TestDrive 'win'
+        $codigo = '{11111111-2222-3333-4444-555555555555}'
+        New-Item -ItemType Directory -Path (Join-Path $sr "Installer\$codigo") -Force | Out-Null
+        Set-Content -LiteralPath (Join-Path $sr "Installer\$codigo\produto.ico") -Value 'x'
+        $pasta = Join-Path $TestDrive 'Acme Editor'
+        New-Item -ItemType Directory -Path $pasta -Force | Out-Null
+        foreach ($f in 'outro.exe', 'AcmeEditor.exe', 'unins000.exe', 'leia.txt') { Set-Content -LiteralPath (Join-Path $pasta $f) -Value 'x' }
+        $antes = $env:SystemRoot
+        try {
+            $env:SystemRoot = $sr
+            $c = @(Get-TmdCandidatosIcone -DisplayIcon 'C:\x\a.exe,0' -Chave $codigo -Nome 'Acme Editor 2.1' -Pasta "`"$pasta`"" -Desinstalador '"C:\Apps\Acme\Update.exe" --uninstall')
+        }
+        finally { $env:SystemRoot = $antes }
+        $c[0] | Should -Be 'C:\x\a.exe,0'
+        $c[1] | Should -BeLike '*\produto.ico'
+        $c[2] | Should -BeLike '*\AcmeEditor.exe'
+        $c[3] | Should -BeLike '*\outro.exe'
+        $c[-1] | Should -Be 'C:\Apps\Acme\Update.exe'
+        ($c -join '|') | Should -Not -Match 'unins000|leia\.txt'
+        @(Get-TmdCandidatosIcone -Nome 'Acme' -Desinstalador 'MsiExec.exe /X{1}') | Where-Object { $_ -match '(?i)msiexec' } | Should -BeNullOrEmpty
+    }
+
+    It 'o primeiro candidato que tem ícone vale; nenhum, nada' {
+        $png = Get-TmdIconePngPrimeiro -Caminhos @('C:\nao\existe.exe', '%SystemRoot%\System32\shell32.dll,3')
+        $png[0..3] | Should -Be @(0x89, 0x50, 0x4E, 0x47)
+        Get-TmdIconePngPrimeiro -Caminhos @('C:\nao\existe.exe') | Should -BeNullOrEmpty
+        Get-TmdIconePngPrimeiro -Caminhos @() | Should -BeNullOrEmpty
+    }
+}

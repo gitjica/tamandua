@@ -195,7 +195,8 @@ function Set-TmdSelecaoCli {
     }
     foreach ($a in $Alvos) {
         $marcar = $false
-        if ($Preset -and @(Get-Propriedade -Objeto $a -Nome 'Presets') -contains $Preset) { $marcar = $true }
+        # Item já aplicado (Desfaz) não entra por preset: marcado, ele seria desfeito. Só por -Itens, de propósito.
+        if ($Preset -and (Get-Propriedade -Objeto $a -Nome 'Desfaz') -ne $true -and @(Get-Propriedade -Objeto $a -Nome 'Presets') -contains $Preset) { $marcar = $true }
         if ($Itens -and $Itens -contains $a.Id) { $marcar = $true }
         if ($a.PSObject.Properties['Selecionado']) { $a.Selecionado = $marcar }
     }

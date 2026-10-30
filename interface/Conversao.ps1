@@ -156,11 +156,18 @@ function Get-ResumoSelecao {
         Irreversiveis   = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $false }).Count
         Reversiveis     = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $true }).Count
         NaLixeira       = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Destino') -eq 'Lixeira' }).Count
+        Desfazendo      = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Desfaz') -eq $true }).Count
     }
 }
 
 # Frase que fecha a pergunta de confirmação: diz se dá para voltar atrás, e como.
 function Get-AvisoConfirmacao {
+    param([Parameter(Mandatory)]$Resumo, [bool]$Especial)
+    $desfaz = if ((Get-ValorPropriedade $Resumo 'Desfazendo') -gt 0) { " $($Resumo.Desfazendo) já aplicado(s) será(ão) DESFEITO(S)." } else { '' }
+    $desfaz + (Get-AvisoReversao -Resumo $Resumo -Especial $Especial)
+}
+
+function Get-AvisoReversao {
     param([Parameter(Mandatory)]$Resumo, [bool]$Especial)
     if ($Resumo.Irreversiveis -gt 0) { return ' Isso não pode ser desfeito.' }
     if ($Resumo.Quantidade -gt 0 -and $Resumo.NaLixeira -eq $Resumo.Quantidade) { return ' Vai para a Lixeira (dá para recuperar de lá).' }
@@ -188,7 +195,8 @@ function Set-SelecaoPreset {
     $n = 0
     foreach ($a in $Alvos) {
         if (-not $a.PSObject.Properties['Selecionado']) { continue }
-        $a.Selecionado = $Preset -ne 'Nenhum' -and @(Get-ValorPropriedade $a 'Presets') -contains $Preset
+        # Item já aplicado (Desfaz): marcado ele seria desfeito, então preset nunca marca.
+        $a.Selecionado = $Preset -ne 'Nenhum' -and (Get-ValorPropriedade $a 'Desfaz') -ne $true -and @(Get-ValorPropriedade $a 'Presets') -contains $Preset
         if ($a.Selecionado) { $n++ }
     }
     $n
@@ -220,9 +228,23 @@ function ConvertTo-AlvoHistorico {
             Nivel        = if ($script:CorStatusHistorico.ContainsKey([string]$o.Status)) { $script:CorStatusHistorico[[string]$o.Status] } else { 'Normal' }
             Selecionavel = $reversivel
             Selecionado  = $false
-            Mudancas     = @(if ($reversivel) { "Desfazer volta o ajuste '$($o.Id)' para o valor salvo antes de ele ser aplicado." })
+            Mudancas     = @(Get-MotivoHistorico -Operacao $o -Acao $acao -Reversivel $reversivel)
         }
     }
+}
+
+# O que o Histórico diz de uma operação no painel de detalhes: como desfazer, ou por que não dá.
+function Get-MotivoHistorico {
+    param($Operacao, [string]$Acao, [bool]$Reversivel)
+    $paginaAjustes = 'Para voltar ao padrão do Windows, marque o ajuste na página Ajustes (o selo diz "aplicado · marcar desfaz").'
+    if ($Reversivel) { return "Desfazer volta o ajuste '$($Operacao.Id)' para o valor salvo antes de ele ser aplicado." }
+    if ($Operacao.Simulado) { return 'Foi só uma simulação: nada mudou, então não há o que desfazer.' }
+    if ($Acao -eq 'ajustar' -and [string]$Operacao.Motivo -eq 'já estava aplicado') { return "Já estava aplicado antes (por outra ferramenta): o Tamanduá não mudou nada aqui. $paginaAjustes" }
+    if ($Acao -eq 'ajustar' -and [string]$Operacao.Status -eq 'Feito') { return "O valor de antes não está mais salvo (o ajuste já foi desfeito ou aplicado de novo depois). $paginaAjustes" }
+    if ($Acao -eq 'ajustar') { return 'Não foi aplicado, então não há o que desfazer.' }
+    if ($Acao -eq 'remover') { return 'Remoção de arquivos: o que foi para a Lixeira se recupera de lá; o resto não volta.' }
+    if ($Acao -eq 'desfazer') { return 'Isto já é um desfazer.' }
+    'Este tipo de operação não tem desfazer.'
 }
 
 # Resumo de Invoke-Acao para a barra de status, com a cor (token do tema) que combina.

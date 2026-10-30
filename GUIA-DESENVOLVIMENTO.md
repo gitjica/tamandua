@@ -259,7 +259,9 @@ Regras:
 - Manifesto com `Visualizacao = 'Grade'` (desinstalar, programas) mostra a página em quadros com ícone; o botão no
   cabeçalho da página troca para lista e volta (a escolha vale por módulo enquanto a janela está aberta). Alvo com
   `Icone` (caminho no formato do `DisplayIcon`: `arquivo` ou `arquivo,índice`, com aspas e variáveis de ambiente)
-  ganha o ícone; sem ícone, o quadro mostra a inicial do nome. O PNG é extraído em segundo plano por
+  ganha o ícone; sem ícone, o quadro mostra a inicial do nome. `Icone` também pode ser uma lista de candidatos
+  (`Get-TmdCandidatosIcone`: DisplayIcon, o .ico do MSI em `Windows\Installer\{código}`, o .exe da pasta de instalação,
+  o atalho do menu Iniciar, o desinstalador); vale o primeiro que tiver ícone. O PNG é extraído em segundo plano por
   `Get-TmdAlvosParaTela` (núcleo, que as duas leituras da janela usam) e vira imagem na janela em `Set-TmdImagensLinha`.
   A imagem tem que ir para a linha como objeto .NET puro (`::new()` e `.PSObject.BaseObject`): embrulhada num
   PSObject, o Binding do WPF não mostra nada e não dá erro.
@@ -393,6 +395,13 @@ Para cada mudança, na ordem:
 
 Desfazer usa o snapshot. Sem snapshot (ex.: ajuste aplicado por outra ferramenta), usa o `PadraoWindows`
 declarado no catálogo e avisa na tela que está restaurando o *padrão do Windows*, não o valor anterior.
+
+Na tela (ajustes e menu-contexto): item com estado `Aplicado` vem com `Desfaz = $true` e o selo
+"aplicado · marcar desfaz"; marcado, o `Invoke-Acao` chama `Undo-TmdAjuste -Ajuste` (snapshot ou padrão do Windows) em
+vez de aplicar. A primeira linha das mudanças (`Get-TmdTextoDesfaz`) diz para onde volta, e a confirmação avisa quantos
+serão desfeitos. **Preset nunca marca item com `Desfaz`** (nem na interface, nem no `-Preset` da CLI): só marcando à
+mão ou com `-Itens`. O Histórico só desfaz o que tem snapshot; cada linha sem caixa diz o motivo no painel de detalhes
+(simulação, "já estava aplicado", remoção de arquivos) e aponta a página Ajustes.
 
 Implementação (`nucleo/MotorAjustes.ps1`, `nucleo/Estado.ps1`):
 

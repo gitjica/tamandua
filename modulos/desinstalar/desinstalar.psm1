@@ -46,7 +46,9 @@ function Get-RegistroPrograma {
                             Instalado     = [string]$k.GetValue('InstallDate')
                             Desinstalador = $desinstalar
                             ParaTodos     = $fonte.Hive -eq 'LocalMachine'
-                            Icone         = [string]$k.GetValue('DisplayIcon')
+                            # Onde achar o ícone (para a grade): DisplayIcon e, sem ele, o que o núcleo acha.
+                            Icone         = @(Get-TmdCandidatosIcone -DisplayIcon ([string]$k.GetValue('DisplayIcon')) -Chave $nomeChave -Nome $nome `
+                                    -Pasta ([string]$k.GetValue('InstallLocation')) -Desinstalador $desinstalar)
                         }
                     }
                     finally { $k.Close() }

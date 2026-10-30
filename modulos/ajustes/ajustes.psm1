@@ -54,13 +54,18 @@ function Find-Alvos {
 
     foreach ($a in Get-AjusteDisponivel -Catalogo $Catalogo -RaizRegistro $RaizRegistro) {
         $acao = Test-EhAcao $a
+        $estado = if ($acao) { 'NaoSeAplica' } else { Get-TmdEstadoAjuste -Ajuste $a -RaizRegistro $RaizRegistro }
+        # Já aplicado (pelo Tamanduá ou por outra ferramenta): marcar desfaz. Preset nunca marca estes.
+        $desfaz = $estado -eq 'Aplicado'
         [pscustomobject]@{
             Id          = $a.id
             Nome        = $a.nome
             Categoria   = $a.categoria
             Caminho     = ''
             Tamanho     = [int64]0
-            Estado      = if ($acao) { 'NaoSeAplica' } else { Get-TmdEstadoAjuste -Ajuste $a -RaizRegistro $RaizRegistro }
+            Estado      = $estado
+            Desfaz      = $desfaz
+            Selo        = if ($desfaz) { 'aplicado · marcar desfaz' } else { '' }
             Detalhe     = $a.descricao
             Nivel       = 'Normal'
             Valor       = $null
@@ -71,7 +76,12 @@ function Find-Alvos {
             Reversivel  = -not $acao
             Presets     = @($a.presets)
             # @( ) por fora: "if (...) { @(...) }" desmonta a lista e uma mudança só viraria texto solto.
-            Mudancas    = @(if ($acao) { "Faz uma vez (não tem desfazer): $($a.descricao)" } else { $a.mudancas | ForEach-Object { Format-MudancaCatalogo -Mudanca $_ } })
+            Mudancas    = @(
+                if ($acao) { "Faz uma vez (não tem desfazer): $($a.descricao)" }
+                else {
+                    if ($desfaz) { Get-TmdTextoDesfaz -Id $a.id }
+                    $a.mudancas | ForEach-Object { Format-MudancaCatalogo -Mudanca $_ }
+                })
         }
     }
 }
@@ -101,6 +111,7 @@ function Invoke-Acao {
         }
         $d = $definicoes[$id]
         if (Test-EhAcao $d) { Invoke-TmdAcaoAjuste -Ajuste $d -Simular:$Simular -Modulo 'ajustes'; continue }
+        if ($alvo.PSObject.Properties['Desfaz'] -and $alvo.Desfaz -eq $true) { Undo-TmdAjuste -Id $id -Ajuste $d -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'ajustes'; continue }
         Set-TmdAjuste -Ajuste $d -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'ajustes'
     }
 }

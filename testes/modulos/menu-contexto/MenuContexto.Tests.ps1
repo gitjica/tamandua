@@ -82,6 +82,18 @@ Describe 'Menu de contexto' {
         Should -Invoke Restart-TmdExplorador -ModuleName menu-contexto -Times 0 -Exactly -Because 'na área de testes o Explorador nunca é reiniciado'
     }
 
+    It 'item já tirado (por outra ferramenta): vem com "marcar desfaz" e marcar devolve ao menu' {
+        $bloq = "$raiz\HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked"
+        foreach ($b in $bloq, "$raiz\HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked") { Set-Valor $b '{11111111-2222-3333-4444-555555555555}' '' }
+        $alvo = @(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'menu-ext-11111111-2222-3333-4444-555555555555'
+        $alvo.Estado | Should -Be 'Aplicado'
+        $alvo.Desfaz | Should -BeTrue
+        $alvo.Selo | Should -Be 'aplicado · marcar desfaz'
+        (Invoke-Acao -RaizRegistro $raiz -Alvos @($alvo)).Status | Should -Be 'Feito'
+        Get-Valor $bloq '{11111111-2222-3333-4444-555555555555}' | Should -BeNullOrEmpty
+        (@(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'menu-ext-11111111-2222-3333-4444-555555555555').Estado | Should -Be 'NaoAplicado'
+    }
+
     It 'simular não escreve; item que não existe nesta máquina vira erro' {
         $r = @(Invoke-Acao -RaizRegistro $raiz -Simular -Alvos @([pscustomobject]@{ Id = 'menu-compartilhar' }, [pscustomobject]@{ Id = 'menu-nao-existe' }))
         $r[0].Status | Should -Be 'Simulado'

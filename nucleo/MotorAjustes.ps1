@@ -81,6 +81,14 @@ function Invoke-TmdAplicarAjuste {
     New-TmdResultadoAjuste -Id $id -Status 'Feito' -Mudancas $descricoes
 }
 
+# Primeira linha das mudanças de um ajuste que já está aplicado: marcado, ele é desfeito (e para onde volta).
+function Get-TmdTextoDesfaz {
+    param([Parameter(Mandatory)][string]$Id)
+    $volta = if (Test-TmdAjusteReversivel -Id $Id) { 'volta ao valor que estava antes de o Tamanduá aplicar' }
+    else { 'volta ao padrão do Windows (foi aplicado antes, por outra ferramenta ou versão, e o valor anterior não foi salvo)' }
+    "Já está aplicado. Marcado, é DESFEITO: $volta."
+}
+
 # Desfaz pelo snapshot (valor que estava antes). Sem snapshot, usa o padrão do Windows do -Ajuste, avisando.
 function Undo-TmdAjuste {
     [CmdletBinding()]

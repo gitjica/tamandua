@@ -276,13 +276,18 @@ function Find-Alvos {
     foreach ($i in Get-ItemMenu -RaizRegistro $RaizRegistro) {
         $ajuste = Get-AjusteItem -Item $i -RaizRegistro $RaizRegistro
         $presets = @(if ($i.ContainsKey('Classico')) { 'Só o menu clássico' }; if ($i.ContainsKey('Recomendado') -or $i.ContainsKey('Classico')) { 'Recomendado' }; 'Limpo ao máximo')
+        $estado = Get-TmdEstadoAjuste -Ajuste $ajuste -RaizRegistro $RaizRegistro
+        # Já aplicado: marcar desfaz (o item volta ao menu; o clássico volta a ser o novo). Preset nunca marca estes.
+        $desfaz = $estado -eq 'Aplicado'
         [pscustomobject]@{
             Id = $i.Id; Nome = $i.Nome; Categoria = $i.Categoria; Caminho = ''; Tamanho = [int64]0
-            Estado = Get-TmdEstadoAjuste -Ajuste $ajuste -RaizRegistro $RaizRegistro
+            Estado = $estado; Desfaz = $desfaz; Selo = $(if ($desfaz) { 'aplicado · marcar desfaz' } else { '' })
             Detalhe = $i.Explicacao; Nivel = 'Normal'; Valor = $null; Risco = $(if ($i.ContainsKey('Risco')) { $i.Risco } else { 'Baixo' })
             Selecionado = $false; Destino = 'NaoSeAplica'; RequerAdmin = [bool]$ajuste.requerAdmin -and -not $RaizRegistro; Reversivel = $true
             Presets = $presets
-            Mudancas = @(foreach ($m in $ajuste.mudancas) {
+            Mudancas = @(
+                if ($desfaz) { Get-TmdTextoDesfaz -Id $i.Id }
+                foreach ($m in $ajuste.mudancas) {
                     if ($m.tipo -eq 'Registro') { "$($m.caminho)\$($m.nome) = (vazio)" } else { "script: $($m.aplicar)" }
                 })
         }
@@ -305,7 +310,11 @@ function Invoke-Acao {
             [pscustomobject]@{ Id = $id; Status = 'Erro'; Liberado = [int64]0; Motivo = 'item não existe nesta máquina'; Mudancas = @() }
             continue
         }
-        $r = Set-TmdAjuste -Ajuste (Get-AjusteItem -Item $porId[$id] -RaizRegistro $RaizRegistro) -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'menu-contexto'
+        $ajuste = Get-AjusteItem -Item $porId[$id] -RaizRegistro $RaizRegistro
+        $r = if ($a.PSObject.Properties['Desfaz'] -and $a.Desfaz -eq $true) {
+            Undo-TmdAjuste -Id $id -Ajuste $ajuste -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'menu-contexto'
+        }
+        else { Set-TmdAjuste -Ajuste $ajuste -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'menu-contexto' }
         if ($r.Status -eq 'Feito' -and $r.Motivo -ne 'já estava aplicado') { $mudou = $true }
         $r
     }

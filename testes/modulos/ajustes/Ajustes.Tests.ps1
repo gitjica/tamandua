@@ -258,6 +258,37 @@ Describe 'Find-Alvos e Invoke-Acao' {
         (@(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'expl-extensoes').Estado | Should -Be 'Aplicado'
     }
 
+    It 'já aplicado por outra ferramenta (sem valor salvo): marcar desfaz, voltando ao padrão do Windows' {
+        $ext = $catalogo | Where-Object id -eq 'expl-extensoes'
+        # Como o WinUtil faz: escreve direto, sem o Tamanduá guardar nada.
+        New-Item -Path "$raiz\HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Force | Out-Null
+        Set-ItemProperty -Path "$raiz\HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name HideFileExt -Value 0 -Type DWord
+        $alvo = @(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'expl-extensoes'
+        $alvo.Estado | Should -Be 'Aplicado'
+        $alvo.Desfaz | Should -BeTrue
+        $alvo.Selo | Should -Be 'aplicado · marcar desfaz'
+        $alvo.Mudancas[0] | Should -Match 'DESFEITO: volta ao padrão do Windows'
+        (@(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'expl-ocultos').Desfaz | Should -BeFalse
+
+        (Invoke-Acao -Alvos @($alvo) -Simular -RaizRegistro $raiz).Status | Should -Be 'Simulado'
+        Get-TmdEstadoAjuste -Ajuste $ext -RaizRegistro $raiz | Should -Be 'Aplicado' -Because 'simular não muda nada'
+        $r = Invoke-Acao -Alvos @($alvo) -RaizRegistro $raiz
+        $r.Status | Should -Be 'Feito'
+        $r.Motivo | Should -Match 'padrão do Windows'
+        (Get-ItemProperty -Path "$raiz\HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced").HideFileExt | Should -Be 1
+        Get-TmdEstadoAjuste -Ajuste $ext -RaizRegistro $raiz | Should -Be 'NaoAplicado'
+    }
+
+    It 'aplicado pelo Tamanduá: marcar desfaz para o valor de antes, não para o padrão' {
+        New-Item -Path "$raiz\HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Force | Out-Null
+        Set-ItemProperty -Path "$raiz\HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name HideFileExt -Value 7 -Type DWord
+        Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'expl-extensoes' }) -RaizRegistro $raiz | Out-Null
+        $alvo = @(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'expl-extensoes'
+        $alvo.Mudancas[0] | Should -Match 'DESFEITO: volta ao valor que estava antes'
+        (Invoke-Acao -Alvos @($alvo) -RaizRegistro $raiz).Status | Should -Be 'Feito'
+        (Get-ItemProperty -Path "$raiz\HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced").HideFileExt | Should -Be 7
+    }
+
     It 'ajuste desconhecido vira erro' {
         (Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'formatar-disco' }) -RaizRegistro $raiz).Status | Should -Be 'Erro'
     }
@@ -311,6 +342,14 @@ Describe 'Pela linha de comando' {
         # O desfazer não recebe a chave de teste: ela vem do estado salvo.
         (Invoke-Tamandua -Raiz $projeto -Argumentos 'desfazer', 'priv-id-anuncios', '-Sim').Codigo | Should -Be 0
         Get-TmdEstadoAjuste -Ajuste ($catalogo | Where-Object id -eq 'priv-id-anuncios') -RaizRegistro $raiz | Should -Be 'NaoAplicado'
+    }
+
+    It '-Preset nunca marca o que já está aplicado (seria desfeito)' {
+        Invoke-Tamandua -Raiz $projeto -Argumentos 'ajustes', '-Itens', 'priv-id-anuncios', '-Sim' -Ambiente $ambiente | Out-Null
+        $r = Invoke-Tamandua -Raiz $projeto -Argumentos 'ajustes', '-Preset', 'Essencial', '-Simular' -Ambiente $ambiente
+        $r.Codigo | Should -Be 0
+        $r.Saida | Should -Match '\[ \] Desativar o ID de anúncios'
+        Get-TmdEstadoAjuste -Ajuste ($catalogo | Where-Object id -eq 'priv-id-anuncios') -RaizRegistro $raiz | Should -Be 'Aplicado'
     }
 
     It '-Itens com -Simular mostra a mudança e não escreve' {
