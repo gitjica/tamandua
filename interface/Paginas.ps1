@@ -37,13 +37,7 @@ function Initialize-TmdTela {
     $c.ListaModulos.Add_SelectionChanged({ Invoke-TmdProtegido { Open-TmdPaginaSelecionada } })
     $c.ListaAlvos.Add_SelectionChanged({ Invoke-TmdProtegido { Show-TmdDetalhe } })
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
-    $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho $script:Estado.Caminho -Forcar } })
-    # Duplo clique (ou Enter) num item navegável abre a pasta dele na mesma página.
-    $c.ListaAlvos.Add_MouseDoubleClick({ Invoke-TmdProtegido { Open-TmdItemSelecionado } })
-    $c.ListaAlvos.Add_KeyDown({
-            $evento = $args[1]
-            if ($evento.Key -eq 'Return') { Invoke-TmdProtegido { Open-TmdItemSelecionado }; $evento.Handled = $true }
-        })
+    $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Forcar } })
     $c.BotaoCancelar.Add_Click({ Invoke-TmdProtegido { Stop-TmdCargaPagina } })
     $c.BotaoSimular.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoSimular } })
     $c.BotaoAplicar.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoAplicar } })
@@ -82,7 +76,7 @@ function Initialize-TmdTela {
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'F5') {
-                Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho $script:Estado.Caminho -Forcar }
+                Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Forcar }
                 $e.Handled = $true
             }
         })
@@ -162,6 +156,7 @@ function Start-TmdCargaModulos {
             $modulos = @($saida)
             $disponiveis = @($modulos | Where-Object { $_.Estado -eq 'ok' }).Count
             $texto = "$disponiveis de $($modulos.Count) módulos disponíveis"
+            if (-not (Test-TmdAdmin)) { $texto += ' · sem administrador: o que tem escudo pede permissão na hora' }
             $script:Estado.Modulos = $modulos + $script:PaginaHistorico
             $script:Tela.Controles.ListaModulos.ItemsSource = ConvertTo-ItemNavegacao -Modulos $script:Estado.Modulos
             if ($avisos) { Set-TmdStatus "$texto · $($avisos -join ' · ')" 'Aviso' } else { Set-TmdStatus $texto }
@@ -194,31 +189,20 @@ function Get-TmdModuloAtual {
     @($script:Estado.Modulos | Where-Object { $_.Nome -eq $script:Estado.ModuloAtual })[0]
 }
 
-function Open-TmdItemSelecionado {
-    $linha = $script:Tela.Controles.ListaAlvos.SelectedItem
-    if ($null -eq $linha -or $linha.Tipo -ne 'Alvo' -or -not $linha.Alvo) { return }
-    if ((Get-ValorPropriedade $linha.Alvo 'Navegavel') -ne $true) { return }
-    Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho ([string](Get-ValorPropriedade $linha.Alvo 'Caminho'))
-}
-
 # -StatusDepois: texto (e cor) para a barra de status quando a página terminar de carregar, no lugar do padrão.
-# -Caminho: pasta aberta, em módulos que navegam (Find-Alvos com -Caminho). Trocar de módulo volta ao início dele.
 # -Forcar: lê de novo mesmo que a página esteja no cache (Atualizar, F5, depois de uma ação).
 function Open-TmdPagina {
-    param([string]$Nome, $StatusDepois, [string]$Caminho = '', [switch]$Forcar)
+    param([string]$Nome, $StatusDepois, [switch]$Forcar)
     if (-not $Nome) { return }
 
     $modulo = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $Nome })[0]
     $c = $script:Tela.Controles
     Stop-TmdCargaPagina -Silencioso
     $script:Estado.ModuloAtual = $Nome
-    $script:Estado.Caminho = $Caminho
     $script:Estado.Alvos = @()
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
-    $c.SubtituloPagina.Text = if ($Caminho) { "$($modulo.Grupo) · $Caminho" }
-    elseif ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" }
-    else { $modulo.Grupo }
+    $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
     $c.BotaoSimular.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoAplicar.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoSimular.IsEnabled = $false
@@ -238,12 +222,12 @@ function Open-TmdPagina {
 
     $c.BotaoAtualizar.IsEnabled = $true
     $especial = (Get-ValorPropriedade $modulo 'Especial') -eq $true
-    $guardavel = -not $Caminho -and (Test-TmdPaginaGuardavel -Modulo $modulo)
+    $guardavel = Test-TmdPaginaGuardavel -Modulo $modulo
     # A primeira página, lida enquanto a lista de módulos carregava: usa uma vez e descarta.
     $inicial = $script:Estado.Inicial
     # Ela é sempre a primeira do catálogo; abrir outra página antes disso descarta a leitura inicial.
     if ($inicial -and -not $inicial.Pronto -and $Nome -ne @($script:Estado.Modulos)[0].Nome) { $script:Estado.Inicial = $inicial = $null }
-    if ($inicial -and -not $Forcar -and -not $Caminho) {
+    if ($inicial -and -not $Forcar) {
         if (-not $inicial.Pronto) {
             Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Carregando $($modulo.Titulo)" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
             Set-TmdStatus 'Lendo…'
@@ -278,7 +262,7 @@ function Open-TmdPagina {
         return
     }
     $codigo = if ($especial) { $script:ScriptHistorico } else { $script:ScriptBuscarAlvos }
-    $parametros = if ($especial) { @{ Nucleo = $script:Estado.Nucleo } } else { @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $Nome; Caminho = $Caminho } }
+    $parametros = if ($especial) { @{ Nucleo = $script:Estado.Nucleo } } else { @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $Nome } }
     $script:Estado.TarefaPagina = Start-TmdTarefa -Script $codigo -Parametros $parametros `
         -Contexto @{ Nome = $Nome; StatusDepois = $StatusDepois; Especial = $especial; Guardavel = $guardavel; Geracao = $script:Estado.Geracao } `
         -AoTerminar {
@@ -350,7 +334,7 @@ function Start-TmdAntecipacao {
         if ($script:Estado.Cache.ContainsKey($nome)) { continue }
         if ($nome -eq $script:Estado.ModuloAtual -and $script:Estado.TarefaPagina) { continue }
         $tarefa = Start-TmdTarefa -Script $script:ScriptBuscarAlvos `
-            -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Caminho = '' } `
+            -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome } `
             -Contexto @{ Nome = $nome; Geracao = $script:Estado.Geracao } `
             -AoTerminar {
             param($saida, $erro)
@@ -586,9 +570,6 @@ function Show-TmdDetalhe {
     else { $linha.Detalhe }
     $c.DetalheEstado.Text = Get-TextoEstadoAlvo -Linha $linha
     $c.DetalheId.Text = "id: $($linha.Id)"
-    if ((Get-ValorPropriedade $linha.Alvo 'Navegavel') -eq $true) {
-        $c.DetalheEstado.Text = "Clique duas vezes (ou Enter) para abrir.`n$(Get-ValorPropriedade $linha.Alvo 'Caminho')"
-    }
 }
 
 # Avisa quem abriu a janela (testes, captura de tela) uma única vez, quando a primeira página terminou.

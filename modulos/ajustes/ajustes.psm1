@@ -30,11 +30,35 @@ function Get-CatalogoAjustes {
     foreach ($a in ([IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json)) { $a }
 }
 
+# Na área de testes (registro redirecionado) só entram ajustes que são só registro e não pedem admin: serviço e
+# script mexeriam no sistema de verdade, e o que pede admin chamaria o UAC (os testes do motor cobrem esses).
+function Get-AjusteDisponivel {
+    param([string]$Catalogo, [string]$RaizRegistro)
+    foreach ($a in Get-CatalogoAjustes -Arquivo $Catalogo) {
+        if ($RaizRegistro -and ($a.requerAdmin -or @($a.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -gt 0)) { continue }
+        $a
+    }
+}
+
+# Primeiro item da página: não é um ajuste (não tem estado nem desfazer), é a rede de segurança antes deles.
+$script:IdPontoRestauracao = 'seg-ponto-restauracao'
+# Ordem também é a ordem dos botões de preset na janela (vêm na ordem em que aparecem).
+$script:PresetsPontoRestauracao = @('Mínimo', 'Essencial', 'Avançado', 'Notebook', 'Desempenho')
+
 # Um alvo por ajuste, com o estado lido da máquina agora. Nada vem marcado: quem escolhe é você (ou um preset).
 function Find-Alvos {
     param([string]$Catalogo = $script:ArquivoCatalogo, [string]$RaizRegistro = (Get-RaizRegistroPadrao))
 
-    foreach ($a in Get-CatalogoAjustes -Arquivo $Catalogo) {
+    if (-not $RaizRegistro) {
+        [pscustomobject]@{
+            Id = $script:IdPontoRestauracao; Nome = 'Criar ponto de restauração antes'; Categoria = 'Segurança'; Caminho = ''
+            Tamanho = [int64]0; Estado = 'NaoSeAplica'; Nivel = 'Normal'; Valor = $null; Risco = 'Baixo'
+            Detalhe = 'Um ponto de restauração do Windows antes dos outros ajustes marcados: se algo der errado, dá para voltar o sistema inteiro.'
+            Selecionado = $false; Destino = 'NaoSeAplica'; RequerAdmin = $true; Reversivel = $false; Presets = $script:PresetsPontoRestauracao
+            Mudancas = @('Liga a Proteção do Sistema no disco do Windows, se estiver desligada.', 'Cria o ponto (Checkpoint-Computer); leva de alguns segundos a alguns minutos.')
+        }
+    }
+    foreach ($a in Get-AjusteDisponivel -Catalogo $Catalogo -RaizRegistro $RaizRegistro) {
         [pscustomobject]@{
             Id          = $a.id
             Nome        = $a.nome
@@ -66,9 +90,15 @@ function Invoke-Acao {
     )
 
     $definicoes = @{}
-    foreach ($a in Get-CatalogoAjustes -Arquivo $Catalogo) { $definicoes[$a.id] = $a }
-    foreach ($alvo in $Alvos) {
+    foreach ($a in Get-AjusteDisponivel -Catalogo $Catalogo -RaizRegistro $RaizRegistro) { $definicoes[$a.id] = $a }
+    # O ponto de restauração vai antes de qualquer ajuste, venha em que posição vier.
+    $ordenados = @($Alvos | Where-Object { [string]$_.Id -eq $script:IdPontoRestauracao }) + @($Alvos | Where-Object { [string]$_.Id -ne $script:IdPontoRestauracao })
+    foreach ($alvo in $ordenados) {
         $id = [string]$alvo.Id
+        if ($id -eq $script:IdPontoRestauracao -and -not $RaizRegistro) {
+            New-TmdPontoRestauracao -Id $id -Simular:$Simular -Modulo 'ajustes'
+            continue
+        }
         if (-not $definicoes.ContainsKey($id)) {
             [pscustomobject]@{ Id = $id; Status = 'Erro'; Liberado = [int64]0; Motivo = 'ajuste desconhecido'; Mudancas = @() }
             continue

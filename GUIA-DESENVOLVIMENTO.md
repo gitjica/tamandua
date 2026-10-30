@@ -259,7 +259,6 @@ Regras:
 - Alvo pode ter `Selo` (texto do selo, ex.: "instalado"); a cor continua vindo do `Estado`.
 - Módulo que registra operação sem apagar nada (ex.: programas) usa `Write-TmdOperacao`; arquivo temporário próprio usa
   `New-TmdArquivoTemporario` / `Remove-TmdArquivoTemporario` (só `tamandua-*` direto no TEMP).
-- **Módulos que navegam** (nenhum hoje; o `analisar` usava): `Find-Alvos -Caminho <pasta>`; sem `-Caminho`, mostram um ponto de partida.
   Alvos com `Navegavel = $true` e `Caminho` abrem com duplo clique/Enter na interface (o subtítulo mostra a pasta,
   Atualizar/F5 continuam nela) e com `tamandua <módulo> <pasta>` na CLI. O núcleo só passa `-Caminho` se a função tiver esse parâmetro.
 - Nenhum módulo usa `Write-Host` nem toca em WPF. Retorna objetos; quem desenha é a CLI (`Saida.ps1`) ou a interface.
@@ -407,9 +406,10 @@ Implementação (`nucleo/MotorAjustes.ps1`, `nucleo/Estado.ps1`):
 
 ### 7.4 Ponto de restauração
 
-Antes do **primeiro lote** de mudanças de sistema numa sessão (ajustes, recursos, atualizações, otimizar),
-oferece criar ponto de restauração (`Checkpoint-Computer`, precisa de admin e da Proteção do Sistema ligada).
-O Windows limita a 1 ponto a cada 24h por padrão — se não der, avisa o motivo em vez de fingir que criou.
+Implementado como o primeiro item da página Ajustes ("Criar ponto de restauração antes", presets Mínimo, Essencial, Avançado,
+Notebook e Desempenho): `Invoke-Acao` sempre o roda antes dos ajustes marcados. `New-TmdPontoRestauracao` (núcleo) liga a
+Proteção do Sistema no disco do Windows se estiver desligada e zera `SystemRestorePointCreationFrequency` **só durante** a
+criação (o WinUtil deixa zerado), para não esbarrar no limite de 1 ponto a cada 24 h. Falhou = `Erro` com o motivo.
 
 ### 7.5 Confirmação e modos
 
@@ -424,7 +424,10 @@ Na interface: o botão de executar sempre abre um resumo ("Vai alterar 7 itens, 
 
 ### 7.6 Admin
 
-- O programa roda sem admin. Alvos com `RequerAdmin = $true` aparecem marcados com um escudo.
+- Ao abrir a janela (`tamandua` sem comando), pede admin uma vez, como o WinUtil (`Request-TmdAdminAoAbrir`): aceitou, abre
+  outra cópia como administrador e esta termina; recusou, abre assim mesmo e a barra de status avisa que o que tem escudo pede
+  permissão na hora. Comandos da CLI não pedem nada ao abrir. Testes: `TAMANDUA_NAO_ELEVAR=1` (o `Ajudantes.ps1` liga).
+- Sem admin, alvos com `RequerAdmin = $true` aparecem marcados com um escudo.
 - Ao executar, os alvos que precisam de admin vão num **único** processo elevado (um só prompt do UAC por lote),
   que roda o mesmo núcleo e devolve os `Resultado` por arquivo JSON temporário.
   Implementado (`nucleo/Elevacao.ps1`): CLI e interface chamam `Invoke-TmdAcaoModulo`; se o manifesto tem `RequerAdmin = $true`
@@ -467,37 +470,45 @@ Tipos de mudança suportados pelo motor:
 | `tipo` | Campos | Verificação de estado |
 |---|---|---|
 | `Registro` | `caminho`, `nome`, `valor`, `tipoValor`, `padraoWindows` (`null` = não existe) | lê o valor |
-| `Servico` | `nome`, `inicializacao` (`Automatic`, `Manual`, `Disabled`, `AutomaticDelayedStart`), `padraoWindows` | lê `StartType` |
+| `Servico` | `nome`, `inicializacao` (`Automatic`, `Manual`, `Disabled`, `AutomaticDelayedStart`), `padraoWindows` | lê `Services\<nome>\Start` no registro (CIM levava ~100 ms por serviço) |
 | `Tarefa` | `caminho`, `nome`, `habilitada`, `padraoWindows` | lê estado da tarefa |
-| `Appx` | `pacote` | pacote instalado ou não. Remoção de Appx é **risco Alto** e não reversível pelo motor (reinstalação via Store) |
 | `Script` | `aplicar`, `desfazer`, `verificar` | roda `verificar`; sem `verificar`, estado = `Desconhecido` |
+
+Scripts rodam dentro do núcleo e podem usar `Read-TmdRegistro`/`Write-TmdRegistro`. Comando externo que falhar precisa lançar
+(`if ($LASTEXITCODE) { throw ... }`), senão o motor acha que deu certo. `verificar` roda toda vez que a página abre: precisa ser
+rápido e não exigir admin (sem admin, lançar = `Desconhecido`). Remoção de Appx, OneDrive, Edge e afins é `Script` com
+`desfazer` que reinstala pelo winget/Store, e chave inteira (menu clássico) é `Script` que cria/apaga a chave.
 
 Regras do catálogo (verificadas por teste automático em **todo** item):
 
-- `id` único, minúsculo, com prefixo da categoria.
+- `id` único, minúsculo, com prefixo (`priv-`, `sis-`, `expl-`, `barra-`, `aparencia-`, `energia-`, `nav-`, `avanc-`...).
 - Toda mudança `Registro`/`Servico`/`Tarefa` tem `padraoWindows`.
-- Todo `Script` tem `desfazer`; sem `verificar` só é aceito com `risco` ≥ `Medio`.
-- Caminho de registro começa com `HKCU:` ou `HKLM:`; `HKLM:` exige `requerAdmin: true`.
-- Ajustes que mexem em segurança (Defender, UAC, SmartScreen, firewall, BitLocker) **não entram** no catálogo.
+- Todo `Script` tem `desfazer` e compila; sem `verificar` só é aceito com `risco` ≥ `Medio`.
+- Caminho de registro começa com `HKCU:`, `HKLM:` ou `HKU:`; `HKLM:`, `HKU:`, serviço e tarefa exigem `requerAdmin: true`.
+- O que mexe em segurança (Defender, UAC, SmartScreen, firewall, BitLocker) só existe na categoria
+  **Avançado (por sua conta e risco)**, com risco Alto e fora de qualquer preset. Nada de `priv-`/`sis-` toca nisso.
 
-Categorias iniciais (seleção revisada do que o WinUtil oferece):
+Catálogo atual: todos os tweaks do WinUtil (`config/tweaks.json`), 65 ajustes + o ponto de restauração, cada um com
+"(WinUtil: nome original)" na descrição. Diferenças de propósito:
+- Telemetria não mexe no Defender: o envio de amostras virou o ajuste avançado `avanc-defender-sem-amostras`.
+- Otimização de Entrega fica só no módulo Atualizações (mesmo valor; dois módulos com snapshot do mesmo valor se atrapalham).
+- Serviços em manual deixa o Compartilhamento de Internet em manual, não desligado (o Hotspot móvel continua).
+- Remover Edge não usa `--delete-profile` (favoritos e senhas ficam). A lista da Adobe para o hosts é filtrada linha a linha.
+- Copilot/Recall por política reversível + remoção do app (o WinUtil mexe no `EndOfLife` do Appx, sem volta).
+- Ficaram de fora: Disk Cleanup e Temporários (o `limpar` e o `otimizar` fazem, sem `/ResetBase`), DNS e O&O ShutUp10.
+- Os três de IPv6 escrevem o mesmo valor: a descrição avisa para escolher um.
 
-- **Privacidade** (baixo): telemetria, histórico de atividades, rastreamento de localização, ID de anúncios, recursos de consumidor (apps sugeridos), sugestões e Bing na busca do Iniciar.
-- **Explorer e interface** (baixo): mostrar extensões, arquivos ocultos, menu de contexto clássico, barra de tarefas à esquerda, tema escuro, desativar descoberta automática de pastas, Início/Galeria no Explorer, "Finalizar tarefa" no botão direito.
-- **Desempenho** (médio): efeitos visuais para desempenho, apps em segundo plano, Game Mode, aceleração do mouse, plano de energia "Desempenho máximo" (com aviso para notebooks), otimização de entrega.
-- **Sistema** (médio/alto): hibernação, Armazenamento Reservado, Storage Sense, caminhos longos, BSoD/logon detalhados, IPv4 preferido, remover widgets, Copilot/recursos de IA.
-- **Remoções** (alto, desmarcado, não reversível pelo motor): OneDrive, Edge, apps pré-instalados (Appx).
+**Presets**: cada ajuste lista os presets de que faz parte, sem arquivo separado. Os do WinUtil (`config/preset.json`):
+`Mínimo` ⊂ `Essencial` ⊂ `Avançado` (teste garante a inclusão; Mínimo e Essencial só risco baixo). Mais: `Notebook`
+(nada que gaste bateria nem desligue a hibernação; porcentagem da bateria, sem rede na espera, apps em segundo plano),
+`Desempenho` (PC de mesa: efeitos visuais, plano Desempenho Máximo, Modo de Jogo, sem hibernação, mouse sem aceleração),
+`Privacidade` e `Explorador`. Aplicar preset **só marca** os itens; o usuário ainda revisa e confirma. A ordem dos botões é a
+de aparição (o ponto de restauração vem primeiro e define Mínimo, Essencial, Avançado, Notebook, Desempenho). O mecanismo é
+genérico: qualquer módulo cujos alvos tenham `Presets` ganha os botões "Marcar:" e `-Preset <nome>` na CLI; `-Itens a,b` marca por id.
 
-**Presets**: cada ajuste lista os presets de que faz parte (`"presets": ["Essencial", "Privacidade"]`), sem arquivo separado.
-Iniciais: `Essencial` (só risco baixo), `Privacidade`, `Explorador`. Aplicar preset **só marca** os itens; o usuário ainda
-revisa e confirma. O mecanismo é genérico: qualquer módulo cujos alvos tenham `Presets` ganha os botões "Marcar:" na interface
-e `-Preset <nome>` na CLI; `-Itens a,b` marca por id.
-
-Primeira versão do catálogo (`modulos/ajustes/ajustes.json`): 14 ajustes, todos em `HKCU`, sem admin. Cada ajuste tem teste
-de ida e volta (aplica → `Aplicado` → desfaz → nenhum valor sobra) gerado automaticamente a partir do catálogo.
-
-Ainda não suportado pelo motor (fica para quando houver necessidade): criar/apagar **chaves** inteiras (ex.: menu de contexto
-clássico do Windows 11, que depende da existência de uma chave) e remoção de Appx.
+Testes: cada ajuste que é só registro tem ida e volta (aplica → `Aplicado` → desfaz → nenhum valor sobra) na chave de teste,
+inclusive HKLM e HKU (redirecionados). Serviços vão por Mock. Na área de testes (`-RaizRegistro`/`TAMANDUA_REGISTRO_TESTE`)
+o módulo só mostra ajustes de registro sem admin, e o motor recusa serviço e tarefa — nada de teste mexe no sistema.
 
 **Perfis**: o usuário pode exportar/importar sua seleção (ajustes + programas) como JSON em `%APPDATA%\Tamandua\perfis\` —
 útil para configurar uma máquina nova igual à antiga.
@@ -521,7 +532,8 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
 | `historico` (núcleo) | Log de operações, com desfazer por item | — | — | Mole |
 
 `analisar` e `purgar` existiram e foram retirados (lentos e pouco usados; para ver o que ocupa o disco, o WizTree faz melhor).
-O suporte do núcleo a módulos que navegam (`Find-Alvos -Caminho`) continua, testado com um módulo falso.
+A navegação por pastas que só eles usavam (`Find-Alvos -Caminho`, duplo clique para abrir) também saiu: argumento solto depois
+do nome do módulo na CLI é erro.
 
 ### Proteções específicas
 

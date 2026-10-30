@@ -27,6 +27,10 @@ function Invoke-TmdAplicarAjuste {
 
     $id = [string](Get-Propriedade $Ajuste 'id')
     $mudancas = @(Get-TmdMudancaAjuste -Ajuste $Ajuste)
+    # Área de testes: só registro, que vai todo para a chave de teste (serviço e script mexeriam no sistema de verdade).
+    if ($RaizRegistro -and @($mudancas | Where-Object { $_.Tipo -in 'Servico', 'Tarefa' }).Count -gt 0) {
+        throw "ajuste $id mexe em serviço ou tarefa: não roda na área de testes"
+    }
     # Simular só lê (ler HKLM não precisa de admin); só escrever exige.
     if (-not $Simular -and (Get-Propriedade $Ajuste 'requerAdmin') -eq $true -and -not (Test-TmdAdministrador)) {
         return New-TmdResultadoAjuste -Id $id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador'
@@ -47,7 +51,7 @@ function Invoke-TmdAplicarAjuste {
     foreach ($e in $snapshotOriginal) { $entradas.Add($e) }
     $chaves = @($snapshotOriginal | ForEach-Object { $_.Chave })
     foreach ($p in $pendentes) {
-        $entrada = New-TmdEntradaSnapshot -Mudanca $p.Mudanca -Antes $p.Antes -RaizRegistro $RaizRegistro
+        $entrada = New-TmdEntradaSnapshot -Mudanca $p.Mudanca -Antes $p.Antes -RaizRegistro $RaizRegistro -RequerAdmin ((Get-Propriedade $Ajuste 'requerAdmin') -eq $true)
         if ($chaves -notcontains $entrada.Chave) { $entradas.Add($entrada) }
     }
     Save-TmdSnapshot -Id $id -Entradas $entradas.ToArray()
@@ -105,7 +109,7 @@ function Invoke-TmdDesfazerAjuste {
     $itens = @($entradas | ForEach-Object { ConvertFrom-TmdEntradaSnapshot -Entrada $_ })
     # Onde desfazer: o lugar salvo no snapshot; snapshots antigos, sem isso, usam o -RaizRegistro recebido.
     foreach ($it in $itens) { if (-not $it.Raiz) { $it.Raiz = $RaizRegistro } }
-    $precisaAdmin = @($itens | Where-Object { $_.Mudanca.Tipo -in 'Servico', 'Tarefa' -or ($_.Mudanca.Tipo -eq 'Registro' -and -not $_.Raiz -and $_.Mudanca.Caminho -like 'HKLM:*') }).Count -gt 0
+    $precisaAdmin = @($entradas | Where-Object { Test-TmdEntradaPrecisaAdmin $_ }).Count -gt 0
     $descricoes = @($itens | ForEach-Object { "volta $(Get-TmdChaveMudanca $_.Mudanca) para $(Format-TmdEstado -Mudanca $_.Mudanca -Estado $_.Antes)" })
     if ($Simular) { return New-TmdResultadoAjuste -Id $Id -Status 'Simulado' -Mudancas $descricoes }
     if ($precisaAdmin -and -not (Test-TmdAdministrador)) {
@@ -159,17 +163,59 @@ function Invoke-TmdRestaurarPadrao {
     New-TmdResultadoAjuste -Id $id -Status 'Feito' -Motivo $aviso -Mudancas $descricoes
 }
 
-# Desfazer este ajuste precisa de admin? (registro em HKLM fora da área de testes, serviço ou tarefa)
+# Desfazer este ajuste precisa de admin? (registro em HKLM/HKU fora da área de testes, serviço, tarefa ou script de ajuste que pedia admin)
 function Test-TmdDesfazerPrecisaAdmin {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Id)
     try { $entradas = Read-TmdSnapshot -Id $Id } catch { return $false }
-    foreach ($e in $entradas) {
-        $tipo = [string](Get-Propriedade $e 'Tipo')
-        if ($tipo -in 'Servico', 'Tarefa') { return $true }
-        if ($tipo -eq 'Registro' -and -not (Get-Propriedade $e 'RaizRegistro') -and ([string](Get-Propriedade $e 'Caminho')) -like 'HKLM:*') { return $true }
+    @($entradas | Where-Object { Test-TmdEntradaPrecisaAdmin $_ }).Count -gt 0
+}
+
+function Test-TmdRegistroDoSistema {
+    param([string]$Caminho)
+    $Caminho -like 'HKLM:*' -or $Caminho -like 'HKU:*'
+}
+
+function Test-TmdEntradaPrecisaAdmin {
+    param($Entrada)
+    switch ([string](Get-Propriedade $Entrada 'Tipo')) {
+        'Registro' { return -not (Get-Propriedade $Entrada 'RaizRegistro') -and (Test-TmdRegistroDoSistema ([string](Get-Propriedade $Entrada 'Caminho'))) }
+        'Script' { return (Get-Propriedade $Entrada 'RequerAdmin') -ne $false }
+        default { return $true }
     }
-    $false
+}
+
+# Ponto de restauração do Windows antes de mexer no sistema (o "Create Restore Point" do WinUtil). Liga a Proteção do
+# Sistema no disco do Windows se estiver desligada e libera criar mesmo com outro ponto nas últimas 24 h (só durante a criação).
+function New-TmdPontoRestauracao {
+    [CmdletBinding()]
+    param([string]$Id = 'seg-ponto-restauracao', [string]$Descricao = 'Tamanduá', [switch]$Simular, [string]$Modulo = 'ajustes')
+    $resultado = if ($Simular) { New-TmdResultadoAjuste -Id $Id -Status 'Simulado' -Mudancas @("cria um ponto de restauração em $env:SystemDrive") }
+    elseif (-not (Test-TmdAdministrador)) { New-TmdResultadoAjuste -Id $Id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador' }
+    else {
+        try {
+            Invoke-TmdCriarPontoRestauracao -Descricao $Descricao
+            New-TmdResultadoAjuste -Id $Id -Status 'Feito' -Mudancas @("ponto de restauração criado em $env:SystemDrive")
+        }
+        catch { New-TmdResultadoAjuste -Id $Id -Status 'Erro' -Motivo (Get-TmdExcecaoInterna $_.Exception).Message }
+    }
+    Write-TmdOperacao -Modulo $Modulo -Id $Id -Acao 'criar' -Caminho 'Ponto de restauração' -Status $resultado.Status -Motivo $resultado.Motivo -Simulado ([bool]$Simular)
+    $resultado
+}
+
+# Isolado para os testes trocarem por Mock.
+function Invoke-TmdCriarPontoRestauracao {
+    param([string]$Descricao)
+    Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction Stop
+    $chave = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\SystemRestore'
+    $nome = 'SystemRestorePointCreationFrequency'
+    $antes = Read-TmdRegistro -Caminho $chave -Nome $nome
+    Write-TmdRegistro -Caminho $chave -Nome $nome -Valor 0 -TipoValor 'DWord'
+    try { Checkpoint-Computer -Description $Descricao -RestorePointType 'MODIFY_SETTINGS' -ErrorAction Stop }
+    finally {
+        if ($antes.Existe) { Write-TmdRegistro -Caminho $chave -Nome $nome -Valor $antes.Valor -TipoValor $antes.TipoValor }
+        else { Remove-TmdValorRegistro -Caminho $chave -Nome $nome }
+    }
 }
 
 # Aplicado | NaoAplicado | Parcial | Desconhecido, lido da máquina agora.
@@ -222,8 +268,8 @@ function Get-TmdMudancaAjuste {
         }
         switch ($tipo) {
             'Registro' {
-                if ($m.Caminho -notmatch '^(HKCU|HKLM):\\.+') { throw "ajuste $id, mudança $($i): caminho de registro precisa começar com HKCU:\ ou HKLM:\" }
-                if ($m.Caminho -like 'HKLM:*' -and -not $requerAdmin) { throw "ajuste $id, mudança $($i): HKLM exige requerAdmin" }
+                if ($m.Caminho -notmatch '^(HKCU|HKLM|HKU):\\.+') { throw "ajuste $id, mudança $($i): caminho de registro precisa começar com HKCU:\, HKLM:\ ou HKU:\" }
+                if ((Test-TmdRegistroDoSistema $m.Caminho) -and -not $requerAdmin) { throw "ajuste $id, mudança $($i): HKLM e HKU exigem requerAdmin" }
                 if ($m.TipoValor -notin $script:TiposValor) { throw "ajuste $id, mudança $($i): tipoValor '$($m.TipoValor)' inválido" }
                 if ($null -eq $m.Valor) { throw "ajuste $id, mudança $($i): falta o valor" }
             }
@@ -336,9 +382,9 @@ function Get-TmdEstadoPadrao {
 
 # Guarda também onde a mudança foi feita (RaizRegistro): desfazer volta no mesmo lugar, mesmo que quem desfaz não saiba.
 function New-TmdEntradaSnapshot {
-    param([Parameter(Mandatory)]$Mudanca, [Parameter(Mandatory)]$Antes, [string]$RaizRegistro = '')
+    param([Parameter(Mandatory)]$Mudanca, [Parameter(Mandatory)]$Antes, [string]$RaizRegistro = '', [bool]$RequerAdmin = $true)
     [pscustomobject]@{
-        Chave = Get-TmdChaveMudanca $Mudanca; Tipo = $Mudanca.Tipo; Indice = $Mudanca.Indice; RaizRegistro = $RaizRegistro
+        Chave = Get-TmdChaveMudanca $Mudanca; Tipo = $Mudanca.Tipo; Indice = $Mudanca.Indice; RaizRegistro = $RaizRegistro; RequerAdmin = $RequerAdmin
         Caminho = $Mudanca.Caminho; Nome = $Mudanca.Nome; Desfazer = $Mudanca.Desfazer
         Existia = [bool]$Antes.Existe
         Valor = if ($Mudanca.Tipo -eq 'Registro') { $Antes.Valor } else { $null }
@@ -394,7 +440,7 @@ function Format-TmdValor {
 
 function Split-TmdCaminhoRegistro {
     param([Parameter(Mandatory)][string]$Caminho, [string]$RaizRegistro)
-    if ($Caminho -notmatch '^(HKCU|HKLM):\\(.+)$') { throw "caminho de registro inválido: $Caminho" }
+    if ($Caminho -notmatch '^(HKCU|HKLM|HKU):\\(.+)$') { throw "caminho de registro inválido: $Caminho" }
     $hive = $Matches[1]
     $sub = $Matches[2].TrimEnd('\')
     if ($RaizRegistro) {
@@ -408,7 +454,7 @@ function Split-TmdCaminhoRegistro {
 
 function Open-TmdBaseRegistro {
     param([Parameter(Mandatory)][string]$Hive)
-    $h = if ($Hive -eq 'HKLM') { [Microsoft.Win32.RegistryHive]::LocalMachine } else { [Microsoft.Win32.RegistryHive]::CurrentUser }
+    $h = switch ($Hive) { 'HKLM' { [Microsoft.Win32.RegistryHive]::LocalMachine } 'HKU' { [Microsoft.Win32.RegistryHive]::Users } default { [Microsoft.Win32.RegistryHive]::CurrentUser } }
     $visao = if ([Environment]::Is64BitOperatingSystem) { [Microsoft.Win32.RegistryView]::Registry64 } else { [Microsoft.Win32.RegistryView]::Default }
     [Microsoft.Win32.RegistryKey]::OpenBaseKey($h, $visao)
 }
@@ -508,19 +554,21 @@ function Backup-TmdRegistro {
 
 # ---------- Serviços e tarefas (isolados para os testes trocarem por Mock) ----------
 
+# Lido do registro (Services\<nome>\Start): uma consulta CIM por serviço levava ~100 ms, e a página de ajustes lê dezenas.
 function Get-TmdServicoInicializacao {
     param([Parameter(Mandatory)][string]$Nome)
-    $s = Get-CimInstance -ClassName Win32_Service -Filter "Name='$($Nome -replace "'", "''")'" -ErrorAction SilentlyContinue
-    if (-not $s) { return $null }
-    switch ($s.StartMode) {
-        'Auto' {
-            $atraso = Read-TmdRegistro -Caminho "HKLM:\SYSTEM\CurrentControlSet\Services\$Nome" -Nome 'DelayedAutostart'
+    $chave = "HKLM:\SYSTEM\CurrentControlSet\Services\$Nome"
+    $inicio = Read-TmdRegistro -Caminho $chave -Nome 'Start'
+    if (-not $inicio.Existe) { return $null }
+    switch ([int]$inicio.Valor) {
+        2 {
+            $atraso = Read-TmdRegistro -Caminho $chave -Nome 'DelayedAutostart'
             if ($atraso.Existe -and $atraso.Valor -eq 1) { return 'AutomaticDelayedStart' }
             return 'Automatic'
         }
-        'Manual' { return 'Manual' }
-        'Disabled' { return 'Disabled' }
-        default { return [string]$s.StartMode }
+        3 { return 'Manual' }
+        4 { return 'Disabled' }
+        default { return "Start=$($inicio.Valor)" }
     }
 }
 

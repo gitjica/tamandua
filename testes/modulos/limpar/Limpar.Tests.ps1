@@ -292,6 +292,12 @@ Describe 'Módulo limpar' {
             (Invoke-Tamandua -Raiz $projeto -Argumentos 'historico').Saida | Should -Match 'limpar'
         }
 
+        It 'argumento solto depois do módulo é erro (nenhum módulo recebe pasta)' {
+            $r = Invoke-Tamandua -Raiz $projeto -Argumentos 'limpar', 'C:\Users' -Ambiente $ambiente
+            $r.Codigo | Should -Be 1
+            $r.Saida | Should -Match "não aceita: C:\\Users"
+        }
+
         It '-Simular em módulo só de leitura e em comando do núcleo é erro' {
             $projetoStatus = New-ProjetoFalso -Pai $TestDrive -ModulosReais 'status'
             (Invoke-Tamandua -Raiz $projetoStatus -Argumentos 'status', '-Simular').Codigo | Should -Be 1

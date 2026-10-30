@@ -103,13 +103,14 @@
                 </Grid.RowDefinitions>
                 <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Padding="16,12">
                     <DockPanel>
-                        <!-- Presets do módulo (ex.: Essencial). Só aparece se algum alvo tiver Presets. -->
-                        <StackPanel x:Name="PainelPresets" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Visibility="Collapsed">
+                        <!-- Presets do módulo (ex.: Essencial), numa linha abaixo do título (quebra se não couber).
+                             Só aparece se algum alvo tiver Presets. -->
+                        <DockPanel x:Name="PainelPresets" DockPanel.Dock="Bottom" Margin="0,10,0,0" Visibility="Collapsed">
                             <TextBlock Text="Marcar:" Foreground="{DynamicResource TextoSecundario}" VerticalAlignment="Center"/>
                             <ItemsControl x:Name="ListaPresets" AutomationProperties.Name="Presets">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal"/>
+                                        <WrapPanel Orientation="Horizontal"/>
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
@@ -118,7 +119,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                        </StackPanel>
+                        </DockPanel>
                         <StackPanel>
                             <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
                             <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>

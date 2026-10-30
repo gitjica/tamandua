@@ -146,7 +146,7 @@ Describe 'Ajustes mal definidos e permissões' {
     It 'recusa <Caso>' -ForEach @(
         @{ Caso = 'HKLM sem requerAdmin'; A = [pscustomobject]@{ id = 'x'; mudancas = @([pscustomobject]@{ tipo = 'Registro'; caminho = 'HKLM:\SOFTWARE\X'; nome = 'a'; valor = 1; tipoValor = 'DWord' }) } }
         @{ Caso = 'tipo desconhecido'; A = [pscustomobject]@{ id = 'x'; mudancas = @([pscustomobject]@{ tipo = 'Formatar' }) } }
-        @{ Caso = 'caminho fora de HKCU/HKLM'; A = [pscustomobject]@{ id = 'x'; mudancas = @([pscustomobject]@{ tipo = 'Registro'; caminho = 'HKCR:\x'; nome = 'a'; valor = 1; tipoValor = 'DWord' }) } }
+        @{ Caso = 'caminho fora de HKCU/HKLM/HKU'; A =[pscustomobject]@{ id = 'x'; mudancas = @([pscustomobject]@{ tipo = 'Registro'; caminho = 'HKCR:\x'; nome = 'a'; valor = 1; tipoValor = 'DWord' }) } }
         @{ Caso = 'tipoValor inválido'; A = [pscustomobject]@{ id = 'x'; mudancas = @([pscustomobject]@{ tipo = 'Registro'; caminho = 'HKCU:\X'; nome = 'a'; valor = 1; tipoValor = 'Texto' }) } }
         @{ Caso = 'script sem desfazer'; A = [pscustomobject]@{ id = 'x'; mudancas = @([pscustomobject]@{ tipo = 'Script'; aplicar = '1' }) } }
         @{ Caso = 'id com caracteres inválidos'; A = [pscustomobject]@{ id = '..\x'; mudancas = @([pscustomobject]@{ tipo = 'Registro'; caminho = 'HKCU:\X'; nome = 'a'; valor = 1; tipoValor = 'DWord' }) } }
@@ -166,10 +166,67 @@ Describe 'Ajustes mal definidos e permissões' {
 
     It 'requerAdmin sem ser administrador: ignorado, nada escrito' {
         Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
-        $r = Set-TmdAjuste -Ajuste (New-Ajuste 'admin' @(New-MudancaRegistro 'X' 1) -RequerAdmin $true) -RaizRegistro $raiz
+        # Fora da área de testes (lá não há o que pedir), numa chave que não pode ser criada.
+        $chave = "$script:ChaveTestes\fora-$([guid]::NewGuid().ToString('N'))"
+        $r = Set-TmdAjuste -Ajuste (New-Ajuste 'admin' @(New-MudancaRegistro 'X' 1 -Caminho $chave) -RequerAdmin $true)
         $r.Status | Should -Be 'Ignorado'
         $r.Motivo | Should -Match 'administrador'
+        Test-Path -LiteralPath $chave | Should -BeFalse
+    }
+
+    It 'na área de testes, ajuste com serviço ou script é recusado: só registro vai para a chave de teste' {
+        Mock Set-TmdServicoInicializacao -ModuleName Tamandua.Nucleo { throw 'não devia mexer em serviço' }
+        $a = New-Ajuste 'misto' @((New-MudancaRegistro 'X' 1), [pscustomobject]@{ tipo = 'Servico'; nome = 'DiagTrack'; inicializacao = 'Disabled'; padraoWindows = 'Automatic' }) -RequerAdmin $true
+        $r = Set-TmdAjuste -Ajuste $a -RaizRegistro $raiz
+        $r.Status | Should -Be 'Erro'
+        $r.Motivo | Should -Match 'área de testes'
         Test-Path -LiteralPath $raiz | Should -BeFalse
+    }
+
+    It 'HKU exige requerAdmin; com ele, vai para a chave de teste e volta' {
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
+        $hku = New-MudancaRegistro 'InitialKeyboardIndicators' '2' -Tipo 'String' -Caminho 'HKU:\.DEFAULT\Control Panel\Keyboard'
+        (Set-TmdAjuste -Ajuste (New-Ajuste 'hku-sem-admin' @($hku)) -RaizRegistro $raiz).Status | Should -Be 'Erro'
+        (Set-TmdAjuste -Ajuste (New-Ajuste 'hku' @($hku) -RequerAdmin $true) -RaizRegistro $raiz).Status | Should -Be 'Feito'
+        (Get-ValorSandbox $raiz 'HKU:\.DEFAULT\Control Panel\Keyboard' 'InitialKeyboardIndicators').Valor | Should -Be '2'
+        Test-Path -LiteralPath "$raiz\HKU\.DEFAULT\Control Panel\Keyboard" | Should -BeTrue
+        (Undo-TmdAjuste -Id 'hku').Status | Should -Be 'Feito'
+        (Get-ValorSandbox $raiz 'HKU:\.DEFAULT\Control Panel\Keyboard' 'InitialKeyboardIndicators').Existe | Should -BeFalse
+    }
+}
+
+Describe 'Serviços lidos pelo registro' {
+    It 'inicialização de um serviço real (só leitura) e de um que não existe' {
+        InModuleScope Tamandua.Nucleo { Get-TmdServicoInicializacao -Nome 'EventLog' } | Should -Be 'Automatic'
+        InModuleScope Tamandua.Nucleo { Get-TmdServicoInicializacao -Nome 'TamanduaNaoExiste' } | Should -BeNullOrEmpty
+    }
+}
+
+Describe 'Ponto de restauração' {
+    BeforeEach {
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        Mock Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo { }
+    }
+
+    It 'simular não cria; sem admin é ignorado; com admin cria e registra no histórico' {
+        (New-TmdPontoRestauracao -Simular).Status | Should -Be 'Simulado'
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
+        (New-TmdPontoRestauracao).Status | Should -Be 'Ignorado'
+        Should -Invoke Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo -Times 0 -Exactly
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
+        (New-TmdPontoRestauracao).Status | Should -Be 'Feito'
+        Should -Invoke Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo -Times 1 -Exactly
+        $h = @(Get-TmdHistorico -Ultimos 1)[0]
+        $h.Caminho | Should -Be 'Ponto de restauração'
+        $h.Status | Should -Be 'Feito'
+    }
+
+    It 'falha do Windows vira erro com o motivo' {
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
+        Mock Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo { throw 'A Proteção do Sistema está desligada pela política' }
+        $r = New-TmdPontoRestauracao
+        $r.Status | Should -Be 'Erro'
+        $r.Motivo | Should -Match 'Proteção do Sistema'
     }
 }
 

@@ -187,13 +187,11 @@ $script:ScriptExecutarAcao = {
 }
 
 $script:ScriptBuscarAlvos = {
-    param([string]$Nucleo, [string]$Raiz, [string]$Nome, [string]$Caminho)
+    param([string]$Nucleo, [string]$Raiz, [string]$Nome)
     $ErrorActionPreference = 'Stop'
     if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
     # A janela já conferiu os requisitos ao carregar a lista de módulos.
     $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome -SemRequisitos
     if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
-    $buscar = $m.Modulo.ExportedFunctions['Find-Alvos']
-    # Módulos que navegam (Find-Alvos com -Caminho) recebem a pasta aberta.
-    if ($Caminho -and $buscar.Parameters.ContainsKey('Caminho')) { & $buscar -Caminho $Caminho } else { & $buscar }
+    & $m.Modulo.ExportedFunctions['Find-Alvos']
 }

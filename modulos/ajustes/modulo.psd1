@@ -1,10 +1,11 @@
 ﻿@{
     Nome           = 'ajustes'
-    Versao         = '0.1.0'
-    Descricao      = 'Privacidade, desempenho e preferências (reversível)'
+    Versao         = '0.2.0'
+    Descricao      = 'Os ajustes do WinUtil e mais: privacidade, desempenho e preferências (reversível)'
     Arquivo        = 'ajustes.psm1'
     Escreve        = $true
-    RequerAdmin    = $false
+    # Os ajustes de sistema (HKLM, serviços, scripts) pedem admin num único UAC; os de HKCU rodam como o usuário.
+    RequerAdmin    = $true
     ContratoMinimo = 1
     Icone          = 'ajustes'
     RotuloAcao     = 'Aplicar'

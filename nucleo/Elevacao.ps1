@@ -149,6 +149,31 @@ function Invoke-TmdAcaoElevada {
     }
 }
 
+# Ao abrir o programa (sem comando), pede admin uma vez, como o WinUtil: assim ajustes do sistema, serviços e limpezas
+# do Windows rodam sem pedir de novo a cada ação. Recusou o UAC: abre assim mesmo, e cada ação que precisar pede na hora.
+# Devolve $true quando outra cópia, como administrador, foi aberta (esta deve terminar).
+# Testes: TAMANDUA_NAO_ELEVAR=1 (Ajudantes.ps1 liga) nunca pede.
+function Request-TmdAdminAoAbrir {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Script)
+    if ($env:TAMANDUA_NAO_ELEVAR -eq '1' -or (Test-TmdAdministrador)) { return $false }
+    try {
+        Start-TmdReaberturaElevada -Script $Script
+        $true
+    }
+    catch {
+        Write-Verbose "admin recusado ao abrir: $($_.Exception.Message)"
+        $false
+    }
+}
+
+# Abre o Tamanduá de novo como administrador (Mock nos testes).
+function Start-TmdReaberturaElevada {
+    param([Parameter(Mandatory)][string]$Script)
+    $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-STA', '-File', "`"$Script`"")
+    Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentos | Out-Null
+}
+
 # Único ponto que pede o UAC (Mock nos testes). Devolve o processo, sem esperar: quem chama acompanha o progresso.
 function Start-TmdProcessoElevado {
     param([Parameter(Mandatory)][string]$Script, [Parameter(Mandatory)][string]$Pedido)

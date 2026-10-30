@@ -139,6 +139,41 @@ Describe 'Invoke-TmdAcaoModulo' {
     }
 }
 
+Describe 'Pedir admin ao abrir' {
+    BeforeEach {
+        $global:TmdTesteReaberto = $null
+        Mock Start-TmdReaberturaElevada -ModuleName Tamandua.Nucleo { $global:TmdTesteReaberto = $Script }
+    }
+    AfterEach {
+        $env:TAMANDUA_NAO_ELEVAR = '1'
+        Remove-Variable -Name TmdTesteReaberto -Scope Global -ErrorAction SilentlyContinue
+    }
+
+    It 'sem admin: abre outra cópia como administrador e esta termina' {
+        Remove-Item Env:\TAMANDUA_NAO_ELEVAR
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
+        Request-TmdAdminAoAbrir -Script 'C:\x\tamandua.ps1' | Should -BeTrue
+        $global:TmdTesteReaberto | Should -Be 'C:\x\tamandua.ps1'
+    }
+
+    It 'UAC recusado: continua sem admin, sem erro' {
+        Remove-Item Env:\TAMANDUA_NAO_ELEVAR
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
+        Mock Start-TmdReaberturaElevada -ModuleName Tamandua.Nucleo { throw 'A operação foi cancelada pelo usuário' }
+        Request-TmdAdminAoAbrir -Script 'C:\x\tamandua.ps1' | Should -BeFalse
+    }
+
+    It 'já é admin, ou TAMANDUA_NAO_ELEVAR: não pede' {
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
+        Remove-Item Env:\TAMANDUA_NAO_ELEVAR
+        Request-TmdAdminAoAbrir -Script 'C:\x\tamandua.ps1' | Should -BeFalse
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
+        $env:TAMANDUA_NAO_ELEVAR = '1'
+        Request-TmdAdminAoAbrir -Script 'C:\x\tamandua.ps1' | Should -BeFalse
+        Should -Invoke Start-TmdReaberturaElevada -ModuleName Tamandua.Nucleo -Times 0 -Exactly
+    }
+}
+
 Describe 'Comando interno __elevado' {
     It 'recusa pedido que não é um temporário do Tamanduá' {
         $raiz = New-ProjetoComAdmin

@@ -1,14 +1,90 @@
 [
   {
+    "id": "priv-telemetria",
+    "nome": "Desativar a telemetria",
+    "descricao": "Para o envio de dados de diagnóstico e uso para a Microsoft: serviço de telemetria, relatório de erros, coleta de digitação e tinta, pesquisas de opinião e a telemetria do PowerShell. (WinUtil: Telemetry)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Servico", "nome": "DiagTrack", "inicializacao": "Disabled", "padraoWindows": "Automatic" },
+      { "tipo": "Servico", "nome": "WerSvc", "inicializacao": "Disabled", "padraoWindows": "Manual" },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection", "nome": "AllowTelemetry", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Speech_OneCore\\Settings\\OnlineSpeechPrivacy", "nome": "HasAccepted", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Input\\TIPC", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\InputPersonalization", "nome": "RestrictImplicitInkCollection", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\InputPersonalization", "nome": "RestrictImplicitTextCollection", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\InputPersonalization\\TrainedDataStore", "nome": "HarvestContacts", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Personalization\\Settings", "nome": "AcceptedPrivacyPolicy", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Start_TrackProgs", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Siuf\\Rules", "nome": "NumberOfSIUFInPeriod", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", "nome": "POWERSHELL_TELEMETRY_OPTOUT", "valor": "1", "tipoValor": "String", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-historico-atividades",
+    "nome": "Desativar o histórico de atividades",
+    "descricao": "O Windows deixa de registrar e enviar os apps e arquivos que você abre (linha do tempo). (WinUtil: Activity History)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "nome": "EnableActivityFeed", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "nome": "PublishUserActivities", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "nome": "UploadUserActivities", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-recursos-consumidor",
+    "nome": "Não instalar jogos e apps de propaganda",
+    "descricao": "Desliga os \"recursos de consumidor\": o Windows para de instalar sozinho Candy Crush, TikTok e afins depois de atualizações. (WinUtil: ConsumerFeatures)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableWindowsConsumerFeatures", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-localizacao",
+    "nome": "Desativar a localização",
+    "descricao": "Desliga o serviço de localização e a atualização automática de mapas. Apps de clima e mapas e o fuso horário automático deixam de saber onde você está. (WinUtil: Location Tracking)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Servico", "nome": "lfsvc", "inicializacao": "Disabled", "padraoWindows": "Manual" },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\location", "nome": "Value", "valor": "Deny", "tipoValor": "String", "padraoWindows": "Allow" },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Sensor\\Overrides\\{BFA794E4-F964-4FDB-90F6-51056BFE4B44}", "nome": "SensorPermissionState", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\Maps", "nome": "AutoUpdateEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
     "id": "priv-id-anuncios",
     "nome": "Desativar o ID de anúncios",
     "descricao": "Impede que apps usem um identificador seu para mostrar anúncios personalizados.",
     "categoria": "Privacidade",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Essencial", "Privacidade"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-experiencias-personalizadas",
+    "nome": "Sem experiências personalizadas",
+    "descricao": "A Microsoft deixa de usar seus dados de diagnóstico para dicas e anúncios sob medida.",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy", "nome": "TailoredExperiencesWithDiagnosticDataEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
   },
   {
@@ -18,7 +94,7 @@
     "categoria": "Privacidade",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Essencial", "Privacidade"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SystemPaneSuggestionsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
@@ -30,7 +106,7 @@
     "categoria": "Privacidade",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Essencial", "Privacidade"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-338389Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
@@ -42,21 +118,9 @@
     "categoria": "Privacidade",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Essencial", "Privacidade"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SilentInstalledAppsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
-    ]
-  },
-  {
-    "id": "priv-experiencias-personalizadas",
-    "nome": "Sem experiências personalizadas",
-    "descricao": "A Microsoft deixa de usar seus dados de diagnóstico para dicas e anúncios sob medida.",
-    "categoria": "Privacidade",
-    "risco": "Baixo",
-    "requerAdmin": false,
-    "presets": ["Essencial", "Privacidade"],
-    "mudancas": [
-      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Privacy", "nome": "TailoredExperiencesWithDiagnosticDataEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
   },
   {
@@ -72,13 +136,181 @@
     ]
   },
   {
+    "id": "priv-apps-dispositivos",
+    "nome": "Não baixar apps de dispositivos",
+    "descricao": "O Windows não baixa sozinho apps \"companheiros\" e ícones de fabricantes quando você conecta um aparelho. (WinUtil: Prevent Device Companion Apps)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Device Metadata", "nome": "PreventDeviceMetadataFromNetwork", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-busca-loja",
+    "nome": "Sem resultados da Microsoft Store na busca",
+    "descricao": "A busca do Iniciar deixa de sugerir apps da Store, bloqueando o acesso ao arquivo de recomendações dela. (WinUtil: Microsoft Store Recommended Search Results)",
+    "categoria": "Privacidade",
+    "risco": "Medio",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$f = Join-Path $env:LOCALAPPDATA 'Packages\\Microsoft.WindowsStore_8wekyb3d8bbwe\\LocalState\\store.db'; if (Test-Path -LiteralPath $f) { $s = icacls $f /deny '*S-1-1-0:F'; if ($LASTEXITCODE) { throw ('icacls falhou: ' + ($s -join ' ')) } }",
+        "desfazer": "$f = Join-Path $env:LOCALAPPDATA 'Packages\\Microsoft.WindowsStore_8wekyb3d8bbwe\\LocalState\\store.db'; if (Test-Path -LiteralPath $f) { $s = icacls $f /remove:d '*S-1-1-0'; if ($LASTEXITCODE) { throw ('icacls falhou: ' + ($s -join ' ')) } }",
+        "verificar": "$f = Join-Path $env:LOCALAPPDATA 'Packages\\Microsoft.WindowsStore_8wekyb3d8bbwe\\LocalState\\store.db'; if (-not (Test-Path -LiteralPath $f)) { return $true }; @((Get-Acl -LiteralPath $f).Access | Where-Object { $_.AccessControlType -eq 'Deny' -and $_.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value -eq 'S-1-1-0' }).Count -gt 0"
+      }
+    ]
+  },
+  {
+    "id": "priv-outlook-classico",
+    "nome": "Ficar no Outlook clássico",
+    "descricao": "Impede a troca automática para o \"novo Outlook\" e desliga a chavinha que tenta migrar. (WinUtil: Microsoft Outlook New Version)",
+    "categoria": "Programas",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Office\\16.0\\Outlook\\Preferences", "nome": "UseNewOutlook", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Office\\16.0\\Outlook\\Options\\General", "nome": "DoNewOutlookAutoMigration", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Office\\16.0\\Outlook\\Preferences", "nome": "NewOutlookMigrationUserSetting", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-servicos-manual",
+    "nome": "Serviços pouco usados em manual",
+    "descricao": "Arquivos Offline desligado; Mapas, Armazenamento e Compartilhamento de Internet só ligam quando alguém precisar. (WinUtil: Services - Set to Manual; aqui o Compartilhamento fica em manual, não desligado, para o Hotspot móvel continuar funcionando)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Mínimo", "Essencial", "Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Servico", "nome": "CscService", "inicializacao": "Disabled", "padraoWindows": "Manual" },
+      { "tipo": "Servico", "nome": "MapsBroker", "inicializacao": "Manual", "padraoWindows": "AutomaticDelayedStart" },
+      { "tipo": "Servico", "nome": "StorSvc", "inicializacao": "Manual", "padraoWindows": "Automatic" },
+      { "tipo": "Servico", "nome": "SharedAccess", "inicializacao": "Manual", "padraoWindows": "Manual" }
+    ]
+  },
+  {
+    "id": "sis-wpbt",
+    "nome": "Bloquear programas embutidos no firmware (WPBT)",
+    "descricao": "O Windows deixa de rodar programas que o fabricante grava na BIOS/UEFI (ex.: utilitários que voltam sozinhos depois de formatar). Rastreadores antifurto de fabricante deixam de funcionar. (WinUtil: WPBT)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager", "nome": "DisableWpbtExecution", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-storage-sense",
+    "nome": "Desligar o Sensor de Armazenamento",
+    "descricao": "O Windows para de apagar sozinho arquivos da Lixeira e de Downloads para liberar espaço. (WinUtil: Storage Sense)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy", "nome": "01", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "sis-caminhos-longos",
+    "nome": "Permitir caminhos longos",
+    "descricao": "Programas compatíveis passam a aceitar caminhos com mais de 260 caracteres (útil para quem programa: node_modules, git). (WinUtil: Enable Long Paths)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem", "nome": "LongPathsEnabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 }
+    ]
+  },
+  {
+    "id": "sis-tela-azul-detalhada",
+    "nome": "Tela azul com detalhes",
+    "descricao": "A tela azul mostra o código e o driver que causou o erro, em vez do rostinho triste. (WinUtil: BSoD Verbose Mode)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\CrashControl", "nome": "DisplayParameters", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\CrashControl", "nome": "DisableEmoticon", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-login-detalhado",
+    "nome": "Mostrar o que o Windows faz ao entrar e desligar",
+    "descricao": "Em vez de \"Bem-vindo\", mostra cada etapa (ajuda a ver onde trava). (WinUtil: Logon Verbose Mode)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", "nome": "VerboseStatus", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-tela-bloqueio",
+    "nome": "Sem tela de bloqueio",
+    "descricao": "Pula a imagem da tela de bloqueio e vai direto para a senha. (WinUtil: Lock Screen - Disable)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization", "nome": "NoLockScreen", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-config-sem-inicio",
+    "nome": "Configurações sem a página Início",
+    "descricao": "O app Configurações abre direto em Sistema, sem a página Início com propaganda de serviços. (WinUtil: Settings Home Page)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "SettingsPageVisibility", "valor": "hide:home", "tipoValor": "String", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-apps-segundo-plano",
+    "nome": "Apps da Store sem rodar em segundo plano",
+    "descricao": "Apps da Microsoft Store só rodam quando abertos: economiza bateria e memória, mas alguns (ex.: Vincular ao Celular) param de avisar. (WinUtil: Background Apps)",
+    "categoria": "Sistema",
+    "risco": "Medio",
+    "requerAdmin": false,
+    "presets": ["Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications", "nome": "GlobalUserDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 }
+    ]
+  },
+  {
+    "id": "sis-sem-notificacoes",
+    "nome": "Sem central de notificações",
+    "descricao": "Esconde a central de notificações e o calendário da bandeja e desliga os avisos dos apps. Você deixa de ver lembretes e alertas. (WinUtil: System Tray Notifications & Calendar)",
+    "categoria": "Sistema",
+    "risco": "Medio",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer", "nome": "DisableNotificationCenter", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\PushNotifications", "nome": "ToastEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
     "id": "expl-extensoes",
     "nome": "Mostrar extensões de arquivo",
-    "descricao": "Mostra o .exe, .pdf, .jpg no nome dos arquivos. Ajuda a não cair em \"foto.jpg.exe\".",
+    "descricao": "Mostra o .exe, .pdf, .jpg no nome dos arquivos. Ajuda a não cair em \"foto.jpg.exe\". (WinUtil: File Explorer File Extensions)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Essencial", "Explorador"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "HideFileExt", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
@@ -86,7 +318,7 @@
   {
     "id": "expl-ocultos",
     "nome": "Mostrar arquivos ocultos",
-    "descricao": "Mostra pastas como AppData. Arquivos protegidos do sistema continuam escondidos.",
+    "descricao": "Mostra pastas como AppData. Arquivos protegidos do sistema continuam escondidos. (WinUtil: File Explorer Hidden Files)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
     "requerAdmin": false,
@@ -108,13 +340,60 @@
     ]
   },
   {
-    "id": "expl-finalizar-tarefa",
-    "nome": "\"Finalizar tarefa\" no botão direito da barra de tarefas",
-    "descricao": "Fecha um programa travado direto pela barra de tarefas (Windows 11 23H2 ou mais novo).",
-    "categoria": "Barra de tarefas",
+    "id": "expl-sem-inicio-galeria",
+    "nome": "Tirar Início e Galeria do Explorador",
+    "descricao": "Some com \"Início\" e \"Galeria\" do painel da esquerda do Explorador (Windows 11). (WinUtil: File Explorer Home and Gallery)",
+    "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
     "requerAdmin": false,
     "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Classes\\CLSID\\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}", "nome": "System.IsPinnedToNameSpaceTree", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Classes\\CLSID\\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}", "nome": "System.IsPinnedToNameSpaceTree", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-sem-autodescoberta",
+    "nome": "Explorador sem adivinhar o tipo de pasta",
+    "descricao": "O Explorador para de decidir sozinho que uma pasta é \"de fotos\" ou \"de músicas\" (o que deixa pastas grandes lentas). Volta o modo de exibição salvo das pastas para o padrão. (WinUtil: File Explorer Automatic Folder Discovery)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$b = 'HKCU:\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell'; Remove-Item -LiteralPath ($b + '\\Bags'), ($b + '\\BagMRU') -Recurse -Force -ErrorAction SilentlyContinue; Write-TmdRegistro -Caminho ($b + '\\Bags\\AllFolders\\Shell') -Nome 'FolderType' -Valor 'NotSpecified' -TipoValor 'String'",
+        "desfazer": "$b = 'HKCU:\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell'; Remove-Item -LiteralPath ($b + '\\Bags'), ($b + '\\BagMRU') -Recurse -Force -ErrorAction SilentlyContinue",
+        "verificar": "(Read-TmdRegistro -Caminho 'HKCU:\\Software\\Classes\\Local Settings\\Software\\Microsoft\\Windows\\Shell\\Bags\\AllFolders\\Shell' -Nome 'FolderType').Valor -eq 'NotSpecified'"
+      }
+    ]
+  },
+  {
+    "id": "expl-menu-classico",
+    "nome": "Menu do botão direito clássico",
+    "descricao": "Volta o menu completo do botão direito do Windows 10, sem precisar clicar em \"Mostrar mais opções\". Reinicia o Explorador. (WinUtil: Right-Click Menu Previous Layout)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Explorador"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "Write-TmdRegistro -Caminho 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32' -Nome '' -Valor '' -TipoValor 'String'; Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue",
+        "desfazer": "Remove-Item -LiteralPath 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}' -Recurse -Force -ErrorAction SilentlyContinue; Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue",
+        "verificar": "Test-Path -LiteralPath 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32'"
+      }
+    ]
+  },
+  {
+    "id": "expl-finalizar-tarefa",
+    "nome": "\"Finalizar tarefa\" no botão direito da barra de tarefas",
+    "descricao": "Fecha um programa travado direto pela barra de tarefas (Windows 11 23H2 ou mais novo). (WinUtil: End Task With Right Click)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\TaskbarDeveloperSettings", "nome": "TaskbarEndTask", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
     ]
@@ -122,8 +401,8 @@
   {
     "id": "barra-icones-esquerda",
     "nome": "Ícones da barra de tarefas à esquerda",
-    "descricao": "Volta o botão Iniciar e os ícones para o canto esquerdo (Windows 11).",
-    "categoria": "Barra de tarefas",
+    "descricao": "Volta o botão Iniciar e os ícones para o canto esquerdo (Windows 11). (WinUtil: Taskbar Centered Icons)",
+    "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
     "requerAdmin": false,
     "presets": [],
@@ -132,9 +411,88 @@
     ]
   },
   {
+    "id": "barra-sem-busca",
+    "nome": "Esconder a busca da barra de tarefas",
+    "descricao": "Tira a caixa/ícone de pesquisa da barra. Apertar a tecla Windows e digitar continua pesquisando. (WinUtil: Taskbar Search Icon)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "nome": "SearchboxTaskbarMode", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "barra-sem-visao-tarefas",
+    "nome": "Esconder o botão Visão de Tarefas",
+    "descricao": "Tira o botão das áreas de trabalho virtuais da barra (Win+Tab continua funcionando). (WinUtil: Taskbar Task View Icon)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "ShowTaskViewButton", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "barra-sem-recomendados",
+    "nome": "Iniciar sem a seção \"Recomendados\"",
+    "descricao": "Some com arquivos recentes e sugestões do menu Iniciar. Usa a mesma política das edições Education, por isso vale também no Home e no Pro. (WinUtil: Start Menu Recommendations)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\current\\device\\Start", "nome": "HideRecommendedSection", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\current\\device\\Education", "nome": "IsEducationEnvironment", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer", "nome": "HideRecommendedSection", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-porcentagem-bateria",
+    "nome": "Porcentagem da bateria na barra",
+    "descricao": "Mostra o número da bateria ao lado do ícone (notebooks). (WinUtil: System Tray Battery Percentage)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Notebook"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "IsBatteryPercentageEnabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-iniciar-antigo",
+    "nome": "Menu Iniciar no layout anterior",
+    "descricao": "Volta o menu Iniciar do Windows 11 de antes da reformulação de 2025. Pode não funcionar nas versões mais novas. (WinUtil: Start Menu Previous Layout)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FeatureManagement\\Overrides\\8\\3036241548", "nome": "EnabledState", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-sem-widgets",
+    "nome": "Remover os Widgets",
+    "descricao": "Desinstala os Widgets (notícias e clima da barra) para todos os usuários. Desfazer reinstala pela Microsoft Store. (WinUtil: Widgets - Remove)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "Get-Process -Name '*Widget*' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; foreach ($n in 'MicrosoftWindows.Client.WebExperience', 'Microsoft.WidgetsPlatformRuntime') { Get-AppxPackage -AllUsers -Name $n | Remove-AppxPackage -AllUsers -ErrorAction Stop }",
+        "desfazer": "$s = winget install --id 9MSSGKG348SP --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -and $LASTEXITCODE -ne -1978335135) { throw ('winget falhou: ' + $LASTEXITCODE) }",
+        "verificar": "@(Get-AppxPackage -Name 'MicrosoftWindows.Client.WebExperience').Count -eq 0"
+      }
+    ]
+  },
+  {
     "id": "aparencia-tema-escuro",
     "nome": "Tema escuro",
-    "descricao": "Windows e apps no modo escuro.",
+    "descricao": "Windows e apps no modo escuro. (WinUtil: Dark Theme for Windows)",
     "categoria": "Aparência",
     "risco": "Baixo",
     "requerAdmin": false,
@@ -145,29 +503,447 @@
     ]
   },
   {
-    "id": "acess-teclas-aderentes",
-    "nome": "Shift 5 vezes não liga as Teclas de Aderência",
-    "descricao": "Desliga o atalho que abre as Teclas de Aderência ao apertar Shift cinco vezes (comum em jogos).",
-    "categoria": "Acessibilidade",
+    "id": "aparencia-efeitos-desempenho",
+    "nome": "Efeitos visuais no modo desempenho",
+    "descricao": "Desliga animações, sombras e transparência das janelas e menus, e abre menus mais rápido. O Windows fica com cara de mais simples e responde mais rápido em PCs fracos. Vale no próximo login. (WinUtil: Visual Effects - Set to Best Performance)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "DragFullWindows", "valor": "0", "tipoValor": "String", "padraoWindows": "1" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "MenuShowDelay", "valor": "200", "tipoValor": "String", "padraoWindows": "400" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop\\WindowMetrics", "nome": "MinAnimate", "valor": "0", "tipoValor": "String", "padraoWindows": "1" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Keyboard", "nome": "KeyboardDelay", "valor": "0", "tipoValor": "String", "padraoWindows": "1" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "ListviewAlphaSelect", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "ListviewShadow", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "TaskbarAnimations", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects", "nome": "VisualFXSetting", "valor": 3, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\DWM", "nome": "EnableAeroPeek", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "UserPreferencesMask", "valor": [144, 18, 3, 128, 16, 0, 0, 0], "tipoValor": "Binary", "padraoWindows": [158, 30, 7, 128, 18, 0, 0, 0] }
+    ]
+  },
+  {
+    "id": "aparencia-barras-rolagem",
+    "nome": "Barras de rolagem sempre visíveis",
+    "descricao": "As barras de rolagem não somem quando o mouse sai de cima. (WinUtil: Scrollbars Always Visible)",
+    "categoria": "Aparência",
     "risco": "Baixo",
     "requerAdmin": false,
     "presets": [],
     "mudancas": [
-      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility\\StickyKeys", "nome": "Flags", "valor": "506", "tipoValor": "String", "padraoWindows": "510" }
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility", "nome": "DynamicScrollbars", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "aparencia-sem-desfoque-login",
+    "nome": "Tela de login sem desfoque",
+    "descricao": "Mostra a imagem de fundo da tela de login nítida, sem o efeito de vidro fosco. (WinUtil: Logon Screen Acrylic Blur)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "nome": "DisableAcrylicBackgroundOnLogon", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "janela-sem-encaixe",
+    "nome": "Sem encaixe automático de janelas",
+    "descricao": "Arrastar uma janela até a borda da tela não a encaixa nem maximiza mais. (WinUtil: Window Snapping)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "WindowArrangementActive", "valor": "0", "tipoValor": "String", "padraoWindows": "1" }
     ]
   },
   {
     "id": "mouse-sem-aceleracao",
     "nome": "Mouse sem aceleração",
-    "descricao": "O ponteiro anda sempre a mesma distância para o mesmo movimento (\"Aumentar precisão do ponteiro\" desligado). Vale no próximo login.",
+    "descricao": "O ponteiro anda sempre a mesma distância para o mesmo movimento (\"Aumentar precisão do ponteiro\" desligado). Vale no próximo login. (WinUtil: Mouse Acceleration)",
     "categoria": "Mouse e teclado",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": [],
+    "presets": ["Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Mouse", "nome": "MouseSpeed", "valor": "0", "tipoValor": "String", "padraoWindows": "1" },
       { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Mouse", "nome": "MouseThreshold1", "valor": "0", "tipoValor": "String", "padraoWindows": "6" },
       { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Mouse", "nome": "MouseThreshold2", "valor": "0", "tipoValor": "String", "padraoWindows": "10" }
+    ]
+  },
+  {
+    "id": "acess-teclas-aderentes",
+    "nome": "Shift 5 vezes não liga as Teclas de Aderência",
+    "descricao": "Desliga o atalho que abre as Teclas de Aderência ao apertar Shift cinco vezes (comum em jogos). (WinUtil: Sticky Keys)",
+    "categoria": "Mouse e teclado",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility\\StickyKeys", "nome": "Flags", "valor": "506", "tipoValor": "String", "padraoWindows": "510" }
+    ]
+  },
+  {
+    "id": "teclado-numlock",
+    "nome": "Num Lock ligado ao iniciar",
+    "descricao": "O teclado numérico já começa ligado, na tela de login e depois de entrar. (WinUtil: Num Lock on Startup)",
+    "categoria": "Mouse e teclado",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Keyboard", "nome": "InitialKeyboardIndicators", "valor": "2", "tipoValor": "String", "padraoWindows": "0" },
+      { "tipo": "Registro", "caminho": "HKU:\\.DEFAULT\\Control Panel\\Keyboard", "nome": "InitialKeyboardIndicators", "valor": "2", "tipoValor": "String", "padraoWindows": "2147483648" }
+    ]
+  },
+  {
+    "id": "jogos-modo-jogo",
+    "nome": "Modo de Jogo ligado",
+    "descricao": "O Windows prioriza o jogo aberto e segura atualizações e notificações enquanto você joga. (WinUtil: Game Mode)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\GameBar", "nome": "AllowAutoGameMode", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\GameBar", "nome": "AutoGameModeEnabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "energia-sem-hibernacao",
+    "nome": "Desativar a hibernação",
+    "descricao": "Apaga o hiberfil.sys (alguns GB no disco C:) e desliga a Inicialização Rápida. Em notebook, sem hibernar, a bateria acaba se ele ficar dias suspenso. (WinUtil: Hibernation - Disable)",
+    "categoria": "Energia",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$s = powercfg.exe /hibernate off; if ($LASTEXITCODE) { throw ('powercfg falhou: ' + ($s -join ' ')) }",
+        "desfazer": "$s = powercfg.exe /hibernate on; if ($LASTEXITCODE) { throw ('powercfg falhou: ' + ($s -join ' ')) }",
+        "verificar": "(Read-TmdRegistro -Caminho 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power' -Nome 'HibernateEnabled').Valor -eq 0"
+      },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FlyoutMenuSettings", "nome": "ShowHibernateOption", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "energia-desempenho-maximo",
+    "nome": "Plano de energia Desempenho Máximo",
+    "descricao": "Cria e ativa o plano \"Desempenho Máximo\": o processador não economiza energia. Só para PC de mesa: em notebook gasta bateria e esquenta. Desfazer volta para o plano Equilibrado. (WinUtil: Ultimate Performance Profile)",
+    "categoria": "Energia",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$g = '7a6e7d3c-2a8f-4c1b-9e4d-74616d616e64'; if (-not ((powercfg.exe /list) -match $g)) { $s = powercfg.exe /duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 $g; if ($LASTEXITCODE) { throw ('este Windows não tem o plano Desempenho Máximo: ' + ($s -join ' ')) } }; $s = powercfg.exe /setactive $g; if ($LASTEXITCODE) { throw ('powercfg falhou: ' + ($s -join ' ')) }",
+        "desfazer": "$s = powercfg.exe /setactive 381b4222-f694-41f0-9685-ff5bb260df2e; if ($LASTEXITCODE) { throw ('powercfg falhou: ' + ($s -join ' ')) }; powercfg.exe /delete 7a6e7d3c-2a8f-4c1b-9e4d-74616d616e64 | Out-Null",
+        "verificar": "[bool]((powercfg.exe /getactivescheme) -match '7a6e7d3c-2a8f-4c1b-9e4d-74616d616e64')"
+      }
+    ]
+  },
+  {
+    "id": "energia-rede-espera",
+    "nome": "Sem internet no modo de espera (na bateria)",
+    "descricao": "No modo de espera moderno, o notebook desliga o Wi-Fi quando está na bateria: gasta menos e não esquenta na mochila. (WinUtil: S0 Sleep Network Connectivity)",
+    "categoria": "Energia",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Notebook"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9", "nome": "DCSettingIndex", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "nav-edge-limpo",
+    "nome": "Edge sem propaganda e coleta",
+    "descricao": "Políticas do Edge: sem atalho novo na área de trabalho, sem compras, Rewards, coleções, recomendações, primeira execução e envio de dados. O Edge passa a dizer \"gerenciado pela sua organização\". (WinUtil: Microsoft Edge - Debloat)",
+    "categoria": "Navegadores",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\EdgeUpdate", "nome": "CreateDesktopShortcutDefault", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "PersonalizationReportingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "ShowRecommendationsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "HideFirstRunExperience", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "UserFeedbackAllowed", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "ConfigureDoNotTrack", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "AlternateErrorPagesEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "EdgeCollectionsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "EdgeShoppingAssistantEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "MicrosoftEdgeInsiderPromotionEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "ShowMicrosoftRewards", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "WebWidgetAllowed", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "DiagnosticData", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "EdgeAssetDeliveryServiceEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "WalletDonationEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "DefaultBrowserSettingsCampaignEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge\\ExtensionInstallBlocklist", "nome": "1", "valor": "ofefcgjbeghpigppfmkologfjadafddi", "tipoValor": "String", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "nav-brave-limpo",
+    "nome": "Brave sem os extras",
+    "descricao": "Políticas do Brave: sem Rewards, carteira, VPN, IA (Leo), notícias, Talk, Tor e envio de estatísticas. (WinUtil: Brave Browser - Debloat)",
+    "categoria": "Navegadores",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveRewardsDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveWalletDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveVPNDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveAIChatEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveStatsPingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveNewsDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveTalkDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "TorDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveP3AEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "UrlKeyedAnonymizedDataCollectionEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "SafeBrowsingExtendedReportingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "MetricsReportingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-sem-ia",
+    "nome": "Desativar a IA do Windows (Copilot e Recall)",
+    "descricao": "Desliga o Copilot, as capturas do Recall, a IA do Bloco de Notas e o serviço de IA, e desinstala o app Copilot. Desfazer reinstala o Copilot pela Store. (WinUtil: Windows AI - Disable And Remove)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot", "nome": "TurnOffWindowsCopilot", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI", "nome": "DisableAIDataAnalysis", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\WindowsNotepad", "nome": "DisableAIFeatures", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Servico", "nome": "WSAIFabricSvc", "inicializacao": "Disabled", "padraoWindows": "Manual" },
+      {
+        "tipo": "Script",
+        "aplicar": "Get-AppxPackage -AllUsers -Name '*Copilot*' | Remove-AppxPackage -AllUsers -ErrorAction Stop",
+        "desfazer": "$s = winget install --id 9NHT9RB2F4HD --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -and $LASTEXITCODE -ne -1978335135) { throw ('winget falhou: ' + $LASTEXITCODE) }",
+        "verificar": "@(Get-AppxPackage -Name '*Copilot*').Count -eq 0"
+      }
+    ]
+  },
+  {
+    "id": "avanc-remover-onedrive",
+    "nome": "Remover o OneDrive",
+    "descricao": "Desinstala o OneDrive. Seus arquivos que já estão no PC ficam onde estão; os que estão só na nuvem deixam de aparecer (baixe antes o que precisar). Desfazer reinstala pelo winget. (WinUtil: Microsoft OneDrive - Remove)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Alto",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$s = @((Join-Path $env:SystemRoot 'System32\\OneDriveSetup.exe'), (Join-Path $env:SystemRoot 'SysWOW64\\OneDriveSetup.exe')) | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1; if (-not $s) { $s = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'Microsoft\\OneDrive') -Filter 'OneDriveSetup.exe' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName }; if (-not $s) { throw 'desinstalador do OneDrive não encontrado' }; Stop-Process -Name OneDrive -Force -ErrorAction SilentlyContinue; Start-Process -FilePath $s -ArgumentList '/uninstall' -Wait",
+        "desfazer": "$s = winget install --id Microsoft.OneDrive --source winget --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -and $LASTEXITCODE -ne -1978335135) { throw ('winget falhou: ' + $LASTEXITCODE) }",
+        "verificar": "-not (Test-Path -LiteralPath (Join-Path $env:LOCALAPPDATA 'Microsoft\\OneDrive\\OneDrive.exe')) -and -not (Test-Path -LiteralPath (Join-Path $env:ProgramFiles 'Microsoft OneDrive\\OneDrive.exe'))"
+      }
+    ]
+  },
+  {
+    "id": "avanc-remover-edge",
+    "nome": "Remover o Microsoft Edge",
+    "descricao": "Desinstala o Edge (o WebView2, usado por outros programas, fica). Diferente do WinUtil, não apaga o seu perfil do Edge (favoritos e senhas). Links de alguns lugares do Windows podem não abrir. Desfazer reinstala pelo winget. (WinUtil: Microsoft Edge - Remove)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Alto",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$base = Join-Path ${env:ProgramFiles(x86)} 'Microsoft\\Edge\\Application'; $setup = Get-ChildItem -Path $base -Filter 'setup.exe' -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1; if (-not $setup) { throw 'instalador do Edge não encontrado' }; $pasta = Join-Path $env:SystemRoot 'SystemApps\\Microsoft.MicrosoftEdge_8wekyb3d8bbwe'; $exe = Join-Path $pasta 'MicrosoftEdge.exe'; if (-not (Test-Path -LiteralPath $exe)) { New-Item -ItemType Directory -Path $pasta -Force | Out-Null; New-Item -ItemType File -Path $exe | Out-Null }; $p = Start-Process -FilePath $setup.FullName -ArgumentList '--uninstall', '--system-level', '--force-uninstall' -Wait -PassThru; if (Test-Path -LiteralPath (Join-Path $base 'msedge.exe')) { throw ('o Edge continua instalado (código ' + $p.ExitCode + ')') }",
+        "desfazer": "$s = winget install --id Microsoft.Edge --source winget --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -and $LASTEXITCODE -ne -1978335135) { throw ('winget falhou: ' + $LASTEXITCODE) }",
+        "verificar": "-not (Test-Path -LiteralPath (Join-Path ${env:ProgramFiles(x86)} 'Microsoft\\Edge\\Application\\msedge.exe'))"
+      }
+    ]
+  },
+  {
+    "id": "avanc-armazenamento-reservado",
+    "nome": "Desativar o armazenamento reservado",
+    "descricao": "Libera os ~7 GB que o Windows guarda para atualizações. Com o disco cheio, uma atualização grande pode falhar. (WinUtil: Disable Reserved Storage)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "Set-WindowsReservedStorageState -State Disabled -ErrorAction Stop",
+        "desfazer": "Set-WindowsReservedStorageState -State Enabled -ErrorAction Stop",
+        "verificar": "[string](Get-WindowsReservedStorageState -ErrorAction Stop).ReservedStorageState -eq 'Disabled'"
+      }
+    ]
+  },
+  {
+    "id": "avanc-svchost-agrupado",
+    "nome": "Agrupar os serviços do svchost",
+    "descricao": "Junta os serviços do Windows em menos processos svchost.exe (o Gerenciador de Tarefas fica mais limpo; usa um pouco menos de memória). Se um serviço travar, leva junto os do mesmo grupo. (WinUtil: svchost.exe Splitting - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$kb = [int64]((Get-CimInstance -ClassName Win32_ComputerSystem).TotalPhysicalMemory / 1KB); Write-TmdRegistro -Caminho 'HKLM:\\SYSTEM\\CurrentControlSet\\Control' -Nome 'SvcHostSplitThresholdInKB' -Valor $kb -TipoValor 'DWord'",
+        "desfazer": "Write-TmdRegistro -Caminho 'HKLM:\\SYSTEM\\CurrentControlSet\\Control' -Nome 'SvcHostSplitThresholdInKB' -Valor 3670016 -TipoValor 'DWord'",
+        "verificar": "[int64](Read-TmdRegistro -Caminho 'HKLM:\\SYSTEM\\CurrentControlSet\\Control' -Nome 'SvcHostSplitThresholdInKB').Valor -gt 3670016"
+      }
+    ]
+  },
+  {
+    "id": "avanc-hora-utc",
+    "nome": "Relógio do hardware em UTC",
+    "descricao": "Só para quem usa Windows e Linux no mesmo PC: acaba com a hora errada ao trocar de sistema. Sem Linux, o relógio fica errado. (WinUtil: Set Time to UTC)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\TimeZoneInformation", "nome": "RealTimeIsUniversal", "valor": 1, "tipoValor": "QWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-sem-mpo",
+    "nome": "Desativar o Multiplane Overlay (MPO)",
+    "descricao": "Resolve tela piscando ou travadinhas em alguns PCs com placas NVIDIA/AMD e vários monitores. Sem esse problema, deixe como está. (WinUtil: Multiplane Overlay - Disabled)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm", "nome": "OverlayTestMode", "valor": 5, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-rdp-sem-aviso",
+    "nome": "Área de Trabalho Remota sem aviso de arquivo",
+    "descricao": "Abre arquivos .rdp sem a pergunta sobre arquivos não assinados. Um .rdp malicioso também abre sem aviso. (WinUtil: RDP Unsigned File Warnings - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\Terminal Services\\Client", "nome": "RedirectionWarningDialogVersion", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Terminal Server Client", "nome": "RdpLaunchConsentAccepted", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-ipv4-preferido",
+    "nome": "Preferir IPv4 ao IPv6",
+    "descricao": "Mantém o IPv6 ligado, mas usa IPv4 primeiro (resolve lentidão em algumas redes). Escolha só um dos três ajustes de IPv6. (WinUtil: IPv6 - Set IPv4 as Preferred)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "nome": "DisabledComponents", "valor": 32, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-sem-teredo",
+    "nome": "Desativar o Teredo",
+    "descricao": "Desliga o túnel IPv6 sobre IPv4. Pode ajudar a conexão de jogos online; o Xbox app pode reclamar de NAT. Escolha só um dos três ajustes de IPv6. (WinUtil: Teredo - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "nome": "DisabledComponents", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      {
+        "tipo": "Script",
+        "aplicar": "Set-NetTeredoConfiguration -Type Disabled -ErrorAction Stop",
+        "desfazer": "Set-NetTeredoConfiguration -Type Default -ErrorAction Stop",
+        "verificar": "[string](Get-NetTeredoConfiguration -ErrorAction Stop).Type -eq 'Disabled'"
+      }
+    ]
+  },
+  {
+    "id": "avanc-sem-ipv6",
+    "nome": "Desativar o IPv6",
+    "descricao": "Desliga o IPv6 em todas as placas de rede. Algumas redes e serviços (e partes do próprio Windows) esperam IPv6. Escolha só um dos três ajustes de IPv6. (WinUtil: IPv6 - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Alto",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters", "nome": "DisabledComponents", "valor": 255, "tipoValor": "DWord", "padraoWindows": null },
+      {
+        "tipo": "Script",
+        "aplicar": "Disable-NetAdapterBinding -Name '*' -ComponentID ms_tcpip6 -ErrorAction Stop",
+        "desfazer": "Enable-NetAdapterBinding -Name '*' -ComponentID ms_tcpip6 -ErrorAction Stop",
+        "verificar": "(Read-TmdRegistro -Caminho 'HKLM:\\SYSTEM\\CurrentControlSet\\Services\\Tcpip6\\Parameters' -Nome 'DisabledComponents').Valor -eq 255"
+      }
+    ]
+  },
+  {
+    "id": "avanc-bloquear-adobe",
+    "nome": "Bloquear os servidores da Adobe",
+    "descricao": "Baixa a lista de endereços da Adobe (Ruddernation-Designs/Adobe-URL-Block-List) e bloqueia no arquivo hosts. Só entram linhas que bloqueiam um endereço (0.0.0.0 ou 127.0.0.1 + nome); desfazer tira exatamente o que foi posto. (WinUtil: Adobe URL Block List)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $h = Join-Path $env:SystemRoot 'System32\\drivers\\etc\\hosts'; $texto = (Invoke-WebRequest -UseBasicParsing -TimeoutSec 30 -Uri 'https://github.com/Ruddernation-Designs/Adobe-URL-Block-List/raw/refs/heads/master/hosts').Content; $linhas = @($texto -split '\\r?\\n' | Where-Object { $_ -match '^\\s*(0\\.0\\.0\\.0|127\\.0\\.0\\.1)\\s+[A-Za-z0-9.-]+\\s*$' }); if ($linhas.Count -eq 0) { throw 'a lista baixada não tem nenhuma linha de bloqueio válida' }; Add-Content -LiteralPath $h -Value (@('# Tamandua: Adobe (inicio)') + $linhas + @('# Tamandua: Adobe (fim)')) -Encoding ASCII; ipconfig.exe /flushdns | Out-Null",
+        "desfazer": "$h = Join-Path $env:SystemRoot 'System32\\drivers\\etc\\hosts'; $dentro = $false; $novas = foreach ($l in (Get-Content -LiteralPath $h)) { if ($l -eq '# Tamandua: Adobe (inicio)') { $dentro = $true; continue }; if ($l -eq '# Tamandua: Adobe (fim)') { $dentro = $false; continue }; if (-not $dentro) { $l } }; Set-Content -LiteralPath $h -Value $novas -Encoding ASCII; ipconfig.exe /flushdns | Out-Null",
+        "verificar": "[bool](Select-String -LiteralPath (Join-Path $env:SystemRoot 'System32\\drivers\\etc\\hosts') -SimpleMatch -Pattern '# Tamandua: Adobe (inicio)' -Quiet)"
+      }
+    ]
+  },
+  {
+    "id": "avanc-sono-s3",
+    "nome": "Usar o modo de suspensão clássico (S3)",
+    "descricao": "Troca o modo de espera moderno pelo S3: o PC suspende de verdade e não acorda sozinho na mochila. Em muitos notebooks novos o S3 não existe e a suspensão para de funcionar. (WinUtil: S3 Sleep)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Alto",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Power", "nome": "PlatformAoAcOverride", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-defender-sem-amostras",
+    "nome": "Não enviar amostras de arquivos ao Defender",
+    "descricao": "O Defender deixa de enviar arquivos suspeitos para análise na nuvem da Microsoft. Mais privacidade, mas a proteção contra ameaças novas fica mais fraca. (WinUtil: parte do Telemetry)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Alto",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "Set-MpPreference -SubmitSamplesConsent 2 -ErrorAction Stop",
+        "desfazer": "Set-MpPreference -SubmitSamplesConsent 1 -ErrorAction Stop",
+        "verificar": "[int](Get-MpPreference -ErrorAction Stop).SubmitSamplesConsent -eq 2"
+      }
+    ]
+  },
+  {
+    "id": "avanc-sem-bitlocker",
+    "nome": "Desativar o BitLocker no disco do Windows",
+    "descricao": "Descriptografa o disco C: (leva tempo e o disco fica legível por quem pegar o PC). Desfazer liga de novo só com o TPM: para ter a chave de recuperação, religue pelas Configurações. (WinUtil: BitLocker - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Alto",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "Disable-BitLocker -MountPoint $env:SystemDrive -ErrorAction Stop | Out-Null",
+        "desfazer": "Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly -ErrorAction Stop | Out-Null",
+        "verificar": "$v = (New-Object -ComObject Shell.Application).NameSpace($env:SystemDrive + '\\').Self.ExtendedProperty('System.Volume.BitLockerProtection'); $null -eq $v -or [int]$v -in 0, 2"
+      }
     ]
   }
 ]

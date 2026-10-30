@@ -5,7 +5,7 @@ Limpeza, ajustes e manutenção profunda para Windows. 10 módulos: status, limp
 ## Uso
 
 ```powershell
-.\tamandua.ps1            # abre a interface (ou o menu de texto, se a pasta interface faltar)
+.\tamandua.ps1            # abre a interface (pede admin uma vez, como o WinUtil; recusar abre assim mesmo)
 .\tamandua.ps1 status     # painel do sistema: saúde, CPU, memória, discos, rede, bateria, processos
 .\tamandua.ps1 instaladores -Simular   # instaladores, ISOs e compactados esquecidos em Downloads (vão para a Lixeira)
 .\tamandua.ps1 programas -Itens vlc,7zip   # instala (ou atualiza) pelo winget, perguntando antes
@@ -19,6 +19,7 @@ Limpeza, ajustes e manutenção profunda para Windows. 10 módulos: status, limp
 .\tamandua.ps1 limpar            # mostra, pergunta e limpa (o que pede admin vai num único UAC)
 .\tamandua.ps1 limpar -Itens spotify,discord   # só essas categorias (o programa precisa estar fechado)
 .\tamandua.ps1 ajustes -Preset Essencial -Simular   # o que o preset mudaria, e o que já está aplicado
+                         # todos os tweaks do WinUtil; presets: Mínimo, Essencial, Avançado, Notebook, Desempenho, Privacidade, Explorador
 .\tamandua.ps1 ajustes -Itens expl-extensoes        # aplica um ajuste específico (pergunta antes)
 .\tamandua.ps1 modulos    # estado de cada módulo
 .\tamandua.ps1 historico  # o que já foi removido, ajustado, simulado ou pulado

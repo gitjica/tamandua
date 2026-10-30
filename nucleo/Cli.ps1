@@ -34,7 +34,6 @@ function Invoke-TmdCli {
         }
     }
     $comandosDoNucleo = 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao'
-    # Argumento solto só vale para módulo que aceita -Caminho (tamandua <módulo> <pasta>).
     if ($Argumentos -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in $comandosDoNucleo)) {
         Write-Host "Opções ainda não suportadas: $($Argumentos -join ' ')" -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
@@ -119,20 +118,13 @@ function Invoke-TmdComandoModulo {
         Write-Host "O módulo '$Nome' só lê o sistema; -Simular, -Sim, -Preset e -Itens não se aplicam." -ForegroundColor Yellow
         return $script:CodigoSaida.Erro
     }
-    $buscar = $info.Modulo.ExportedFunctions['Find-Alvos']
-    $argumentosBusca = @{}
-    # [string[]] nulo em StrictMode: @($Argumentos).Count lança no 5.1, então monta a lista à mão.
-    $soltos = @()
-    if ($Argumentos) { $soltos = @($Argumentos) }
-    if ($soltos.Count -gt 0) {
-        if ($soltos.Count -gt 1 -or -not $buscar.Parameters.ContainsKey('Caminho')) {
-            Write-Host "O módulo '$Nome' não aceita: $($soltos -join ' ')" -ForegroundColor Yellow
-            return $script:CodigoSaida.Erro
-        }
-        $argumentosBusca.Caminho = $soltos[0]
+    # [string[]] nulo em StrictMode: @($Argumentos).Count lança no 5.1, então testa direto.
+    if ($Argumentos) {
+        Write-Host "O módulo '$Nome' não aceita: $($Argumentos -join ' ')" -ForegroundColor Yellow
+        return $script:CodigoSaida.Erro
     }
     try {
-        $alvos = @(& $buscar @argumentosBusca)
+        $alvos = @(& $info.Modulo.ExportedFunctions['Find-Alvos'])
     }
     catch {
         Write-Host "O módulo '$Nome' falhou: $($_.Exception.Message)" -ForegroundColor Red
@@ -213,6 +205,8 @@ function Set-TmdSelecaoCli {
 function Start-TmdPrincipal {
     param([Parameter(Mandatory)][string]$Raiz)
 
+    # Abriu outra cópia como administrador: esta termina aqui.
+    if (Request-TmdAdminAoAbrir -Script (Join-Path $Raiz 'tamandua.ps1')) { return $script:CodigoSaida.Ok }
     $motivo = Start-InterfaceGrafica -Raiz $Raiz
     if ($null -eq $motivo) { return $script:CodigoSaida.Ok }
     Write-Host "Interface gráfica indisponível: $motivo." -ForegroundColor Yellow

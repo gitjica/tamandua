@@ -4,7 +4,10 @@
 BeforeDiscovery {
     $raizProjeto = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
     $texto = [IO.File]::ReadAllText((Join-Path $raizProjeto 'modulos\ajustes\ajustes.json'), [Text.Encoding]::UTF8)
-    $ajustesCatalogo = @(foreach ($a in ($texto | ConvertFrom-Json)) { @{ Id = $a.id; Ajuste = $a } })
+    # Ida e volta de verdade (na chave de teste) só para os ajustes que são só registro; serviços vão por Mock.
+    $ajustesCatalogo = @(foreach ($a in ($texto | ConvertFrom-Json)) {
+            if (@($a.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0) { @{ Id = $a.id; Ajuste = $a } }
+        })
 }
 
 BeforeAll {
@@ -14,6 +17,12 @@ BeforeAll {
     $script:ChaveTestes = "HKCU:\Software\TamanduaTestes\ajustes-$([guid]::NewGuid().ToString('N'))"
     function New-RaizRegistro { "$script:ChaveTestes\$([guid]::NewGuid().ToString('N'))" }
     $catalogo = @(InModuleScope ajustes { Get-CatalogoAjustes })
+    # O que a área de testes mostra: só registro e sem admin (igual a Get-AjusteDisponivel).
+    $soRegistro = @($catalogo | Where-Object { -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
+    $script:Categorias = 'Privacidade', 'Sistema', 'Explorador de Arquivos', 'Barra de tarefas e Iniciar', 'Aparência', 'Mouse e teclado',
+    'Desempenho e jogos', 'Energia', 'Navegadores', 'Programas', 'Avançado (por sua conta e risco)'
+    $script:Presets = 'Mínimo', 'Essencial', 'Avançado', 'Notebook', 'Desempenho', 'Privacidade', 'Explorador'
+    function Get-IdsPreset { param($P) @($catalogo | Where-Object { @($_.presets) -contains $P } | ForEach-Object { $_.id }) }
 }
 
 AfterAll {
@@ -40,41 +49,68 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         }
     }
 
-    It 'toda mudança de registro/serviço/tarefa declara padraoWindows; script tem desfazer' {
+    It 'toda mudança de registro/serviço/tarefa declara padraoWindows; script tem desfazer e compila' {
         foreach ($a in $catalogo) {
             foreach ($m in $a.mudancas) {
                 if ($m.tipo -in 'Registro', 'Servico', 'Tarefa') { $m.PSObject.Properties.Name | Should -Contain 'padraoWindows' -Because $a.id }
                 if ($m.tipo -eq 'Script') {
                     $m.desfazer | Should -Not -BeNullOrEmpty -Because $a.id
                     if (-not $m.verificar) { $a.risco | Should -BeIn 'Medio', 'Alto' -Because "$($a.id): script sem verificar" }
+                    foreach ($parte in 'aplicar', 'desfazer', 'verificar') {
+                        if (-not $m.$parte) { continue }
+                        $erros = $null; $tokens = $null
+                        [void][Management.Automation.Language.Parser]::ParseInput($m.$parte, [ref]$tokens, [ref]$erros)
+                        @($erros).Count | Should -Be 0 -Because "$($a.id).$parte"
+                    }
                 }
-                if ($m.tipo -eq 'Registro' -and $m.caminho -like 'HKLM:*') { $a.requerAdmin | Should -BeTrue -Because $a.id }
+                # Sistema (HKLM, HKU, serviço, tarefa) pede admin.
+                if (($m.tipo -eq 'Registro' -and $m.caminho -match '^(HKLM|HKU):') -or $m.tipo -in 'Servico', 'Tarefa') { $a.requerAdmin | Should -BeTrue -Because $a.id }
             }
         }
     }
 
-    It 'nada que mexa em segurança (Defender, UAC, SmartScreen, firewall, BitLocker)' {
-        $proibido = 'Defender|SmartScreen|EnableLUA|ConsentPrompt|PromptOnSecureDesktop|Firewall|FVE|BitLocker|MpSvc|WinDefend'
+    It 'categorias e presets conhecidos' {
         foreach ($a in $catalogo) {
-            ($a | ConvertTo-Json -Depth 5) | Should -Not -Match $proibido -Because $a.id
+            $a.categoria | Should -BeIn $script:Categorias -Because $a.id
+            foreach ($p in @($a.presets)) { $p | Should -BeIn $script:Presets -Because $a.id }
         }
     }
 
-    It 'preset Essencial só tem risco baixo e todo preset tem pelo menos 2 itens' {
-        foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Essencial' }) { $a.risco | Should -Be 'Baixo' -Because $a.id }
-        $presets = @($catalogo | ForEach-Object { @($_.presets) } | Where-Object { $_ } | Select-Object -Unique)
-        foreach ($p in $presets) { @($catalogo | Where-Object { @($_.presets) -contains $p }).Count | Should -BeGreaterOrEqual 2 -Because $p }
+    It 'o que mexe em segurança (Defender, UAC, SmartScreen, firewall, BitLocker) só existe como Avançado: risco alto e fora dos presets' {
+        $seguranca = 'Defender|SmartScreen|EnableLUA|ConsentPrompt|PromptOnSecureDesktop|Firewall|FVE|BitLocker|MpSvc|WinDefend|MpPreference'
+        $achados = @($catalogo | Where-Object { ($_ | ConvertTo-Json -Depth 5) -match $seguranca })
+        $achados.Count | Should -BeGreaterThan 0
+        foreach ($a in $achados) {
+            $a.categoria | Should -Be 'Avançado (por sua conta e risco)' -Because $a.id
+            $a.risco | Should -Be 'Alto' -Because $a.id
+            @($a.presets).Count | Should -Be 0 -Because $a.id
+        }
+        foreach ($a in $catalogo | Where-Object { $_.id -match '^(priv|sis)-' }) { ($a | ConvertTo-Json -Depth 5) | Should -Not -Match $seguranca -Because $a.id }
     }
 
-    It 'nesta etapa, todos os ajustes ficam em HKCU e não pedem admin' {
-        foreach ($a in $catalogo) {
-            $a.requerAdmin | Should -BeFalse -Because $a.id
-            foreach ($m in $a.mudancas) { $m.caminho | Should -BeLike 'HKCU:\*' -Because $a.id }
+    It 'presets como no WinUtil: Mínimo dentro do Essencial, Essencial dentro do Avançado; Essencial e Notebook só risco baixo' {
+        $minimo = Get-IdsPreset 'Mínimo'; $essencial = Get-IdsPreset 'Essencial'; $avancado = Get-IdsPreset 'Avançado'
+        foreach ($id in $minimo) { $essencial | Should -Contain $id -Because "$id está no Mínimo" }
+        foreach ($id in $essencial) { $avancado | Should -Contain $id -Because "$id está no Essencial" }
+        foreach ($p in 'Essencial', 'Mínimo') { foreach ($a in $catalogo | Where-Object { @($_.presets) -contains $p }) { $a.risco | Should -Be 'Baixo' -Because "$p/$($a.id)" } }
+        foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Notebook' }) { $a.risco | Should -BeIn 'Baixo', 'Medio' -Because $a.id }
+        foreach ($p in $script:Presets) { (Get-IdsPreset $p).Count | Should -BeGreaterOrEqual 2 -Because $p }
+        # Notebook: nada que gaste bateria ou desligue a hibernação.
+        (Get-IdsPreset 'Notebook') | Should -Not -Contain 'energia-desempenho-maximo'
+        (Get-IdsPreset 'Notebook') | Should -Not -Contain 'energia-sem-hibernacao'
+    }
+
+    It 'os três ajustes de IPv6 mexem no mesmo valor e nenhum está em preset' {
+        foreach ($id in 'avanc-ipv4-preferido', 'avanc-sem-teredo', 'avanc-sem-ipv6') {
+            @(($catalogo | Where-Object id -eq $id).presets).Count | Should -Be 0 -Because $id
         }
     }
 }
 
 Describe 'Ida e volta de <Id>' -ForEach $ajustesCatalogo {
+    # HKLM e HKU também vão para a chave de teste; "admin" é fingido para o motor deixar escrever lá.
+    BeforeEach { Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true } }
+
     It 'aplica, fica Aplicado, desfaz e volta exatamente ao que era' {
         $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         $raiz = New-RaizRegistro
@@ -89,15 +125,50 @@ Describe 'Ida e volta de <Id>' -ForEach $ajustesCatalogo {
     }
 }
 
+Describe 'Ajustes com serviços (serviços simulados por Mock)' {
+    BeforeEach {
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        $global:TmdTesteServicos = @{ CscService = 'Manual'; MapsBroker = 'AutomaticDelayedStart'; StorSvc = 'Automatic'; SharedAccess = 'Manual' }
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
+        Mock Get-TmdServicoInicializacao -ModuleName Tamandua.Nucleo { $global:TmdTesteServicos[$Nome] }
+        Mock Set-TmdServicoInicializacao -ModuleName Tamandua.Nucleo { $global:TmdTesteServicos[$Nome] = $Inicializacao }
+    }
+    AfterEach { Remove-Variable -Name TmdTesteServicos -Scope Global -ErrorAction SilentlyContinue }
+
+    It 'serviços em manual: aplica só o que falta e desfazer volta cada um ao que era' {
+        $a = $catalogo | Where-Object id -eq 'sis-servicos-manual'
+        (Set-TmdAjuste -Ajuste $a).Status | Should -Be 'Feito'
+        $global:TmdTesteServicos.CscService | Should -Be 'Disabled'
+        $global:TmdTesteServicos.MapsBroker | Should -Be 'Manual'
+        Get-TmdEstadoAjuste -Ajuste $a | Should -Be 'Aplicado'
+        (Undo-TmdAjuste -Id 'sis-servicos-manual').Status | Should -Be 'Feito'
+        $global:TmdTesteServicos.MapsBroker | Should -Be 'AutomaticDelayedStart'
+        $global:TmdTesteServicos.StorSvc | Should -Be 'Automatic'
+        Should -Invoke Set-TmdServicoInicializacao -ModuleName Tamandua.Nucleo -ParameterFilter { $Nome -eq 'SharedAccess' } -Times 0 -Exactly
+    }
+
+    It 'serviço que não existe nesta máquina conta como nada a fazer' {
+        $global:TmdTesteServicos.Remove('CscService')
+        (Set-TmdAjuste -Ajuste ($catalogo | Where-Object id -eq 'sis-servicos-manual')).Status | Should -Be 'Feito'
+        $global:TmdTesteServicos.ContainsKey('CscService') | Should -BeFalse
+    }
+}
+
 Describe 'Find-Alvos e Invoke-Acao' {
     BeforeEach {
         $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
         $raiz = New-RaizRegistro
     }
 
+    It 'na área de testes: só os ajustes que são só registro, nenhum pede admin, sem ponto de restauração' {
+        $alvos = @(Find-Alvos -RaizRegistro $raiz)
+        $alvos.Count | Should -Be $soRegistro.Count
+        @($alvos | Where-Object RequerAdmin).Count | Should -Be 0
+        $alvos.Id | Should -Not -Contain 'seg-ponto-restauracao'
+    }
+
     It 'um alvo por ajuste, nada marcado, com estado, presets e o que muda' {
         $alvos = @(Find-Alvos -RaizRegistro $raiz)
-        $alvos.Count | Should -Be $catalogo.Count
         @($alvos | Where-Object Selecionado).Count | Should -Be 0
         @($alvos | ForEach-Object Estado | Select-Object -Unique) | Should -Be 'NaoAplicado'
         ($alvos | Where-Object Id -eq 'priv-id-anuncios').Presets | Should -Contain 'Essencial'
@@ -128,6 +199,13 @@ Describe 'Find-Alvos e Invoke-Acao' {
         Test-Path -LiteralPath $raiz | Should -BeFalse
     }
 
+    It 'ponto de restauração vem antes dos ajustes, em qualquer ordem que chegue' {
+        Mock New-TmdPontoRestauracao -ModuleName ajustes { [pscustomobject]@{ Id = $Id; Status = 'Feito'; Liberado = [int64]0; Motivo = ''; Mudancas = @() } }
+        $r = @(Invoke-Acao -RaizRegistro '' -Alvos @([pscustomobject]@{ Id = 'formatar-disco' }, [pscustomobject]@{ Id = 'seg-ponto-restauracao' }))
+        ($r | ForEach-Object Id) -join ',' | Should -Be 'seg-ponto-restauracao,formatar-disco'
+        Should -Invoke New-TmdPontoRestauracao -ModuleName ajustes -Times 1 -Exactly
+    }
+
     It 'TAMANDUA_REGISTRO_TESTE fora da área de testes é ignorado' {
         $env:TAMANDUA_REGISTRO_TESTE = 'HKCU:\Software\Microsoft'
         try { InModuleScope ajustes { Get-RaizRegistroPadrao } | Should -Be '' }
@@ -149,7 +227,7 @@ Describe 'Pela linha de comando' {
         $r.Saida | Should -Match '\[x\] Desativar o ID de anúncios'
         $r.Saida | Should -Match '\[ \] Mostrar arquivos ocultos'
         $r.Saida | Should -Match 'tamandua desfazer'
-        $essencial = @($catalogo | Where-Object { @($_.presets) -contains 'Essencial' })
+        $essencial = @($soRegistro | Where-Object { @($_.presets) -contains 'Essencial' })
         foreach ($a in $essencial) { Get-TmdEstadoAjuste -Ajuste $a -RaizRegistro $raiz | Should -Be 'Aplicado' -Because $a.id }
         Get-TmdEstadoAjuste -Ajuste ($catalogo | Where-Object id -eq 'expl-ocultos') -RaizRegistro $raiz | Should -Be 'NaoAplicado'
 
@@ -176,7 +254,7 @@ Describe 'Pela linha de comando' {
     }
 
     It 'preset ou item desconhecido, e -Preset em módulo de leitura, são erro' {
-        (Invoke-Tamandua -Raiz $projeto -Argumentos 'ajustes', '-Preset', 'Turbo' -Ambiente $ambiente).Saida | Should -Match 'Disponíveis: Essencial'
+        (Invoke-Tamandua -Raiz $projeto -Argumentos 'ajustes', '-Preset', 'Turbo' -Ambiente $ambiente).Saida | Should -Match 'Disponíveis: .*Essencial.*Notebook'
         (Invoke-Tamandua -Raiz $projeto -Argumentos 'ajustes', '-Itens', 'nada' -Ambiente $ambiente).Codigo | Should -Be 1
         (Invoke-Tamandua -Raiz $projeto -Argumentos 'modulos', '-Preset', 'Essencial').Codigo | Should -Be 1
     }

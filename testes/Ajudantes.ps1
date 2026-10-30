@@ -8,6 +8,8 @@ if ($TestDrive) {
     $env:TAMANDUA_CONFIG = Join-Path $TestDrive 'config-usuario'
     $env:TAMANDUA_DADOS = Join-Path $TestDrive 'dados-usuario'
 }
+# Abrir o programa sem comando pediria admin (UAC) de verdade: nos testes, nunca.
+$env:TAMANDUA_NAO_ELEVAR = '1'
 
 $script:CodigoModuloValido = @'
 function Test-Requisitos { @{ Ok = $true; Motivo = '' } }

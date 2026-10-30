@@ -440,67 +440,19 @@ Describe 'Ajustes pela janela de verdade' {
             $mae = 'HKCU:\Software\TamanduaTestes'
             if ((Test-Path -LiteralPath $mae) -and @(Get-ChildItem -LiteralPath $mae).Count -eq 0) { Remove-Item -LiteralPath $mae -Force }
         }
+        # Na área de testes só entram os ajustes que são só registro: conta a partir do catálogo.
+        $catalogo = @(foreach ($a in ([IO.File]::ReadAllText((Join-Path $script:RaizProjeto 'modulos\ajustes\ajustes.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json)) { $a })
+        $soRegistro = @($catalogo | Where-Object { -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
+        $essencial = @($soRegistro | Where-Object { @($_.presets) -contains 'Essencial' }).Count
+        $essencial | Should -BeGreaterThan 3
         $passos.Etapa | Should -Be 5
         $passos.PresetsVisivel | Should -Be 'Visible'
-        $passos.Presets | Should -Be 'Essencial,Privacidade,Explorador,Nenhum'
-        $passos.Marcados | Should -Match '^Preset Essencial: 6 marcado'
-        $passos.MaisUm | Should -Match '^7 selecionados'
-        $passos.Confirmacao | Should -Match '^Aplicar: 7 itens\. Dá para desfazer pelo Histórico\. Confirmar\?$'
-        $passos.Final | Should -Match '^Aplicados: 7 ajuste'
-        $passos.Aplicados | Should -Be 7
-    }
-}
-
-Describe 'Navegação por pastas na janela' {
-    It 'duplo clique abre a pasta do item, o subtítulo mostra o caminho e Atualizar continua nela' {
-        $projeto = New-ProjetoFalso -Pai $TestDrive -Catalogo 'nav' -ComInterface
-        # Módulo falso que "navega": devolve um item que abre a pasta X, e mostra a pasta recebida.
-        New-ModuloFalso -Raiz $projeto -Nome 'nav' -Codigo @'
-function Test-Requisitos { @{ Ok = $true } }
-function Find-Alvos {
-    param([string]$Caminho)
-    if (-not $Caminho) {
-        return [pscustomobject]@{ Id = 'ir'; Nome = 'Abrir X'; Categoria = 'Início'; Estado = 'NaoSeAplica'; Detalhe = ''; Caminho = 'C:\X'; Navegavel = $true }
-    }
-    [pscustomobject]@{ Id = 'dentro'; Nome = "Dentro de $Caminho"; Categoria = 'Pasta'; Estado = 'NaoSeAplica'; Detalhe = ''; Caminho = ''; Navegavel = $false }
-}
-'@ | Out-Null
-        $passos = @{ Etapa = 0 }
-        $aoCarregar = {
-            $tela = $args[0]
-            $p = $passos
-            $relogio = New-Object System.Windows.Threading.DispatcherTimer
-            $relogio.Interval = [TimeSpan]::FromMilliseconds(200)
-            $relogio.Add_Tick({
-                    $c = $tela.Controles
-                    if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
-                    switch ($p.Etapa) {
-                        0 {
-                            $c.ListaAlvos.SelectedItem = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Id -eq 'ir' })[0]
-                            $duplo = New-Object System.Windows.Input.MouseButtonEventArgs([System.Windows.Input.Mouse]::PrimaryDevice, 0, [System.Windows.Input.MouseButton]::Left)
-                            $duplo.RoutedEvent = [System.Windows.Controls.Control]::MouseDoubleClickEvent
-                            $c.ListaAlvos.RaiseEvent($duplo)
-                        }
-                        1 {
-                            $p.Subtitulo = $c.SubtituloPagina.Text
-                            $p.Dentro = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Tipo -eq 'Alvo' })[0].Nome
-                            $c.BotaoAtualizar.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent)))
-                        }
-                        2 {
-                            $p.DepoisDeAtualizar = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Tipo -eq 'Alvo' })[0].Nome
-                            $relogio.Stop()
-                            $tela.Janela.Close()
-                        }
-                    }
-                    $p.Etapa++
-                }.GetNewClosure())
-            $relogio.Start()
-        }.GetNewClosure()
-        Start-TmdInterface -Raiz $projeto -Tema 'claro' -AoCarregar $aoCarregar -FecharAposSeg 60
-        $passos.Etapa | Should -Be 3
-        $passos.Subtitulo | Should -Match 'C:\\X$'
-        $passos.Dentro | Should -Be 'Dentro de C:\X'
-        $passos.DepoisDeAtualizar | Should -Be 'Dentro de C:\X'
+        $passos.Presets | Should -Match '^Essencial,.*Notebook.*Nenhum$'
+        $passos.Marcados | Should -Match "^Preset Essencial: $essencial marcado"
+        $passos.MaisUm | Should -Match "^$($essencial + 1) selecionados"
+        $passos.Confirmacao | Should -Match "^Aplicar: $($essencial + 1) itens\. Dá para desfazer pelo Histórico\. Confirmar\?$"
+        $passos.Final | Should -Match "^Aplicados: $($essencial + 1) ajuste"
+        $passos.Aplicados | Should -Be ($essencial + 1)
     }
 }
 
