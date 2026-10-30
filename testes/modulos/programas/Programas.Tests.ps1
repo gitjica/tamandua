@@ -22,6 +22,8 @@ BeforeAll {
         $global:TmdTesteUpgrade = $script:TabelaUpgrade
         $global:TmdTesteCodigo = $Codigo
         $global:TmdTesteChamadas = [System.Collections.Generic.List[string]]::new()
+        $global:TmdTesteTemWinget = $true
+        Mock Test-WingetPresente -ModuleName programas { $global:TmdTesteTemWinget }
         # O paralelo chama o falso um de cada vez (a lógica de juntar os resultados é a mesma).
         Mock Invoke-WingetVarios -ModuleName programas {
             foreach ($c in $Comandos) { & (Get-Module programas) { param($a) Invoke-Winget -Argumentos $a } $c }
@@ -234,12 +236,45 @@ Describe 'Invoke-Acao' {
     }
 }
 
-Describe 'Requisitos' {
-    It 'sem winget: indisponível, dizendo onde conseguir' {
-        Mock Get-Command -ModuleName programas { $null }
-        $r = InModuleScope programas { Test-Requisitos }
-        $r.Ok | Should -BeFalse
-        $r.Motivo | Should -Match 'Microsoft Store'
+Describe 'Sem winget (Windows LTSC/IoT)' {
+    BeforeEach {
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        Set-WingetFalso -Instalados 'Mozilla.Firefox'
+        $global:TmdTesteTemWinget = $false
+        $global:TmdTesteInstalouWinget = 0
+    }
+
+    It 'a página abre do mesmo jeito: tudo "não verificado", e os detalhes avisam que o winget vem antes' {
+        (InModuleScope programas { Test-Requisitos }).Ok | Should -BeTrue
+        $alvos = @(Find-Alvos)
+        $global:TmdTesteChamadas.Count | Should -Be 0
+        ($alvos | Where-Object Id -eq 'firefox').Selo | Should -Be 'não verificado'
+        ($alvos | Where-Object Id -eq 'vlc').Mudancas[0] | Should -Match 'instala o winget'
+    }
+
+    It 'ao instalar: instala o winget primeiro e depois o programa escolhido' {
+        Mock Install-TmdWinget -ModuleName programas { $global:TmdTesteInstalouWinget++; $global:TmdTesteTemWinget = $true; [pscustomobject]@{ Status = 'Feito'; Motivo = 'winget v1 instalado' } }
+        $r = @(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'vlc' }))
+        $global:TmdTesteInstalouWinget | Should -Be 1
+        $r[0].Status | Should -Be 'Feito'
+        $global:TmdTesteChamadas[0] | Should -Match '^install --id VideoLAN\.VLC'
+    }
+
+    It 'winget não instalou: nada é chamado e cada item diz por quê' {
+        Mock Install-TmdWinget -ModuleName programas { [pscustomobject]@{ Status = 'Erro'; Motivo = 'não foi possível instalar o winget: sem internet' } }
+        $r = @(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'vlc' }, [pscustomobject]@{ Id = 'obsidian' }))
+        @($r | ForEach-Object Status | Select-Object -Unique) | Should -Be 'Erro'
+        $r[0].Motivo | Should -Match 'sem internet'
+        $global:TmdTesteChamadas.Count | Should -Be 0
+    }
+
+    It '-Simular não instala nada, nem o winget, e descreve os dois passos' {
+        Mock Install-TmdWinget -ModuleName programas { $global:TmdTesteInstalouWinget++ }
+        $r = Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'vlc' }) -Simular
+        $global:TmdTesteInstalouWinget | Should -Be 0
+        $r.Status | Should -Be 'Simulado'
+        $r.Mudancas[0] | Should -Match 'instala o winget'
+        $r.Mudancas[1] | Should -Match '^winget install --id VideoLAN\.VLC'
     }
 }
 

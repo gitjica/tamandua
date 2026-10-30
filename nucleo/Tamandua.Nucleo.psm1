@@ -5,7 +5,7 @@ $script:Versao = '0.1.0'
 $script:ContratoAtual = 1
 $script:RaizPadrao = Split-Path -Parent $PSScriptRoot
 
-foreach ($parte in 'Config', 'Elevacao', 'Seguranca', 'Remocao', 'Estado', 'MotorAjustes', 'Registro', 'Carregador', 'Saida', 'Cli') {
+foreach ($parte in 'Config', 'Elevacao', 'Seguranca', 'Remocao', 'Estado', 'MotorAjustes', 'Registro', 'Carregador', 'Saida', 'Winget', 'Cli') {
     . (Join-Path $PSScriptRoot "$parte.ps1")
 }
 
@@ -61,4 +61,7 @@ Export-ModuleMember -Function @(
     'Test-TmdAjusteReversivel'
     'Get-TmdTextoDesfaz'
     'Update-TmdLeiturasLentas'
+    'Get-TmdCaminhoWinget'
+    'Test-TmdWinget'
+    'Install-TmdWinget'
 )

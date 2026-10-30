@@ -375,12 +375,17 @@ function Find-Alvos { }
         $vigia = New-Object Windows.Threading.DispatcherTimer
         $vigia.Interval = [TimeSpan]::FromMilliseconds(100)
         $vigia.Add_Tick({
-                $r = $global:TmdTesteProvisoria
-                $tela = InModuleScope Interface { $script:Tela }
-                if (-not $tela) { return }
-                $c = $tela.Controles
-                if ($null -eq $r.Lista -and @($c.ListaModulos.ItemsSource).Count -gt 0) { $r.Lista = $r.Relogio.ElapsedMilliseconds }
-                if ($null -eq $r.Pagina -and @($c.ListaAlvos.ItemsSource | Where-Object { $_.Tipo -eq 'Alvo' }).Count -gt 0) { $r.Pagina = $r.Relogio.ElapsedMilliseconds }
+                try {
+                    $r = $global:TmdTesteProvisoria
+                    $tela = InModuleScope Interface { $script:Tela }
+                    # Só a janela deste teste (a de um teste anterior pode ainda estar guardada, já fechada).
+                    if (-not $tela -or -not $tela.Janela.IsVisible) { return }
+                    $c = $tela.Controles
+                    $temAlvo = { param($l) $l -and $l.PSObject.Properties['Tipo'] -and $l.Tipo -eq 'Alvo' }
+                    if ($null -eq $r.Lista -and @($c.ListaModulos.ItemsSource | Where-Object { $_ }).Count -gt 0) { $r.Lista = $r.Relogio.ElapsedMilliseconds }
+                    if ($null -eq $r.Pagina -and @($c.ListaAlvos.ItemsSource | Where-Object { & $temAlvo $_ }).Count -gt 0) { $r.Pagina = $r.Relogio.ElapsedMilliseconds }
+                }
+                catch { Write-Verbose "vigia: $($_.Exception.Message)" }
             })
         $vigia.Start()
         $aoCarregar = {
@@ -400,6 +405,33 @@ function Find-Alvos { }
         $r.Carregou | Should -BeGreaterThan 3900 -Because '"carregou" só depois da lista de verdade'
         $r.Lento | Should -Be 'indisponivel' -Because 'a lista de verdade troca a provisória (que achava tudo ok)'
         $r.Titulo | Should -Be 'Rapido'
+    }
+
+    It 'grade grande: os primeiros quadros vão na hora e o resto logo depois, sem perder nenhum' {
+        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'muitos' -ComInterface
+        New-ModuloFalso -Raiz $raiz -Nome 'muitos' -Manifesto @{ Visualizacao = 'Grade' } -Codigo @'
+function Test-Requisitos { @{ Ok = $true } }
+function Find-Alvos { foreach ($i in 1..120) { [pscustomobject]@{ Id = "p$i"; Nome = "Programa $i"; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = 'd' } } }
+'@ | Out-Null
+        $global:TmdTesteGrade = @{}
+        $aoCarregar = {
+            param($tela)
+            $r = $global:TmdTesteGrade
+            $lista = $tela.Controles.ListaAlvos
+            $r.AoAvisar = @($lista.ItemsSource).Count
+            & (Get-Module Interface) { Update-TmdBusca }
+            $r.LogoDepois = @($lista.ItemsSource).Count
+            [void]$tela.Janela.Dispatcher.BeginInvoke([Action] {
+                    $global:TmdTesteGrade.NoFim = @($lista.ItemsSource).Count
+                    $tela.Janela.Close()
+                }.GetNewClosure(), [Windows.Threading.DispatcherPriority]::ContextIdle)
+        }
+        Start-TmdInterface -Raiz $raiz -AoCarregar $aoCarregar -FecharAposSeg 30
+        $r = $global:TmdTesteGrade
+        Remove-Variable -Name TmdTesteGrade -Scope Global
+        $r.AoAvisar | Should -Be 121 -Because 'quem é avisado de "carregou" já acha a lista completa (120 + o cabeçalho)'
+        $r.LogoDepois | Should -Be 48 -Because 'no primeiro desenho vão só os primeiros quadros'
+        $r.NoFim | Should -Be 121
     }
 
     It 'módulo que falha ao buscar: a janela continua de pé e mostra o erro' {

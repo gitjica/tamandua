@@ -132,6 +132,14 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
   são os mesmos (a busca refaz a lista a cada tecla), e as pastas são montadas numa passada só. Redesenhar Programas:
   ~1,3 s → ~0,6 s. No modelo da grade, toda linha tem todas as propriedades ligadas por Binding (vazias se não usar):
   Binding que não acha a propriedade custa caro em cada quadro.
+- Abrir: a barra lateral sai do catálogo e dos manifestos (`Get-TmdModulosProvisorios`, ~0,15 s na própria janela) e a
+  primeira página abre sem esperar os módulos carregarem de verdade (~0,8 s). A lista de verdade troca a provisória sem
+  reabrir a página (`Update-TmdListaDeVerdade`); módulo que estava com problema é reaberto com a mensagem certa. O aviso
+  "carregou" (`AoCarregar`) e a leitura antecipada esperam a lista de verdade.
+- Grade grande: o WPF não tem painel em grade que desenhe só o que está à vista. `Update-TmdBusca` põe os 48 primeiros
+  quadros e o resto com prioridade `Background`, depois do primeiro desenho (a página aparece 2,5 a 3,5x antes);
+  `-Inteira` para quem precisa achar um item logo em seguida (fechar pasta). O `AoCarregar` vai com prioridade
+  `ContextIdle`, então quem é avisado já acha a lista completa.
 - Testes: nada de `<...>` no nome de `It`/`Describe` fora de `-ForEach` — o Pester tenta expandir como variável.
 - Testes: `-Skip:(...)` é avaliado na descoberta; o que ele usa vem de `BeforeDiscovery`, não de `BeforeAll`.
 - `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
@@ -681,6 +689,12 @@ do nome do módulo na CLI é erro.
     um quadro "pasta" com 4 miniaturas (como as pastas do menu Iniciar do Windows 11); clicar abre, "Voltar" ou Esc
     fecham. É só visual (`ConvertTo-LinhasComPastas`): a marca fica no alvo, a busca e a lista mostram tudo solto.
   - Sem preset na página Programas; os populares ficam na categoria normal deles (e nas pastas), sem estrela.
+  - **Sem winget** (Windows LTSC/IoT não traz o "Instalador de Aplicativo"): a página abre do mesmo jeito (tudo "não
+    verificado") e, ao instalar, `Install-TmdWinget` (`nucleo/Winget.ps1`) instala o winget antes: última versão do
+    `github.com/microsoft/winget-cli` (~210 MB) + dependências da arquitetura do PC (~90 MB), só se a assinatura for
+    válida e da Microsoft, por `Add-AppxPackage` para o usuário. Falhou: cada item diz por quê e nada mais é chamado.
+    O winget é chamado pelo caminho achado (`Get-TmdCaminhoWinget`), porque o alias em `WindowsApps` pode não estar
+    no PATH logo depois de instalar.
   - `winget export` (instalados) e `winget upgrade` (atualizações) rodam juntos (`Invoke-WingetVarios`, um runspace
     cada, mesmo jeito de chamar do `Invoke-Winget`; se o paralelo falhar, roda um de cada vez): ~1,7 s → ~1,1 s, com
     o mesmo resultado. Nos testes, o Mock do `Invoke-WingetVarios` chama o `Invoke-Winget` falso um de cada vez.

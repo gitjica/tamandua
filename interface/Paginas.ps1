@@ -614,7 +614,12 @@ function Stop-TmdCargaPagina {
     }
 }
 
+# Quantos quadros da grade vão no primeiro desenho (numa tela grande cabem ~40).
+$script:QuadrosPrimeiroDesenho = 48
+
+# -Inteira: põe a lista toda de uma vez (quem chama precisa achar um item nela logo em seguida, ex.: fechar pasta).
 function Update-TmdBusca {
+    param([switch]$Inteira)
     $c = $script:Tela.Controles
     $busca = $c.CampoBusca.Text
     $c.DicaBusca.Visibility = if ($busca) { 'Collapsed' } else { 'Visible' }
@@ -637,7 +642,23 @@ function Update-TmdBusca {
         }
         return
     }
-    $c.ListaAlvos.ItemsSource = $linhas
+    # Grade grande: a grade do WPF desenha todos os quadros de uma vez (não tem um painel que desenhe só os
+    # visíveis). Põe os primeiros (mais do que cabem na tela) e o resto logo depois do primeiro desenho, com
+    # prioridade baixa: a página aparece antes e a lista completa vem em seguida.
+    $primeiros = $script:QuadrosPrimeiroDesenho
+    if (-not $Inteira -and (Test-TmdEmGrade) -and $linhas.Count -gt $primeiros) {
+        $colecao = [System.Collections.ObjectModel.ObservableCollection[object]]::new()
+        for ($i = 0; $i -lt $primeiros; $i++) { $colecao.Add($linhas[$i]) }
+        $resto = $linhas[$primeiros..($linhas.Count - 1)]
+        $lista = $c.ListaAlvos
+        $lista.ItemsSource = $colecao
+        # GetNewClosure: o bloco leva $lista, $colecao e $resto (variáveis $script: não valem dentro dele).
+        [void]$script:Tela.Janela.Dispatcher.BeginInvoke([Action] {
+                # Outra página ou outra busca já trocou a lista: este resto não vale mais.
+                if ([object]::ReferenceEquals($lista.ItemsSource, $colecao)) { foreach ($l in $resto) { $colecao.Add($l) } }
+            }.GetNewClosure(), [Windows.Threading.DispatcherPriority]::Background)
+    }
+    else { $c.ListaAlvos.ItemsSource = $linhas }
     $c.PainelMensagem.Visibility = 'Collapsed'
     $c.ListaAlvos.Visibility = 'Visible'
 }
@@ -786,7 +807,8 @@ function Open-TmdPasta {
     $c = $script:Tela.Controles
     $anterior = $script:Estado.PastaAberta
     $script:Estado.PastaAberta = $Nome
-    Update-TmdBusca
+    # Inteira: logo abaixo a lista é rolada até a pasta, que pode estar depois dos primeiros quadros.
+    Update-TmdBusca -Inteira
     $c.ListaAlvos.SelectedItem = $null
     $linhas = @($c.ListaAlvos.ItemsSource)
     $alvo = if (-not $Nome -and $anterior) { @($linhas | Where-Object { $_.Tipo -eq 'Pasta' -and $_.Nome -eq $anterior })[0] } else { $linhas[0] }
@@ -810,5 +832,8 @@ function Complete-TmdCargaInicial {
     if ($script:Estado.ListaProvisoria) { $script:Estado.CargaPendente = $true; return }
     if ($script:Estado.JaAvisouCarga -or -not $script:Estado.AoCarregar) { return }
     $script:Estado.JaAvisouCarga = $true
-    & $script:Estado.AoCarregar $script:Tela
+    # Prioridade mais baixa que a do resto da grade (Update-TmdBusca): quem é avisado já acha a lista completa.
+    $aviso = $script:Estado.AoCarregar
+    $tela = $script:Tela
+    [void]$tela.Janela.Dispatcher.BeginInvoke([Action] { & $aviso $tela }.GetNewClosure(), [Windows.Threading.DispatcherPriority]::ContextIdle)
 }

@@ -8,12 +8,21 @@ $script:ArquivoCatalogo = Join-Path $PSScriptRoot 'programas.json'
 # Códigos de saída do winget que não são erro para nós.
 $script:SemAtualizacao = -1978335189   # 0x8A15002B: nenhuma atualização aplicável
 $script:JaInstalado = -1978335135      # 0x8A150061: pacote já instalado
+$script:AvisoSemWinget = 'Antes: instala o winget (o "Instalador de Aplicativo" da Microsoft), que este Windows não tem: ~300 MB do GitHub oficial da Microsoft, com a assinatura conferida.'
 
+# Sem winget (Windows LTSC/IoT) a página abre do mesmo jeito: ao instalar, o núcleo instala o winget primeiro.
 function Test-Requisitos {
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        return @{ Ok = $false; Motivo = 'winget não encontrado. Instale o "Instalador de Aplicativo" (App Installer) pela Microsoft Store.' }
-    }
     @{ Ok = $true; Motivo = '' }
+}
+
+# Tem winget nesta máquina? (Mock nos testes.)
+function Test-WingetPresente {
+    Test-TmdWinget
+}
+
+function Get-ExecutavelWinget {
+    $c = Get-TmdCaminhoWinget
+    if ($c) { $c } else { 'winget' }
 }
 
 function Get-CatalogoProgramas {
@@ -26,7 +35,8 @@ function Invoke-Winget {
     param([Parameter(Mandatory)][string[]]$Argumentos)
     # No 5.1, stderr de programa externo com ErrorActionPreference = Stop vira exceção; aqui só interessam saída e código.
     $ErrorActionPreference = 'Continue'
-    $saida = @(& winget @Argumentos 2>$null)
+    $exe = Get-ExecutavelWinget
+    $saida = @(& $exe @Argumentos 2>$null)
     [pscustomobject]@{ Codigo = $LASTEXITCODE; Saida = $saida }
 }
 
@@ -35,6 +45,7 @@ function Invoke-Winget {
 function Invoke-WingetVarios {
     param([Parameter(Mandatory)][object[]]$Comandos)
     $conjunto = $null
+    $exe = Get-ExecutavelWinget
     try {
         $conjunto = [runspacefactory]::CreateRunspacePool(1, $Comandos.Count)
         $conjunto.Open()
@@ -42,11 +53,11 @@ function Invoke-WingetVarios {
             $ps = [powershell]::Create()
             $ps.RunspacePool = $conjunto
             [void]$ps.AddScript({
-                    param([string[]]$Argumentos)
+                    param([string]$Exe, [string[]]$Argumentos)
                     $ErrorActionPreference = 'Continue'
-                    $saida = @(& winget @Argumentos 2>$null)
+                    $saida = @(& $Exe @Argumentos 2>$null)
                     [pscustomobject]@{ Codigo = $LASTEXITCODE; Saida = $saida }
-                }).AddArgument([string[]]$c)
+                }).AddArgument($exe).AddArgument([string[]]$c)
             [pscustomobject]@{ Ps = $ps; Espera = $ps.BeginInvoke() }
         }
         $resultados = foreach ($t in $tarefas) { try { @($t.Ps.EndInvoke($t.Espera))[0] } finally { $t.Ps.Dispose() } }
@@ -115,15 +126,20 @@ function ConvertFrom-WingetUpgrade {
 function Find-Alvos {
     param([string]$Catalogo = $script:ArquivoCatalogo)
 
-    $estadoWinget = Get-WingetEstado
-    $instalados = $estadoWinget.Instalados
-    $atualizacoes = $estadoWinget.Atualizacoes
+    # Sem winget não dá para saber o que está instalado: a lista aparece inteira e, ao instalar, o winget vem antes.
+    $temWinget = Test-WingetPresente
+    if ($temWinget) {
+        $estadoWinget = Get-WingetEstado
+        $instalados = $estadoWinget.Instalados
+        $atualizacoes = $estadoWinget.Atualizacoes
+    }
+    else { $instalados = @{}; $atualizacoes = @{} }
     $icones = $null
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) {
         $instalado = $instalados.ContainsKey($p.wingetId)
         $nova = if ($atualizacoes.ContainsKey($p.wingetId)) { $atualizacoes[$p.wingetId] } else { $null }
         $estado = if (-not $instalado) { 'NaoAplicado' } elseif ($nova) { 'Parcial' } else { 'Aplicado' }
-        $selo = if (-not $instalado) { 'não instalado' } elseif ($nova) { "atualizar para $nova" } else { 'instalado' }
+        $selo = if (-not $temWinget) { 'não verificado' } elseif (-not $instalado) { 'não instalado' } elseif ($nova) { "atualizar para $nova" } else { 'instalado' }
         $acao = if (-not $instalado) { 'install' } elseif ($nova) { 'upgrade' } else { $null }
         $livre = if ($p.livre) { ' Software livre.' } else { '' }
         $loja = if ((Get-FontePrograma $p) -eq 'msstore') { ' Vem da Microsoft Store.' } else { '' }
@@ -137,6 +153,7 @@ function Find-Alvos {
         $grupo = if ($p.PSObject.Properties['grupo']) { [string]$p.grupo } else { '' }
         New-AlvoPrograma -Id $p.id -Nome $p.nome -Categoria $p.categoria -Estado $estado -Selo $selo -Icone $icone -Estrela $estrela -Grupo $grupo `
             -Detalhe "$($p.descricao)$livre$loja" -Mudancas @(
+            if (-not $temWinget) { $script:AvisoSemWinget }
             # O comando aparece sempre, mesmo com o programa já instalado (para quem quer rodar à mão ou conferir).
             $instalar = "winget install --id $($p.wingetId) --exact --source $(Get-FontePrograma $p)"
             if ($acao -eq 'install') { $instalar }
@@ -199,9 +216,24 @@ function Invoke-Acao {
     # Nome diferente do parâmetro: variáveis do PowerShell não diferenciam maiúsculas ($porId x $Catalogo).
     $porId = @{}
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) { $porId[$p.id] = $p }
-    $estadoWinget = Get-WingetEstado
-    $instalados = $estadoWinget.Instalados
-    $atualizacoes = $estadoWinget.Atualizacoes
+    # Sem winget (Windows LTSC/IoT): instala o winget primeiro, e só então os programas escolhidos.
+    $antes = @()
+    if (-not (Test-WingetPresente)) {
+        if ($Simular) { $antes = @($script:AvisoSemWinget) }
+        else {
+            $w = Install-TmdWinget -Modulo 'programas' -Progresso { param($t) Write-TmdProgresso -Texto $t -Atual 1 -Total 1 }
+            if ($w.Status -ne 'Feito') {
+                foreach ($a in $Alvos) { New-ResultadoPrograma -Id ([string]$a.Id) -Nome ([string]$a.Id) -Status 'Erro' -Motivo $w.Motivo -Simular $false }
+                return
+            }
+        }
+    }
+    if ($antes.Count -gt 0) { $instalados = @{}; $atualizacoes = @{} }
+    else {
+        $estadoWinget = Get-WingetEstado
+        $instalados = $estadoWinget.Instalados
+        $atualizacoes = $estadoWinget.Atualizacoes
+    }
     $comuns = @('--silent', '--disable-interactivity', '--accept-package-agreements', '--accept-source-agreements')
 
     foreach ($a in $Alvos) {
@@ -228,7 +260,7 @@ function Invoke-Acao {
 
         $comando = "winget $($argumentos -join ' ')"
         if ($Simular) {
-            New-ResultadoPrograma -Id $id -Nome $nome -Status 'Simulado' -Mudancas @($comando) -Simular $true
+            New-ResultadoPrograma -Id $id -Nome $nome -Status 'Simulado' -Mudancas @($antes + $comando) -Simular $true
             continue
         }
         $r = Invoke-Winget -Argumentos $argumentos
