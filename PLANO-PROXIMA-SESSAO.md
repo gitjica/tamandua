@@ -57,10 +57,11 @@ Atenção: em PowerShell 5.1, arquivo .ps1 sem BOM lê o ⭐ errado — usar `[c
    - Tabela `$Casamentos` no gerador para os casos que o automático erra (nomes diferentes, ex.:
      "Visual C++" ↔ "Visual C++ Redistributable", ".NET" etc.), conferida à mão.
    - Campo novo no catálogo: `"estrela": true` e `"fmhy": "system-tools"` (de onde veio).
-2. **Decisão para confirmar com o usuário no começo:** além de *tirar* o que não está no FMHY, *adicionar* os
-   programas com ⭐ do FMHY que têm pacote no winget e não estão no WinUtil? (Ex.: Windhawk, EverythingToolbar,
-   SuperF4, Revo… o FMHY tem muita coisa boa para Windows que o WinUtil não tem.) Minha sugestão: **sim, só os com ⭐**,
-   com o ID do winget conferido por `winget show --id X --exact` (só leitura) e descrição em português.
+2. **Decidido pelo usuário (30/10/2026): adicionar também os programas com ⭐ do FMHY** que têm pacote no winget e
+   não estão na lista (ex.: Windhawk, EverythingToolbar, SuperF4). Só os com ⭐, só programas de Windows instaláveis
+   (nada de site, extensão de navegador ou ferramenta só web), com o ID do winget conferido por
+   `winget show --id X --exact` (só leitura), descrição em português, categoria nossa e ícone baixado pela ferramenta.
+   Mostrar a lista dos novos ao usuário antes de gravar no catálogo.
 3. Programas que o FMHY lista em `unsafe.md` nunca entram (teste).
 4. Tela:
    - Estrela no canto do quadro da grade (ícone ⭐ / glifo E735 do Segoe Fluent, cor de destaque do tema) e na lista.
