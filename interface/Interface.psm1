@@ -23,7 +23,9 @@ function Start-TmdInterface {
         throw 'a interface precisa de um processo STA (rode com powershell.exe)'
     }
     if (-not $Tema) { $Tema = Get-TmdTemaWindows }
+    Set-TmdIdentidadeApp
     $tela = New-TmdJanela -Raiz $Raiz -Tema $Tema
+    $tela.Janela.Add_ContentRendered({ Set-TmdIconeJanela -Tela $script:Tela; Hide-TmdConsole })
     Set-TmdTema -Tela $tela -Tema $Tema
     Initialize-TmdTela -Tela $tela -Raiz $Raiz -AoCarregar $AoCarregar
     if ($FecharAposSeg -gt 0) {

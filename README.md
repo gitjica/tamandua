@@ -2,6 +2,21 @@
 
 Limpeza, ajustes e manutenção profunda para Windows. 10 módulos: status, limpar, instaladores, desinstalar, programas, ajustes, recursos, atualizações, otimizar e reparos.
 
+## Como abrir
+
+Baixe a pasta inteira (no GitHub: **Code > Download ZIP**, e extraia) e dê dois cliques em **`Tamandua.cmd`**.
+Ele pede permissão de administrador uma vez (dá para recusar: abre assim mesmo, e o que precisar pede na hora).
+
+- Por que o `.cmd` e não o `.ps1`: o Windows vem com scripts do PowerShell bloqueados (política "Restricted") e
+  bloqueia também scripts baixados da internet. O `Tamandua.cmd` abre com `-ExecutionPolicy Bypass`, que vale só
+  para aquela execução: não muda nenhuma configuração do Windows.
+- Se o Windows mostrar "O Windows protegeu o computador" ou "Deseja executar este arquivo?", é porque ele veio da
+  internet: clique em **Mais informações > Executar assim mesmo** (ou **Executar**).
+- Pelo terminal: `powershell -ExecutionPolicy Bypass -File .\tamandua.ps1` (o PowerShell 7 também serve: o programa
+  se abre de novo no Windows PowerShell 5.1, que é para o qual foi feito).
+- Não abriu? O motivo fica em `%LOCALAPPDATA%\Tamandua\logs\erro-ao-abrir.txt` (versão do Windows, do PowerShell,
+  política de scripts e o erro completo). Mande esse arquivo para quem for ajudar.
+
 ## Uso
 
 ```powershell

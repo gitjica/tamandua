@@ -15,7 +15,7 @@
         <!-- Topo: logo, busca, tema -->
         <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Background="{DynamicResource Superficie}">
             <DockPanel Margin="16,0" LastChildFill="False">
-                <Canvas DockPanel.Dock="Left" Width="26" Height="26" VerticalAlignment="Center" AutomationProperties.Name="Logo do Tamanduá">
+                <Canvas x:Name="Logo" DockPanel.Dock="Left" Width="26" Height="26" VerticalAlignment="Center" AutomationProperties.Name="Logo do Tamanduá">
                     <Canvas.Clip>
                         <EllipseGeometry Center="13,13" RadiusX="12" RadiusY="12"/>
                     </Canvas.Clip>

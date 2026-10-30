@@ -174,6 +174,23 @@ Describe 'Pedir admin ao abrir' {
     }
 }
 
+Describe 'Como a cópia de admin é aberta' {
+    It 'pelo console clássico (conhost), minimizada, escondendo o console quando a janela aparece' {
+        Mock Start-Process -ModuleName Tamandua.Nucleo { $global:TmdTesteProcesso = @{ Arquivo = $FilePath; Args = @($ArgumentList); Janela = [string]$WindowStyle; Verbo = $Verb } }
+        try {
+            & (Get-Module Tamandua.Nucleo) { Start-TmdReaberturaElevada -Script 'C:\x y\tamandua.ps1' }
+            $r = $global:TmdTesteProcesso
+            $r.Verbo | Should -Be 'RunAs'
+            $r.Arquivo | Should -BeLike '*\System32\conhost.exe'
+            $r.Janela | Should -Be 'Minimized'
+            $r.Args[0] | Should -Be 'powershell.exe'
+            $r.Args | Should -Contain '-EsconderConsole'
+            $r.Args | Should -Contain '"C:\x y\tamandua.ps1"'
+        }
+        finally { Remove-Variable -Name TmdTesteProcesso -Scope Global -ErrorAction SilentlyContinue }
+    }
+}
+
 Describe 'Comando interno __elevado' {
     It 'recusa pedido que não é um temporário do Tamanduá' {
         $raiz = New-ProjetoComAdmin

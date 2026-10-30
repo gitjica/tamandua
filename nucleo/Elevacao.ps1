@@ -171,8 +171,14 @@ function Request-TmdAdminAoAbrir {
 # Abre o Tamanduá de novo como administrador (Mock nos testes).
 function Start-TmdReaberturaElevada {
     param([Parameter(Mandatory)][string]$Script)
-    $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-STA', '-File', "`"$Script`"")
-    Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentos | Out-Null
+    # -EsconderConsole: a janela de console da cópia nova some quando a interface aparece. Pelo conhost (console
+    # clássico), minimizada: com o Windows Terminal como console padrão, a janela dele não dá para esconder.
+    $argumentos = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-STA', '-File', "`"$Script`"", '-EsconderConsole')
+    $conhost = Join-Path $env:SystemRoot 'System32\conhost.exe'
+    if (Test-Path -LiteralPath $conhost -PathType Leaf) {
+        Start-Process -FilePath $conhost -Verb RunAs -WindowStyle Minimized -ArgumentList (@('powershell.exe') + $argumentos) | Out-Null
+    }
+    else { Start-Process -FilePath 'powershell.exe' -Verb RunAs -ArgumentList $argumentos | Out-Null }
 }
 
 # Único ponto que pede o UAC (Mock nos testes). Devolve o processo, sem esperar: quem chama acompanha o progresso.

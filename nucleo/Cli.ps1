@@ -214,9 +214,30 @@ function Start-TmdPrincipal {
     if (Request-TmdAdminAoAbrir -Script (Join-Path $Raiz 'tamandua.ps1')) { return $script:CodigoSaida.Ok }
     $motivo = Start-InterfaceGrafica -Raiz $Raiz
     if ($null -eq $motivo) { return $script:CodigoSaida.Ok }
+    # O console pode ter começado minimizado (Tamandua.cmd, cópia de admin): o menu de texto precisa dele à vista.
+    Show-TmdConsole
     Write-Host "Interface gráfica indisponível: $motivo." -ForegroundColor Yellow
+    # O motivo fica no mesmo arquivo do erro ao abrir, para quem for ajudar.
+    try {
+        $log = Join-Path (Get-TmdPastaDados) 'logs\erro-ao-abrir.txt'
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $log))
+        [IO.File]::WriteAllText($log, "Data: $((Get-Date).ToString('yyyy-MM-dd HH:mm:ss'))`r`nWindows: $([Environment]::OSVersion.VersionString) | PowerShell: $($PSVersionTable.PSVersion)`r`nInterface gráfica indisponível: $motivo`r`n", (New-Object Text.UTF8Encoding $true))
+        Write-Host "Detalhes em: $log"
+    }
+    catch { Write-Verbose "sem log do erro da interface: $($_.Exception.Message)" }
     Write-Host 'Abrindo o menu de texto.'
     Start-TmdMenu -Raiz $Raiz
+}
+
+function Show-TmdConsole {
+    try {
+        if (-not ('Tamandua.ConsoleCli' -as [type])) {
+            Add-Type -Namespace Tamandua -Name ConsoleCli -MemberDefinition '[DllImport("kernel32.dll")] public static extern System.IntPtr GetConsoleWindow(); [DllImport("user32.dll")] public static extern bool ShowWindow(System.IntPtr h, int c);'
+        }
+        $h = [Tamandua.ConsoleCli]::GetConsoleWindow()
+        if ($h -ne [IntPtr]::Zero) { [void][Tamandua.ConsoleCli]::ShowWindow($h, 9) }
+    }
+    catch { Write-Verbose "console não restaurado: $($_.Exception.Message)" }
 }
 
 # Devolve $null se a interface abriu e foi fechada normalmente, ou o motivo de não ter aberto.

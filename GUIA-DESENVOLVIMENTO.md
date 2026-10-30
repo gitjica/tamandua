@@ -87,6 +87,26 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 | Manifestos e catálogos | `.psd1` (lido com `Import-PowerShellDataFile`) para manifestos; `.json` para catálogos grandes (ajustes, programas) | Nativo, sem parser externo |
 | Logs | JSON Lines em `%LOCALAPPDATA%\Tamandua\logs\operacoes.jsonl` | Fácil de ler, filtrar e mostrar no Histórico |
 
+### Como o programa abre (e por que pode não abrir na máquina de outra pessoa)
+
+- O Windows vem com a política de scripts "Restricted" e bloqueia `.ps1` baixado da internet (Mark of the Web, mesmo
+  com "RemoteSigned"). Por isso o jeito de abrir é o **`Tamandua.cmd`**: `powershell.exe -ExecutionPolicy Bypass`, que
+  vale só para aquela execução (não muda configuração nenhuma). Sem argumentos ele abre pelo `conhost.exe` (console
+  clássico) minimizado e termina: com o Windows Terminal como console padrão, a janela dele não dá para esconder.
+  Com argumentos (linha de comando) roda no console à vista e, se der erro, espera uma tecla.
+- `tamandua.ps1`: no PowerShell 7 (pwsh) ou sem STA, abre de novo no Windows PowerShell 5.1 com `-STA`.
+  `-EsconderConsole` (o `.cmd` e a cópia de admin passam) esconde o console só depois que a janela aparece
+  (`Hide-TmdConsole` no `ContentRendered`); quem abre pelo próprio terminal não perde o terminal.
+- Erro ao abrir: `erro-ao-abrir.txt` em `%LOCALAPPDATA%\Tamandua\logs` (Windows, PowerShell, idioma, pasta, admin,
+  política de scripts, erro completo), caixa de mensagem quando era para abrir a janela, e o console volta à vista.
+  Interface que não abre: o motivo vai para o mesmo arquivo e o menu de texto aparece com o console restaurado.
+- A cópia de admin (`Start-TmdReaberturaElevada`) também vai pelo `conhost.exe`, minimizada.
+- A janela tem identidade própria na barra de tarefas (`SetCurrentProcessExplicitAppUserModelID`) e o ícone é o logo do
+  topo desenhado em 64 px: não agrupa com o PowerShell nem usa o ícone dele.
+- Para testar como numa máquina nova: copie a pasta, marque os arquivos como baixados
+  (`Set-Content -Stream Zone.Identifier -Value "[ZoneTransfer]`nZoneId=3"`) e rode
+  `powershell -ExecutionPolicy Restricted -File tamandua.ps1 versao` (falha, como na máquina do amigo) e o `Tamandua.cmd`.
+
 ### Regras de compatibilidade com PowerShell 5.1
 
 - **Arquivos `.ps1`/`.psm1`/`.psd1` em UTF-8 *com BOM*.** Sem BOM, o 5.1 lê acentos errado (`Tamanduá` vira `TamanduÃ¡`).

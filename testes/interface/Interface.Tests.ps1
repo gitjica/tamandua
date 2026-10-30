@@ -16,6 +16,7 @@
             $resultado.Linhas = @($c.ListaAlvos.ItemsSource)
             $resultado.Mensagem = if ($c.PainelMensagem.Visibility -eq 'Visible') { $c.TituloMensagem.Text } else { $null }
             $resultado.Status = $c.TextoStatus.Text
+            $resultado.TemIcone = $null -ne $tela.Janela.Icon
             $tela.Janela.Close()
         }.GetNewClosure()
         Start-TmdInterface -Raiz $Raiz -Tema $Tema -AoCarregar $aoCarregar -FecharAposSeg 30
@@ -244,6 +245,7 @@ Describe 'Janela de verdade' {
         $r.Mensagem | Should -BeNullOrEmpty
         @($r.Linhas | Where-Object { $_.Tipo -eq 'Alvo' -and $_.Id -eq 'saude' }).Count | Should -Be 1
         $r.Status | Should -Match 'módulo só de leitura'
+        $r.TemIcone | Should -BeTrue -Because 'a janela tem ícone próprio (o logo), não o do PowerShell'
     }
 
     It 'sem nenhum módulo: abre e explica que o módulo está faltando' {
