@@ -5,6 +5,7 @@
     "descricao": "Versões grandes do Windows (ex.: 24H2 → 25H2) só chegam 365 dias depois. Correções de segurança continuam chegando normalmente.",
     "categoria": "Quando atualizar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Equilibrado", "Mais controle"],
     "mudancas": [
@@ -18,6 +19,9 @@
     "descricao": "Dá tempo de a Microsoft retirar uma atualização com problema. Em troca, correções de segurança chegam 4 dias depois.",
     "categoria": "Quando atualizar",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Correções de segurança urgentes também chegam 4 dias depois.",
+    "seAcontecer": "Desfaça na página Atualizações (o item aparece como \"aplicado · marcar desfaz\") ou rode o Windows Update à mão quando sair uma correção grave.",
     "requerAdmin": true,
     "presets": ["Mais controle"],
     "mudancas": [
@@ -31,6 +35,7 @@
     "descricao": "O Windows espera você reiniciar quando houver alguém conectado, em vez de reiniciar sozinho fora do horário ativo.",
     "categoria": "Reinício",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Equilibrado", "Mais controle"],
     "mudancas": [
@@ -43,6 +48,9 @@
     "descricao": "Drivers de vídeo, áudio e chipset ficam por sua conta (ou do fabricante). Evita o Windows trocar um driver que estava funcionando.",
     "categoria": "O que atualizar",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Aparelho novo (impressora, controle, placa) pode ficar sem driver até você instalar pelo site do fabricante.",
+    "seAcontecer": "Instale o driver pelo site do fabricante, ou desfaça na página Atualizações.",
     "requerAdmin": true,
     "presets": ["Mais controle"],
     "mudancas": [
@@ -55,6 +63,7 @@
     "descricao": "Baixa as atualizações só da Microsoft. A Otimização de Entrega para de usar sua conexão para mandar atualizações a outros computadores (da internet ou da sua rede).",
     "categoria": "O que atualizar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Equilibrado", "Mais controle"],
     "mudancas": [

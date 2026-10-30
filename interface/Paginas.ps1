@@ -21,6 +21,8 @@ function Initialize-TmdTela {
         JaAvisouCarga = $false
         # Módulo -> 'Lista' quando o usuário trocou a grade por lista nele.
         Visao         = @{}
+        # Pasta de alternativas aberta na grade (nome do grupo), ou vazio.
+        PastaAberta   = ''
         # Páginas já lidas (nome -> Alvos e Quando) e a leitura antecipada em andamento. Ver Start-TmdAntecipacao.
         Cache         = @{}
         Geracao       = 0
@@ -74,6 +76,10 @@ function Initialize-TmdTela {
             $e = $args[1]
             if ($e.Key -eq 'F' -and [System.Windows.Input.Keyboard]::Modifiers -eq 'Control') {
                 [void]$script:Tela.Controles.CampoBusca.Focus()
+                $e.Handled = $true
+            }
+            elseif ($e.Key -eq 'Escape' -and $script:Estado.PastaAberta -and -not $script:Tela.Controles.CampoBusca.IsKeyboardFocused) {
+                Invoke-TmdProtegido { Open-TmdPasta -Nome '' }
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'Escape' -and $script:Tela.Controles.CampoBusca.IsKeyboardFocused) {
@@ -205,6 +211,7 @@ function Open-TmdPagina {
     Stop-TmdCargaPagina -Silencioso
     $script:Estado.ModuloAtual = $Nome
     $script:Estado.Alvos = @()
+    $script:Estado.PastaAberta = ''
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
     $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
@@ -535,7 +542,11 @@ function Update-TmdBusca {
     if ($modulo.Estado -ne 'ok') { return }
 
     $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca -Escreve:$modulo.Escreve
-    if (Test-TmdEmGrade) { Set-TmdImagensLinha -Linhas $linhas }
+    if (Test-TmdEmGrade) {
+        Set-TmdImagensLinha -Linhas $linhas
+        # Pastas de alternativas só na grade e sem busca (a busca acha o que está dentro delas).
+        if (-not $busca) { $linhas = ConvertTo-LinhasComPastas -Linhas $linhas -PastaAberta $script:Estado.PastaAberta }
+    }
     if ($linhas.Count -eq 0) {
         if ($busca) {
             Show-TmdMensagem -Icone ([string][char]0xE721) -Titulo 'Nada encontrado' -Texto "Nenhum item desta página corresponde a “$busca”."
@@ -629,6 +640,11 @@ function Show-TmdMensagem {
 function Show-TmdDetalhe {
     $c = $script:Tela.Controles
     $linha = $c.ListaAlvos.SelectedItem
+    # Clique numa pasta abre; no "Voltar", fecha. Depois do evento de seleção, para não trocar a lista no meio dele.
+    if ($linha -and $linha.Tipo -in 'Pasta', 'Voltar') {
+        Open-TmdPasta -Nome $(if ($linha.Tipo -eq 'Pasta') { $linha.Nome } else { '' })
+        return
+    }
     if ($null -eq $linha -or $linha.Tipo -ne 'Alvo') {
         $c.PainelDetalhe.Visibility = 'Collapsed'
         $c.PainelSemSelecao.Visibility = 'Visible'
@@ -638,13 +654,15 @@ function Show-TmdDetalhe {
     $c.PainelDetalhe.Visibility = 'Visible'
     $c.DetalheNome.Text = $linha.Nome
     $c.DetalheCategoria.Text = $linha.Categoria
-    $mudancas = @(Get-ValorPropriedade $linha.Alvo 'Mudancas' | Where-Object { $_ })
-    $c.DetalheTexto.Text = if ($mudancas.Count -gt 0) {
-        "$($linha.Detalhe)`n`nO que acontece:`n• $($mudancas -join "`n• ")"
-    }
-    else { $linha.Detalhe }
+    $c.DetalheTexto.Text = Get-TextoDetalheAlvo -Linha $linha
     $c.DetalheEstado.Text = Get-TextoEstadoAlvo -Linha $linha
     $c.DetalheId.Text = "id: $($linha.Id)"
+}
+
+function Open-TmdPasta {
+    param([string]$Nome)
+    $script:Estado.PastaAberta = $Nome
+    [void]$script:Tela.Janela.Dispatcher.BeginInvoke([Action] { Invoke-TmdProtegido { Update-TmdBusca; Show-TmdDetalhe } })
 }
 
 # Avisa quem abriu a janela (testes, captura de tela) uma única vez, quando a primeira página terminou.

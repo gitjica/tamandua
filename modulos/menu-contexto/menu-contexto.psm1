@@ -47,11 +47,14 @@ $script:ItensWindows = @(
     @{ Id = 'menu-criptografia'; Nome = 'Criptografar (EFS)'; Clsid = @('{A470F8CF-A1E8-4f65-8335-227475AA5C46}')
         Explicacao = 'Criptografia de arquivo do NTFS, só nas edições Pro e superiores.' }
     @{ Id = 'menu-extrair-tudo'; Nome = 'Extrair tudo (zip)'; Clsid = @('{b8cdcb65-b1bf-4b42-9428-1dfdb7ee92af}'); Risco = 'Medio'
-        Explicacao = 'O extrator de zip do Windows. Tire só se usar outro (7-Zip, WinRAR).' }
+        Explicacao = 'O extrator de zip do Windows. Tire só se usar outro (7-Zip, WinRAR).'
+        Contratempo = 'Sem outro programa de compactação, não sobra jeito fácil de extrair um .zip pelo botão direito.' }
     @{ Id = 'menu-enviar-para'; Nome = 'Enviar para (o submenu inteiro)'; Clsid = @('{7BA4C740-9E81-11CF-99D3-00AA004AE837}'); Risco = 'Medio'
-        Explicacao = 'Some com o "Enviar para" todo, inclusive "Pasta compactada" e pendrives.' }
+        Explicacao = 'Some com o "Enviar para" todo, inclusive "Pasta compactada" e pendrives.'
+        Contratempo = 'Somem junto "Pasta compactada", "Área de trabalho (criar atalho)" e o envio direto para pendrive.' }
     @{ Id = 'menu-defender'; Nome = 'Verificar com o Microsoft Defender'; Clsid = @('{09A47860-11B0-4DA5-AFA5-26D86198A780}'); Risco = 'Medio'
-        Explicacao = 'Só o item do menu: o Defender continua protegendo e verificando sozinho.' }
+        Explicacao = 'Só o item do menu: o Defender continua protegendo e verificando sozinho.'
+        Contratempo = 'Para verificar um arquivo baixado à mão, é preciso abrir Segurança do Windows > Proteção contra vírus > Opções de verificação.' }
     @{ Id = 'menu-abrir-nova-aba'; Nome = 'Abrir em nova guia'; Verbo = @('Folder\shell\opennewtab')
         Explicacao = 'O "Abrir em nova guia" do Explorador do Windows 11 (clicar com a rodinha faz o mesmo).' }
     @{ Id = 'menu-bitlocker'; Nome = 'Itens do BitLocker nas unidades'; Verbo = @('Drive\shell\encrypt-bde', 'Drive\shell\encrypt-bde-elev', 'Drive\shell\manage-bde', 'Drive\shell\resume-bde', 'Drive\shell\resume-bde-elev'); Recomendado = $true
@@ -271,6 +274,25 @@ function Get-ItemMenu {
     $itens.ToArray()
 }
 
+# Recomendado: o que quase ninguém usa (e o menu clássico); Atencao: risco médio, com o contratempo do item;
+# Opcional: o resto, inclusive os itens de programas (o item some do menu, o programa continua funcionando).
+function Get-ClassificacaoItem {
+    param([hashtable]$Item)
+    $volta = 'Desfaça na página Menu de contexto: o item aparece como "aplicado · marcar desfaz"; marque e clique em Aplicar.'
+    if ($Item.ContainsKey('Classico')) {
+        return @{ Classificacao = 'Recomendado'; SeAcontecer = $volta
+            Contratempo = 'Alguns itens que apps novos (da Microsoft Store) põem só no menu do Windows 11 não aparecem no clássico.' }
+    }
+    if ($Item.ContainsKey('Risco') -and $Item.Risco -ne 'Baixo') {
+        return @{ Classificacao = 'Atencao'; Contratempo = [string]$Item.Contratempo; SeAcontecer = $volta }
+    }
+    if ($Item.ContainsKey('Recomendado')) { return @{ Classificacao = 'Recomendado'; Contratempo = ''; SeAcontecer = '' } }
+    if ($Item.Categoria -eq 'Itens de programas') {
+        return @{ Classificacao = 'Opcional'; Contratempo = 'O item some do menu, mas o programa continua instalado e funcionando.'; SeAcontecer = $volta }
+    }
+    @{ Classificacao = 'Opcional'; Contratempo = ''; SeAcontecer = '' }
+}
+
 function Find-Alvos {
     param([string]$RaizRegistro = (Get-RaizRegistroPadrao))
     foreach ($i in Get-ItemMenu -RaizRegistro $RaizRegistro) {
@@ -279,12 +301,14 @@ function Find-Alvos {
         $estado = Get-TmdEstadoAjuste -Ajuste $ajuste -RaizRegistro $RaizRegistro
         # Já aplicado: marcar desfaz (o item volta ao menu; o clássico volta a ser o novo). Preset nunca marca estes.
         $desfaz = $estado -eq 'Aplicado'
+        $c = Get-ClassificacaoItem -Item $i
         [pscustomobject]@{
             Id = $i.Id; Nome = $i.Nome; Categoria = $i.Categoria; Caminho = ''; Tamanho = [int64]0
             Estado = $estado; Desfaz = $desfaz; Selo = $(if ($desfaz) { 'aplicado · marcar desfaz' } else { '' })
             Detalhe = $i.Explicacao; Nivel = 'Normal'; Valor = $null; Risco = $(if ($i.ContainsKey('Risco')) { $i.Risco } else { 'Baixo' })
             Selecionado = $false; Destino = 'NaoSeAplica'; RequerAdmin = [bool]$ajuste.requerAdmin -and -not $RaizRegistro; Reversivel = $true
             Presets = $presets
+            Classificacao = $c.Classificacao; Contratempo = $c.Contratempo; SeAcontecer = $c.SeAcontecer
             Mudancas = @(
                 if ($desfaz) { Get-TmdTextoDesfaz -Id $i.Id }
                 foreach ($m in $ajuste.mudancas) {

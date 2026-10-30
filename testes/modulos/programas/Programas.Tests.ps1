@@ -60,21 +60,42 @@ Describe 'Catálogo' {
     }
 
     It 'categorias conhecidas, na ordem da página' {
-        $ordem = 'Navegadores', 'Comunicação', 'Multimídia', 'Documentos', 'Utilitários', 'Jogos', 'Desenvolvimento', 'Ferramentas da Microsoft', 'Ferramentas avançadas', 'Servidor em casa'
+        $ordem = 'Navegadores', 'Comunicação', 'Multimídia', 'Documentos', 'Utilitários', 'Jogos', 'Desenvolvimento', 'Ferramentas da Microsoft', 'Ferramentas avançadas', 'Servidor em casa', 'Populares (fora do FMHY)'
         $vistas = @($catalogo | ForEach-Object categoria | Select-Object -Unique)
         ($vistas -join '|') | Should -Be ($ordem -join '|')
     }
 
-    It 'tem todos os programas do WinUtil (winutil-apps.json), fora a parte de desenvolvimento além do básico' {
-        $ref = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'winutil-apps.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-        $nossos = @($catalogo | ForEach-Object { $_.PSObject.Properties['winutil'] } | Where-Object { $_ -and $_.Value } | ForEach-Object Value)
-        $faltando = foreach ($p in $ref.Programas.PSObject.Properties) {
-            $dev = $p.Value.categoria -eq 'Development'
-            if ($dev -and @($ref.DevBasico) -notcontains $p.Name) { continue }
-            if ($nossos -notcontains $p.Name) { "$($p.Name) ($($p.Value.nome))" }
+    It 'só o que está no FMHY (fmhy-referencia.json), com a mesma estrela; populares à parte, sem estrela; nada pago nem do unsafe.md' {
+        $ref = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'fmhy-referencia.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($p in $catalogo) {
+            $estrela = $p.PSObject.Properties['estrela'] -and $p.estrela -eq $true
+            if (@($ref.Populares) -contains $p.id) {
+                $p.categoria | Should -Be 'Populares (fora do FMHY)' -Because $p.id
+                $estrela | Should -BeFalse -Because $p.id
+                continue
+            }
+            $r = $ref.Programas.PSObject.Properties[$p.id]
+            $r | Should -Not -BeNullOrEmpty -Because "$($p.id) não está no FMHY"
+            $estrela | Should -Be ([bool]$r.Value.estrela) -Because $p.id
+            $p.fmhy | Should -Not -BeNullOrEmpty -Because "$($p.id): de onde veio no FMHY"
         }
-        $faltando | Should -BeNullOrEmpty -Because ($faltando -join ', ')
+        $ids = @($catalogo | ForEach-Object id)
+        foreach ($pago in $ref.Pagos) { $ids | Should -Not -Contain $pago }
+        foreach ($p in $catalogo) { @($ref.Inseguros) | Should -Not -Contain ($p.nome.ToLowerInvariant() -replace '[^a-z0-9]', '') -Because $p.id }
+        @($catalogo | Where-Object { $_.PSObject.Properties['estrela'] -and $_.estrela }).Count | Should -BeGreaterThan 80
         @($catalogo | Where-Object categoria -eq 'Desenvolvimento').Count | Should -BeLessOrEqual 15 -Because 'desenvolvimento é só o básico'
+    }
+
+    It 'dentro de cada categoria, os com estrela vêm primeiro' {
+        foreach ($g in $catalogo | Group-Object categoria) {
+            $vistos = @($g.Group | ForEach-Object { $_.PSObject.Properties['estrela'] -and $_.estrela -eq $true })
+            $primeiroSem = [array]::IndexOf($vistos, $false)
+            if ($primeiroSem -ge 0) { $vistos[$primeiroSem..($vistos.Count - 1)] | Should -Not -Contain $true -Because $g.Name }
+        }
+    }
+
+    It 'programa que veio do WinUtil tem o mesmo ID do winget de lá' {
+        $ref = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'winutil-apps.json') -Raw -Encoding UTF8 | ConvertFrom-Json
         # O ID do winget é o mesmo do WinUtil (com "msstore:" separado em "fonte").
         foreach ($p in $catalogo | Where-Object { $_.PSObject.Properties['winutil'] -and $_.winutil }) {
             $w = [string]$ref.Programas.($p.winutil).winget
@@ -120,6 +141,15 @@ Describe 'Find-Alvos' {
         $zap.Mudancas[0] | Should -Be 'winget install --id 9NKSQGP7F2NH --exact --source msstore'
         $zap.Detalhe | Should -Match 'Microsoft Store'
         Get-TmdIconePng -Caminho @($zap.Icone)[0] | Should -Not -BeNullOrEmpty
+    }
+
+    It 'estrela do FMHY vai para a tela; o preset "Recomendados (FMHY)" só marca os com estrela que faltam instalar' {
+        $alvos = @(Find-Alvos)
+        $vlc = $alvos | Where-Object Id -eq 'vlc'
+        $vlc.Estrela | Should -BeTrue
+        $vlc.Presets | Should -Contain 'Recomendados (FMHY)'
+        ($alvos | Where-Object Id -eq 'obsidian').Presets | Should -BeNullOrEmpty -Because 'já está instalado'
+        ($alvos | Where-Object Id -eq 'whatsapp').Estrela | Should -BeFalse
     }
 
     It '"Atualizar tudo" lista todas as atualizações, inclusive de fora do catálogo' {

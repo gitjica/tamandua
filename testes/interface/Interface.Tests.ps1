@@ -359,6 +359,47 @@ Describe 'Seleção e resultado (funções puras)' {
         }
     }
 
+    It 'classificação: selo na linha, contratempo e solução nos detalhes, e a confirmação lista os arriscados' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'a'; Nome = 'Seguro'; Categoria = 'T'; Estado = 'NaoAplicado'; Detalhe = 'd'; Selecionado = $true; Classificacao = 'Recomendado'; Reversivel = $true }
+            [pscustomobject]@{ Id = 'b'; Nome = 'Perigoso'; Categoria = 'T'; Estado = 'NaoAplicado'; Detalhe = 'd'; Selecionado = $true; Classificacao = 'Arriscado'
+                Contratempo = 'O Wi-Fi pode cair.'; SeAcontecer = 'Desfaça e reinicie.'; Reversivel = $true }
+            [pscustomobject]@{ Id = 'c'; Nome = 'Já feito'; Categoria = 'T'; Estado = 'Aplicado'; Detalhe = 'd'; Selecionado = $true; Classificacao = 'Arriscado'; Desfaz = $true; Reversivel = $true }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            $todas = ConvertTo-LinhaAlvo -Alvos $A -Escreve; $linhas = @($todas | Where-Object Tipo -eq 'Alvo')
+            $linhas[0].RotuloClasse | Should -Be 'Recomendado'
+            $linhas[1].RotuloClasse | Should -Be 'Arriscado'
+            $linhas[1].TemClasse | Should -BeTrue
+            $texto = Get-TextoDetalheAlvo -Linha $linhas[1]
+            $texto | Should -Match 'Pode dar problema:\s+O Wi-Fi pode cair\.'
+            $texto | Should -Match 'Se acontecer:\s+Desfaça e reinicie\.'
+            $aviso = Get-AvisoConfirmacao -Resumo (Get-ResumoSelecao -Linhas $linhas)
+            $aviso | Should -Match 'ARRISCADO \(1\): Perigoso' -Because 'desfazer um arriscado não conta'
+        }
+    }
+
+    It 'pastas de alternativas: fechadas viram um quadro só, abertas mostram os itens e o Voltar; sozinho não vira pasta' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'vlc'; Nome = 'VLC'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $true; Grupo = 'Players de vídeo' }
+            [pscustomobject]@{ Id = 'mpv'; Nome = 'mpv'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = 'Players de vídeo' }
+            [pscustomobject]@{ Id = 'gimp'; Nome = 'GIMP'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = '' }
+            [pscustomobject]@{ Id = 'aimp'; Nome = 'AIMP'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = 'Players de música' }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            $linhas = ConvertTo-LinhaAlvo -Alvos $A -Escreve
+            $fechadas = ConvertTo-LinhasComPastas -Linhas $linhas
+            ($fechadas | ForEach-Object { "$($_.Tipo):$($_.Nome)" }) -join ',' | Should -Be 'Categoria:Multimídia,Pasta:Players de vídeo,Alvo:GIMP,Alvo:AIMP'
+            ($fechadas | Where-Object Tipo -eq 'Pasta').Selo | Should -Be '1 de 2 marcados'
+            $abertas = ConvertTo-LinhasComPastas -Linhas $linhas -PastaAberta 'Players de vídeo'
+            ($abertas | ForEach-Object { "$($_.Tipo):$($_.Nome)" }) -join ',' | Should -Be 'Categoria:Players de vídeo,Voltar:Voltar,Alvo:VLC,Alvo:mpv'
+            # A marca continua no alvo: o resumo da seleção não muda por causa das pastas.
+            (Get-ResumoSelecao -Linhas $linhas).Quantidade | Should -Be 1
+        }
+    }
+
     It 'Histórico: cada linha sem caixa diz por que não dá para desfazer' {
         InModuleScope Interface {
             $ops = @(

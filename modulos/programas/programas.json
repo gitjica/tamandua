@@ -1,82 +1,5 @@
 [
     {
-        "id":  "brave",
-        "nome":  "Brave",
-        "descricao":  "Navegador com bloqueio de anúncios embutido.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Brave.Brave",
-        "livre":  true,
-        "site":  "https://www.brave.com",
-        "choco":  "brave",
-        "winutil":  "brave"
-    },
-    {
-        "id":  "chromium",
-        "nome":  "Chromium",
-        "descricao":  "O Chrome de código aberto, sem os serviços do Google.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Hibbiki.Chromium",
-        "livre":  true,
-        "site":  "https://www.chromium.org/",
-        "choco":  "chromium",
-        "winutil":  "chromium"
-    },
-    {
-        "id":  "firefox",
-        "nome":  "Firefox",
-        "descricao":  "Navegador da Mozilla.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Mozilla.Firefox",
-        "livre":  true,
-        "site":  "https://www.mozilla.org/en-US/firefox/new/",
-        "choco":  "firefox",
-        "winutil":  "firefox"
-    },
-    {
-        "id":  "firefoxesr",
-        "nome":  "Firefox ESR",
-        "descricao":  "Firefox com atualizações mais espaçadas (versão estendida).",
-        "categoria":  "Navegadores",
-        "wingetId":  "Mozilla.Firefox.ESR",
-        "livre":  true,
-        "site":  "https://www.mozilla.org/en-US/firefox/enterprise/",
-        "choco":  "FirefoxESR",
-        "winutil":  "firefoxesr"
-    },
-    {
-        "id":  "floorp",
-        "nome":  "Floorp",
-        "descricao":  "Firefox com mais personalização.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Ablaze.Floorp",
-        "livre":  true,
-        "site":  "https://floorp.app/",
-        "choco":  "floorp",
-        "winutil":  "floorp"
-    },
-    {
-        "id":  "chrome",
-        "nome":  "Google Chrome",
-        "descricao":  "Navegador do Google.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Google.Chrome",
-        "livre":  false,
-        "site":  "https://www.google.com/chrome/",
-        "choco":  "googlechrome",
-        "winutil":  "chrome"
-    },
-    {
-        "id":  "helium",
-        "nome":  "Helium",
-        "descricao":  "Navegador leve baseado no Chromium, sem rastreamento.",
-        "categoria":  "Navegadores",
-        "wingetId":  "ImputNet.Helium",
-        "livre":  true,
-        "site":  "https://helium.computer",
-        "choco":  "helium",
-        "winutil":  "helium"
-    },
-    {
         "id":  "librewolf",
         "nome":  "LibreWolf",
         "descricao":  "Firefox com foco em privacidade.",
@@ -85,18 +8,10 @@
         "livre":  true,
         "site":  "https://librewolf.net/",
         "choco":  "librewolf",
-        "winutil":  "librewolf"
-    },
-    {
-        "id":  "edge",
-        "nome":  "Microsoft Edge",
-        "descricao":  "Navegador da Microsoft.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Microsoft.Edge",
-        "livre":  false,
-        "site":  "https://www.microsoft.com/edge",
-        "choco":  "microsoft-edge",
-        "winutil":  "edge"
+        "winutil":  "librewolf",
+        "estrela":  true,
+        "fmhy":  "privacy / Browser Privacy",
+        "grupo":  "Baseados no Firefox"
     },
     {
         "id":  "mullvadbrowser",
@@ -107,7 +22,10 @@
         "livre":  true,
         "site":  "https://mullvad.net/browser",
         "choco":  "",
-        "winutil":  "mullvadbrowser"
+        "winutil":  "mullvadbrowser",
+        "estrela":  true,
+        "fmhy":  "privacy / Browser Privacy",
+        "grupo":  "Baseados no Firefox"
     },
     {
         "id":  "tor",
@@ -118,40 +36,52 @@
         "livre":  true,
         "site":  "https://www.torproject.org/",
         "choco":  "tor-browser",
-        "winutil":  "tor"
+        "winutil":  "tor",
+        "estrela":  true,
+        "fmhy":  "privacy / Browser Privacy",
+        "grupo":  "Baseados no Firefox"
     },
     {
-        "id":  "ungoogled",
-        "nome":  "Ungoogled Chromium",
-        "descricao":  "Chromium sem nada do Google.",
+        "id":  "brave",
+        "nome":  "Brave",
+        "descricao":  "Navegador com bloqueio de anúncios embutido.",
         "categoria":  "Navegadores",
-        "wingetId":  "eloston.ungoogled-chromium",
+        "wingetId":  "Brave.Brave",
         "livre":  true,
-        "site":  "https://github.com/Eloston/ungoogled-chromium",
-        "choco":  "ungoogled-chromium",
-        "winutil":  "ungoogled"
+        "site":  "https://www.brave.com",
+        "choco":  "brave",
+        "winutil":  "brave",
+        "estrela":  false,
+        "fmhy":  "privacy / Browser Privacy",
+        "grupo":  "Baseados no Chromium"
     },
     {
-        "id":  "vivaldi",
-        "nome":  "Vivaldi",
-        "descricao":  "Navegador muito personalizável.",
+        "id":  "firefox",
+        "nome":  "Firefox",
+        "descricao":  "Navegador da Mozilla.",
         "categoria":  "Navegadores",
-        "wingetId":  "Vivaldi.Vivaldi",
-        "livre":  false,
-        "site":  "https://vivaldi.com/",
-        "choco":  "vivaldi",
-        "winutil":  "vivaldi"
-    },
-    {
-        "id":  "waterfox",
-        "nome":  "Waterfox",
-        "descricao":  "Navegador baseado no Firefox, com foco em privacidade.",
-        "categoria":  "Navegadores",
-        "wingetId":  "Waterfox.Waterfox",
+        "wingetId":  "Mozilla.Firefox",
         "livre":  true,
-        "site":  "https://www.waterfox.net/",
-        "choco":  "waterfox",
-        "winutil":  "waterfox"
+        "site":  "https://www.mozilla.org/en-US/firefox/new/",
+        "choco":  "firefox",
+        "winutil":  "firefox",
+        "estrela":  false,
+        "fmhy":  "internet-tools / Firefox Tools",
+        "grupo":  "Baseados no Firefox"
+    },
+    {
+        "id":  "helium",
+        "nome":  "Helium",
+        "descricao":  "Navegador leve baseado no Chromium, sem rastreamento.",
+        "categoria":  "Navegadores",
+        "wingetId":  "ImputNet.Helium",
+        "livre":  true,
+        "site":  "https://helium.computer",
+        "choco":  "helium",
+        "winutil":  "helium",
+        "estrela":  false,
+        "fmhy":  "educational / Study Tools; privacy / Browser Privacy",
+        "grupo":  "Baseados no Chromium"
     },
     {
         "id":  "zenbrowser",
@@ -162,7 +92,10 @@
         "livre":  true,
         "site":  "https://zen-browser.app/",
         "choco":  "",
-        "winutil":  "ZenBrowser"
+        "winutil":  "ZenBrowser",
+        "estrela":  false,
+        "fmhy":  "privacy",
+        "grupo":  "Baseados no Firefox"
     },
     {
         "id":  "betterbird",
@@ -173,7 +106,10 @@
         "livre":  true,
         "site":  "https://www.betterbird.eu/",
         "choco":  "betterbird",
-        "winutil":  "betterbird"
+        "winutil":  "betterbird",
+        "estrela":  true,
+        "fmhy":  "internet-tools / Email Clients",
+        "grupo":  "E-mail"
     },
     {
         "id":  "chatterino",
@@ -184,51 +120,23 @@
         "livre":  true,
         "site":  "https://www.chatterino.com/",
         "choco":  "chatterino",
-        "winutil":  "chatterino"
+        "winutil":  "chatterino",
+        "estrela":  true,
+        "fmhy":  "social-media-tools / Twitch Players"
     },
     {
-        "id":  "discord",
-        "nome":  "Discord",
-        "descricao":  "Chat de voz e texto.",
+        "id":  "mailspring",
+        "nome":  "Mailspring",
+        "descricao":  "Cliente de e-mail moderno para várias contas.",
         "categoria":  "Comunicação",
-        "wingetId":  "Discord.Discord",
+        "wingetId":  "Foundry376.Mailspring",
         "livre":  false,
-        "site":  "https://discord.com/",
-        "choco":  "discord",
-        "winutil":  "discord"
-    },
-    {
-        "id":  "dorion",
-        "nome":  "Dorion",
-        "descricao":  "Discord mais leve, com temas e plugins.",
-        "categoria":  "Comunicação",
-        "wingetId":  "SpikeHD.Dorion",
-        "livre":  true,
-        "site":  "https://spikehd.dev/projects/dorion/",
-        "choco":  "dorion",
-        "winutil":  "dorion"
-    },
-    {
-        "id":  "matrix",
-        "nome":  "Element",
-        "descricao":  "Mensagens pelo Matrix, descentralizado e criptografado.",
-        "categoria":  "Comunicação",
-        "wingetId":  "Element.Element",
-        "livre":  true,
-        "site":  "https://element.io/",
-        "choco":  "element-desktop",
-        "winutil":  "matrix"
-    },
-    {
-        "id":  "teams",
-        "nome":  "Microsoft Teams",
-        "descricao":  "Reuniões e chat da Microsoft.",
-        "categoria":  "Comunicação",
-        "wingetId":  "Microsoft.Teams",
-        "livre":  false,
-        "site":  "https://www.microsoft.com/en-us/microsoft-teams/group-chat-software",
-        "choco":  "microsoft-teams",
-        "winutil":  "teams"
+        "site":  "https://getmailspring.com/",
+        "choco":  "mailspring",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "internet-tools / Email Clients",
+        "grupo":  "E-mail"
     },
     {
         "id":  "protonmail",
@@ -239,18 +147,10 @@
         "livre":  true,
         "site":  "https://proton.me/mail",
         "choco":  "protonmail",
-        "winutil":  "protonmail"
-    },
-    {
-        "id":  "qtox",
-        "nome":  "QTox",
-        "descricao":  "Mensagens e chamadas criptografadas, sem servidor.",
-        "categoria":  "Comunicação",
-        "wingetId":  "Tox.qTox",
-        "livre":  true,
-        "site":  "https://qtox.github.io/",
-        "choco":  "qtox",
-        "winutil":  "qtox"
+        "winutil":  "protonmail",
+        "estrela":  true,
+        "fmhy":  "privacy / Email Privacy",
+        "grupo":  "E-mail"
     },
     {
         "id":  "signal",
@@ -261,51 +161,10 @@
         "livre":  true,
         "site":  "https://signal.org/",
         "choco":  "signal",
-        "winutil":  "signal"
-    },
-    {
-        "id":  "slack",
-        "nome":  "Slack",
-        "descricao":  "Chat para equipes.",
-        "categoria":  "Comunicação",
-        "wingetId":  "SlackTechnologies.Slack",
-        "livre":  false,
-        "site":  "https://slack.com/",
-        "choco":  "slack",
-        "winutil":  "slack"
-    },
-    {
-        "id":  "teamspeak3",
-        "nome":  "TeamSpeak 3",
-        "descricao":  "Chat de voz para jogos.",
-        "categoria":  "Comunicação",
-        "wingetId":  "TeamSpeakSystems.TeamSpeakClient",
-        "livre":  false,
-        "site":  "https://www.teamspeak.com/",
-        "choco":  "teamspeak",
-        "winutil":  "teamspeak3"
-    },
-    {
-        "id":  "teamspeak6",
-        "nome":  "TeamSpeak 6",
-        "descricao":  "Chat de voz para jogos (versão nova, em teste).",
-        "categoria":  "Comunicação",
-        "wingetId":  "TeamSpeakSystems.TeamSpeakClient.Beta.6",
-        "livre":  false,
-        "site":  "https://www.teamspeak.com/",
-        "choco":  "",
-        "winutil":  "teamspeak6"
-    },
-    {
-        "id":  "telegram",
-        "nome":  "Telegram",
-        "descricao":  "Mensagens.",
-        "categoria":  "Comunicação",
-        "wingetId":  "Telegram.TelegramDesktop",
-        "livre":  true,
-        "site":  "https://telegram.org/",
-        "choco":  "telegram",
-        "winutil":  "telegram"
+        "winutil":  "signal",
+        "estrela":  true,
+        "fmhy":  "audio / Browser Editors / Synths; privacy / Encrypted Messengers",
+        "grupo":  "Mensagens"
     },
     {
         "id":  "thunderbird",
@@ -316,7 +175,52 @@
         "livre":  true,
         "site":  "https://www.thunderbird.net/",
         "choco":  "thunderbird",
-        "winutil":  "thunderbird"
+        "winutil":  "thunderbird",
+        "estrela":  true,
+        "fmhy":  "internet-tools / Email Clients",
+        "grupo":  "E-mail"
+    },
+    {
+        "id":  "dorion",
+        "nome":  "Dorion",
+        "descricao":  "Discord mais leve, com temas e plugins.",
+        "categoria":  "Comunicação",
+        "wingetId":  "SpikeHD.Dorion",
+        "livre":  true,
+        "site":  "https://spikehd.dev/projects/dorion/",
+        "choco":  "dorion",
+        "winutil":  "dorion",
+        "estrela":  false,
+        "fmhy":  "social-media-tools / Discord Clients",
+        "grupo":  "Discord com extras"
+    },
+    {
+        "id":  "matrix",
+        "nome":  "Element",
+        "descricao":  "Mensagens pelo Matrix, descentralizado e criptografado.",
+        "categoria":  "Comunicação",
+        "wingetId":  "Element.Element",
+        "livre":  true,
+        "site":  "https://element.io/",
+        "choco":  "element-desktop",
+        "winutil":  "matrix",
+        "estrela":  false,
+        "fmhy":  "audio / Audio Editors",
+        "grupo":  "Mensagens"
+    },
+    {
+        "id":  "qtox",
+        "nome":  "QTox",
+        "descricao":  "Mensagens e chamadas criptografadas, sem servidor.",
+        "categoria":  "Comunicação",
+        "wingetId":  "Tox.qTox",
+        "livre":  true,
+        "site":  "https://qtox.github.io/",
+        "choco":  "qtox",
+        "winutil":  "qtox",
+        "estrela":  false,
+        "fmhy":  "privacy / Encrypted Messengers",
+        "grupo":  "Mensagens"
     },
     {
         "id":  "vesktop",
@@ -327,30 +231,10 @@
         "livre":  true,
         "site":  "https://vesktop.dev",
         "choco":  "",
-        "winutil":  "vesktop"
-    },
-    {
-        "id":  "viber",
-        "nome":  "Viber",
-        "descricao":  "Mensagens e chamadas.",
-        "categoria":  "Comunicação",
-        "wingetId":  "Rakuten.Viber",
-        "livre":  false,
-        "site":  "https://www.viber.com/",
-        "choco":  "viber",
-        "winutil":  "viber"
-    },
-    {
-        "id":  "whatsapp",
-        "nome":  "WhatsApp",
-        "descricao":  "O WhatsApp para Windows (Microsoft Store).",
-        "categoria":  "Comunicação",
-        "wingetId":  "9NKSQGP7F2NH",
-        "fonte":  "msstore",
-        "livre":  false,
-        "site":  "https://www.whatsapp.com/download",
-        "choco":  "",
-        "winutil":  "whatsapp"
+        "winutil":  "vesktop",
+        "estrela":  false,
+        "fmhy":  "social-media-tools / Discord Clients",
+        "grupo":  "Discord com extras"
     },
     {
         "id":  "zoom",
@@ -361,7 +245,9 @@
         "livre":  false,
         "site":  "https://zoom.us/",
         "choco":  "zoom",
-        "winutil":  "zoom"
+        "winutil":  "zoom",
+        "estrela":  false,
+        "fmhy":  "file-tools"
     },
     {
         "id":  "aimp",
@@ -372,18 +258,10 @@
         "livre":  false,
         "site":  "https://www.aimp.ru/",
         "choco":  "aimp",
-        "winutil":  "aimp"
-    },
-    {
-        "id":  "audacity",
-        "nome":  "Audacity",
-        "descricao":  "Edição de áudio.",
-        "categoria":  "Multimídia",
-        "wingetId":  "Audacity.Audacity",
-        "livre":  true,
-        "site":  "https://www.audacityteam.org/",
-        "choco":  "audacity",
-        "winutil":  "audacity"
+        "winutil":  "aimp",
+        "estrela":  true,
+        "fmhy":  "audio / Audio Players",
+        "grupo":  "Players de música"
     },
     {
         "id":  "blender",
@@ -394,7 +272,9 @@
         "livre":  true,
         "site":  "https://www.blender.org/",
         "choco":  "blender",
-        "winutil":  "blender"
+        "winutil":  "blender",
+        "estrela":  true,
+        "fmhy":  "image-tools / 3D Modeling Apps; video-tools / Video Editors; video-tools / Animation Tools"
     },
     {
         "id":  "calibre",
@@ -405,7 +285,9 @@
         "livre":  true,
         "site":  "https://calibre-ebook.com/",
         "choco":  "calibre",
-        "winutil":  "calibre"
+        "winutil":  "calibre",
+        "estrela":  true,
+        "fmhy":  "reading; reading / E-Reader Tools"
     },
     {
         "id":  "eartrumpet",
@@ -416,7 +298,9 @@
         "livre":  true,
         "site":  "https://eartrumpet.app/",
         "choco":  "eartrumpet",
-        "winutil":  "eartrumpet"
+        "winutil":  "eartrumpet",
+        "estrela":  true,
+        "fmhy":  "system-tools / System Tweaks"
     },
     {
         "id":  "fileconverter",
@@ -427,7 +311,10 @@
         "livre":  true,
         "site":  "https://file-converter.io/",
         "choco":  "file-converter",
-        "winutil":  "fileconverter"
+        "winutil":  "fileconverter",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Converters; image-tools / Image Converters",
+        "grupo":  "Conversores"
     },
     {
         "id":  "foobar",
@@ -438,7 +325,23 @@
         "livre":  false,
         "site":  "https://www.foobar2000.org/",
         "choco":  "foobar2000",
-        "winutil":  "foobar"
+        "winutil":  "foobar",
+        "estrela":  true,
+        "fmhy":  "audio / Audio Players",
+        "grupo":  "Players de música"
+    },
+    {
+        "id":  "freetube",
+        "nome":  "FreeTube",
+        "descricao":  "YouTube sem anúncios e sem rastreamento.",
+        "categoria":  "Multimídia",
+        "wingetId":  "FreeTube.FreeTube",
+        "livre":  false,
+        "site":  "https://freetubeapp.io/",
+        "choco":  "freetube",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "social-media-tools / Players / Frontends"
     },
     {
         "id":  "gimp",
@@ -449,7 +352,10 @@
         "livre":  true,
         "site":  "https://www.gimp.org/",
         "choco":  "gimp",
-        "winutil":  "gimp"
+        "winutil":  "gimp",
+        "estrela":  true,
+        "fmhy":  "image-tools / Editing Software",
+        "grupo":  "Edição de imagem"
     },
     {
         "id":  "handbrake",
@@ -460,7 +366,10 @@
         "livre":  true,
         "site":  "https://handbrake.fr/",
         "choco":  "handbrake",
-        "winutil":  "handbrake"
+        "winutil":  "handbrake",
+        "estrela":  true,
+        "fmhy":  "video-tools / Processing / Encoding",
+        "grupo":  "Conversores"
     },
     {
         "id":  "imageglass",
@@ -471,7 +380,24 @@
         "livre":  true,
         "site":  "https://imageglass.org/",
         "choco":  "imageglass",
-        "winutil":  "imageglass"
+        "winutil":  "imageglass",
+        "estrela":  true,
+        "fmhy":  "image-tools / Image Viewers",
+        "grupo":  "Visualizadores de imagem"
+    },
+    {
+        "id":  "inkscape",
+        "nome":  "Inkscape",
+        "descricao":  "Desenho vetorial: logos, ilustrações, SVG.",
+        "categoria":  "Multimídia",
+        "wingetId":  "Inkscape.Inkscape",
+        "livre":  false,
+        "site":  "https://inkscape.org/",
+        "choco":  "inkscape",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "image-tools / Painting / Drawing",
+        "grupo":  "Edição de imagem"
     },
     {
         "id":  "irfanview",
@@ -482,29 +408,65 @@
         "livre":  false,
         "site":  "https://irfanview.com/",
         "choco":  "irfanview",
-        "winutil":  "irfanview"
+        "winutil":  "irfanview",
+        "estrela":  true,
+        "fmhy":  "image-tools / Image Viewers",
+        "grupo":  "Visualizadores de imagem"
     },
     {
-        "id":  "itunes",
-        "nome":  "iTunes",
-        "descricao":  "Música da Apple e backup do iPhone.",
+        "id":  "kdenlive",
+        "nome":  "Kdenlive",
+        "descricao":  "Editor de vídeo completo.",
         "categoria":  "Multimídia",
-        "wingetId":  "Apple.iTunes",
+        "wingetId":  "KDE.Kdenlive",
         "livre":  false,
-        "site":  "https://www.apple.com/itunes/",
-        "choco":  "itunes",
-        "winutil":  "itunes"
+        "site":  "https://kdenlive.org/",
+        "choco":  "kdenlive",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "video-tools / Video Editors",
+        "grupo":  "Edição de vídeo"
     },
     {
-        "id":  "klite",
-        "nome":  "K-Lite Codec Pack",
-        "descricao":  "Codecs para abrir qualquer formato de vídeo.",
+        "id":  "krita",
+        "nome":  "Krita",
+        "descricao":  "Pintura digital e ilustração.",
         "categoria":  "Multimídia",
-        "wingetId":  "CodecGuide.K-LiteCodecPack.Standard",
+        "wingetId":  "KDE.Krita",
         "livre":  false,
-        "site":  "https://www.codecguide.com/",
-        "choco":  "k-litecodecpack-standard",
-        "winutil":  "klite"
+        "site":  "https://krita.org/",
+        "choco":  "krita",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "image-tools / Painting / Drawing",
+        "grupo":  "Edição de imagem"
+    },
+    {
+        "id":  "losslesscut",
+        "nome":  "LosslessCut",
+        "descricao":  "Corta vídeos e áudios na hora, sem perder qualidade.",
+        "categoria":  "Multimídia",
+        "wingetId":  "ch.LosslessCut",
+        "livre":  false,
+        "site":  "https://github.com/mifi/lossless-cut",
+        "choco":  "lossless-cut",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "video-tools / Video Editors",
+        "grupo":  "Edição de vídeo"
+    },
+    {
+        "id":  "mp3tag",
+        "nome":  "Mp3tag",
+        "descricao":  "Edita nome, artista, álbum e capa das músicas.",
+        "categoria":  "Multimídia",
+        "wingetId":  "FlorianHeidenreich.Mp3tag",
+        "livre":  false,
+        "site":  "https://www.mp3tag.de/",
+        "choco":  "mp3tag",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "audio / Audio Metadata"
     },
     {
         "id":  "mpchc",
@@ -515,7 +477,10 @@
         "livre":  true,
         "site":  "https://mpc-hc.org/",
         "choco":  "mpc-hc-clsid2",
-        "winutil":  "mpchc"
+        "winutil":  "mpchc",
+        "estrela":  true,
+        "fmhy":  "video-tools",
+        "grupo":  "Players de vídeo"
     },
     {
         "id":  "mpc-qt",
@@ -526,7 +491,10 @@
         "livre":  true,
         "site":  "https://mpc-qt.github.io",
         "choco":  "mpc-qt",
-        "winutil":  "mpc-qt"
+        "winutil":  "mpc-qt",
+        "estrela":  true,
+        "fmhy":  "video-tools",
+        "grupo":  "Players de vídeo"
     },
     {
         "id":  "mpv",
@@ -537,18 +505,23 @@
         "livre":  true,
         "site":  "https://mpv.io/",
         "choco":  "",
-        "winutil":  "mpv"
+        "winutil":  "mpv",
+        "estrela":  true,
+        "fmhy":  "video-tools",
+        "grupo":  "Players de vídeo"
     },
     {
-        "id":  "nomacs",
-        "nome":  "nomacs",
-        "descricao":  "Visualizador de imagens.",
+        "id":  "musescore",
+        "nome":  "MuseScore",
+        "descricao":  "Escreve e toca partituras.",
         "categoria":  "Multimídia",
-        "wingetId":  "nomacs.nomacs",
-        "livre":  true,
-        "site":  "https://nomacs.org/",
-        "choco":  "nomacs",
-        "winutil":  "nomacs"
+        "wingetId":  "Musescore.Musescore",
+        "livre":  false,
+        "site":  "https://musescore.org/",
+        "choco":  "musescore",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "audio / Sheet Music / Notation"
     },
     {
         "id":  "obs",
@@ -559,18 +532,23 @@
         "livre":  true,
         "site":  "https://obsproject.com/",
         "choco":  "obs-studio",
-        "winutil":  "obs"
+        "winutil":  "obs",
+        "estrela":  true,
+        "fmhy":  "video-tools / Screen Recording; video-tools / Live Streaming"
     },
     {
-        "id":  "paintdotnet",
-        "nome":  "Paint.NET",
-        "descricao":  "Edição de imagens simples e rápida.",
+        "id":  "pinta",
+        "nome":  "Pinta",
+        "descricao":  "Editor de imagens simples, tipo um Paint mais completo.",
         "categoria":  "Multimídia",
-        "wingetId":  "dotPDN.PaintDotNet",
+        "wingetId":  "Pinta.Pinta",
         "livre":  false,
-        "site":  "https://www.getpaint.net/",
-        "choco":  "paint.net",
-        "winutil":  "Paintdotnet"
+        "site":  "https://www.pinta-project.com/",
+        "choco":  "pinta",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "image-tools / Painting / Drawing",
+        "grupo":  "Edição de imagem"
     },
     {
         "id":  "sharex",
@@ -581,18 +559,50 @@
         "livre":  true,
         "site":  "https://getsharex.com/",
         "choco":  "sharex",
-        "winutil":  "sharex"
+        "winutil":  "sharex",
+        "estrela":  true,
+        "fmhy":  "image-tools / Screenshot Tools; video-tools / Screen Recording"
     },
     {
-        "id":  "spotify",
-        "nome":  "Spotify",
-        "descricao":  "Música por streaming.",
+        "id":  "shotcut",
+        "nome":  "Shotcut",
+        "descricao":  "Editor de vídeo.",
         "categoria":  "Multimídia",
-        "wingetId":  "Spotify.Spotify",
+        "wingetId":  "Meltytech.Shotcut",
         "livre":  false,
-        "site":  "https://www.spotify.com/",
-        "choco":  "spotify",
-        "winutil":  ""
+        "site":  "https://shotcut.org/",
+        "choco":  "shotcut",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "video-tools / Video Editors",
+        "grupo":  "Edição de vídeo"
+    },
+    {
+        "id":  "shutterencoder",
+        "nome":  "Shutter Encoder",
+        "descricao":  "Converte vídeo, áudio e imagem para qualquer formato.",
+        "categoria":  "Multimídia",
+        "wingetId":  "PaulPacifico.ShutterEncoder",
+        "livre":  false,
+        "site":  "https://www.shutterencoder.com/",
+        "choco":  "shutter-encoder",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "audio; video-tools / Processing / Encoding",
+        "grupo":  "Conversores"
+    },
+    {
+        "id":  "upscayl",
+        "nome":  "Upscayl",
+        "descricao":  "Aumenta imagens com IA sem ficar borrado.",
+        "categoria":  "Multimídia",
+        "wingetId":  "Upscayl.Upscayl",
+        "livre":  false,
+        "site":  "https://upscayl.org/",
+        "choco":  "upscayl",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "image-tools / Upscale / Restore"
     },
     {
         "id":  "vlc",
@@ -603,40 +613,104 @@
         "livre":  true,
         "site":  "https://www.videolan.org/vlc/",
         "choco":  "vlc",
-        "winutil":  "vlc"
+        "winutil":  "vlc",
+        "estrela":  true,
+        "fmhy":  "video-tools",
+        "grupo":  "Players de vídeo"
     },
     {
-        "id":  "adobe",
-        "nome":  "Adobe Acrobat Reader",
-        "descricao":  "O leitor de PDF da Adobe.",
-        "categoria":  "Documentos",
-        "wingetId":  "Adobe.Acrobat.Reader.64-bit",
+        "id":  "voicemeeter",
+        "nome":  "Voicemeeter",
+        "descricao":  "Mesa de som virtual: mistura microfone e sons do PC.",
+        "categoria":  "Multimídia",
+        "wingetId":  "VB-Audio.Voicemeeter",
         "livre":  false,
-        "site":  "https://www.adobe.com/acrobat/pdf-reader.html",
-        "choco":  "adobereader",
-        "winutil":  "adobe"
+        "site":  "https://vb-audio.com/Voicemeeter/",
+        "choco":  "voicemeeter",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / System Audio"
     },
     {
-        "id":  "foxpdfreader",
-        "nome":  "Foxit PDF Reader",
-        "descricao":  "Leitor de PDF com anotações.",
-        "categoria":  "Documentos",
-        "wingetId":  "Foxit.FoxitReader",
-        "livre":  false,
-        "site":  "https://www.foxit.com/pdf-reader/",
-        "choco":  "foxitreader",
-        "winutil":  "foxpdfreader"
-    },
-    {
-        "id":  "joplin",
-        "nome":  "Joplin",
-        "descricao":  "Notas e listas, com sincronização.",
-        "categoria":  "Documentos",
-        "wingetId":  "Joplin.Joplin",
+        "id":  "audacity",
+        "nome":  "Audacity",
+        "descricao":  "Edição de áudio.",
+        "categoria":  "Multimídia",
+        "wingetId":  "Audacity.Audacity",
         "livre":  true,
-        "site":  "https://joplinapp.org/",
-        "choco":  "joplin",
-        "winutil":  "joplin"
+        "site":  "https://www.audacityteam.org/",
+        "choco":  "audacity",
+        "winutil":  "audacity",
+        "estrela":  false,
+        "fmhy":  "audio / Audio Editors"
+    },
+    {
+        "id":  "nomacs",
+        "nome":  "nomacs",
+        "descricao":  "Visualizador de imagens.",
+        "categoria":  "Multimídia",
+        "wingetId":  "nomacs.nomacs",
+        "livre":  true,
+        "site":  "https://nomacs.org/",
+        "choco":  "nomacs",
+        "winutil":  "nomacs",
+        "estrela":  false,
+        "fmhy":  "image-tools / Image Viewers",
+        "grupo":  "Visualizadores de imagem"
+    },
+    {
+        "id":  "paintdotnet",
+        "nome":  "Paint.NET",
+        "descricao":  "Edição de imagens simples e rápida.",
+        "categoria":  "Multimídia",
+        "wingetId":  "dotPDN.PaintDotNet",
+        "livre":  false,
+        "site":  "https://www.getpaint.net/",
+        "choco":  "paint.net",
+        "winutil":  "Paintdotnet",
+        "estrela":  false,
+        "fmhy":  "image-tools / Editing Software",
+        "grupo":  "Edição de imagem"
+    },
+    {
+        "id":  "spotify",
+        "nome":  "Spotify",
+        "descricao":  "Música por streaming.",
+        "categoria":  "Multimídia",
+        "wingetId":  "Spotify.Spotify",
+        "livre":  false,
+        "site":  "https://www.spotify.com/",
+        "choco":  "spotify",
+        "winutil":  "",
+        "estrela":  false,
+        "fmhy":  "audio / Streaming Sites"
+    },
+    {
+        "id":  "drawio",
+        "nome":  "draw.io",
+        "descricao":  "Fluxogramas, diagramas e organogramas.",
+        "categoria":  "Documentos",
+        "wingetId":  "JGraph.Draw",
+        "livre":  false,
+        "site":  "https://www.drawio.com/",
+        "choco":  "drawio",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "storage / Visualization Tools"
+    },
+    {
+        "id":  "koodoreader",
+        "nome":  "Koodo Reader",
+        "descricao":  "Leitor de e-books (EPUB, PDF, MOBI).",
+        "categoria":  "Documentos",
+        "wingetId":  "AppByTroye.KoodoReader",
+        "livre":  false,
+        "site":  "https://koodoreader.com/",
+        "choco":  "koodo-reader",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "reading / Ebook Readers",
+        "grupo":  "Leitores (PDF e e-book)"
     },
     {
         "id":  "libreoffice",
@@ -647,18 +721,38 @@
         "livre":  true,
         "site":  "https://www.libreoffice.org/",
         "choco":  "libreoffice-fresh",
-        "winutil":  "libreoffice"
+        "winutil":  "libreoffice",
+        "estrela":  true,
+        "fmhy":  "text-tools / Office Suites",
+        "grupo":  "Escritório"
     },
     {
-        "id":  "naps2",
-        "nome":  "NAPS2",
-        "descricao":  "Digitaliza documentos para PDF.",
+        "id":  "logseq",
+        "nome":  "Logseq",
+        "descricao":  "Notas ligadas umas às outras, em tópicos.",
         "categoria":  "Documentos",
-        "wingetId":  "Cyanfish.NAPS2",
-        "livre":  true,
-        "site":  "https://www.naps2.com/",
-        "choco":  "naps2",
-        "winutil":  "naps2"
+        "wingetId":  "Logseq.Logseq",
+        "livre":  false,
+        "site":  "https://logseq.com/",
+        "choco":  "logseq",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "text-tools / Note-Taking",
+        "grupo":  "Notas"
+    },
+    {
+        "id":  "notesnook",
+        "nome":  "Notesnook",
+        "descricao":  "Notas criptografadas, sincronizadas.",
+        "categoria":  "Documentos",
+        "wingetId":  "Streetwriters.Notesnook",
+        "livre":  false,
+        "site":  "https://notesnook.com/",
+        "choco":  "notesnook",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "text-tools / Note-Taking",
+        "grupo":  "Notas"
     },
     {
         "id":  "obsidian",
@@ -669,18 +763,10 @@
         "livre":  false,
         "site":  "https://obsidian.md/",
         "choco":  "obsidian",
-        "winutil":  "obsidian"
-    },
-    {
-        "id":  "okular",
-        "nome":  "Okular",
-        "descricao":  "Leitor de PDF e documentos do KDE.",
-        "categoria":  "Documentos",
-        "wingetId":  "KDE.Okular",
-        "livre":  true,
-        "site":  "https://okular.kde.org/",
-        "choco":  "okular",
-        "winutil":  "okular"
+        "winutil":  "obsidian",
+        "estrela":  true,
+        "fmhy":  "gaming / Unblocked Games; text-tools / Note-Taking",
+        "grupo":  "Notas"
     },
     {
         "id":  "onlyoffice",
@@ -691,7 +777,10 @@
         "livre":  true,
         "site":  "https://www.onlyoffice.com/desktop.aspx",
         "choco":  "onlyoffice",
-        "winutil":  "onlyoffice"
+        "winutil":  "onlyoffice",
+        "estrela":  true,
+        "fmhy":  "text-tools / Office Suites",
+        "grupo":  "Escritório"
     },
     {
         "id":  "pdf24creator",
@@ -702,62 +791,9 @@
         "livre":  false,
         "site":  "https://tools.pdf24.org/en/creator",
         "choco":  "pdf24",
-        "winutil":  "pdf24creator"
-    },
-    {
-        "id":  "pdfgear",
-        "nome":  "PDFgear",
-        "descricao":  "Edita e converte PDFs, grátis.",
-        "categoria":  "Documentos",
-        "wingetId":  "PDFgear.PDFgear",
-        "livre":  false,
-        "site":  "https://www.pdfgear.com/",
-        "choco":  "pdfgear",
-        "winutil":  "pdfgear"
-    },
-    {
-        "id":  "pdfsam",
-        "nome":  "PDFsam Basic",
-        "descricao":  "Junta e divide PDFs.",
-        "categoria":  "Documentos",
-        "wingetId":  "PDFsam.PDFsam",
-        "livre":  true,
-        "site":  "https://pdfsam.org/",
-        "choco":  "pdfsam",
-        "winutil":  "pdfsam"
-    },
-    {
-        "id":  "pdf-xchange",
-        "nome":  "PDF-XChange Editor",
-        "descricao":  "Edita, anota e assina PDFs.",
-        "categoria":  "Documentos",
-        "wingetId":  "TrackerSoftware.PDF-XChangeEditor",
-        "livre":  false,
-        "site":  "https://www.pdf-xchange.com/",
-        "choco":  "pdfxchangeeditor",
-        "winutil":  "pdf-xchange"
-    },
-    {
-        "id":  "qownnotes",
-        "nome":  "QOwnNotes",
-        "descricao":  "Notas em Markdown, com sincronização pelo Nextcloud.",
-        "categoria":  "Documentos",
-        "wingetId":  "pbek.QOwnNotes",
-        "livre":  true,
-        "site":  "https://www.qownnotes.org/",
-        "choco":  "qownnotes",
-        "winutil":  "qownnotes"
-    },
-    {
-        "id":  "simplenote",
-        "nome":  "Simplenote",
-        "descricao":  "Notas simples, sincronizadas.",
-        "categoria":  "Documentos",
-        "wingetId":  "Automattic.Simplenote",
-        "livre":  true,
-        "site":  "https://simplenote.com/",
-        "choco":  "simplenote",
-        "winutil":  "simplenote"
+        "winutil":  "pdf24creator",
+        "estrela":  true,
+        "fmhy":  "file-tools / Offline PDF Toolkits"
     },
     {
         "id":  "sumatrapdf",
@@ -768,18 +804,10 @@
         "livre":  true,
         "site":  "https://www.sumatrapdfreader.org/free-pdf-reader.html",
         "choco":  "sumatrapdf",
-        "winutil":  "sumatra"
-    },
-    {
-        "id":  "xournal",
-        "nome":  "Xournal++",
-        "descricao":  "Anotações à mão e em PDFs (bom com caneta).",
-        "categoria":  "Documentos",
-        "wingetId":  "Xournal++.Xournal++",
-        "livre":  true,
-        "site":  "https://xournalpp.github.io/",
-        "choco":  "xournalplusplus",
-        "winutil":  "xournal"
+        "winutil":  "sumatra",
+        "estrela":  true,
+        "fmhy":  "reading / Ebook Readers",
+        "grupo":  "Leitores (PDF e e-book)"
     },
     {
         "id":  "zotero",
@@ -790,29 +818,91 @@
         "livre":  true,
         "site":  "https://www.zotero.org/",
         "choco":  "zotero",
-        "winutil":  "zotero"
+        "winutil":  "zotero",
+        "estrela":  true,
+        "fmhy":  "educational / Research Tools"
     },
     {
-        "id":  "1password",
-        "nome":  "1Password",
-        "descricao":  "Gerenciador de senhas pago, com app e extensão para o navegador.",
-        "categoria":  "Utilitários",
-        "wingetId":  "AgileBits.1Password",
-        "livre":  false,
-        "site":  "https://1password.com/",
-        "choco":  "1password",
-        "winutil":  "1password"
-    },
-    {
-        "id":  "7zip",
-        "nome":  "7-Zip",
-        "descricao":  "Abre e cria .zip, .7z, .rar e outros.",
-        "categoria":  "Utilitários",
-        "wingetId":  "7zip.7zip",
+        "id":  "joplin",
+        "nome":  "Joplin",
+        "descricao":  "Notas e listas, com sincronização.",
+        "categoria":  "Documentos",
+        "wingetId":  "Joplin.Joplin",
         "livre":  true,
-        "site":  "https://www.7-zip.org/",
-        "choco":  "7zip",
-        "winutil":  "7zip"
+        "site":  "https://joplinapp.org/",
+        "choco":  "joplin",
+        "winutil":  "joplin",
+        "estrela":  false,
+        "fmhy":  "text-tools / Note-Taking",
+        "grupo":  "Notas"
+    },
+    {
+        "id":  "naps2",
+        "nome":  "NAPS2",
+        "descricao":  "Digitaliza documentos para PDF.",
+        "categoria":  "Documentos",
+        "wingetId":  "Cyanfish.NAPS2",
+        "livre":  true,
+        "site":  "https://www.naps2.com/",
+        "choco":  "naps2",
+        "winutil":  "naps2",
+        "estrela":  false,
+        "fmhy":  "text-tools"
+    },
+    {
+        "id":  "okular",
+        "nome":  "Okular",
+        "descricao":  "Leitor de PDF e documentos do KDE.",
+        "categoria":  "Documentos",
+        "wingetId":  "KDE.Okular",
+        "livre":  true,
+        "site":  "https://okular.kde.org/",
+        "choco":  "okular",
+        "winutil":  "okular",
+        "estrela":  false,
+        "fmhy":  "reading / Ebook Readers",
+        "grupo":  "Leitores (PDF e e-book)"
+    },
+    {
+        "id":  "qownnotes",
+        "nome":  "QOwnNotes",
+        "descricao":  "Notas em Markdown, com sincronização pelo Nextcloud.",
+        "categoria":  "Documentos",
+        "wingetId":  "pbek.QOwnNotes",
+        "livre":  true,
+        "site":  "https://www.qownnotes.org/",
+        "choco":  "qownnotes",
+        "winutil":  "qownnotes",
+        "estrela":  false,
+        "fmhy":  "text-tools / Note-Taking",
+        "grupo":  "Notas"
+    },
+    {
+        "id":  "simplenote",
+        "nome":  "Simplenote",
+        "descricao":  "Notas simples, sincronizadas.",
+        "categoria":  "Documentos",
+        "wingetId":  "Automattic.Simplenote",
+        "livre":  true,
+        "site":  "https://simplenote.com/",
+        "choco":  "simplenote",
+        "winutil":  "simplenote",
+        "estrela":  false,
+        "fmhy":  "text-tools / Note-Taking",
+        "grupo":  "Notas"
+    },
+    {
+        "id":  "xournal",
+        "nome":  "Xournal++",
+        "descricao":  "Anotações à mão e em PDFs (bom com caneta).",
+        "categoria":  "Documentos",
+        "wingetId":  "Xournal++.Xournal++",
+        "livre":  true,
+        "site":  "https://xournalpp.github.io/",
+        "choco":  "xournalplusplus",
+        "winutil":  "xournal",
+        "estrela":  false,
+        "fmhy":  "text-tools / Whiteboards / Handwritten"
     },
     {
         "id":  "abdownloadmanager",
@@ -823,18 +913,50 @@
         "livre":  true,
         "site":  "https://abdownloadmanager.com/",
         "choco":  "ab-download-manager",
-        "winutil":  "abdownloadmanager"
+        "winutil":  "abdownloadmanager",
+        "estrela":  true,
+        "fmhy":  "beginners-guide / Links; file-tools / Download Managers"
     },
     {
-        "id":  "anydesk",
-        "nome":  "AnyDesk",
-        "descricao":  "Acesso remoto: controla outro computador pela internet.",
+        "id":  "advancedrenamer",
+        "nome":  "Advanced Renamer",
+        "descricao":  "Renomeia muitos arquivos de uma vez, com regras (grátis para uso pessoal).",
         "categoria":  "Utilitários",
-        "wingetId":  "AnyDesk.AnyDesk",
+        "wingetId":  "HulubuluSoftware.AdvancedRenamer",
         "livre":  false,
-        "site":  "https://anydesk.com/",
-        "choco":  "anydesk",
-        "winutil":  "anydesk"
+        "site":  "https://www.advancedrenamer.com/",
+        "choco":  "advanced-renamer",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools / Data Automation"
+    },
+    {
+        "id":  "adwcleaner",
+        "nome":  "AdwCleaner",
+        "descricao":  "Remove adware, barras de ferramentas e programas indesejados.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Malwarebytes.AdwCleaner",
+        "livre":  false,
+        "site":  "https://www.malwarebytes.com/adwcleaner",
+        "choco":  "adwcleaner",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "privacy",
+        "grupo":  "Antimalware"
+    },
+    {
+        "id":  "altsnap",
+        "nome":  "AltSnap",
+        "descricao":  "Arrasta e redimensiona janelas segurando Alt, de qualquer ponto delas.",
+        "categoria":  "Utilitários",
+        "wingetId":  "AltSnap.AltSnap",
+        "livre":  false,
+        "site":  "https://github.com/RamonUnch/AltSnap",
+        "choco":  "altsnap",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / System Tweaks",
+        "grupo":  "Organizar janelas"
     },
     {
         "id":  "autohotkey",
@@ -845,7 +967,9 @@
         "livre":  true,
         "site":  "https://www.autohotkey.com/",
         "choco":  "autohotkey",
-        "winutil":  "autohotkey"
+        "winutil":  "autohotkey",
+        "estrela":  true,
+        "fmhy":  "system-tools / Task Automation"
     },
     {
         "id":  "bitwarden",
@@ -856,18 +980,10 @@
         "livre":  true,
         "site":  "https://bitwarden.com/",
         "choco":  "bitwarden",
-        "winutil":  "bitwarden"
-    },
-    {
-        "id":  "blurautoclicker",
-        "nome":  "BlurAutoClicker",
-        "descricao":  "Clica sozinho no intervalo que você escolher.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Blur009.BlurAutoClicker",
-        "livre":  true,
-        "site":  "https://blur009.vercel.app/projects/blur-autoclicker/",
-        "choco":  "",
-        "winutil":  "blurautoclicker"
+        "winutil":  "bitwarden",
+        "estrela":  true,
+        "fmhy":  "internet-tools / Password Managers",
+        "grupo":  "Senhas e 2FA"
     },
     {
         "id":  "bulkcrapuninstaller",
@@ -878,7 +994,10 @@
         "livre":  true,
         "site":  "https://www.bcuninstaller.com/",
         "choco":  "bulk-crap-uninstaller",
-        "winutil":  "bulkcrapuninstaller"
+        "winutil":  "bulkcrapuninstaller",
+        "estrela":  true,
+        "fmhy":  "system-tools",
+        "grupo":  "Desinstaladores"
     },
     {
         "id":  "cloudflarewarp",
@@ -889,18 +1008,36 @@
         "livre":  false,
         "site":  "https://one.one.one.one",
         "choco":  "warp",
-        "winutil":  "CloudflareWARP"
+        "winutil":  "CloudflareWARP",
+        "estrela":  true,
+        "fmhy":  "privacy"
     },
     {
-        "id":  "crystaldiskinfo",
-        "nome":  "Crystal Disk Info",
-        "descricao":  "Mostra a saúde e a temperatura dos discos.",
+        "id":  "compactgui",
+        "nome":  "CompactGUI",
+        "descricao":  "Compacta pastas e jogos pelo próprio Windows, sem perder nada e sem precisar descompactar.",
         "categoria":  "Utilitários",
-        "wingetId":  "CrystalDewWorld.CrystalDiskInfo",
-        "livre":  true,
-        "site":  "https://crystalmark.info/en/software/crystaldiskinfo/",
-        "choco":  "crystaldiskinfo",
-        "winutil":  "crystaldiskinfo"
+        "wingetId":  "IridiumIO.CompactGUI",
+        "livre":  false,
+        "site":  "https://github.com/IridiumIO/CompactGUI",
+        "choco":  "compactgui",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools / Archiving / Compression"
+    },
+    {
+        "id":  "cryptomator",
+        "nome":  "Cryptomator",
+        "descricao":  "Criptografa seus arquivos antes de irem para a nuvem (Drive, Dropbox, OneDrive).",
+        "categoria":  "Utilitários",
+        "wingetId":  "Cryptomator.Cryptomator",
+        "livre":  false,
+        "site":  "https://cryptomator.org/",
+        "choco":  "cryptomator",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Encryption",
+        "grupo":  "Criptografia"
     },
     {
         "id":  "crystaldiskmark",
@@ -911,40 +1048,50 @@
         "livre":  true,
         "site":  "https://crystalmark.info/en/software/crystaldiskmark/",
         "choco":  "crystaldiskmark",
-        "winutil":  "crystaldiskmark"
+        "winutil":  "crystaldiskmark",
+        "estrela":  true,
+        "fmhy":  "system-tools / Disk Tools",
+        "grupo":  "Saúde do disco"
     },
     {
-        "id":  "deskflow",
-        "nome":  "Deskflow",
-        "descricao":  "Um teclado e mouse para vários computadores.",
+        "id":  "czkawka",
+        "nome":  "Czkawka",
+        "descricao":  "Acha arquivos duplicados, imagens parecidas e pastas vazias para liberar espaço.",
         "categoria":  "Utilitários",
-        "wingetId":  "Deskflow.Deskflow",
-        "livre":  true,
-        "site":  "https://github.com/deskflow/deskflow",
-        "choco":  "deskflow",
-        "winutil":  "deskflow"
-    },
-    {
-        "id":  "dropbox",
-        "nome":  "Dropbox",
-        "descricao":  "Arquivos sincronizados na nuvem.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Dropbox.Dropbox",
+        "wingetId":  "qarmin.czkawka.gui",
         "livre":  false,
-        "site":  "https://www.dropbox.com/desktop",
-        "choco":  "dropbox",
-        "winutil":  "dropbox"
+        "site":  "https://github.com/qarmin/czkawka",
+        "choco":  "czkawka",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools; image-tools",
+        "grupo":  "Espaço em disco"
     },
     {
-        "id":  "enteauth",
-        "nome":  "Ente Auth",
-        "descricao":  "Códigos de verificação em duas etapas, com backup criptografado.",
+        "id":  "deepl",
+        "nome":  "DeepL",
+        "descricao":  "Tradutor de texto e documentos (plano gratuito).",
         "categoria":  "Utilitários",
-        "wingetId":  "ente-io.auth-desktop",
-        "livre":  true,
-        "site":  "https://ente.io/auth/",
-        "choco":  "ente-auth",
-        "winutil":  "enteauth"
+        "wingetId":  "DeepL.DeepL",
+        "livre":  false,
+        "site":  "https://www.deepl.com/",
+        "choco":  "deepl",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "text-tools / Translators"
+    },
+    {
+        "id":  "ditto",
+        "nome":  "Ditto",
+        "descricao":  "Guarda tudo o que você copia para colar de novo depois.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Ditto.Ditto",
+        "livre":  false,
+        "site":  "https://ditto-cp.sourceforge.io/",
+        "choco":  "ditto",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / Clipboard Managers"
     },
     {
         "id":  "everything",
@@ -955,7 +1102,24 @@
         "livre":  false,
         "site":  "https://www.voidtools.com/",
         "choco":  "everything",
-        "winutil":  "everything"
+        "winutil":  "everything",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Searching",
+        "grupo":  "Busca de arquivos"
+    },
+    {
+        "id":  "everythingtoolbar",
+        "nome":  "EverythingToolbar",
+        "descricao":  "Busca do Everything direto da barra de tarefas (precisa do Everything).",
+        "categoria":  "Utilitários",
+        "wingetId":  "srwi.EverythingToolbar.Launcher",
+        "livre":  false,
+        "site":  "https://github.com/srwi/EverythingToolbar",
+        "choco":  "everythingtoolbar",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / System Tweaks",
+        "grupo":  "Busca de arquivos"
     },
     {
         "id":  "flux",
@@ -966,18 +1130,22 @@
         "livre":  false,
         "site":  "https://justgetflux.com/",
         "choco":  "f.lux",
-        "winutil":  "flux"
+        "winutil":  "flux",
+        "estrela":  true,
+        "fmhy":  "system-tools / Monitor Tools"
     },
     {
-        "id":  "files",
-        "nome":  "Files",
-        "descricao":  "Explorador de arquivos moderno, com abas.",
+        "id":  "flameshot",
+        "nome":  "Flameshot",
+        "descricao":  "Captura de tela com setas, texto e destaque na hora.",
         "categoria":  "Utilitários",
-        "wingetId":  "FilesCommunity.Files",
-        "livre":  true,
-        "site":  "https://files.community",
-        "choco":  "files",
-        "winutil":  "files"
+        "wingetId":  "Flameshot.Flameshot",
+        "livre":  false,
+        "site":  "https://flameshot.org/",
+        "choco":  "flameshot",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "image-tools / Screenshot Tools"
     },
     {
         "id":  "glazewm",
@@ -988,7 +1156,10 @@
         "livre":  true,
         "site":  "https://github.com/glzr-io/glazewm",
         "choco":  "glazewm",
-        "winutil":  "glazewm"
+        "winutil":  "glazewm",
+        "estrela":  true,
+        "fmhy":  "system-tools / Window Managers",
+        "grupo":  "Organizar janelas"
     },
     {
         "id":  "googledrive",
@@ -999,29 +1170,10 @@
         "livre":  false,
         "site":  "https://www.google.com/drive/",
         "choco":  "googledrive",
-        "winutil":  "googledrive"
-    },
-    {
-        "id":  "xeheditor",
-        "nome":  "HxD",
-        "descricao":  "Editor hexadecimal.",
-        "categoria":  "Utilitários",
-        "wingetId":  "MHNexus.HxD",
-        "livre":  false,
-        "site":  "https://mh-nexus.de/en/hxd/",
-        "choco":  "HxD",
-        "winutil":  "xeheditor"
-    },
-    {
-        "id":  "internetdownloadmanager",
-        "nome":  "Internet Download Manager",
-        "descricao":  "Gerenciador de downloads pago, que acelera downloads.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Tonec.InternetDownloadManager",
-        "livre":  false,
-        "site":  "https://www.internetdownloadmanager.com/",
-        "choco":  "internet-download-manager",
-        "winutil":  "internetdownloadmanager"
+        "winutil":  "googledrive",
+        "estrela":  true,
+        "fmhy":  "file-tools / Cloud Storage",
+        "grupo":  "Nuvem"
     },
     {
         "id":  "jpegview",
@@ -1032,7 +1184,9 @@
         "livre":  true,
         "site":  "https://github.com/sylikc/jpegview",
         "choco":  "jpegview",
-        "winutil":  "jpegview"
+        "winutil":  "jpegview",
+        "estrela":  true,
+        "fmhy":  "image-tools / Image Viewers"
     },
     {
         "id":  "keepassxc",
@@ -1043,29 +1197,64 @@
         "livre":  true,
         "site":  "https://keepassxc.org/",
         "choco":  "keepassxc",
-        "winutil":  "keepassxc"
+        "winutil":  "keepassxc",
+        "estrela":  true,
+        "fmhy":  "internet-tools / Password Managers; privacy / Password Privacy / 2FA",
+        "grupo":  "Senhas e 2FA"
     },
     {
-        "id":  "minitoolpartitionwizard",
-        "nome":  "MiniTool Partition Wizard",
-        "descricao":  "Cria, redimensiona e move partições.",
+        "id":  "kopia",
+        "nome":  "Kopia",
+        "descricao":  "Backup das suas pastas, criptografado, para outro disco ou para a nuvem.",
         "categoria":  "Utilitários",
-        "wingetId":  "MiniTool.PartitionWizard.Free",
+        "wingetId":  "Kopia.KopiaUI",
         "livre":  false,
-        "site":  "https://www.partitionwizard.com/",
-        "choco":  "partitionwizard",
-        "winutil":  "minitoolpartitionwizard"
+        "site":  "https://kopia.io/",
+        "choco":  "kopiaui",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Backup"
     },
     {
-        "id":  "msedgeredirect",
-        "nome":  "MSEdgeRedirect",
-        "descricao":  "Abre os links do Windows no seu navegador, não no Edge.",
+        "id":  "lively",
+        "nome":  "Lively Wallpaper",
+        "descricao":  "Papel de parede animado (vídeo, página, GIF).",
         "categoria":  "Utilitários",
-        "wingetId":  "rcmaehl.MSEdgeRedirect",
-        "livre":  true,
-        "site":  "https://github.com/rcmaehl/MSEdgeRedirect",
-        "choco":  "msedgeredirect",
-        "winutil":  "msedgeredirect"
+        "wingetId":  "rocksdanister.LivelyWallpaper",
+        "livre":  false,
+        "site":  "https://www.rocksdanister.com/lively/",
+        "choco":  "lively",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / Wallpaper Tools",
+        "grupo":  "Personalizar o Windows"
+    },
+    {
+        "id":  "malwarebytes",
+        "nome":  "Malwarebytes",
+        "descricao":  "Procura e remove malware (a verificação manual é grátis).",
+        "categoria":  "Utilitários",
+        "wingetId":  "Malwarebytes.Malwarebytes",
+        "livre":  false,
+        "site":  "https://www.malwarebytes.com/",
+        "choco":  "malwarebytes",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "privacy",
+        "grupo":  "Antimalware"
+    },
+    {
+        "id":  "monitorian",
+        "nome":  "Monitorian",
+        "descricao":  "Ajusta o brilho dos monitores pela bandeja.",
+        "categoria":  "Utilitários",
+        "wingetId":  "emoacht.Monitorian",
+        "livre":  false,
+        "site":  "https://github.com/emoacht/Monitorian",
+        "choco":  "monitorian",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / Monitor Tools"
     },
     {
         "id":  "nanazip",
@@ -1076,18 +1265,10 @@
         "livre":  true,
         "site":  "https://nanazip.org",
         "choco":  "nanazip",
-        "winutil":  "nanazip"
-    },
-    {
-        "id":  "nilesoftshell",
-        "nome":  "Nilesoft Shell",
-        "descricao":  "Substitui o menu do botão direito por um personalizável.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Nilesoft.Shell",
-        "livre":  false,
-        "site":  "https://nilesoft.org/",
-        "choco":  "nilesoft-shell",
-        "winutil":  "nilesoftShell"
+        "winutil":  "nanazip",
+        "estrela":  true,
+        "fmhy":  "file-tools / Archiving / Compression",
+        "grupo":  "Compactadores"
     },
     {
         "id":  "nvclean",
@@ -1098,29 +1279,9 @@
         "livre":  false,
         "site":  "https://www.techpowerup.com/nvcleanstall/",
         "choco":  "",
-        "winutil":  "nvclean"
-    },
-    {
-        "id":  "ofgb",
-        "nome":  "OFGB",
-        "descricao":  "Desliga as propagandas do Windows 11.",
-        "categoria":  "Utilitários",
-        "wingetId":  "xM4ddy.OFGB",
-        "livre":  true,
-        "site":  "https://github.com/xM4ddy/OFGB",
-        "choco":  "ofgb",
-        "winutil":  "OFGB"
-    },
-    {
-        "id":  "opautoclicker",
-        "nome":  "OPAutoClicker",
-        "descricao":  "Clica sozinho no intervalo que você escolher.",
-        "categoria":  "Utilitários",
-        "wingetId":  "OPAutoClicker.OPAutoClicker",
-        "livre":  false,
-        "site":  "https://www.opautoclicker.com",
-        "choco":  "autoclicker",
-        "winutil":  "OPAutoClicker"
+        "winutil":  "nvclean",
+        "estrela":  true,
+        "fmhy":  "system-tools / GPU Tools"
     },
     {
         "id":  "openrgb",
@@ -1131,7 +1292,9 @@
         "livre":  true,
         "site":  "https://openrgb.org/",
         "choco":  "openrgb",
-        "winutil":  "openrgb"
+        "winutil":  "openrgb",
+        "estrela":  true,
+        "fmhy":  "system-tools"
     },
     {
         "id":  "parsec",
@@ -1142,7 +1305,9 @@
         "livre":  false,
         "site":  "https://parsec.app/",
         "choco":  "parsec",
-        "winutil":  "parsec"
+        "winutil":  "parsec",
+        "estrela":  true,
+        "fmhy":  "system-tools / Remote Desktop"
     },
     {
         "id":  "peazip",
@@ -1153,51 +1318,10 @@
         "livre":  true,
         "site":  "https://peazip.github.io/",
         "choco":  "peazip",
-        "winutil":  "peazip"
-    },
-    {
-        "id":  "policyplus",
-        "nome":  "Policy Plus",
-        "descricao":  "Editor de Política de Grupo, inclusive no Windows Home.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Fleex255.PolicyPlus",
-        "livre":  true,
-        "site":  "https://github.com/Fleex255/PolicyPlus",
-        "choco":  "",
-        "winutil":  "policyplus"
-    },
-    {
-        "id":  "processlasso",
-        "nome":  "Process Lasso",
-        "descricao":  "Ajusta a prioridade dos programas automaticamente.",
-        "categoria":  "Utilitários",
-        "wingetId":  "BitSum.ProcessLasso",
-        "livre":  false,
-        "site":  "https://bitsum.com/",
-        "choco":  "plasso",
-        "winutil":  "processlasso"
-    },
-    {
-        "id":  "protonauth",
-        "nome":  "Proton Authenticator",
-        "descricao":  "Códigos de verificação em duas etapas, da Proton.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Proton.ProtonAuthenticator",
-        "livre":  true,
-        "site":  "https://proton.me/authenticator",
-        "choco":  "protonauth",
-        "winutil":  "protonauth"
-    },
-    {
-        "id":  "protondrive",
-        "nome":  "Proton Drive",
-        "descricao":  "Nuvem criptografada da Proton.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Proton.ProtonDrive",
-        "livre":  true,
-        "site":  "https://proton.me/drive",
-        "choco":  "protondrive",
-        "winutil":  "protondrive"
+        "winutil":  "peazip",
+        "estrela":  true,
+        "fmhy":  "file-tools / Archiving / Compression",
+        "grupo":  "Compactadores"
     },
     {
         "id":  "protonpass",
@@ -1208,7 +1332,10 @@
         "livre":  true,
         "site":  "https://proton.me/pass",
         "choco":  "protonpass",
-        "winutil":  "protonpass"
+        "winutil":  "protonpass",
+        "estrela":  true,
+        "fmhy":  "internet-tools / Password Managers",
+        "grupo":  "Senhas e 2FA"
     },
     {
         "id":  "qbittorrent",
@@ -1219,106 +1346,62 @@
         "livre":  true,
         "site":  "https://www.qbittorrent.org/",
         "choco":  "qbittorrent",
-        "winutil":  "qbittorrent"
+        "winutil":  "qbittorrent",
+        "estrela":  true,
+        "fmhy":  "torrenting"
     },
     {
-        "id":  "revo",
-        "nome":  "Revo Uninstaller",
-        "descricao":  "Desinstala programas e limpa os restos.",
+        "id":  "rainmeter",
+        "nome":  "Rainmeter",
+        "descricao":  "Widgets e temas na área de trabalho (relógio, uso do PC, clima).",
         "categoria":  "Utilitários",
-        "wingetId":  "RevoUninstaller.RevoUninstaller",
+        "wingetId":  "Rainmeter.Rainmeter",
         "livre":  false,
-        "site":  "https://www.revouninstaller.com/",
-        "choco":  "revo-uninstaller",
-        "winutil":  "revo"
+        "site":  "https://www.rainmeter.net/",
+        "choco":  "rainmeter",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools",
+        "grupo":  "Personalizar o Windows"
     },
     {
-        "id":  "signalrgb",
-        "nome":  "SignalRGB",
-        "descricao":  "Controla as luzes RGB de várias marcas.",
+        "id":  "superf4",
+        "nome":  "SuperF4",
+        "descricao":  "Ctrl+Alt+F4 fecha na hora o programa travado em primeiro plano.",
         "categoria":  "Utilitários",
-        "wingetId":  "WhirlwindFX.SignalRgb",
+        "wingetId":  "StefanSundin.Superf4",
         "livre":  false,
-        "site":  "https://www.signalrgb.com/",
-        "choco":  "",
-        "winutil":  "signalrgb"
+        "site":  "https://stefansundin.github.io/superf4/",
+        "choco":  "superf4",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools"
     },
     {
-        "id":  "sdio",
-        "nome":  "Snappy Driver Installer Origin",
-        "descricao":  "Instala e atualiza drivers sem internet.",
+        "id":  "testdisk",
+        "nome":  "TestDisk e PhotoRec",
+        "descricao":  "Recupera arquivos apagados e partições perdidas.",
         "categoria":  "Utilitários",
-        "wingetId":  "GlennDelahoy.SnappyDriverInstallerOrigin",
-        "livre":  true,
-        "site":  "https://www.glenn.delahoy.com/snappy-driver-installer-origin/",
-        "choco":  "sdio",
-        "winutil":  "sdio"
-    },
-    {
-        "id":  "startallback",
-        "nome":  "StartAllBack",
-        "descricao":  "Menu Iniciar e barra de tarefas no estilo do Windows 7/10 (pago).",
-        "categoria":  "Utilitários",
-        "wingetId":  "StartIsBack.StartAllBack",
+        "wingetId":  "CGSecurity.TestDisk",
         "livre":  false,
-        "site":  "https://www.startallback.com/",
-        "choco":  "StartAllBack",
-        "winutil":  "startallback"
+        "site":  "https://www.cgsecurity.org/",
+        "choco":  "testdisk-photorec",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Recovery"
     },
     {
-        "id":  "teamviewer",
-        "nome":  "TeamViewer",
-        "descricao":  "Acesso remoto.",
+        "id":  "textgrab",
+        "nome":  "Text Grab",
+        "descricao":  "Copia o texto de qualquer coisa na tela (imagem, vídeo, programa).",
         "categoria":  "Utilitários",
-        "wingetId":  "TeamViewer.TeamViewer",
+        "wingetId":  "JosephFinney.Text-Grab",
         "livre":  false,
-        "site":  "https://www.teamviewer.com/",
-        "choco":  "teamviewer",
-        "winutil":  "teamviewer"
-    },
-    {
-        "id":  "tightvnc",
-        "nome":  "TightVNC",
-        "descricao":  "Acesso remoto por VNC.",
-        "categoria":  "Utilitários",
-        "wingetId":  "GlavSoft.TightVNC",
-        "livre":  true,
-        "site":  "https://www.tightvnc.com/",
-        "choco":  "TightVNC",
-        "winutil":  "tightvnc"
-    },
-    {
-        "id":  "totalcommander",
-        "nome":  "Total Commander",
-        "descricao":  "Gerenciador de arquivos com dois painéis.",
-        "categoria":  "Utilitários",
-        "wingetId":  "Ghisler.TotalCommander",
-        "livre":  false,
-        "site":  "https://www.ghisler.com/",
-        "choco":  "TotalCommander",
-        "winutil":  "totalcommander"
-    },
-    {
-        "id":  "ttaskbar",
-        "nome":  "TranslucentTB",
-        "descricao":  "Barra de tarefas transparente.",
-        "categoria":  "Utilitários",
-        "wingetId":  "CharlesMilette.TranslucentTB",
-        "livre":  true,
-        "site":  "https://translucenttb.github.io",
-        "choco":  "translucenttb",
-        "winutil":  "ttaskbar"
-    },
-    {
-        "id":  "treesize",
-        "nome":  "TreeSize Free",
-        "descricao":  "Mostra o que ocupa espaço no disco.",
-        "categoria":  "Utilitários",
-        "wingetId":  "JAMSoftware.TreeSize.Free",
-        "livre":  false,
-        "site":  "https://www.jam-software.com/treesize_free/",
-        "choco":  "treesizefree",
-        "winutil":  "treesize"
+        "site":  "https://github.com/TheJoeFin/Text-Grab",
+        "choco":  "text-grab",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "image-tools / Image to Text / OCR"
     },
     {
         "id":  "wingetui",
@@ -1329,7 +1412,23 @@
         "livre":  true,
         "site":  "https://devolutions.net/unigetui/",
         "choco":  "wingetui",
-        "winutil":  "wingetui"
+        "winutil":  "wingetui",
+        "estrela":  true,
+        "fmhy":  "system-tools / Package Managers"
+    },
+    {
+        "id":  "veracrypt",
+        "nome":  "VeraCrypt",
+        "descricao":  "Cofre criptografado para arquivos, pendrives e discos inteiros.",
+        "categoria":  "Utilitários",
+        "wingetId":  "IDRIX.VeraCrypt",
+        "livre":  false,
+        "site":  "https://www.veracrypt.fr/",
+        "choco":  "veracrypt",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Encryption",
+        "grupo":  "Criptografia"
     },
     {
         "id":  "ovirtualbox",
@@ -1340,29 +1439,253 @@
         "livre":  true,
         "site":  "https://www.virtualbox.org/",
         "choco":  "virtualbox",
-        "winutil":  "OVirtualBox"
+        "winutil":  "OVirtualBox",
+        "estrela":  true,
+        "fmhy":  "system-tools / Virtual Machines"
     },
     {
-        "id":  "winrar",
-        "nome":  "WinRAR",
-        "descricao":  "Abre e cria .rar e .zip.",
+        "id":  "windhawk",
+        "nome":  "Windhawk",
+        "descricao":  "Mods para personalizar o Windows (barra de tarefas, menu Iniciar, janelas) sem mexer em arquivo do sistema.",
         "categoria":  "Utilitários",
-        "wingetId":  "RARLab.WinRAR",
+        "wingetId":  "RamenSoftware.Windhawk",
         "livre":  false,
-        "site":  "https://www.win-rar.com/",
-        "choco":  "winrar",
-        "winutil":  "winrar"
+        "site":  "https://windhawk.net/",
+        "choco":  "windhawk",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools / System Tweaks",
+        "grupo":  "Personalizar o Windows"
     },
     {
-        "id":  "wiseprogramuninstaller",
-        "nome":  "Wise Program Uninstaller",
+        "id":  "7zip",
+        "nome":  "7-Zip",
+        "descricao":  "Abre e cria .zip, .7z, .rar e outros.",
+        "categoria":  "Utilitários",
+        "wingetId":  "7zip.7zip",
+        "livre":  true,
+        "site":  "https://www.7-zip.org/",
+        "choco":  "7zip",
+        "winutil":  "7zip",
+        "estrela":  false,
+        "fmhy":  "file-tools / Archiving / Compression",
+        "grupo":  "Compactadores"
+    },
+    {
+        "id":  "crystaldiskinfo",
+        "nome":  "Crystal Disk Info",
+        "descricao":  "Mostra a saúde e a temperatura dos discos.",
+        "categoria":  "Utilitários",
+        "wingetId":  "CrystalDewWorld.CrystalDiskInfo",
+        "livre":  true,
+        "site":  "https://crystalmark.info/en/software/crystaldiskinfo/",
+        "choco":  "crystaldiskinfo",
+        "winutil":  "crystaldiskinfo",
+        "estrela":  false,
+        "fmhy":  "system-tools / Disk Tools",
+        "grupo":  "Saúde do disco"
+    },
+    {
+        "id":  "deskflow",
+        "nome":  "Deskflow",
+        "descricao":  "Um teclado e mouse para vários computadores.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Deskflow.Deskflow",
+        "livre":  true,
+        "site":  "https://github.com/deskflow/deskflow",
+        "choco":  "deskflow",
+        "winutil":  "deskflow",
+        "estrela":  false,
+        "fmhy":  "system-tools / Mouse / Keyboard"
+    },
+    {
+        "id":  "dropbox",
+        "nome":  "Dropbox",
+        "descricao":  "Arquivos sincronizados na nuvem.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Dropbox.Dropbox",
+        "livre":  false,
+        "site":  "https://www.dropbox.com/desktop",
+        "choco":  "dropbox",
+        "winutil":  "dropbox",
+        "estrela":  false,
+        "fmhy":  "file-tools / Cloud Storage",
+        "grupo":  "Nuvem"
+    },
+    {
+        "id":  "enteauth",
+        "nome":  "Ente Auth",
+        "descricao":  "Códigos de verificação em duas etapas, com backup criptografado.",
+        "categoria":  "Utilitários",
+        "wingetId":  "ente-io.auth-desktop",
+        "livre":  true,
+        "site":  "https://ente.io/auth/",
+        "choco":  "ente-auth",
+        "winutil":  "enteauth",
+        "estrela":  false,
+        "fmhy":  "privacy / Password Privacy / 2FA",
+        "grupo":  "Senhas e 2FA"
+    },
+    {
+        "id":  "files",
+        "nome":  "Files",
+        "descricao":  "Explorador de arquivos moderno, com abas.",
+        "categoria":  "Utilitários",
+        "wingetId":  "FilesCommunity.Files",
+        "livre":  true,
+        "site":  "https://files.community",
+        "choco":  "files",
+        "winutil":  "files",
+        "estrela":  false,
+        "fmhy":  "file-tools / File Managers"
+    },
+    {
+        "id":  "minitoolpartitionwizard",
+        "nome":  "MiniTool Partition Wizard",
+        "descricao":  "Cria, redimensiona e move partições.",
+        "categoria":  "Utilitários",
+        "wingetId":  "MiniTool.PartitionWizard.Free",
+        "livre":  false,
+        "site":  "https://www.partitionwizard.com/",
+        "choco":  "partitionwizard",
+        "winutil":  "minitoolpartitionwizard",
+        "estrela":  false,
+        "fmhy":  "system-tools / Disk Tools"
+    },
+    {
+        "id":  "msedgeredirect",
+        "nome":  "MSEdgeRedirect",
+        "descricao":  "Abre os links do Windows no seu navegador, não no Edge.",
+        "categoria":  "Utilitários",
+        "wingetId":  "rcmaehl.MSEdgeRedirect",
+        "livre":  true,
+        "site":  "https://github.com/rcmaehl/MSEdgeRedirect",
+        "choco":  "msedgeredirect",
+        "winutil":  "msedgeredirect",
+        "estrela":  false,
+        "fmhy":  "system-tools / System Tweaks"
+    },
+    {
+        "id":  "policyplus",
+        "nome":  "Policy Plus",
+        "descricao":  "Editor de Política de Grupo, inclusive no Windows Home.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Fleex255.PolicyPlus",
+        "livre":  true,
+        "site":  "https://github.com/Fleex255/PolicyPlus",
+        "choco":  "",
+        "winutil":  "policyplus",
+        "estrela":  false,
+        "fmhy":  "system-tools"
+    },
+    {
+        "id":  "processlasso",
+        "nome":  "Process Lasso",
+        "descricao":  "Ajusta a prioridade dos programas automaticamente.",
+        "categoria":  "Utilitários",
+        "wingetId":  "BitSum.ProcessLasso",
+        "livre":  false,
+        "site":  "https://bitsum.com/",
+        "choco":  "plasso",
+        "winutil":  "processlasso",
+        "estrela":  false,
+        "fmhy":  "system-tools"
+    },
+    {
+        "id":  "protonauth",
+        "nome":  "Proton Authenticator",
+        "descricao":  "Códigos de verificação em duas etapas, da Proton.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Proton.ProtonAuthenticator",
+        "livre":  true,
+        "site":  "https://proton.me/authenticator",
+        "choco":  "protonauth",
+        "winutil":  "protonauth",
+        "estrela":  false,
+        "fmhy":  "privacy / Password Privacy / 2FA",
+        "grupo":  "Senhas e 2FA"
+    },
+    {
+        "id":  "protondrive",
+        "nome":  "Proton Drive",
+        "descricao":  "Nuvem criptografada da Proton.",
+        "categoria":  "Utilitários",
+        "wingetId":  "Proton.ProtonDrive",
+        "livre":  true,
+        "site":  "https://proton.me/drive",
+        "choco":  "protondrive",
+        "winutil":  "protondrive",
+        "estrela":  false,
+        "fmhy":  "file-tools / Cloud Storage",
+        "grupo":  "Nuvem"
+    },
+    {
+        "id":  "revo",
+        "nome":  "Revo Uninstaller",
         "descricao":  "Desinstala programas e limpa os restos.",
         "categoria":  "Utilitários",
-        "wingetId":  "WiseCleaner.WiseProgramUninstaller",
+        "wingetId":  "RevoUninstaller.RevoUninstaller",
         "livre":  false,
-        "site":  "https://www.wisecleaner.com/wise-program-uninstaller.html",
-        "choco":  "",
-        "winutil":  "WiseProgramUninstaller"
+        "site":  "https://www.revouninstaller.com/",
+        "choco":  "revo-uninstaller",
+        "winutil":  "revo",
+        "estrela":  false,
+        "fmhy":  "system-tools",
+        "grupo":  "Desinstaladores"
+    },
+    {
+        "id":  "sdio",
+        "nome":  "Snappy Driver Installer Origin",
+        "descricao":  "Instala e atualiza drivers sem internet.",
+        "categoria":  "Utilitários",
+        "wingetId":  "GlennDelahoy.SnappyDriverInstallerOrigin",
+        "livre":  true,
+        "site":  "https://www.glenn.delahoy.com/snappy-driver-installer-origin/",
+        "choco":  "sdio",
+        "winutil":  "sdio",
+        "estrela":  false,
+        "fmhy":  "system-tools"
+    },
+    {
+        "id":  "tightvnc",
+        "nome":  "TightVNC",
+        "descricao":  "Acesso remoto por VNC.",
+        "categoria":  "Utilitários",
+        "wingetId":  "GlavSoft.TightVNC",
+        "livre":  true,
+        "site":  "https://www.tightvnc.com/",
+        "choco":  "TightVNC",
+        "winutil":  "tightvnc",
+        "estrela":  false,
+        "fmhy":  "system-tools / Remote Desktop"
+    },
+    {
+        "id":  "ttaskbar",
+        "nome":  "TranslucentTB",
+        "descricao":  "Barra de tarefas transparente.",
+        "categoria":  "Utilitários",
+        "wingetId":  "CharlesMilette.TranslucentTB",
+        "livre":  true,
+        "site":  "https://translucenttb.github.io",
+        "choco":  "translucenttb",
+        "winutil":  "ttaskbar",
+        "estrela":  false,
+        "fmhy":  "system-tools",
+        "grupo":  "Personalizar o Windows"
+    },
+    {
+        "id":  "treesize",
+        "nome":  "TreeSize Free",
+        "descricao":  "Mostra o que ocupa espaço no disco.",
+        "categoria":  "Utilitários",
+        "wingetId":  "JAMSoftware.TreeSize.Free",
+        "livre":  false,
+        "site":  "https://www.jam-software.com/treesize_free/",
+        "choco":  "treesizefree",
+        "winutil":  "treesize",
+        "estrela":  false,
+        "fmhy":  "system-tools / Disk Tools",
+        "grupo":  "Espaço em disco"
     },
     {
         "id":  "wiztree",
@@ -1373,95 +1696,10 @@
         "livre":  false,
         "site":  "https://wiztreefree.com/",
         "choco":  "wiztree",
-        "winutil":  "wiztree"
-    },
-    {
-        "id":  "battlenet",
-        "nome":  "Battle.net",
-        "descricao":  "Loja e launcher da Blizzard (Diablo, Overwatch, WoW).",
-        "categoria":  "Jogos",
-        "wingetId":  "Blizzard.BattleNet",
-        "livre":  false,
-        "site":  "https://battle.net",
-        "choco":  "",
-        "winutil":  "battlenet"
-    },
-    {
-        "id":  "cemu",
-        "nome":  "Cemu",
-        "descricao":  "Emulador de Wii U.",
-        "categoria":  "Jogos",
-        "wingetId":  "Cemu.Cemu",
-        "livre":  true,
-        "site":  "https://cemu.info/",
-        "choco":  "cemu",
-        "winutil":  "cemu"
-    },
-    {
-        "id":  "overwolf",
-        "nome":  "CurseForge",
-        "descricao":  "Instala mods de jogos (Minecraft, WoW e outros).",
-        "categoria":  "Jogos",
-        "wingetId":  "Overwolf.CurseForge",
-        "livre":  false,
-        "site":  "https://www.overwolf.com/app/overwolf-curseforge",
-        "choco":  "",
-        "winutil":  "Overwolf"
-    },
-    {
-        "id":  "eaapp",
-        "nome":  "EA App",
-        "descricao":  "Loja e launcher da EA (FIFA/FC, Battlefield, The Sims).",
-        "categoria":  "Jogos",
-        "wingetId":  "ElectronicArts.EADesktop",
-        "livre":  false,
-        "site":  "https://www.ea.com/ea-app",
-        "choco":  "ea-app",
-        "winutil":  "eaapp"
-    },
-    {
-        "id":  "es-de",
-        "nome":  "EmulationStation Desktop Edition",
-        "descricao":  "Biblioteca de jogos para emuladores, com cara de console.",
-        "categoria":  "Jogos",
-        "wingetId":  "ES-DE.EmulationStation-DE",
-        "livre":  true,
-        "site":  "https://es-de.org/",
-        "choco":  "",
-        "winutil":  "es-de"
-    },
-    {
-        "id":  "epic",
-        "nome":  "Epic Games",
-        "descricao":  "Loja da Epic (jogos grátis toda semana).",
-        "categoria":  "Jogos",
-        "wingetId":  "EpicGames.EpicGamesLauncher",
-        "livre":  false,
-        "site":  "https://www.epicgames.com/store/en-US/",
-        "choco":  "epicgameslauncher",
-        "winutil":  "epicgames"
-    },
-    {
-        "id":  "geforcenow",
-        "nome":  "GeForce NOW",
-        "descricao":  "Jogos na nuvem da NVIDIA.",
-        "categoria":  "Jogos",
-        "wingetId":  "Nvidia.GeForceNow",
-        "livre":  false,
-        "site":  "https://www.nvidia.com/en-us/geforce-now/",
-        "choco":  "nvidia-geforce-now",
-        "winutil":  "geforcenow"
-    },
-    {
-        "id":  "gog",
-        "nome":  "GOG Galaxy",
-        "descricao":  "Loja e biblioteca de jogos da GOG, sem DRM.",
-        "categoria":  "Jogos",
-        "wingetId":  "GOG.Galaxy",
-        "livre":  false,
-        "site":  "https://www.gog.com/galaxy",
-        "choco":  "goggalaxy",
-        "winutil":  "gog"
+        "winutil":  "wiztree",
+        "estrela":  false,
+        "fmhy":  "system-tools / Disk Tools",
+        "grupo":  "Espaço em disco"
     },
     {
         "id":  "heroic",
@@ -1472,7 +1710,10 @@
         "livre":  true,
         "site":  "https://heroicgameslauncher.com/",
         "choco":  "heroic-games-launcher",
-        "winutil":  "heroiclauncher"
+        "winutil":  "heroiclauncher",
+        "estrela":  true,
+        "fmhy":  "gaming-tools / Game Launchers; gaming-tools / Client Tools",
+        "grupo":  "Launchers de jogos"
     },
     {
         "id":  "itch",
@@ -1483,18 +1724,23 @@
         "livre":  true,
         "site":  "https://itch.io/",
         "choco":  "itch",
-        "winutil":  "itch"
+        "winutil":  "itch",
+        "estrela":  true,
+        "fmhy":  "gaming / Indie Games",
+        "grupo":  "Launchers de jogos"
     },
     {
-        "id":  "modrinth",
-        "nome":  "Modrinth App",
-        "descricao":  "Instala Minecraft com mods.",
+        "id":  "ludusavi",
+        "nome":  "Ludusavi",
+        "descricao":  "Faz backup dos saves dos seus jogos.",
         "categoria":  "Jogos",
-        "wingetId":  "Modrinth.ModrinthApp",
-        "livre":  true,
-        "site":  "https://modrinth.com/app",
-        "choco":  "modrinth-app",
-        "winutil":  "modrinth"
+        "wingetId":  "mtkennerly.ludusavi",
+        "livre":  false,
+        "site":  "https://github.com/mtkennerly/ludusavi",
+        "choco":  "ludusavi",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "gaming-tools / Game Saves"
     },
     {
         "id":  "playnite",
@@ -1505,7 +1751,10 @@
         "livre":  true,
         "site":  "https://playnite.link/",
         "choco":  "playnite",
-        "winutil":  "playnite"
+        "winutil":  "playnite",
+        "estrela":  true,
+        "fmhy":  "gaming-tools / Game Launchers",
+        "grupo":  "Launchers de jogos"
     },
     {
         "id":  "prismlauncher",
@@ -1516,51 +1765,120 @@
         "livre":  true,
         "site":  "https://prismlauncher.org/",
         "choco":  "prismlauncher",
-        "winutil":  "prismlauncher"
+        "winutil":  "prismlauncher",
+        "estrela":  true,
+        "fmhy":  "gaming-tools / Premium Only Launchers; text-tools / LaTeX Tools",
+        "grupo":  "Minecraft"
     },
     {
-        "id":  "roblox",
-        "nome":  "Roblox",
-        "descricao":  "Plataforma de jogos Roblox.",
+        "id":  "cemu",
+        "nome":  "Cemu",
+        "descricao":  "Emulador de Wii U.",
         "categoria":  "Jogos",
-        "wingetId":  "Roblox.Roblox",
+        "wingetId":  "Cemu.Cemu",
+        "livre":  true,
+        "site":  "https://cemu.info/",
+        "choco":  "cemu",
+        "winutil":  "cemu",
+        "estrela":  false,
+        "fmhy":  "educational / Calculators"
+    },
+    {
+        "id":  "overwolf",
+        "nome":  "CurseForge",
+        "descricao":  "Instala mods de jogos (Minecraft, WoW e outros).",
+        "categoria":  "Jogos",
+        "wingetId":  "Overwolf.CurseForge",
         "livre":  false,
-        "site":  "https://www.roblox.com/",
+        "site":  "https://www.overwolf.com/app/overwolf-curseforge",
         "choco":  "",
-        "winutil":  "roblox"
+        "winutil":  "Overwolf",
+        "estrela":  false,
+        "fmhy":  "gaming-tools / Mod Packs / Indexes; gaming-tools / Minecraft Mods",
+        "grupo":  "Minecraft"
     },
     {
-        "id":  "steam",
-        "nome":  "Steam",
-        "descricao":  "Loja e biblioteca de jogos.",
+        "id":  "gog",
+        "nome":  "GOG Galaxy",
+        "descricao":  "Loja e biblioteca de jogos da GOG, sem DRM.",
         "categoria":  "Jogos",
-        "wingetId":  "Valve.Steam",
+        "wingetId":  "GOG.Galaxy",
         "livre":  false,
-        "site":  "https://store.steampowered.com/about/",
-        "choco":  "steam-client",
-        "winutil":  "steam"
+        "site":  "https://www.gog.com/galaxy",
+        "choco":  "goggalaxy",
+        "winutil":  "gog",
+        "estrela":  false,
+        "fmhy":  "gaming-tools / Game Launchers",
+        "grupo":  "Launchers de jogos"
     },
     {
-        "id":  "ubisoft",
-        "nome":  "Ubisoft Connect",
-        "descricao":  "Loja e launcher da Ubisoft.",
+        "id":  "modrinth",
+        "nome":  "Modrinth App",
+        "descricao":  "Instala Minecraft com mods.",
         "categoria":  "Jogos",
-        "wingetId":  "Ubisoft.Connect",
-        "livre":  false,
-        "site":  "https://ubisoftconnect.com/",
-        "choco":  "ubisoft-connect",
-        "winutil":  "ubisoft"
+        "wingetId":  "Modrinth.ModrinthApp",
+        "livre":  true,
+        "site":  "https://modrinth.com/app",
+        "choco":  "modrinth-app",
+        "winutil":  "modrinth",
+        "estrela":  false,
+        "fmhy":  "gaming-tools / Minecraft Mods",
+        "grupo":  "Minecraft"
     },
     {
-        "id":  "vrdesktopstreamer",
-        "nome":  "Virtual Desktop Streamer",
-        "descricao":  "Usa o PC em óculos de realidade virtual.",
-        "categoria":  "Jogos",
-        "wingetId":  "VirtualDesktop.Streamer",
-        "livre":  false,
-        "site":  "https://www.vrdesktop.net/",
-        "choco":  "",
-        "winutil":  "vrdesktopstreamer"
+        "id":  "githubdesktop",
+        "nome":  "GitHub Desktop",
+        "descricao":  "O GitHub sem linha de comando: salvar e enviar versões com cliques.",
+        "categoria":  "Desenvolvimento",
+        "wingetId":  "GitHub.GitHubDesktop",
+        "livre":  true,
+        "site":  "https://desktop.github.com/",
+        "choco":  "github-desktop",
+        "winutil":  "githubdesktop",
+        "estrela":  true,
+        "fmhy":  "developer-tools / GitHub Tools"
+    },
+    {
+        "id":  "notepadpp",
+        "nome":  "Notepad++",
+        "descricao":  "Editor de texto leve.",
+        "categoria":  "Desenvolvimento",
+        "wingetId":  "Notepad++.Notepad++",
+        "livre":  true,
+        "site":  "https://notepad-plus-plus.org/",
+        "choco":  "notepadplusplus",
+        "winutil":  "notepadplus",
+        "estrela":  true,
+        "fmhy":  "text-tools; text-tools / Online Editors",
+        "grupo":  "Editores de código"
+    },
+    {
+        "id":  "vscodium",
+        "nome":  "VSCodium",
+        "descricao":  "O VS Code sem a telemetria da Microsoft.",
+        "categoria":  "Desenvolvimento",
+        "wingetId":  "VSCodium.VSCodium",
+        "livre":  true,
+        "site":  "https://vscodium.com/",
+        "choco":  "vscodium",
+        "winutil":  "vscodium",
+        "estrela":  true,
+        "fmhy":  "developer-tools",
+        "grupo":  "Editores de código"
+    },
+    {
+        "id":  "zed",
+        "nome":  "Zed",
+        "descricao":  "Editor de código rápido.",
+        "categoria":  "Desenvolvimento",
+        "wingetId":  "ZedIndustries.Zed",
+        "livre":  true,
+        "site":  "https://zed.dev/",
+        "choco":  "zed",
+        "winutil":  "Zed",
+        "estrela":  true,
+        "fmhy":  "developer-tools",
+        "grupo":  "Editores de código"
     },
     {
         "id":  "chatgpt",
@@ -1572,7 +1890,10 @@
         "livre":  false,
         "site":  "https://openai.com/chatgpt/download/",
         "choco":  "",
-        "winutil":  "chatgpt"
+        "winutil":  "chatgpt",
+        "estrela":  false,
+        "fmhy":  "ai / Official Model Sites",
+        "grupo":  "Assistentes de IA"
     },
     {
         "id":  "claude",
@@ -1583,18 +1904,10 @@
         "livre":  false,
         "site":  "https://claude.ai/download",
         "choco":  "claude",
-        "winutil":  "claude"
-    },
-    {
-        "id":  "cursor",
-        "nome":  "Cursor",
-        "descricao":  "Editor de código com IA, baseado no VS Code.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "Anysphere.Cursor",
-        "livre":  false,
-        "site":  "https://cursor.com/",
-        "choco":  "cursoride",
-        "winutil":  "cursor"
+        "winutil":  "claude",
+        "estrela":  false,
+        "fmhy":  "ai / Official Model Sites",
+        "grupo":  "Assistentes de IA"
     },
     {
         "id":  "git",
@@ -1605,62 +1918,9 @@
         "livre":  true,
         "site":  "https://git-scm.com/",
         "choco":  "git",
-        "winutil":  "git"
-    },
-    {
-        "id":  "githubdesktop",
-        "nome":  "GitHub Desktop",
-        "descricao":  "O GitHub sem linha de comando: salvar e enviar versões com cliques.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "GitHub.GitHubDesktop",
-        "livre":  true,
-        "site":  "https://desktop.github.com/",
-        "choco":  "github-desktop",
-        "winutil":  "githubdesktop"
-    },
-    {
-        "id":  "nodejs",
-        "nome":  "Node.js (LTS)",
-        "descricao":  "JavaScript fora do navegador (versão de longo suporte).",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "OpenJS.NodeJS.LTS",
-        "livre":  true,
-        "site":  "https://nodejs.org/",
-        "choco":  "nodejs-lts",
-        "winutil":  "nodejslts"
-    },
-    {
-        "id":  "notepadpp",
-        "nome":  "Notepad++",
-        "descricao":  "Editor de texto leve.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "Notepad++.Notepad++",
-        "livre":  true,
-        "site":  "https://notepad-plus-plus.org/",
-        "choco":  "notepadplusplus",
-        "winutil":  "notepadplus"
-    },
-    {
-        "id":  "python",
-        "nome":  "Python",
-        "descricao":  "Linguagem Python.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "Python.Python.3.14",
-        "livre":  true,
-        "site":  "https://www.python.org/",
-        "choco":  "python",
-        "winutil":  "python3"
-    },
-    {
-        "id":  "sublimetext",
-        "nome":  "Sublime Text",
-        "descricao":  "Editor de código rápido.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "SublimeHQ.SublimeText.4",
-        "livre":  false,
-        "site":  "https://www.sublimetext.com/",
-        "choco":  "sublimetext4",
-        "winutil":  "sublimetext"
+        "winutil":  "git",
+        "estrela":  false,
+        "fmhy":  "developer-tools / Git Tools"
     },
     {
         "id":  "vscode",
@@ -1671,139 +1931,23 @@
         "livre":  true,
         "site":  "https://code.visualstudio.com/",
         "choco":  "vscode",
-        "winutil":  "vscode"
+        "winutil":  "vscode",
+        "estrela":  false,
+        "fmhy":  "developer-tools",
+        "grupo":  "Editores de código"
     },
     {
-        "id":  "visualstudio2026",
-        "nome":  "Visual Studio Community",
-        "descricao":  "IDE da Microsoft para C#, C++ e .NET, grátis.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "Microsoft.VisualStudio.Community",
+        "id":  "sysinternals",
+        "nome":  "Sysinternals Suite",
+        "descricao":  "As ferramentas avançadas da Microsoft: Autoruns, Process Explorer, Process Monitor, TCPView e outras.",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.Sysinternals.Suite",
         "livre":  false,
-        "site":  "https://visualstudio.microsoft.com/",
-        "choco":  "visualstudio2026community",
-        "winutil":  "visualstudio2026"
-    },
-    {
-        "id":  "vscodium",
-        "nome":  "VSCodium",
-        "descricao":  "O VS Code sem a telemetria da Microsoft.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "VSCodium.VSCodium",
-        "livre":  true,
-        "site":  "https://vscodium.com/",
-        "choco":  "vscodium",
-        "winutil":  "vscodium"
-    },
-    {
-        "id":  "zed",
-        "nome":  "Zed",
-        "descricao":  "Editor de código rápido.",
-        "categoria":  "Desenvolvimento",
-        "wingetId":  "ZedIndustries.Zed",
-        "livre":  true,
-        "site":  "https://zed.dev/",
-        "choco":  "zed",
-        "winutil":  "Zed"
-    },
-    {
-        "id":  "dotnet10",
-        "nome":  ".NET Desktop Runtime 10",
-        "descricao":  "O que programas feitos em .NET 10 precisam para abrir.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.10",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/10.0",
-        "choco":  "dotnet-10.0-runtime",
-        "winutil":  "dotnet10"
-    },
-    {
-        "id":  "dotnet6",
-        "nome":  ".NET Desktop Runtime 6",
-        "descricao":  "O que programas feitos em .NET 6 precisam para abrir.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.6",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/6.0",
-        "choco":  "dotnet-6.0-runtime",
-        "winutil":  "dotnet6"
-    },
-    {
-        "id":  "dotnet8",
-        "nome":  ".NET Desktop Runtime 8",
-        "descricao":  "O que programas feitos em .NET 8 precisam para abrir.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.8",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/8.0",
-        "choco":  "dotnet-8.0-runtime",
-        "winutil":  "dotnet8"
-    },
-    {
-        "id":  "dotnet9",
-        "nome":  ".NET Desktop Runtime 9",
-        "descricao":  "O que programas feitos em .NET 9 precisam para abrir.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.9",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/9.0",
-        "choco":  "dotnet-9.0-runtime",
-        "winutil":  "dotnet9"
-    },
-    {
-        "id":  "autoruns",
-        "nome":  "Autoruns",
-        "descricao":  "Mostra tudo que inicia com o Windows (Sysinternals).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.Sysinternals.Autoruns",
-        "livre":  false,
-        "site":  "https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns",
-        "choco":  "autoruns",
-        "winutil":  "autoruns"
-    },
-    {
-        "id":  "dismtools",
-        "nome":  "DISMTools",
-        "descricao":  "Interface para o DISM: imagens e reparo do Windows.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "CodingWondersSoftware.DISMTools.Stable",
-        "livre":  true,
-        "site":  "https://github.com/CodingWonders/DISMTools",
-        "choco":  "dismtools",
-        "winutil":  "dismtools"
-    },
-    {
-        "id":  "ntlite",
-        "nome":  "NTLite",
-        "descricao":  "Personaliza a instalação do Windows antes de instalar.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Nlitesoft.NTLite",
-        "livre":  false,
-        "site":  "https://ntlite.com",
-        "choco":  "ntlite-free",
-        "winutil":  "ntlite"
-    },
-    {
-        "id":  "nuget",
-        "nome":  "NuGet",
-        "descricao":  "Gerenciador de pacotes do .NET.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.NuGet",
-        "livre":  true,
-        "site":  "https://www.nuget.org/",
-        "choco":  "nuget.commandline",
-        "winutil":  "nuget"
-    },
-    {
-        "id":  "onedrive",
-        "nome":  "OneDrive",
-        "descricao":  "Arquivos da Microsoft na nuvem.",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.OneDrive",
-        "livre":  false,
-        "site":  "https://onedrive.live.com/",
-        "choco":  "onedrive",
-        "winutil":  "onedrive"
+        "site":  "https://learn.microsoft.com/sysinternals/",
+        "choco":  "sysinternals",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "system-tools"
     },
     {
         "id":  "powershell",
@@ -1814,7 +1958,9 @@
         "livre":  true,
         "site":  "https://github.com/PowerShell/PowerShell",
         "choco":  "powershell-core",
-        "winutil":  "powershell"
+        "winutil":  "powershell",
+        "estrela":  false,
+        "fmhy":  "system-tools / Terminal / CLI"
     },
     {
         "id":  "powertoys",
@@ -1825,84 +1971,9 @@
         "livre":  true,
         "site":  "https://github.com/microsoft/PowerToys",
         "choco":  "powertoys",
-        "winutil":  "powertoys"
-    },
-    {
-        "id":  "processexplorer",
-        "nome":  "Process Explorer",
-        "descricao":  "Gerenciador de Tarefas detalhado (Sysinternals).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.Sysinternals.ProcessExplorer",
-        "livre":  false,
-        "site":  "https://learn.microsoft.com/sysinternals/downloads/process-explorer",
-        "choco":  "procexp",
-        "winutil":  "processexplorer"
-    },
-    {
-        "id":  "processmonitor",
-        "nome":  "Process Monitor",
-        "descricao":  "Mostra o que cada programa faz no disco e no registro (Sysinternals).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.Sysinternals.ProcessMonitor",
-        "livre":  false,
-        "site":  "https://docs.microsoft.com/en-us/sysinternals/downloads/procmon",
-        "choco":  "procmon",
-        "winutil":  "processmonitor"
-    },
-    {
-        "id":  "pstools",
-        "nome":  "PsTools",
-        "descricao":  "Comandos de administração remota (Sysinternals).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.Sysinternals.PsTools",
-        "livre":  false,
-        "site":  "https://learn.microsoft.com/en-us/sysinternals/downloads/pstools",
-        "choco":  "pstools",
-        "winutil":  "pstools"
-    },
-    {
-        "id":  "rdcman",
-        "nome":  "RDCMan",
-        "descricao":  "Organiza várias conexões de Área de Trabalho Remota (Sysinternals).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.Sysinternals.RDCMan",
-        "livre":  false,
-        "site":  "https://learn.microsoft.com/en-us/sysinternals/downloads/rdcman",
-        "choco":  "rdcman",
-        "winutil":  "rdcman"
-    },
-    {
-        "id":  "tcpview",
-        "nome":  "TCPView",
-        "descricao":  "Mostra as conexões de rede de cada programa (Sysinternals).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.Sysinternals.TCPView",
-        "livre":  false,
-        "site":  "https://docs.microsoft.com/en-us/sysinternals/downloads/tcpview",
-        "choco":  "tcpview",
-        "winutil":  "tcpview"
-    },
-    {
-        "id":  "vc2015-32",
-        "nome":  "Visual C++ 2015-2022 (32 bits)",
-        "descricao":  "O que muitos programas e jogos precisam para abrir (32 bits).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.VCRedist.2015+.x86",
-        "livre":  false,
-        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
-        "choco":  "vcredist2015",
-        "winutil":  "vc2015_32"
-    },
-    {
-        "id":  "vc2015-64",
-        "nome":  "Visual C++ 2015-2022 (64 bits)",
-        "descricao":  "O que muitos programas e jogos precisam para abrir (64 bits).",
-        "categoria":  "Ferramentas da Microsoft",
-        "wingetId":  "Microsoft.VCRedist.2015+.x64",
-        "livre":  false,
-        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
-        "choco":  "vcredist2015",
-        "winutil":  "vc2015_64"
+        "winutil":  "powertoys",
+        "estrela":  false,
+        "fmhy":  "system-tools"
     },
     {
         "id":  "terminal",
@@ -1913,40 +1984,9 @@
         "livre":  true,
         "site":  "https://aka.ms/terminal",
         "choco":  "microsoft-windows-terminal",
-        "winutil":  "terminal"
-    },
-    {
-        "id":  "advancedip",
-        "nome":  "Advanced IP Scanner",
-        "descricao":  "Mostra todos os aparelhos ligados na sua rede.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "Famatech.AdvancedIPScanner",
-        "livre":  false,
-        "site":  "https://www.advanced-ip-scanner.com/",
-        "choco":  "advanced-ip-scanner",
-        "winutil":  "advancedip"
-    },
-    {
-        "id":  "angryipscanner",
-        "nome":  "Angry IP Scanner",
-        "descricao":  "Procura aparelhos e portas abertas na rede.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "angryziber.AngryIPScanner",
-        "livre":  true,
-        "site":  "https://angryip.org/",
-        "choco":  "angryip",
-        "winutil":  "angryipscanner"
-    },
-    {
-        "id":  "cinebenchr23",
-        "nome":  "Cinebench R23",
-        "descricao":  "Mede o desempenho do processador.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "Maxon.CinebenchR23",
-        "livre":  false,
-        "site":  "https://www.maxon.net/en/cinebench",
-        "choco":  "",
-        "winutil":  "cinebenchr23"
+        "winutil":  "terminal",
+        "estrela":  false,
+        "fmhy":  "system-tools / Terminal / CLI"
     },
     {
         "id":  "cpuz",
@@ -1957,40 +1997,10 @@
         "livre":  false,
         "site":  "https://www.cpuid.com/softwares/cpu-z.html",
         "choco":  "cpu-z",
-        "winutil":  "cpuz"
-    },
-    {
-        "id":  "ddu",
-        "nome":  "Display Driver Uninstaller",
-        "descricao":  "Remove por completo o driver de vídeo (para reinstalar do zero).",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "Wagnardsoft.DisplayDriverUninstaller",
-        "livre":  true,
-        "site":  "https://www.wagnardsoft.com/display-driver-uninstaller-DDU-",
-        "choco":  "ddu",
-        "winutil":  "ddu"
-    },
-    {
-        "id":  "gpuz",
-        "nome":  "GPU-Z",
-        "descricao":  "Mostra detalhes da placa de vídeo.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "TechPowerUp.GPU-Z",
-        "livre":  false,
-        "site":  "https://www.techpowerup.com/gpuz/",
-        "choco":  "gpu-z",
-        "winutil":  "gpuz"
-    },
-    {
-        "id":  "gsudo",
-        "nome":  "gsudo",
-        "descricao":  "Roda um comando como administrador no terminal.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "gerardog.gsudo",
-        "livre":  true,
-        "site":  "https://github.com/gerardog/gsudo",
-        "choco":  "gsudo",
-        "winutil":  "gsudo"
+        "winutil":  "cpuz",
+        "estrela":  true,
+        "fmhy":  "system-tools",
+        "grupo":  "Informações do hardware"
     },
     {
         "id":  "hwinfo",
@@ -2001,18 +2011,10 @@
         "livre":  false,
         "site":  "https://www.hwinfo.com/",
         "choco":  "hwinfo",
-        "winutil":  "hwinfo"
-    },
-    {
-        "id":  "hwmonitor",
-        "nome":  "HWMonitor",
-        "descricao":  "Temperaturas, voltagens e ventoinhas.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "CPUID.HWMonitor",
-        "livre":  false,
-        "site":  "https://www.cpuid.com/softwares/hwmonitor.html",
-        "choco":  "hwmonitor",
-        "winutil":  "hwmonitor"
+        "winutil":  "hwinfo",
+        "estrela":  true,
+        "fmhy":  "system-tools / Hardware Monitors",
+        "grupo":  "Informações do hardware"
     },
     {
         "id":  "imhex",
@@ -2023,7 +2025,9 @@
         "livre":  true,
         "site":  "https://imhex.werwolv.net/",
         "choco":  "imhex",
-        "winutil":  "imhex"
+        "winutil":  "imhex",
+        "estrela":  true,
+        "fmhy":  "developer-tools"
     },
     {
         "id":  "msiafterburner",
@@ -2034,40 +2038,9 @@
         "livre":  false,
         "site":  "https://www.msi.com/Landing/afterburner",
         "choco":  "msiafterburner",
-        "winutil":  "msiafterburner"
-    },
-    {
-        "id":  "mullvadvpn",
-        "nome":  "Mullvad VPN",
-        "descricao":  "VPN paga, sem conta e sem registro.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "MullvadVPN.MullvadVPN",
-        "livre":  true,
-        "site":  "https://mullvad.net/",
-        "choco":  "mullvad-app",
-        "winutil":  "mullvadvpn"
-    },
-    {
-        "id":  "nmap",
-        "nome":  "Nmap",
-        "descricao":  "Mapeia redes e portas.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "Insecure.Nmap",
-        "livre":  true,
-        "site":  "https://nmap.org/",
-        "choco":  "nmap",
-        "winutil":  "nmap"
-    },
-    {
-        "id":  "openvpn",
-        "nome":  "OpenVPN Connect",
-        "descricao":  "Conecta em VPNs OpenVPN.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "OpenVPNTechnologies.OpenVPNConnect",
-        "livre":  false,
-        "site":  "https://openvpn.net/",
-        "choco":  "openvpn-connect",
-        "winutil":  "OpenVPN"
+        "winutil":  "msiafterburner",
+        "estrela":  true,
+        "fmhy":  "gaming-tools / Optimization Tools"
     },
     {
         "id":  "protonvpn",
@@ -2078,18 +2051,10 @@
         "livre":  true,
         "site":  "https://protonvpn.com/",
         "choco":  "protonvpn",
-        "winutil":  "protonvpn"
-    },
-    {
-        "id":  "putty",
-        "nome":  "PuTTY",
-        "descricao":  "Conexões SSH e Telnet.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "PuTTY.PuTTY",
-        "livre":  true,
-        "site":  "https://www.chiark.greenend.org.uk/~sgtatham/putty/",
-        "choco":  "putty",
-        "winutil":  "putty"
+        "winutil":  "protonvpn",
+        "estrela":  true,
+        "fmhy":  "privacy",
+        "grupo":  "VPN"
     },
     {
         "id":  "rufus",
@@ -2100,29 +2065,9 @@
         "livre":  true,
         "site":  "https://rufus.ie/",
         "choco":  "rufus",
-        "winutil":  "rufus"
-    },
-    {
-        "id":  "simplewall",
-        "nome":  "Simplewall",
-        "descricao":  "Firewall simples: escolhe quais programas usam a internet.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "Henry++.simplewall",
-        "livre":  true,
-        "site":  "https://github.com/henrypp/simplewall",
-        "choco":  "simplewall",
-        "winutil":  "simplewall"
-    },
-    {
-        "id":  "systeminformer",
-        "nome":  "System Informer",
-        "descricao":  "Gerenciador de Tarefas avançado.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "WinsiderSS.SystemInformer",
-        "livre":  true,
-        "site":  "https://systeminformer.com/",
-        "choco":  "systeminformer",
-        "winutil":  "systeminformer"
+        "winutil":  "rufus",
+        "estrela":  true,
+        "fmhy":  "system-tools / USB / Bootloaders"
     },
     {
         "id":  "tailscale",
@@ -2133,29 +2078,24 @@
         "livre":  false,
         "site":  "https://tailscale.com/",
         "choco":  "tailscale",
-        "winutil":  "tailscale"
+        "winutil":  "tailscale",
+        "estrela":  true,
+        "fmhy":  "privacy / VPN Server",
+        "grupo":  "VPN"
     },
     {
-        "id":  "ventoy",
-        "nome":  "Ventoy",
-        "descricao":  "Pendrive que dá boot em vários ISOs.",
+        "id":  "windscribe",
+        "nome":  "Windscribe",
+        "descricao":  "VPN com plano gratuito.",
         "categoria":  "Ferramentas avançadas",
-        "wingetId":  "Ventoy.Ventoy",
-        "livre":  true,
-        "site":  "https://www.ventoy.net/",
-        "choco":  "ventoy",
-        "winutil":  "ventoy"
-    },
-    {
-        "id":  "winscp",
-        "nome":  "WinSCP",
-        "descricao":  "Transfere arquivos por SFTP e FTP.",
-        "categoria":  "Ferramentas avançadas",
-        "wingetId":  "WinSCP.WinSCP",
-        "livre":  true,
-        "site":  "https://winscp.net/",
-        "choco":  "winscp",
-        "winutil":  "winscp"
+        "wingetId":  "Windscribe.Windscribe",
+        "livre":  false,
+        "site":  "https://windscribe.com/",
+        "choco":  "windscribe",
+        "winutil":  "",
+        "estrela":  true,
+        "fmhy":  "privacy",
+        "grupo":  "VPN"
     },
     {
         "id":  "wireguard",
@@ -2166,7 +2106,117 @@
         "livre":  true,
         "site":  "https://www.wireguard.com/",
         "choco":  "wireguard",
-        "winutil":  "wireguard"
+        "winutil":  "wireguard",
+        "estrela":  true,
+        "fmhy":  "privacy / VPN Server",
+        "grupo":  "VPN"
+    },
+    {
+        "id":  "ddu",
+        "nome":  "Display Driver Uninstaller",
+        "descricao":  "Remove por completo o driver de vídeo (para reinstalar do zero).",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "Wagnardsoft.DisplayDriverUninstaller",
+        "livre":  true,
+        "site":  "https://www.wagnardsoft.com/display-driver-uninstaller-DDU-",
+        "choco":  "ddu",
+        "winutil":  "ddu",
+        "estrela":  false,
+        "fmhy":  "system-tools / GPU Tools"
+    },
+    {
+        "id":  "gpuz",
+        "nome":  "GPU-Z",
+        "descricao":  "Mostra detalhes da placa de vídeo.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "TechPowerUp.GPU-Z",
+        "livre":  false,
+        "site":  "https://www.techpowerup.com/gpuz/",
+        "choco":  "gpu-z",
+        "winutil":  "gpuz",
+        "estrela":  false,
+        "fmhy":  "system-tools",
+        "grupo":  "Informações do hardware"
+    },
+    {
+        "id":  "hwmonitor",
+        "nome":  "HWMonitor",
+        "descricao":  "Temperaturas, voltagens e ventoinhas.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "CPUID.HWMonitor",
+        "livre":  false,
+        "site":  "https://www.cpuid.com/softwares/hwmonitor.html",
+        "choco":  "hwmonitor",
+        "winutil":  "hwmonitor",
+        "estrela":  false,
+        "fmhy":  "system-tools / Hardware Monitors",
+        "grupo":  "Informações do hardware"
+    },
+    {
+        "id":  "nmap",
+        "nome":  "Nmap",
+        "descricao":  "Mapeia redes e portas.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "Insecure.Nmap",
+        "livre":  true,
+        "site":  "https://nmap.org/",
+        "choco":  "nmap",
+        "winutil":  "nmap",
+        "estrela":  false,
+        "fmhy":  "developer-tools",
+        "grupo":  "Análise de rede"
+    },
+    {
+        "id":  "putty",
+        "nome":  "PuTTY",
+        "descricao":  "Conexões SSH e Telnet.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "PuTTY.PuTTY",
+        "livre":  true,
+        "site":  "https://www.chiark.greenend.org.uk/~sgtatham/putty/",
+        "choco":  "putty",
+        "winutil":  "putty",
+        "estrela":  false,
+        "fmhy":  "developer-tools"
+    },
+    {
+        "id":  "simplewall",
+        "nome":  "Simplewall",
+        "descricao":  "Firewall simples: escolhe quais programas usam a internet.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "Henry++.simplewall",
+        "livre":  true,
+        "site":  "https://github.com/henrypp/simplewall",
+        "choco":  "simplewall",
+        "winutil":  "simplewall",
+        "estrela":  false,
+        "fmhy":  "privacy / Network Security"
+    },
+    {
+        "id":  "systeminformer",
+        "nome":  "System Informer",
+        "descricao":  "Gerenciador de Tarefas avançado.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "WinsiderSS.SystemInformer",
+        "livre":  true,
+        "site":  "https://systeminformer.com/",
+        "choco":  "systeminformer",
+        "winutil":  "systeminformer",
+        "estrela":  false,
+        "fmhy":  "system-tools / Hardware Monitors"
+    },
+    {
+        "id":  "winscp",
+        "nome":  "WinSCP",
+        "descricao":  "Transfere arquivos por SFTP e FTP.",
+        "categoria":  "Ferramentas avançadas",
+        "wingetId":  "WinSCP.WinSCP",
+        "livre":  true,
+        "site":  "https://winscp.net/",
+        "choco":  "winscp",
+        "winutil":  "winscp",
+        "estrela":  false,
+        "fmhy":  "file-tools"
     },
     {
         "id":  "wireshark",
@@ -2177,7 +2227,10 @@
         "livre":  true,
         "site":  "https://www.wireshark.org/",
         "choco":  "wireshark",
-        "winutil":  "wireshark"
+        "winutil":  "wireshark",
+        "estrela":  false,
+        "fmhy":  "internet-tools / Network Tools",
+        "grupo":  "Análise de rede"
     },
     {
         "id":  "jellyfinmediaplayer",
@@ -2188,7 +2241,10 @@
         "livre":  true,
         "site":  "https://jellyfin.org/",
         "choco":  "jellyfin-media-player",
-        "winutil":  "jellyfinmediaplayer"
+        "winutil":  "jellyfinmediaplayer",
+        "estrela":  true,
+        "fmhy":  "video-tools",
+        "grupo":  "Jellyfin"
     },
     {
         "id":  "jellyfinserver",
@@ -2199,7 +2255,10 @@
         "livre":  true,
         "site":  "https://jellyfin.org/",
         "choco":  "jellyfin",
-        "winutil":  "jellyfinserver"
+        "winutil":  "jellyfinserver",
+        "estrela":  true,
+        "fmhy":  "video-tools",
+        "grupo":  "Jellyfin"
     },
     {
         "id":  "kodi",
@@ -2210,7 +2269,9 @@
         "livre":  true,
         "site":  "https://kodi.tv/",
         "choco":  "kodi",
-        "winutil":  "kodi"
+        "winutil":  "kodi",
+        "estrela":  true,
+        "fmhy":  "video-tools; video"
     },
     {
         "id":  "localsend",
@@ -2221,7 +2282,9 @@
         "livre":  true,
         "site":  "https://localsend.org/",
         "choco":  "localsend.install",
-        "winutil":  "localsend"
+        "winutil":  "localsend",
+        "estrela":  true,
+        "fmhy":  "file-tools"
     },
     {
         "id":  "moonlight",
@@ -2232,18 +2295,10 @@
         "livre":  true,
         "site":  "https://moonlight-stream.org/",
         "choco":  "moonlight-qt",
-        "winutil":  "moonlight"
-    },
-    {
-        "id":  "netbird",
-        "nome":  "NetBird",
-        "descricao":  "Rede privada entre seus aparelhos.",
-        "categoria":  "Servidor em casa",
-        "wingetId":  "Netbird.Netbird",
-        "livre":  true,
-        "site":  "https://netbird.io/",
-        "choco":  "netbird",
-        "winutil":  "netbird"
+        "winutil":  "moonlight",
+        "estrela":  true,
+        "fmhy":  "developer-tools; gaming-tools; system-tools / Remote Desktop",
+        "grupo":  "Jogos por streaming"
     },
     {
         "id":  "nextclouddesktop",
@@ -2254,29 +2309,9 @@
         "livre":  true,
         "site":  "https://nextcloud.com/install/#install-clients",
         "choco":  "nextcloud-client",
-        "winutil":  "nextclouddesktop"
-    },
-    {
-        "id":  "plexdesktop",
-        "nome":  "Plex Desktop",
-        "descricao":  "Assiste ao que está no seu servidor Plex.",
-        "categoria":  "Servidor em casa",
-        "wingetId":  "Plex.Plex",
-        "livre":  false,
-        "site":  "https://www.plex.tv",
-        "choco":  "plex",
-        "winutil":  "plexdesktop"
-    },
-    {
-        "id":  "plex",
-        "nome":  "Plex Media Server",
-        "descricao":  "Servidor de filmes e séries para a casa toda.",
-        "categoria":  "Servidor em casa",
-        "wingetId":  "Plex.PlexMediaServer",
-        "livre":  false,
-        "site":  "https://www.plex.tv/your-media/",
-        "choco":  "plexmediaserver",
-        "winutil":  "plex"
+        "winutil":  "nextclouddesktop",
+        "estrela":  true,
+        "fmhy":  "internet-tools; misc / Collaboration Platforms"
     },
     {
         "id":  "sunshine",
@@ -2287,7 +2322,10 @@
         "livre":  true,
         "site":  "https://app.lizardbyte.dev/Sunshine/",
         "choco":  "sunshine",
-        "winutil":  "sunshine"
+        "winutil":  "sunshine",
+        "estrela":  true,
+        "fmhy":  "gaming-tools; system-tools / Remote Desktop",
+        "grupo":  "Jogos por streaming"
     },
     {
         "id":  "syncthing",
@@ -2298,17 +2336,205 @@
         "livre":  true,
         "site":  "https://syncthing.net/",
         "choco":  "syncthing",
-        "winutil":  "syncthing"
+        "winutil":  "syncthing",
+        "estrela":  true,
+        "fmhy":  "file-tools / File Sync"
     },
     {
-        "id":  "synctrayzor",
-        "nome":  "SyncTrayzor",
-        "descricao":  "Syncthing com ícone na bandeja.",
+        "id":  "netbird",
+        "nome":  "NetBird",
+        "descricao":  "Rede privada entre seus aparelhos.",
         "categoria":  "Servidor em casa",
-        "wingetId":  "GermanCoding.SyncTrayzor",
+        "wingetId":  "Netbird.Netbird",
+        "livre":  true,
+        "site":  "https://netbird.io/",
+        "choco":  "netbird",
+        "winutil":  "netbird",
+        "estrela":  false,
+        "fmhy":  "privacy / VPN Server"
+    },
+    {
+        "id":  "plexdesktop",
+        "nome":  "Plex Desktop",
+        "descricao":  "Assiste ao que está no seu servidor Plex.",
+        "categoria":  "Servidor em casa",
+        "wingetId":  "Plex.Plex",
         "livre":  false,
-        "site":  "https://github.com/GermanCoding/SyncTrayzor",
-        "choco":  "synctrayzor",
-        "winutil":  "synctrayzor"
+        "site":  "https://www.plex.tv",
+        "choco":  "plex",
+        "winutil":  "plexdesktop",
+        "estrela":  false,
+        "fmhy":  "video-tools; video / Free w/ Ads",
+        "grupo":  "Plex"
+    },
+    {
+        "id":  "plex",
+        "nome":  "Plex Media Server",
+        "descricao":  "Servidor de filmes e séries para a casa toda.",
+        "categoria":  "Servidor em casa",
+        "wingetId":  "Plex.PlexMediaServer",
+        "livre":  false,
+        "site":  "https://www.plex.tv/your-media/",
+        "choco":  "plexmediaserver",
+        "winutil":  "plex",
+        "estrela":  false,
+        "fmhy":  "video-tools; video / Free w/ Ads",
+        "grupo":  "Plex"
+    },
+    {
+        "id":  "dotnet10",
+        "nome":  ".NET Desktop Runtime 10",
+        "descricao":  "O que programas feitos em .NET 10 precisam para abrir.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.10",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/10.0",
+        "choco":  "dotnet-10.0-runtime",
+        "winutil":  "dotnet10",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "dotnet6",
+        "nome":  ".NET Desktop Runtime 6",
+        "descricao":  "O que programas feitos em .NET 6 precisam para abrir.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.6",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/6.0",
+        "choco":  "dotnet-6.0-runtime",
+        "winutil":  "dotnet6",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "dotnet8",
+        "nome":  ".NET Desktop Runtime 8",
+        "descricao":  "O que programas feitos em .NET 8 precisam para abrir.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.8",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/8.0",
+        "choco":  "dotnet-8.0-runtime",
+        "winutil":  "dotnet8",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "dotnet9",
+        "nome":  ".NET Desktop Runtime 9",
+        "descricao":  "O que programas feitos em .NET 9 precisam para abrir.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.9",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/9.0",
+        "choco":  "dotnet-9.0-runtime",
+        "winutil":  "dotnet9",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "discord",
+        "nome":  "Discord",
+        "descricao":  "Chat de voz e texto.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Discord.Discord",
+        "livre":  false,
+        "site":  "https://discord.com/",
+        "choco":  "discord",
+        "winutil":  "discord",
+        "estrela":  false,
+        "grupo":  "Mensagens"
+    },
+    {
+        "id":  "epic",
+        "nome":  "Epic Games",
+        "descricao":  "Loja da Epic (jogos grátis toda semana).",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "EpicGames.EpicGamesLauncher",
+        "livre":  false,
+        "site":  "https://www.epicgames.com/store/en-US/",
+        "choco":  "epicgameslauncher",
+        "winutil":  "epicgames",
+        "estrela":  false,
+        "grupo":  "Launchers de jogos"
+    },
+    {
+        "id":  "chrome",
+        "nome":  "Google Chrome",
+        "descricao":  "Navegador do Google.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Google.Chrome",
+        "livre":  false,
+        "site":  "https://www.google.com/chrome/",
+        "choco":  "googlechrome",
+        "winutil":  "chrome",
+        "estrela":  false
+    },
+    {
+        "id":  "steam",
+        "nome":  "Steam",
+        "descricao":  "Loja e biblioteca de jogos.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Valve.Steam",
+        "livre":  false,
+        "site":  "https://store.steampowered.com/about/",
+        "choco":  "steam-client",
+        "winutil":  "steam",
+        "estrela":  false,
+        "grupo":  "Launchers de jogos"
+    },
+    {
+        "id":  "telegram",
+        "nome":  "Telegram",
+        "descricao":  "Mensagens.",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Telegram.TelegramDesktop",
+        "livre":  true,
+        "site":  "https://telegram.org/",
+        "choco":  "telegram",
+        "winutil":  "telegram",
+        "estrela":  false,
+        "grupo":  "Mensagens"
+    },
+    {
+        "id":  "vc2015-32",
+        "nome":  "Visual C++ 2015-2022 (32 bits)",
+        "descricao":  "O que muitos programas e jogos precisam para abrir (32 bits).",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Microsoft.VCRedist.2015+.x86",
+        "livre":  false,
+        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
+        "choco":  "vcredist2015",
+        "winutil":  "vc2015_32",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "vc2015-64",
+        "nome":  "Visual C++ 2015-2022 (64 bits)",
+        "descricao":  "O que muitos programas e jogos precisam para abrir (64 bits).",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "Microsoft.VCRedist.2015+.x64",
+        "livre":  false,
+        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
+        "choco":  "vcredist2015",
+        "winutil":  "vc2015_64",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "whatsapp",
+        "nome":  "WhatsApp",
+        "descricao":  "O WhatsApp para Windows (Microsoft Store).",
+        "categoria":  "Populares (fora do FMHY)",
+        "wingetId":  "9NKSQGP7F2NH",
+        "fonte":  "msstore",
+        "livre":  false,
+        "site":  "https://www.whatsapp.com/download",
+        "choco":  "",
+        "winutil":  "whatsapp",
+        "estrela":  false,
+        "grupo":  "Mensagens"
     }
 ]

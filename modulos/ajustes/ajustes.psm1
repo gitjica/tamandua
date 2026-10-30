@@ -31,6 +31,12 @@ function Get-CatalogoAjustes {
     foreach ($a in ([IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json)) { $a }
 }
 
+function Get-CampoTexto {
+    param($Objeto, [string]$Nome)
+    $p = $Objeto.PSObject.Properties[$Nome]
+    if ($p -and $p.Value) { [string]$p.Value } else { '' }
+}
+
 function Test-EhAcao {
     param($Ajuste)
     $p = $Ajuste.PSObject.Properties['acao']
@@ -70,6 +76,10 @@ function Find-Alvos {
             Nivel       = 'Normal'
             Valor       = $null
             Risco       = $a.risco
+            # Recomendado, Opcional, Atencao ou Arriscado; e, quando pode dar problema, o quê e como resolver.
+            Classificacao = Get-CampoTexto $a 'classificacao'
+            Contratempo = Get-CampoTexto $a 'contratempo'
+            SeAcontecer = Get-CampoTexto $a 'seAcontecer'
             Selecionado = $false
             Destino     = 'NaoSeAplica'
             RequerAdmin = [bool]$a.requerAdmin

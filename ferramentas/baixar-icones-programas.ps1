@@ -13,7 +13,7 @@
     .\ferramentas\baixar-icones-programas.ps1 -Ids zoom  # só estes
 #>
 [CmdletBinding()]
-param([switch]$Forcar, [string[]]$Ids)
+param([switch]$Forcar, [string[]]$Ids, [switch]$SoLimparFundo)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -93,6 +93,58 @@ function ConvertTo-Bitmap([byte[]]$Bytes) {
     catch { return $null }
 }
 
+# Quadrado branco atrás do logo: com 3 ou mais cantos brancos opacos, apaga o branco que encosta na borda
+# (preenchimento a partir das bordas). O branco de dentro do desenho, cercado por cor, fica.
+function Test-QuaseBranco([Drawing.Color]$C) { $C.A -gt 200 -and $C.R -gt 232 -and $C.G -gt 232 -and $C.B -gt 232 }
+
+function Remove-FundoBranco([Drawing.Bitmap]$Bmp) {
+    $w = $Bmp.Width; $h = $Bmp.Height
+    $cantos = @(@(0, 0), @(($w - 1), 0), @(0, ($h - 1)), @(($w - 1), ($h - 1))) | Where-Object { Test-QuaseBranco $Bmp.GetPixel($_[0], $_[1]) }
+    if (@($cantos).Count -lt 3) { return $false }
+    $visto = New-Object 'bool[,]' $w, $h
+    $fila = [System.Collections.Generic.Queue[int[]]]::new()
+    for ($x = 0; $x -lt $w; $x++) { $fila.Enqueue(@($x, 0)); $fila.Enqueue(@($x, ($h - 1))) }
+    for ($y = 0; $y -lt $h; $y++) { $fila.Enqueue(@(0, $y)); $fila.Enqueue(@(($w - 1), $y)) }
+    while ($fila.Count -gt 0) {
+        $p = $fila.Dequeue(); $x = $p[0]; $y = $p[1]
+        if ($x -lt 0 -or $y -lt 0 -or $x -ge $w -or $y -ge $h -or $visto[$x, $y]) { continue }
+        $visto[$x, $y] = $true
+        if (-not (Test-QuaseBranco $Bmp.GetPixel($x, $y))) { continue }
+        $Bmp.SetPixel($x, $y, [Drawing.Color]::Transparent)
+        $fila.Enqueue(@(($x + 1), $y)); $fila.Enqueue(@(($x - 1), $y)); $fila.Enqueue(@($x, ($y + 1))); $fila.Enqueue(@($x, ($y - 1)))
+    }
+    $true
+}
+
+# Logo escuro sem fundo (ex.: ChatGPT, preto) some no tema escuro: ganha uma placa branca arredondada atrás.
+function Add-PlacaSeEscuro([Drawing.Bitmap]$Bmp) {
+    $soma = 0.0; $n = 0; $total = 0
+    for ($y = 0; $y -lt $Bmp.Height; $y += 2) {
+        for ($x = 0; $x -lt $Bmp.Width; $x += 2) {
+            $total++
+            $c = $Bmp.GetPixel($x, $y)
+            if ($c.A -gt 128) { $soma += 0.299 * $c.R + 0.587 * $c.G + 0.114 * $c.B; $n++ }
+        }
+    }
+    # Só logo escuro E vazado (menos da metade coberta): ícone que já é um quadro escuro (Audacity, GOG) se vê bem.
+    if ($n -eq 0 -or ($soma / $n) -ge 70 -or ($n / $total) -ge 0.5) { return $false }
+    $copia = New-Object Drawing.Bitmap($Bmp)
+    $g = [Drawing.Graphics]::FromImage($Bmp)
+    try {
+        $g.SmoothingMode = [Drawing.Drawing2D.SmoothingMode]::AntiAlias
+        $g.Clear([Drawing.Color]::Transparent)
+        $r = 14; $l = $Bmp.Width - 1
+        $caminho = New-Object Drawing.Drawing2D.GraphicsPath
+        $caminho.AddArc(0, 0, $r, $r, 180, 90); $caminho.AddArc($l - $r, 0, $r, $r, 270, 90)
+        $caminho.AddArc($l - $r, $l - $r, $r, $r, 0, 90); $caminho.AddArc(0, $l - $r, $r, $r, 90, 90); $caminho.CloseFigure()
+        $g.FillPath([Drawing.Brushes]::White, $caminho)
+        $g.InterpolationMode = [Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+        $g.DrawImage($copia, 8, 8, $Bmp.Width - 16, $Bmp.Height - 16)
+    }
+    finally { $g.Dispose(); $copia.Dispose() }
+    $true
+}
+
 # Desenha num PNG novo de 64x64, centralizado, sem distorcer.
 function Save-Png64([Drawing.Bitmap]$Origem, [string]$Destino) {
     $lado = 64
@@ -106,6 +158,8 @@ function Save-Png64([Drawing.Bitmap]$Origem, [string]$Destino) {
         $g.SmoothingMode = [Drawing.Drawing2D.SmoothingMode]::HighQuality
         $g.PixelOffsetMode = [Drawing.Drawing2D.PixelOffsetMode]::HighQuality
         $g.DrawImage($Origem, [int](($lado - $w) / 2), [int](($lado - $h) / 2), $w, $h)
+        [void](Remove-FundoBranco $novo)
+        [void](Add-PlacaSeEscuro $novo)
         $novo.Save($Destino, [Drawing.Imaging.ImageFormat]::Png)
     }
     finally { $g.Dispose(); $novo.Dispose() }
@@ -122,10 +176,29 @@ $script:Manuais = @{
     gsudo          = @('https://raw.githubusercontent.com/gerardog/gsudo/master/docs/static/img/gsudo.png', 'https://raw.githubusercontent.com/gerardog/gsudo/master/src/gsudo/icon/gsudo.ico')
     overwolf       = @('https://www.google.com/s2/favicons?domain=curseforge.com&sz=128')
     signalrgb      = @('https://github.com/SignalRGB.png?size=128')
+    inkscape       = @('https://commons.wikimedia.org/wiki/Special:FilePath/Inkscape_Logo.svg?width=128')
+    kdenlive       = @('https://commons.wikimedia.org/wiki/Special:FilePath/Kdenlive_logo.svg?width=128')
+    ludusavi       = @('https://raw.githubusercontent.com/mtkennerly/ludusavi/master/assets/icon.png')
+    compactgui     = @('https://github.com/IridiumIO.png?size=128')
     whatsapp       = @('https://commons.wikimedia.org/wiki/Special:FilePath/WhatsApp.svg?width=128')
     revo           = @('https://www.revouninstaller.com/apple-touch-icon.png', 'https://www.google.com/s2/favicons?domain=revouninstaller.com&sz=128')
     policyplus     = @('https://raw.githubusercontent.com/Fleex255/PolicyPlus/master/PolicyPlus/PolicyPlus.ico')
     blurautoclicker = @('https://github.com/Blur009.png?size=128')
+}
+
+# -SoLimparFundo: só tira o quadrado branco dos ícones que já estão no projeto, sem baixar nada.
+if ($SoLimparFundo) {
+    foreach ($f in Get-ChildItem -LiteralPath $pasta -Filter '*.png') {
+        $orig = [Drawing.Bitmap]::FromFile($f.FullName)
+        $bmp = New-Object Drawing.Bitmap($orig); $orig.Dispose()
+        try {
+            $tirou = Remove-FundoBranco $bmp
+            $placa = Add-PlacaSeEscuro $bmp
+            if ($tirou -or $placa) { $bmp.Save($f.FullName, [Drawing.Imaging.ImageFormat]::Png); Write-Host "ajustado: $($f.BaseName) (fundo: $tirou, placa: $placa)" }
+        }
+        finally { $bmp.Dispose() }
+    }
+    return
 }
 
 $catalogo = @([IO.File]::ReadAllText((Join-Path $raiz 'modulos\programas\programas.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json | ForEach-Object { $_ })

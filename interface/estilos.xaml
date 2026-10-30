@@ -287,6 +287,10 @@
                           AutomationProperties.Name="{Binding Nome}"/>
                 <TextBlock x:Name="Escudo" Style="{DynamicResource Icone}" Text="&#xE83D;" FontSize="12" HorizontalAlignment="Right"
                            VerticalAlignment="Top" Margin="8" Visibility="Collapsed" ToolTip="Pede permissão de administrador"/>
+                <!-- Estrela do FMHY (programas recomendados por lá) -->
+                <TextBlock x:Name="Estrela" Style="{DynamicResource Icone}" Text="&#xE735;" FontSize="13" HorizontalAlignment="Right"
+                           VerticalAlignment="Top" Margin="8" Visibility="Collapsed" Foreground="{DynamicResource Aviso}"
+                           ToolTip="Recomendado pelo FMHY" AutomationProperties.Name="Recomendado pelo FMHY"/>
                 <StackPanel VerticalAlignment="Center" Margin="8,18,8,6">
                     <Grid Width="40" Height="40" HorizontalAlignment="Center">
                         <Border x:Name="FundoInicial" CornerRadius="20" Background="{DynamicResource AcentoFundo}">
@@ -295,6 +299,20 @@
                         </Border>
                         <Image x:Name="Imagem" Source="{Binding Imagem}" Width="32" Height="32" Visibility="Collapsed"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
+                        <!-- Pasta de alternativas: até 4 miniaturas num quadrado, como no menu Iniciar do Windows 11 -->
+                        <Border x:Name="FundoPasta" CornerRadius="8" Background="{DynamicResource SuperficieLateral}" Padding="3"
+                                Visibility="Collapsed">
+                            <ItemsControl ItemsSource="{Binding Miniaturas}" Focusable="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><UniformGrid Rows="2" Columns="2"/></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Image Source="{Binding}" Width="15" Height="15" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Border>
                     </Grid>
                     <TextBlock Text="{Binding Nome}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                MaxHeight="34" Margin="0,8,0,4"/>
@@ -314,6 +332,14 @@
             <DataTrigger Binding="{Binding TemImagem}" Value="True">
                 <Setter TargetName="Imagem" Property="Visibility" Value="Visible"/>
                 <Setter TargetName="FundoInicial" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Estrela}" Value="True">
+                <Setter TargetName="Estrela" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tipo}" Value="Pasta">
+                <Setter TargetName="FundoPasta" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="FundoInicial" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding TemCaixa}" Value="True">
                 <Setter TargetName="Caixa" Property="Visibility" Value="Visible"/>

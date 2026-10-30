@@ -160,6 +160,12 @@
                                     </DockPanel>
                                     <ProgressBar x:Name="Barra" Grid.Column="2" Style="{DynamicResource BarraValor}" Value="{Binding Valor}"
                                                  Margin="0,0,14,0" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                    <!-- Classificação do ajuste (Recomendado, Opcional, Atenção, Arriscado): no lugar da barra, que ajuste não tem -->
+                                    <Border x:Name="Classe" Grid.Column="2" CornerRadius="4" Padding="7,1" Margin="0,0,14,0" HorizontalAlignment="Left"
+                                            VerticalAlignment="Center" Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed"
+                                            ToolTip="{Binding DicaClasse}">
+                                        <TextBlock x:Name="TextoClasse" Text="{Binding RotuloClasse}" FontSize="11" Foreground="{DynamicResource TextoSecundario}"/>
+                                    </Border>
                                     <TextBlock x:Name="Detalhe" Grid.Column="3" Text="{Binding Detalhe}" Foreground="{DynamicResource TextoSecundario}"
                                                TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
                                     <Border x:Name="Selo" Grid.Column="4" CornerRadius="4" Padding="7,1" Margin="10,0,0,0"
@@ -206,6 +212,21 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Estado}" Value="Desconhecido">
                                     <Setter TargetName="Detalhe" Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding TemClasse}" Value="True">
+                                    <Setter TargetName="Classe" Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Classe}" Value="Recomendado">
+                                    <Setter TargetName="Classe" Property="Background" Value="{DynamicResource SucessoFundo}"/>
+                                    <Setter TargetName="TextoClasse" Property="Foreground" Value="{DynamicResource Sucesso}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Classe}" Value="Atencao">
+                                    <Setter TargetName="Classe" Property="Background" Value="{DynamicResource AvisoFundo}"/>
+                                    <Setter TargetName="TextoClasse" Property="Foreground" Value="{DynamicResource Aviso}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Classe}" Value="Arriscado">
+                                    <Setter TargetName="Classe" Property="Background" Value="{DynamicResource PerigoFundo}"/>
+                                    <Setter TargetName="TextoClasse" Property="Foreground" Value="{DynamicResource Perigo}"/>
                                 </DataTrigger>
                             </DataTemplate.Triggers>
                         </DataTemplate>

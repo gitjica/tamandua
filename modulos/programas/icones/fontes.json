@@ -23,18 +23,6 @@
                   "url":  "https://brave.com/static-assets/images/cropped-brave_appicon_release-192x192.png",
                   "tamanhoOriginal":  "192x192"
               },
-    "chromium":  {
-                     "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@ea8c584d7d199602a04ce8b9258774e9be247d31/icons/chromium.png",
-                     "tamanhoOriginal":  "520x520"
-                 },
-    "firefoxesr":  {
-                       "url":  "https://www.firefox.com/media/img/favicons/firefox/browser/favicon-196x196.59e3822720be.png",
-                       "tamanhoOriginal":  "196x196"
-                   },
-    "floorp":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/corbob/ChocoPackages@master/icons/floorp.png",
-                   "tamanhoOriginal":  "200x200"
-               },
     "chrome":  {
                    "url":  "https://www.google.com/chrome/static/images/favicons/android-icon-192x192.png",
                    "tamanhoOriginal":  "192x192"
@@ -47,10 +35,6 @@
                       "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Flibrewolf.net%2F\u0026sz=128",
                       "tamanhoOriginal":  "128x128"
                   },
-    "edge":  {
-                 "url":  "https://cdn.jsdelivr.net/gh/DennisGaida/chocolatey-packages@eabf98dc8331b255d3c01365145918a8335f927b/microsoft-edge/icon.png",
-                 "tamanhoOriginal":  "256x256"
-             },
     "mullvadbrowser":  {
                            "url":  "https://mullvad.net/apple-touch-icon.png",
                            "tamanhoOriginal":  "180x180"
@@ -59,18 +43,6 @@
                 "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@edba4a5849ff756e767cba86641bea97ff5721fe/icons/tor-browser.png",
                 "tamanhoOriginal":  "128x128"
             },
-    "ungoogled":  {
-                      "url":  "https://glcdn.githack.com/dimqua/choco/raw/stable/icons/ungoogled-chromium.png",
-                      "tamanhoOriginal":  "128x128"
-                  },
-    "vivaldi":  {
-                    "url":  "https://cdn.jsdelivr.net/gh/pauby/ChocoPackages@55d09a2/icons/vivaldi.png",
-                    "tamanhoOriginal":  "256x256"
-                },
-    "waterfox":  {
-                     "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@2171e76d9468526e4e792d20ac6b68e1a8fdc93a/icons/waterfox.png",
-                     "tamanhoOriginal":  "300x300"
-                 },
     "zenbrowser":  {
                        "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fzen-browser.app%2F\u0026sz=128",
                        "tamanhoOriginal":  "128x128"
@@ -95,10 +67,6 @@
                    "url":  "https://cdn.statically.io/gh/TheCakeIsNaOH/chocolatey-packages/775ac37179c4c8bc14ed55d62af30795eba9d3e2/Icons/element-desktop.png",
                    "tamanhoOriginal":  "256x256"
                },
-    "teams":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/flcdrg/au-packages@master/microsoft-teams/icons/teams-logo.png",
-                  "tamanhoOriginal":  "506x430"
-              },
     "protonmail":  {
                        "url":  "https://rawcdn.githack.com/TomGenco/chocolatey-packages/master/icons/protonmail.png",
                        "tamanhoOriginal":  "256x256"
@@ -107,18 +75,6 @@
                    "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@611b500941a16ba0195a925ea04d6d8c695b6fa3/icons/signal.png",
                    "tamanhoOriginal":  "128x128"
                },
-    "slack":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@63378edac68e986a45f67eb8ac2eb845fc502321/icons/slack.png",
-                  "tamanhoOriginal":  "500x500"
-              },
-    "teamspeak3":  {
-                       "url":  "https://raw.githubusercontent.com/SebastianK90/chocolateyautomaticpackages/master/icons/teamspeak.png",
-                       "tamanhoOriginal":  "256x256"
-                   },
-    "teamspeak6":  {
-                       "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fwww.teamspeak.com%2F\u0026sz=128",
-                       "tamanhoOriginal":  "128x128"
-                   },
     "telegram":  {
                      "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@1dac7d7eb1994481b19cc4db6ac02edd2d9de7c8/icons/telegram.png",
                      "tamanhoOriginal":  "256x256"
@@ -131,10 +87,6 @@
                     "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fvesktop.dev\u0026sz=128",
                     "tamanhoOriginal":  "128x128"
                 },
-    "viber":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@3a055dbd4509673290e55aa9de2c53c9a4b6b7ed/icons/viber.png",
-                  "tamanhoOriginal":  "512x512"
-              },
     "aimp":  {
                  "url":  "http://3.bp.blogspot.com/-t8xzAOs7YbQ/U4ppFniZjGI/AAAAAAAAD2A/UkAMbEeWCGE/w200/AIM3anthzoblog.png",
                  "tamanhoOriginal":  "200x199"
@@ -175,14 +127,6 @@
                       "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@8483cf19933cc937b78a8a4523c4b37da5b5b643/icons/irfanview.png",
                       "tamanhoOriginal":  "256x256"
                   },
-    "itunes":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@849eb1042625bdc77a95f0b92491857e9dfc326d/icons/itunes.png",
-                   "tamanhoOriginal":  "256x256"
-               },
-    "klite":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/zersh01/chocolatey-k-litecodecpack-standart@master/KLite.png",
-                  "tamanhoOriginal":  "128x128"
-              },
     "mpchc":  {
                   "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@18bc5fef22a657d3632d88b1366126201b3b39bc/icons/mpc-hc.png",
                   "tamanhoOriginal":  "256x256"
@@ -215,14 +159,6 @@
                     "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@4ad26e5a5ab2b5280e4d57e5b14fcc9d4c6a22c5/icons/spotify.png",
                     "tamanhoOriginal":  "256x256"
                 },
-    "adobe":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/pauby/ChocoPackages@fb3fc3a/icons/adobereader.png",
-                  "tamanhoOriginal":  "535x535"
-              },
-    "foxpdfreader":  {
-                         "url":  "https://cdn.jsdelivr.net/gh/brogers5/chocolatey-package-foxitreader@2debc1705b7ac1cc4ad610ad1f682293a5f81a65/FoxitReader.png",
-                         "tamanhoOriginal":  "256x256"
-                     },
     "joplin":  {
                    "url":  "https://raw.githubusercontent.com/afischer211/my-chocolatey/master/icons/joplin.png",
                    "tamanhoOriginal":  "256x256"
@@ -251,18 +187,6 @@
                          "url":  "https://cdn.jsdelivr.net/gh/teknowledgist/Chocolatey-packages@cc4b1558ccc7853df6d0cb4f1f79cb63caede42b/Icons/pdf24_icon.png",
                          "tamanhoOriginal":  "128x128"
                      },
-    "pdfgear":  {
-                    "url":  "https://rawcdn.githack.com/HeckmanK/chocolatey-packages/4a47c19936509302be1fe121bc89dea7210967b7/icons/pdfgear.png",
-                    "tamanhoOriginal":  "128x128"
-                },
-    "pdfsam":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/teknowledgist/Chocolatey-packages@867d7a88b8b782f68a8c3ccd65bc82bfacb0e39a/Icons/pdfsam_icon.png",
-                   "tamanhoOriginal":  "512x512"
-               },
-    "pdf-xchange":  {
-                        "url":  "https://cdn.jsdelivr.net/gh/flcdrg/au-packages@master/PDFXchangeEditor/icons/pdfxchangeeditor.png",
-                        "tamanhoOriginal":  "250x250"
-                    },
     "qownnotes":  {
                       "url":  "https://www.qownnotes.org/favicon.png",
                       "tamanhoOriginal":  "128x128"
@@ -283,10 +207,6 @@
                    "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@53607633ce049d5d75ac668f4408faaeced36bc3/icons/zotero.png",
                    "tamanhoOriginal":  "128x128"
                },
-    "1password":  {
-                      "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@c1a3d39ea26e859ef0f4c1f1f9eacd95b340c332/icons/1password8.png",
-                      "tamanhoOriginal":  "128x128"
-                  },
     "7zip":  {
                  "url":  "https://commons.wikimedia.org/wiki/Special:FilePath/7-Zip_Icon.svg?width=128",
                  "tamanhoOriginal":  "250x194"
@@ -295,10 +215,6 @@
                               "url":  "https://cdn.statically.io/gh/Aurocosh/chocolatey-packages/master/automatic/ab-download-manager/img/icon.png",
                               "tamanhoOriginal":  "100x100"
                           },
-    "anydesk":  {
-                    "url":  "https://cdn.statically.io/gh/Aurocosh/chocolatey-packages/master/automatic/anydesk/img/icon.png",
-                    "tamanhoOriginal":  "256x256"
-                },
     "autohotkey":  {
                        "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@edba4a5849ff756e767cba86641bea97ff5721fe/icons/autohotkey.png",
                        "tamanhoOriginal":  "48x48"
@@ -355,14 +271,6 @@
                         "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fwww.google.com%2Fdrive%2F\u0026sz=128",
                         "tamanhoOriginal":  "64x64"
                     },
-    "xeheditor":  {
-                      "url":  "https://raw.githack.com/koitsu/chocolatey-packages/master/hxd/HxD.png",
-                      "tamanhoOriginal":  "100x100"
-                  },
-    "internetdownloadmanager":  {
-                                    "url":  "https://cdn.jsdelivr.net/gh/chtof/chocolatey-packages/automatic/internet-download-manager/internet-download-manager.png",
-                                    "tamanhoOriginal":  "256x256"
-                                },
     "jpegview":  {
                      "url":  "https://cdn.jsdelivr.net/gh/teknowledgist/Chocolatey-packages@32062a628d31c49f30b0e812b649d5470489639f/Icons/jpegview_icon.png",
                      "tamanhoOriginal":  "64x64"
@@ -383,22 +291,10 @@
                     "url":  "https://raw.githubusercontent.com/M2Team/NanaZip/main/Assets/NanaZip.png",
                     "tamanhoOriginal":  "64x64"
                 },
-    "nilesoftshell":  {
-                          "url":  "https://cdn.jsdelivr.net/gh/moudey/Shell@main/packages/assets/logo-256.png",
-                          "tamanhoOriginal":  "256x256"
-                      },
     "nvclean":  {
                     "url":  "https://tpucdn.com/apple-touch-icon-v1793263030.png",
                     "tamanhoOriginal":  "57x57"
                 },
-    "ofgb":  {
-                 "url":  "https://rawcdn.githack.com/jtcmedia/chocolatey-packages/f435f1eb0e778152fde33af1f5cc7dc3d487e841/icons/ofgb.png",
-                 "tamanhoOriginal":  "256x256"
-             },
-    "opautoclicker":  {
-                          "url":  "https://cdn.jsdelivr.net/gh/chtof/chocolatey-packages/automatic/autoclicker/autoclicker.png",
-                          "tamanhoOriginal":  "64x64"
-                      },
     "openrgb":  {
                     "url":  "https://cdn.jsdelivr.net/gh/brogers5/chocolatey-package-openrgb@dd76d83044a6045e1882e53a7360fb8791811de5/openrgb.png",
                     "tamanhoOriginal":  "128x128"
@@ -435,30 +331,14 @@
                  "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fwww.revouninstaller.com%2F\u0026sz=128",
                  "tamanhoOriginal":  "24x24"
              },
-    "signalrgb":  {
-                      "url":  "https://github.com/SignalRGB.png?size=128",
-                      "tamanhoOriginal":  "128x128"
-                  },
     "sdio":  {
                  "url":  "https://cdn.jsdelivr.net/gh/tunisiano187/Chocolatey-packages@40c3a3d4bd00e678297a08100b604627ecdaffcf/icons/sdio.png",
                  "tamanhoOriginal":  "512x512"
              },
-    "startallback":  {
-                         "url":  "https://cdn.statically.io/gh/asheroto/ChocolateyPackages/e0533b0b2c331db0db33c0bfb9280ffa345f7bf8/StartAllBack/icon.png",
-                         "tamanhoOriginal":  "256x256"
-                     },
-    "teamviewer":  {
-                       "url":  "https://cdn.jsdelivr.net/gh/pauby/ChocoPackages@46f969b5/icons/teamviewer.png",
-                       "tamanhoOriginal":  "256x256"
-                   },
     "tightvnc":  {
                      "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@edba4a5849ff756e767cba86641bea97ff5721fe/icons/tightvnc.png",
                      "tamanhoOriginal":  "90x90"
                  },
-    "totalcommander":  {
-                           "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@a37f40763d259eab20d0462b72cba86a108441d9/icons/totalcommander.png",
-                           "tamanhoOriginal":  "256x256"
-                       },
     "ttaskbar":  {
                      "url":  "https://cdn.jsdelivr.net/gh/pauby/ChocoPackages@4348898/icons/translucenttb.png",
                      "tamanhoOriginal":  "128x128"
@@ -475,22 +355,10 @@
                         "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@c9f08adeb0cc2dcda323211894358e69d3af323c/icons/virtualbox.png",
                         "tamanhoOriginal":  "128x128"
                     },
-    "winrar":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@646ffab0085403b1476d1d7e4ad50a1a82203e67/icons/winrar.png",
-                   "tamanhoOriginal":  "256x256"
-               },
-    "wiseprogramuninstaller":  {
-                                   "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fwww.wisecleaner.com%2Fwise-program-uninstaller.html\u0026sz=128",
-                                   "tamanhoOriginal":  "48x48"
-                               },
     "wiztree":  {
                     "url":  "https://cdn.jsdelivr.net/gh/teknowledgist/Chocolatey-packages@2b0f9ae47d47b9b699977be5d6a6c98f0f910180/Icons/wiztree_icon.png",
                     "tamanhoOriginal":  "64x64"
                 },
-    "battlenet":  {
-                      "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fbattle.net\u0026sz=128",
-                      "tamanhoOriginal":  "48x48"
-                  },
     "cemu":  {
                  "url":  "https://rawcdn.githack.com/SebastianK90/chocolateyautomaticpackages/31d0b9851a02b653471474a4aef34e0b9a90e4c1/icons/cemu.png",
                  "tamanhoOriginal":  "256x256"
@@ -499,22 +367,10 @@
                      "url":  "https://www.google.com/s2/favicons?domain=curseforge.com\u0026sz=128",
                      "tamanhoOriginal":  "32x32"
                  },
-    "eaapp":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/Zoullx/chocolatey-packages/ea-app/ea-app.png",
-                  "tamanhoOriginal":  "256x256"
-              },
-    "es-de":  {
-                  "url":  "https://impro.usercontent.one/appid/oneComWsb/domain/es-de.org/media/es-de.org/onewebmedia/ES-DE_logo_small.png?etag=%22ba8-60428863%22\u0026sourceContentType=image%2Fpng\u0026resize=57,57\u0026ignoreAspectRatio",
-                  "tamanhoOriginal":  "57x57"
-              },
     "epic":  {
                  "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fwww.epicgames.com%2Fstore%2Fen-US%2F\u0026sz=128",
                  "tamanhoOriginal":  "48x48"
              },
-    "geforcenow":  {
-                       "url":  "https://cdn.jsdelivr.net/gh/kwilliams1987/chocolatey-packages/manual/nvidia-geforce-now/resources/icon.png",
-                       "tamanhoOriginal":  "1024x1024"
-                   },
     "gog":  {
                 "url":  "https://cdn.rawgit.com/AnthonyMastrean/chocolateypackages/a561f0de0d19224bf85d694f74f6ce52f8bf9c08/public/icons/goggalaxy.png",
                 "tamanhoOriginal":  "300x281"
@@ -539,22 +395,10 @@
                           "url":  "https://cdn.jsdelivr.net/gh/PrismLauncher/PrismLauncher@develop/program_info/org.prismlauncher.PrismLauncher_256.png",
                           "tamanhoOriginal":  "256x256"
                       },
-    "roblox":  {
-                   "url":  "https://images.rbxcdn.com/905bd722ee0a6ceda3caacde54c0b081.png",
-                   "tamanhoOriginal":  "180x180"
-               },
     "steam":  {
                   "url":  "https://cdn.jsdelivr.net/gh/mikeee/ChocoPackages/icons/steam.png",
                   "tamanhoOriginal":  "512x512"
               },
-    "ubisoft":  {
-                    "url":  "https://cdn.jsdelivr.net/gh/AdmiringWorm/chocolatey-packages@c83e5c78e07916aca67a4eabb48fc5b81f17cef7/automatic/ubisoft-connect/icons/128x128.png",
-                    "tamanhoOriginal":  "128x128"
-                },
-    "vrdesktopstreamer":  {
-                              "url":  "https://static.wixstatic.com/media/e0881d_667d7d32eadb45a282f375385db9a448%7Emv2.png/v1/fill/w_192%2Ch_192%2Clg_1%2Cusm_0.66_1.00_0.01/e0881d_667d7d32eadb45a282f375385db9a448%7Emv2.png",
-                              "tamanhoOriginal":  "192x192"
-                          },
     "chatgpt":  {
                     "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fopenai.com%2Fchatgpt%2Fdownload%2F\u0026sz=128",
                     "tamanhoOriginal":  "128x128"
@@ -562,10 +406,6 @@
     "claude":  {
                    "url":  "https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Claude/logo.png",
                    "tamanhoOriginal":  "400x400"
-               },
-    "cursor":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/targed/chocolatey-projects@main/Cursor/logo.png",
-                   "tamanhoOriginal":  "1024x1024"
                },
     "git":  {
                 "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fgit-scm.com%2F\u0026sz=128",
@@ -575,30 +415,14 @@
                           "url":  "https://cdn.statically.io/gh/TheCakeIsNaOH/chocolatey-packages/775ac37179c4c8bc14ed55d62af30795eba9d3e2/Icons/github-desktop.png",
                           "tamanhoOriginal":  "256x256"
                       },
-    "nodejs":  {
-                   "url":  "https://rawcdn.githack.com/jtcmedia/chocolatey-packages/76f0c59ddbe130f082a19bd6908398e5dc22ba83/icons/nodejs-lts.png",
-                   "tamanhoOriginal":  "128x128"
-               },
     "notepadpp":  {
                       "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@8a927ff286164545446171f26f19b436622e69b5/icons/notepadplusplus.png",
                       "tamanhoOriginal":  "128x128"
                   },
-    "python":  {
-                   "url":  "https://www.python.org/static/apple-touch-icon-precomposed.png",
-                   "tamanhoOriginal":  "57x57"
-               },
-    "sublimetext":  {
-                        "url":  "https://cdn.jsdelivr.net/gh/jack1142/choco-auto@ac2ee3f251f28874c5967cc153686e7ef25c5bb6/automatic/sublimetext4/icons/sublimetext4.png",
-                        "tamanhoOriginal":  "128x128"
-                    },
     "vscode":  {
                    "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@00a000c7e5d8cc0d8416468e164eef281f843bff/icons/vscode.png",
                    "tamanhoOriginal":  "256x256"
                },
-    "visualstudio2026":  {
-                             "url":  "https://rawcdn.githack.com/jberezanski/ChocolateyPackages/0e962f3d7328af29a6382130db5f0b5239970a4d/icons/vs2026.png",
-                             "tamanhoOriginal":  "256x256"
-                         },
     "vscodium":  {
                      "url":  "https://cdn.jsdelivr.net/gh/Thilas/chocolatey-packages@c6bc7188363aecd38726935a305d586a594b0525/vscodium/icon.png",
                      "tamanhoOriginal":  "1024x1024"
@@ -623,26 +447,6 @@
                     "url":  "https://rawcdn.githack.com/dotnetcore-chocolatey/dotnetcore-chocolateypackages/5a90ffc61572e8403cb88c325f88cf6989de8c79/icons/dotnetcore.png",
                     "tamanhoOriginal":  "174x174"
                 },
-    "autoruns":  {
-                     "url":  "https://cdn.jsdelivr.net/gh/tunisiano187/Chocolatey-packages@90497a9b07e46fd5816b6f9b5ac307a7a625b19a/icons/autoruns.jpg",
-                     "tamanhoOriginal":  "512x512"
-                 },
-    "dismtools":  {
-                      "url":  "https://cdn.jsdelivr.net/gh/muddy1/chocolatey-packages@master/icons/dismtools.png",
-                      "tamanhoOriginal":  "225x225"
-                  },
-    "ntlite":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/tunisiano187/Chocolatey-packages@13930f88753e040df726d2aa2e2274ae1ee6c8e8/icons/ntlite-free.png",
-                   "tamanhoOriginal":  "288x72"
-               },
-    "nuget":  {
-                  "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@27f780622b37514680f86c7f5e5f7f9bb0a32fe9/icons/nuget.commandline.png",
-                  "tamanhoOriginal":  "128x128"
-              },
-    "onedrive":  {
-                     "url":  "https://cdn.jsdelivr.net/gh/teknowledgist/Chocolatey-packages@3ecd8fd600c16dfcb9bb0a8e43819c2b52ca9ce1/Icons/onedrive_icon.png",
-                     "tamanhoOriginal":  "128x128"
-                 },
     "powershell":  {
                        "url":  "https://glcdn.githack.com/guided-explorations/microsoft/chocolatey/powershell-core/-/raw/master/powershell-core/appicon.png",
                        "tamanhoOriginal":  "248x256"
@@ -651,26 +455,6 @@
                       "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@783a3b629ad9948830e24567739a7a884537d9a4/icons/powertoys.png",
                       "tamanhoOriginal":  "256x256"
                   },
-    "processexplorer":  {
-                            "url":  "https://cdn.jsdelivr.net/gh/Thilas/chocolatey-packages@de52ec688c3894483381c83c0c964fbb3b5eb960/procexp/icon.png",
-                            "tamanhoOriginal":  "128x128"
-                        },
-    "processmonitor":  {
-                           "url":  "https://cdn.jsdelivr.net/gh/Thilas/chocolatey-packages@de52ec688c3894483381c83c0c964fbb3b5eb960/procmon/icon.png",
-                           "tamanhoOriginal":  "256x256"
-                       },
-    "pstools":  {
-                    "url":  "https://cdn.jsdelivr.net/gh/dgalbraith/chocolatey-packages@f1075d8ebcef438242228bccd7320aff28f82ed0/icons/sysinternals.png",
-                    "tamanhoOriginal":  "256x256"
-                },
-    "rdcman":  {
-                   "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@cfd84d3d546b3479bb2c5ece367867ba6e495c30/icons/rdcman.png",
-                   "tamanhoOriginal":  "48x48"
-               },
-    "tcpview":  {
-                    "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fdocs.microsoft.com%2Fen-us%2Fsysinternals%2Fdownloads%2Ftcpview\u0026sz=128",
-                    "tamanhoOriginal":  "128x128"
-                },
     "vc2015-32":  {
                       "url":  "https://cdn.rawgit.com/chocolatey/chocolatey-coreteampackages/20ae24c36d6a3fa6c8db2a7bce038e9244dbcd59/icons/vcredist2015.png",
                       "tamanhoOriginal":  "256x256"
@@ -683,18 +467,6 @@
                      "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@c22c9a3e3dd59ab1181cb729c7853f205478c3ea/icons/microsoft-windows-terminal.png",
                      "tamanhoOriginal":  "256x256"
                  },
-    "advancedip":  {
-                       "url":  "https://rawcdn.githack.com/virtualex-itv/chocolatey-packages/3f46049c7e9122fdc526ae1e2c0813eb1c83768c/icons/advanced-ip-scanner.png",
-                       "tamanhoOriginal":  "62x62"
-                   },
-    "angryipscanner":  {
-                           "url":  "https://cdn.statically.io/gh/TheCakeIsNaOH/chocolatey-packages/d9eb53b2137d945c09616b13e1b0ee074f25303f/Icons/angryip.png",
-                           "tamanhoOriginal":  "128x128"
-                       },
-    "cinebenchr23":  {
-                         "url":  "https://www.maxon.net/app-icons/favicon-196x196.png",
-                         "tamanhoOriginal":  "196x196"
-                     },
     "cpuz":  {
                  "url":  "https://cdn.jsdelivr.net/gh/mkevenaar/chocolatey-packages@a2d2b28de250105f84f6a2d0123c435ba7667f57/icons/cpu-z.png",
                  "tamanhoOriginal":  "128x128"
@@ -707,10 +479,6 @@
                  "url":  "https://cdn.statically.io/gh/TheCakeIsNaOH/chocolatey-packages/76473405f9bd2f91c67e23610608f11d87a50fc8/Icons/gpu-z.png",
                  "tamanhoOriginal":  "128x128"
              },
-    "gsudo":  {
-                  "url":  "https://raw.githubusercontent.com/gerardog/gsudo/master/docs/static/img/gsudo.png",
-                  "tamanhoOriginal":  "255x140"
-              },
     "hwmonitor":  {
                       "url":  "https://cdn.jsdelivr.net/gh/brogers5/chocolatey-package-hwmonitor@3c97c2c283fd8b4d53191d05b24320cf1d14eaf7/hwmonitor.png",
                       "tamanhoOriginal":  "256x256"
@@ -723,18 +491,10 @@
                            "url":  "https://cdn.jsdelivr.net/gh/mikeee/ChocoPackages/icons/msiafterburner.png",
                            "tamanhoOriginal":  "300x300"
                        },
-    "mullvadvpn":  {
-                       "url":  "https://cdn.jsdelivr.net/gh/Smart123s/chocolatey-packages@daff248d0f29c6d27f50f41b6256bb0a4c5f99f1/icons/mullvad-app.png",
-                       "tamanhoOriginal":  "512x512"
-                   },
     "nmap":  {
                  "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@a0850d2be498cbb87f9f0fd7c84bc1eafd4e58ba/icons/nmap.png",
                  "tamanhoOriginal":  "256x256"
              },
-    "openvpn":  {
-                    "url":  "https://cdn.statically.io/gh/jan-win1993/au-packages/405fc0e5/icons/OpenVPNConnect.png",
-                    "tamanhoOriginal":  "256x256"
-                },
     "protonvpn":  {
                       "url":  "https://protonvpn.com/favicons/apple-touch-icon.png",
                       "tamanhoOriginal":  "180x180"
@@ -759,10 +519,6 @@
                       "url":  "https://cdn.jsdelivr.net/gh/tailscale/tailscale-chocolatey@main/icon/Tailscale.png",
                       "tamanhoOriginal":  "512x512"
                   },
-    "ventoy":  {
-                   "url":  "https://cdn.statically.io/gh/asheroto/ChocolateyPackages/d8da4fbc2df61bf7e9bc2dd63b39571b93f3fe4d/ventoy/icon.png",
-                   "tamanhoOriginal":  "256x256"
-               },
     "winscp":  {
                    "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@6528e6936f5dc088aa67e03532d06101cdf4ed70/icons/winscp.png",
                    "tamanhoOriginal":  "128x128"
@@ -819,10 +575,6 @@
                       "url":  "https://cdn.jsdelivr.net/gh/pauby/ChocoPackages@9ffd3adf/icons/syncthing.png",
                       "tamanhoOriginal":  "128x128"
                   },
-    "synctrayzor":  {
-                        "url":  "https://rawcdn.githack.com/GermanCoding/SyncTrayzor/v2.0.0/SyncTrayzor.png",
-                        "tamanhoOriginal":  "128x128"
-                    },
     "qtox":  {
                  "url":  "https://github.com/qTox.png?size=128",
                  "tamanhoOriginal":  "128x128"
@@ -831,8 +583,156 @@
                  "url":  "https://commons.wikimedia.org/wiki/Special:FilePath/The_GIMP_icon_-_gnome.svg?width=128",
                  "tamanhoOriginal":  "250x250"
              },
-    "blurautoclicker":  {
-                            "url":  "https://github.com/Blur009.png?size=128",
-                            "tamanhoOriginal":  "128x128"
-                        }
+    "mailspring":  {
+                       "url":  "https://mailspring-builds.s3.amazonaws.com/assets/mailspring-chocolatey.png",
+                       "tamanhoOriginal":  "512x512"
+                   },
+    "freetube":  {
+                     "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Ffreetubeapp.io%2F\u0026sz=128",
+                     "tamanhoOriginal":  "128x128"
+                 },
+    "kdenlive":  {
+                     "url":  "https://commons.wikimedia.org/wiki/Special:FilePath/Kdenlive_logo.svg?width=128",
+                     "tamanhoOriginal":  "250x250"
+                 },
+    "krita":  {
+                  "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fkrita.org%2F\u0026sz=128",
+                  "tamanhoOriginal":  "114x117"
+              },
+    "losslesscut":  {
+                        "url":  "https://cdn.jsdelivr.net/gh/chtof/chocolatey-packages/automatic/lossless-cut/lossless-cut.png",
+                        "tamanhoOriginal":  "256x256"
+                    },
+    "mp3tag":  {
+                   "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@479c139f9c3358eac716a36ce8a60e7f1f95d806/icons/mp3tag.png",
+                   "tamanhoOriginal":  "202x202"
+               },
+    "musescore":  {
+                      "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fmusescore.org%2F\u0026sz=128",
+                      "tamanhoOriginal":  "32x32"
+                  },
+    "pinta":  {
+                  "url":  "https://cdn.jsdelivr.net/gh/teknowledgist/Chocolatey-packages@edc90dcbfe33d690a5236d55426978e37fd4f6c4/Icons/pinta_icon.png",
+                  "tamanhoOriginal":  "48x48"
+              },
+    "shotcut":  {
+                    "url":  "https://cdn.jsdelivr.net/gh/Summerspecial/ChocoCont@5fdddf143e28339f45a5289d96751b0d5611a5c6/Shotcut/shotcut_Logo.png",
+                    "tamanhoOriginal":  "64x64"
+                },
+    "shutterencoder":  {
+                           "url":  "https://www.shutterencoder.com/wp-content/uploads/2024/04/cropped-logo-192x192.png",
+                           "tamanhoOriginal":  "192x192"
+                       },
+    "upscayl":  {
+                    "url":  "https://cdn.jsdelivr.net/gh/upscayl/upscayl@a908abe10af11740d9e5d5b1ea0e452aa6720b0b/build/icon.png",
+                    "tamanhoOriginal":  "512x512"
+                },
+    "voicemeeter":  {
+                        "url":  "https://cdn.jsdelivr.net/gh/chtof/chocolatey-packages/automatic/voicemeeter/voicemeeter.png",
+                        "tamanhoOriginal":  "48x48"
+                    },
+    "drawio":  {
+                   "url":  "https://cdn.jsdelivr.net/gh/darwinjs/chocopackages/drawio/appicon.png",
+                   "tamanhoOriginal":  "128x128"
+               },
+    "koodoreader":  {
+                        "url":  "https://cdn.jsdelivr.net/gh/dgalbraith/chocolatey-packages@d1474eaa642bfb53bc936d7c15ddfdff8b6e6ed2/icons/koodo-reader.png",
+                        "tamanhoOriginal":  "225x256"
+                    },
+    "logseq":  {
+                   "url":  "http://rawcdn.githack.com/w0/au-packages/master/logseq/icon.png",
+                   "tamanhoOriginal":  "512x512"
+               },
+    "notesnook":  {
+                      "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fnotesnook.com%2F\u0026sz=128",
+                      "tamanhoOriginal":  "32x32"
+                  },
+    "advancedrenamer":  {
+                            "url":  "https://cdn.jsdelivr.net/gh/tunisiano187/Chocolatey-packages@13930f88753e040df726d2aa2e2274ae1ee6c8e8/icons/advanced-renamer.png",
+                            "tamanhoOriginal":  "256x256"
+                        },
+    "adwcleaner":  {
+                       "url":  "https://www.malwarebytes.com/wp-content/uploads/sites/2/2026/10/app.png?w=192",
+                       "tamanhoOriginal":  "192x192"
+                   },
+    "altsnap":  {
+                    "url":  "https://rawcdn.githack.com/RamonUnch/AltSnapChocoPackage/25fddb0a528d3768a4158cc4ca037a52bc404a07/AltSnap.png",
+                    "tamanhoOriginal":  "128x128"
+                },
+    "cryptomator":  {
+                        "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fcryptomator.org%2F\u0026sz=128",
+                        "tamanhoOriginal":  "48x48"
+                    },
+    "deepl":  {
+                  "url":  "https://www.deepl.com/apple-icon?fb6f62776db8f84a",
+                  "tamanhoOriginal":  "180x180"
+              },
+    "ditto":  {
+                  "url":  "https://ditto-cp.sourceforge.io/Ditto2.png",
+                  "tamanhoOriginal":  "128x128"
+              },
+    "everythingtoolbar":  {
+                              "url":  "https://cdn.statically.io/gh/Aurocosh/chocolatey-packages/master/automatic/everythingtoolbar/img/icon.png",
+                              "tamanhoOriginal":  "256x256"
+                          },
+    "flameshot":  {
+                      "url":  "https://flameshot.org/apple-touch-icon.png",
+                      "tamanhoOriginal":  "179x179"
+                  },
+    "kopia":  {
+                  "url":  "https://kopia.io/favicons/apple-touch-icon.png",
+                  "tamanhoOriginal":  "180x180"
+              },
+    "lively":  {
+                   "url":  "https://cdn.jsdelivr.net/gh/w0/au-packages/lively/icon.png",
+                   "tamanhoOriginal":  "96x96"
+               },
+    "malwarebytes":  {
+                         "url":  "https://rawcdn.githack.com/pauby/ChocoPackages/920ab4c8e70ab46814966644a86f403f171d7a09/icons/malwarebytes.png",
+                         "tamanhoOriginal":  "256x228"
+                     },
+    "monitorian":  {
+                       "url":  "https://rawcdn.githack.com/emoacht/Monitorian/0cb4509d3255449ba665e5ed9c97a4d106e9e5d5/Source/Monitorian/Resources/Icons/AppIcon.ico",
+                       "tamanhoOriginal":  "48x48"
+                   },
+    "rainmeter":  {
+                      "url":  "https://cdn.statically.io/gh/Aurocosh/chocolatey-packages/master/automatic/rainmeter/img/icon.png",
+                      "tamanhoOriginal":  "256x256"
+                  },
+    "superf4":  {
+                    "url":  "https://rawcdn.githack.com/stefansundin/superf4/6b677d422553e6b908b9eeaff4333b8b457e7bef/media/bowser.png",
+                    "tamanhoOriginal":  "32x32"
+                },
+    "testdisk":  {
+                     "url":  "https://www.google.com/s2/favicons?domain_url=https%3A%2F%2Fwww.cgsecurity.org%2F\u0026sz=128",
+                     "tamanhoOriginal":  "32x32"
+                 },
+    "textgrab":  {
+                     "url":  "https://cdn.jsdelivr.net/gh/theJoeFin/Text-Grab@c8c1ca7fb15ba4e7e30999446e8720630e67c2b5/Text-Grab/Images/Text-Grab-Icon.png",
+                     "tamanhoOriginal":  "300x300"
+                 },
+    "veracrypt":  {
+                      "url":  "https://cdn.rawgit.com/kendaleiv/chocolatey-veracrypt/main/VeraCrypt128x128.png",
+                      "tamanhoOriginal":  "100x100"
+                  },
+    "windhawk":  {
+                     "url":  "https://rawcdn.githack.com/kamack38/packages/e955e4a1bd6e62aa2aa4a4d6b28c693509ac3fb7/assets/windhawk.png",
+                     "tamanhoOriginal":  "256x256"
+                 },
+    "sysinternals":  {
+                         "url":  "https://cdn.jsdelivr.net/gh/chocolatey-community/chocolatey-packages@8a042fbe6c07391d0c2da13f638b1fdde474850f/icons/sysinternals.png",
+                         "tamanhoOriginal":  "299x299"
+                     },
+    "windscribe":  {
+                       "url":  "https://cdn.jsdelivr.net/gh/joachimschmidt557/chocolatey-packages-manual-automatic@d0d7eb53637456056867aac9cdb51a755c677313/icons/Windscribe.png",
+                       "tamanhoOriginal":  "256x256"
+                   },
+    "inkscape":  {
+                     "url":  "https://commons.wikimedia.org/wiki/Special:FilePath/Inkscape_Logo.svg?width=128",
+                     "tamanhoOriginal":  "250x250"
+                 },
+    "ludusavi":  {
+                     "url":  "https://raw.githubusercontent.com/mtkennerly/ludusavi/master/assets/icon.png",
+                     "tamanhoOriginal":  "64x64"
+                 }
 }

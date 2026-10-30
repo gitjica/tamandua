@@ -261,7 +261,9 @@ Regras:
   `Icone` (caminho no formato do `DisplayIcon`: `arquivo` ou `arquivo,índice`, com aspas e variáveis de ambiente)
   ganha o ícone; sem ícone, o quadro mostra a inicial do nome. `Icone` também pode ser uma lista de candidatos
   (`Get-TmdCandidatosIcone`: DisplayIcon, o .ico do MSI em `Windows\Installer\{código}`, o .exe da pasta de instalação,
-  o atalho do menu Iniciar, o desinstalador); vale o primeiro que tiver ícone. O PNG é extraído em segundo plano por
+  o atalho do menu Iniciar, o desinstalador); vale o primeiro que tiver ícone. Ícones dos programas para instalar vêm
+  com o projeto; o `baixar-icones-programas.ps1` tira o quadrado branco que encosta na borda e põe uma placa branca
+  arredondada atrás de logo escuro e vazado (que sumiria no tema escuro); `-SoLimparFundo` refaz isso sem baixar. O PNG é extraído em segundo plano por
   `Get-TmdAlvosParaTela` (núcleo, que as duas leituras da janela usam) e vira imagem na janela em `Set-TmdImagensLinha`.
   A imagem tem que ir para a linha como objeto .NET puro (`::new()` e `.PSObject.BaseObject`): embrulhada num
   PSObject, o Binding do WPF não mostra nada e não dá erro.
@@ -395,6 +397,15 @@ Para cada mudança, na ordem:
 
 Desfazer usa o snapshot. Sem snapshot (ex.: ajuste aplicado por outra ferramenta), usa o `PadraoWindows`
 declarado no catálogo e avisa na tela que está restaurando o *padrão do Windows*, não o valor anterior.
+
+**Classificação** (ajustes, menu-contexto, atualizacoes): `classificacao` = `Recomendado` (bom para quase todo
+mundo), `Opcional` (gosto), `Atencao` (pode dar contratempo) ou `Arriscado` (segurança ou algo que o Windows usa por
+baixo; tudo de "Avançado"). Atenção e Arriscado têm `contratempo` (o que pode acontecer, em linguagem de gente) e
+`seAcontecer` (como resolver). Os textos dos ajustes ficam em `ferramentas/classificar-ajustes.ps1`, que grava no
+`ajustes.json` sem mexer no resto do arquivo; no menu de contexto saem de `Get-ClassificacaoItem`. Na tela: selo
+colorido na linha (com a explicação ao passar o mouse), "Pode dar problema" e "Se acontecer" nos detalhes, e a
+confirmação lista os arriscados que vão ser aplicados. Na CLI: `[Atenção]` na listagem e aviso antes de confirmar.
+Presets Mínimo, Essencial, Notebook e Explorador nunca têm Arriscado (teste).
 
 Na tela (ajustes e menu-contexto): item com estado `Aplicado` vem com `Desfaz = $true` e o selo
 "aplicado · marcar desfaz"; marcado, o `Invoke-Acao` chama `Undo-TmdAjuste -Ajuste` (snapshot ou padrão do Windows) em
@@ -621,11 +632,26 @@ do nome do módulo na CLI é erro.
   (guardados em `estado\restos.json`); aparecem desmarcados e vão para a Lixeira. Restos em Arquivos de Programas não são
   oferecidos (árvore protegida). Desinstalador e lista do registro passam por `Start-Desinstalador` e `Get-RegistroPrograma` (Mock nos testes).
 - **programas:** só IDs exatos do winget (`--exact --id`), com `--accept-source-agreements` apenas depois de o usuário aceitar na primeira execução.
-  Implementado: catálogo `modulos/programas/programas.json` (210 programas) gerado por `ferramentas/gerar-programas.ps1`
-  a partir do `config/applications.json` do WinUtil: tudo, menos desenvolvimento além do básico (editores, Python, Node,
-  Git); nomes, descrições e categorias em português ficam no gerador. Um teste confere contra
-  `testes/modulos/programas/winutil-apps.json` que nada do WinUtil ficou de fora. Programa só da Microsoft Store tem
-  `"fonte": "msstore"` e o ID da loja em `wingetId` (instala com `--source msstore`).
+  Implementado: catálogo `modulos/programas/programas.json` (187 programas) gerado por `ferramentas/gerar-programas.ps1`
+  a partir do WinUtil (`config/applications.json`: IDs do winget e sites) e do **FMHY** (`github.com/fmhy/edit`,
+  `docs/*.md`, lidos por `ferramentas/Fmhy.ps1`). Regras do usuário:
+  - **Só programas para baixar** (todo item é um pacote do winget/Microsoft Store; site não entra) e **só grátis** (a
+    versão gratuita tem que bastar; `$Pagos` fica fora).
+  - **Só o que está no FMHY.** No FMHY, a linha `* ⭐ **[Nome](link)**, [Outro](link) - Descrição` tem as entradas
+    antes do " - "; links depois de " / " são do mesmo programa (GitHub, Discord) e não contam; a ⭐ vale só para o
+    primeiro nome em negrito. Links `rentry…/FMHYB64` (versões crackeadas) e o `unsafe.md` são ignorados/proibidos.
+    A estrela só conta se o link for do mesmo site do programa (o "Plex" ⭐ é o site de filmes; `$SemEstrela`).
+  - **Exceção:** `$Populares` (Discord, Steam, Telegram, WhatsApp, Chrome, Epic, .NET, Visual C++) ficam na categoria
+    "Populares (fora do FMHY)", sem estrela.
+  - Programas com ⭐ no FMHY que não estão no WinUtil entram por `$DoFmhy` (escolhidos à mão: janela, usuário comum,
+    nada de pirataria, linha de comando ou mod de jogo).
+  - Desenvolvimento só com o básico. Dentro da categoria, os com estrela vêm primeiro.
+  - **Pastas de alternativas** (`$Grupos`, campo `grupo`): na grade, programas do mesmo grupo na mesma categoria viram
+    um quadro "pasta" com 4 miniaturas (como as pastas do menu Iniciar do Windows 11); clicar abre, "Voltar" ou Esc
+    fecham. É só visual (`ConvertTo-LinhasComPastas`): a marca fica no alvo, a busca e a lista mostram tudo solto.
+  - Preset "Recomendados (FMHY)": os com estrela que não estão instalados.
+  O que justificou cada programa vai para `testes/modulos/programas/fmhy-referencia.json`, que os testes conferem.
+  Programa só da Microsoft Store tem `"fonte": "msstore"` e o ID da loja em `wingetId` (instala com `--source msstore`).
   **Ícones vêm com o projeto** (`modulos/programas/icones/<id>.png`, 64x64; origem de cada um em `fontes.json`): quem vai
   instalar ainda não tem o programa no disco. `ferramentas/baixar-icones-programas.ps1` baixa (ícone do pacote no
   Chocolatey, ícone declarado pelo site, favicon do Google; `$Manuais` para os que o automático erra) e redesenha cada

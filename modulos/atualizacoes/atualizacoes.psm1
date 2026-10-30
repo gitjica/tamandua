@@ -22,6 +22,12 @@ function Test-Requisitos {
     catch { @{ Ok = $false; Motivo = "não foi possível ler atualizacoes.json: $($_.Exception.Message)" } }
 }
 
+function Get-CampoTexto {
+    param($Objeto, [string]$Nome)
+    $p = $Objeto.PSObject.Properties[$Nome]
+    if ($p -and $p.Value) { [string]$p.Value } else { '' }
+}
+
 function Get-CatalogoPoliticas {
     param([string]$Arquivo = $script:ArquivoCatalogo)
     foreach ($p in ([IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json)) { $p }
@@ -43,7 +49,8 @@ function Find-Alvos {
         [pscustomobject]@{
             Id = $p.id; Nome = $p.nome; Categoria = $p.categoria; Caminho = ''; Tamanho = [int64]0
             Estado = Get-TmdEstadoAjuste -Ajuste $p -RaizRegistro $RaizRegistro; Detalhe = $detalhe; Nivel = 'Normal'; Valor = $null
-            Risco = $p.risco; Selecionado = $false; Destino = 'NaoSeAplica'; RequerAdmin = [bool]$p.requerAdmin; Reversivel = $true
+            Risco = $p.risco; Classificacao = Get-CampoTexto $p 'classificacao'; Contratempo = Get-CampoTexto $p 'contratempo'
+            SeAcontecer = Get-CampoTexto $p 'seAcontecer'; Selecionado = $false; Destino = 'NaoSeAplica'; RequerAdmin = [bool]$p.requerAdmin; Reversivel = $true
             Presets = @($p.presets)
             Mudancas = @($p.mudancas | ForEach-Object { "$($_.caminho)\$($_.nome) = $($_.valor) (padrão do Windows: não existe)" })
         }

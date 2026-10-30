@@ -1,20 +1,132 @@
 ﻿<#
 .SYNOPSIS
-    Gera modulos\programas\programas.json a partir da lista de programas do WinUtil (config/applications.json),
-    com nome, descrição e categoria em português. Ferramenta de desenvolvimento: o programa nunca roda isto.
+    Gera modulos\programas\programas.json a partir do WinUtil (config/applications.json: IDs do winget, sites) e do
+    FMHY (github.com/fmhy/edit, docs/*.md: o que entra e o que tem estrela). Nome, descrição e categoria em português.
+    Ferramenta de desenvolvimento: o programa nunca roda isto.
 .DESCRIPTION
-    Entra tudo do WinUtil, menos a parte de desenvolvimento, que fica só com o básico (editores, Python, Node, Git):
-    o Tamanduá não é para quem programa por profissão. A lista do WinUtil vai para a pasta de testes
-    (winutil-apps.json), e um teste confere que nada dela ficou de fora sem estar em $ForaDeProposito.
+    Regras (pedido do usuário):
+      - Só fica o que está no FMHY; ⭐ no FMHY vira "estrela": true aqui.
+      - Exceção: $Populares (muito usados que o FMHY não lista, e componentes que jogos e programas precisam), numa
+        categoria à parte e sem estrela.
+      - Só programas grátis (a versão gratuita tem que bastar): $Pagos ficam de fora mesmo estando no FMHY.
+      - Programas com ⭐ do FMHY que não estão no WinUtil entram por $DoFmhy (escolhidos à mão: com pacote no winget,
+        com janela, para usuário comum; nada de pirataria, linha de comando ou mod de jogo).
+      - Desenvolvimento só com o básico.
+    O que justificou cada programa (a entrada do FMHY) vai para testes\modulos\programas\fmhy-referencia.json.
 .EXAMPLE
-    .\ferramentas\gerar-programas.ps1 -WinUtil C:\temp\applications.json
+    .\ferramentas\gerar-programas.ps1 -WinUtil C:\temp\applications.json -Fmhy C:\temp\fmhy-docs
 #>
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$WinUtil)
+param([Parameter(Mandatory)][string]$WinUtil, [Parameter(Mandatory)][string]$Fmhy)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot 'Fmhy.ps1')
+
+# Muito usados que o FMHY não lista: ficam, à parte. (Decisão do usuário em 30/10/2026.)
+$script:CategoriaPopulares = 'Populares (fora do FMHY)'
+$script:Populares = 'discord', 'steam', 'telegram', 'whatsapp', 'chrome', 'epic', 'dotnet6', 'dotnet8', 'dotnet9', 'dotnet10', 'vc2015-32', 'vc2015-64'
+
+# Pagos ou teste com prazo: fora, mesmo estando no FMHY. (Mullvad VPN: o app é grátis, mas só funciona com conta paga.)
+$script:Pagos = '1password', 'winrar', 'startallback', 'totalcommander', 'sublimetext', 'internetdownloadmanager', 'mullvadvpn'
+
+# Nome do programa no FMHY, quando é outro (id -> nomes).
+$script:NomesFmhy = @{
+    'cloudflarewarp' = @('Cloudflare One'); 'pdf24creator' = @('PDF24'); 'kodi' = @('Kodi'); 'jellyfinmediaplayer' = @('Jellyfin')
+    'jellyfinserver' = @('Jellyfin'); 'treesize' = @('TreeSize'); 'sdio' = @('SDIO'); 'nextclouddesktop' = @('NextCloud')
+    'lively' = @('Lively'); 'testdisk' = @('TestDisk'); 'koodoreader' = @('Koodo'); 'sysinternals' = @('Sysinternals')
+}
+
+# Alternativas (programas que fazem a mesma coisa): viram uma pasta na grade, como as pastas do menu Iniciar do
+# Windows 11. Só dentro da mesma categoria; pasta com um programa só não aparece.
+$script:Grupos = [ordered]@{
+    'Baseados no Firefox'      = 'firefox', 'librewolf', 'zenbrowser', 'mullvadbrowser', 'tor'
+    'Baseados no Chromium'     = 'brave', 'helium'
+    'E-mail'                   = 'thunderbird', 'betterbird', 'mailspring', 'protonmail'
+    'Mensagens'                = 'signal', 'matrix', 'qtox', 'discord', 'telegram', 'whatsapp'
+    'Discord com extras'       = 'vesktop', 'dorion'
+    'Players de vídeo'         = 'vlc', 'mpchc', 'mpc-qt', 'mpv'
+    'Players de música'        = 'aimp', 'foobar'
+    'Edição de imagem'         = 'gimp', 'krita', 'pinta', 'paintdotnet', 'inkscape'
+    'Visualizadores de imagem' = 'imageglass', 'irfanview', 'nomacs', 'jpegview'
+    'Edição de vídeo'          = 'kdenlive', 'shotcut', 'losslesscut'
+    'Conversores'              = 'handbrake', 'shutterencoder', 'fileconverter'
+    'Escritório'               = 'libreoffice', 'onlyoffice'
+    'Notas'                    = 'obsidian', 'logseq', 'notesnook', 'joplin', 'qownnotes', 'simplenote'
+    'Leitores (PDF e e-book)'  = 'sumatrapdf', 'okular', 'koodoreader'
+    'Compactadores'            = '7zip', 'nanazip', 'peazip'
+    'Senhas e 2FA'             = 'bitwarden', 'keepassxc', 'protonpass', 'enteauth', 'protonauth'
+    'Desinstaladores'          = 'bulkcrapuninstaller', 'revo'
+    'Espaço em disco'          = 'wiztree', 'treesize', 'czkawka'
+    'Saúde do disco'           = 'crystaldiskinfo', 'crystaldiskmark'
+    'Nuvem'                    = 'googledrive', 'dropbox', 'protondrive'
+    'Criptografia'             = 'veracrypt', 'cryptomator'
+    'Antimalware'              = 'malwarebytes', 'adwcleaner'
+    'Personalizar o Windows'   = 'windhawk', 'rainmeter', 'lively', 'ttaskbar'
+    'Organizar janelas'        = 'glazewm', 'altsnap'
+    'Busca de arquivos'        = 'everything', 'everythingtoolbar'
+    'Launchers de jogos'       = 'heroic', 'playnite', 'gog', 'itch', 'steam', 'epic'
+    'Minecraft'                = 'prismlauncher', 'modrinth', 'overwolf'
+    'Editores de código'       = 'vscode', 'vscodium', 'zed', 'notepadpp'
+    'Assistentes de IA'        = 'chatgpt', 'claude'
+    'Informações do hardware'  = 'cpuz', 'gpuz', 'hwinfo', 'hwmonitor'
+    'VPN'                      = 'protonvpn', 'windscribe', 'wireguard', 'tailscale'
+    'Análise de rede'          = 'nmap', 'wireshark'
+    'Jellyfin'                 = 'jellyfinserver', 'jellyfinmediaplayer'
+    'Plex'                     = 'plex', 'plexdesktop'
+    'Jogos por streaming'      = 'sunshine', 'moonlight'
+    'Componentes do Windows'   = 'dotnet6', 'dotnet8', 'dotnet9', 'dotnet10', 'vc2015-32', 'vc2015-64'
+}
+
+# Estrela do FMHY que é de outra coisa com o mesmo nome e site (o "Plex" com ⭐ é o site de filmes, não o app).
+$script:SemEstrela = 'plex', 'plexdesktop'
+
+# Programas com ⭐ no FMHY que não estão no WinUtil. Os seis do Sysinternals (Autoruns etc.) viram a suíte, que é o
+# que o FMHY recomenda.
+$script:Substituidos = 'autoruns', 'processexplorer', 'processmonitor', 'pstools', 'rdcman', 'tcpview'
+$script:DoFmhy = @(
+    , @('windhawk', 'Windhawk', 'Utilitários', 'RamenSoftware.Windhawk', 'https://windhawk.net/', 'windhawk', 'Mods para personalizar o Windows (barra de tarefas, menu Iniciar, janelas) sem mexer em arquivo do sistema.')
+    , @('superf4', 'SuperF4', 'Utilitários', 'StefanSundin.Superf4', 'https://stefansundin.github.io/superf4/', 'superf4', 'Ctrl+Alt+F4 fecha na hora o programa travado em primeiro plano.')
+    , @('altsnap', 'AltSnap', 'Utilitários', 'AltSnap.AltSnap', 'https://github.com/RamonUnch/AltSnap', 'altsnap', 'Arrasta e redimensiona janelas segurando Alt, de qualquer ponto delas.')
+    , @('ditto', 'Ditto', 'Utilitários', 'Ditto.Ditto', 'https://ditto-cp.sourceforge.io/', 'ditto', 'Guarda tudo o que você copia para colar de novo depois.')
+    , @('everythingtoolbar', 'EverythingToolbar', 'Utilitários', 'srwi.EverythingToolbar.Launcher', 'https://github.com/srwi/EverythingToolbar', 'everythingtoolbar', 'Busca do Everything direto da barra de tarefas (precisa do Everything).')
+    , @('compactgui', 'CompactGUI', 'Utilitários', 'IridiumIO.CompactGUI', 'https://github.com/IridiumIO/CompactGUI', 'compactgui', 'Compacta pastas e jogos pelo próprio Windows, sem perder nada e sem precisar descompactar.')
+    , @('czkawka', 'Czkawka', 'Utilitários', 'qarmin.czkawka.gui', 'https://github.com/qarmin/czkawka', 'czkawka', 'Acha arquivos duplicados, imagens parecidas e pastas vazias para liberar espaço.')
+    , @('monitorian', 'Monitorian', 'Utilitários', 'emoacht.Monitorian', 'https://github.com/emoacht/Monitorian', 'monitorian', 'Ajusta o brilho dos monitores pela bandeja.')
+    , @('rainmeter', 'Rainmeter', 'Utilitários', 'Rainmeter.Rainmeter', 'https://www.rainmeter.net/', 'rainmeter', 'Widgets e temas na área de trabalho (relógio, uso do PC, clima).')
+    , @('textgrab', 'Text Grab', 'Utilitários', 'JosephFinney.Text-Grab', 'https://github.com/TheJoeFin/Text-Grab', 'text-grab', 'Copia o texto de qualquer coisa na tela (imagem, vídeo, programa).')
+    , @('advancedrenamer', 'Advanced Renamer', 'Utilitários', 'HulubuluSoftware.AdvancedRenamer', 'https://www.advancedrenamer.com/', 'advanced-renamer', 'Renomeia muitos arquivos de uma vez, com regras (grátis para uso pessoal).')
+    , @('deepl', 'DeepL', 'Utilitários', 'DeepL.DeepL', 'https://www.deepl.com/', 'deepl', 'Tradutor de texto e documentos (plano gratuito).')
+    , @('flameshot', 'Flameshot', 'Utilitários', 'Flameshot.Flameshot', 'https://flameshot.org/', 'flameshot', 'Captura de tela com setas, texto e destaque na hora.')
+    , @('kopia', 'Kopia', 'Utilitários', 'Kopia.KopiaUI', 'https://kopia.io/', 'kopiaui', 'Backup das suas pastas, criptografado, para outro disco ou para a nuvem.')
+    , @('lively', 'Lively Wallpaper', 'Utilitários', 'rocksdanister.LivelyWallpaper', 'https://www.rocksdanister.com/lively/', 'lively', 'Papel de parede animado (vídeo, página, GIF).')
+    , @('testdisk', 'TestDisk e PhotoRec', 'Utilitários', 'CGSecurity.TestDisk', 'https://www.cgsecurity.org/', 'testdisk-photorec', 'Recupera arquivos apagados e partições perdidas.')
+    , @('veracrypt', 'VeraCrypt', 'Utilitários', 'IDRIX.VeraCrypt', 'https://www.veracrypt.fr/', 'veracrypt', 'Cofre criptografado para arquivos, pendrives e discos inteiros.')
+    , @('cryptomator', 'Cryptomator', 'Utilitários', 'Cryptomator.Cryptomator', 'https://cryptomator.org/', 'cryptomator', 'Criptografa seus arquivos antes de irem para a nuvem (Drive, Dropbox, OneDrive).')
+    , @('adwcleaner', 'AdwCleaner', 'Utilitários', 'Malwarebytes.AdwCleaner', 'https://www.malwarebytes.com/adwcleaner', 'adwcleaner', 'Remove adware, barras de ferramentas e programas indesejados.')
+    , @('malwarebytes', 'Malwarebytes', 'Utilitários', 'Malwarebytes.Malwarebytes', 'https://www.malwarebytes.com/', 'malwarebytes', 'Procura e remove malware (a verificação manual é grátis).')
+    , @('windscribe', 'Windscribe', 'Ferramentas avançadas', 'Windscribe.Windscribe', 'https://windscribe.com/', 'windscribe', 'VPN com plano gratuito.')
+    , @('inkscape', 'Inkscape', 'Multimídia', 'Inkscape.Inkscape', 'https://inkscape.org/', 'inkscape', 'Desenho vetorial: logos, ilustrações, SVG.')
+    , @('krita', 'Krita', 'Multimídia', 'KDE.Krita', 'https://krita.org/', 'krita', 'Pintura digital e ilustração.')
+    , @('pinta', 'Pinta', 'Multimídia', 'Pinta.Pinta', 'https://www.pinta-project.com/', 'pinta', 'Editor de imagens simples, tipo um Paint mais completo.')
+    , @('kdenlive', 'Kdenlive', 'Multimídia', 'KDE.Kdenlive', 'https://kdenlive.org/', 'kdenlive', 'Editor de vídeo completo.')
+    , @('shotcut', 'Shotcut', 'Multimídia', 'Meltytech.Shotcut', 'https://shotcut.org/', 'shotcut', 'Editor de vídeo.')
+    , @('losslesscut', 'LosslessCut', 'Multimídia', 'ch.LosslessCut', 'https://github.com/mifi/lossless-cut', 'lossless-cut', 'Corta vídeos e áudios na hora, sem perder qualidade.')
+    , @('shutterencoder', 'Shutter Encoder', 'Multimídia', 'PaulPacifico.ShutterEncoder', 'https://www.shutterencoder.com/', 'shutter-encoder', 'Converte vídeo, áudio e imagem para qualquer formato.')
+    , @('upscayl', 'Upscayl', 'Multimídia', 'Upscayl.Upscayl', 'https://upscayl.org/', 'upscayl', 'Aumenta imagens com IA sem ficar borrado.')
+    , @('mp3tag', 'Mp3tag', 'Multimídia', 'FlorianHeidenreich.Mp3tag', 'https://www.mp3tag.de/', 'mp3tag', 'Edita nome, artista, álbum e capa das músicas.')
+    , @('musescore', 'MuseScore', 'Multimídia', 'Musescore.Musescore', 'https://musescore.org/', 'musescore', 'Escreve e toca partituras.')
+    , @('voicemeeter', 'Voicemeeter', 'Multimídia', 'VB-Audio.Voicemeeter', 'https://vb-audio.com/Voicemeeter/', 'voicemeeter', 'Mesa de som virtual: mistura microfone e sons do PC.')
+    , @('freetube', 'FreeTube', 'Multimídia', 'FreeTube.FreeTube', 'https://freetubeapp.io/', 'freetube', 'YouTube sem anúncios e sem rastreamento.')
+    , @('logseq', 'Logseq', 'Documentos', 'Logseq.Logseq', 'https://logseq.com/', 'logseq', 'Notas ligadas umas às outras, em tópicos.')
+    , @('notesnook', 'Notesnook', 'Documentos', 'Streetwriters.Notesnook', 'https://notesnook.com/', 'notesnook', 'Notas criptografadas, sincronizadas.')
+    , @('drawio', 'draw.io', 'Documentos', 'JGraph.Draw', 'https://www.drawio.com/', 'drawio', 'Fluxogramas, diagramas e organogramas.')
+    , @('koodoreader', 'Koodo Reader', 'Documentos', 'AppByTroye.KoodoReader', 'https://koodoreader.com/', 'koodo-reader', 'Leitor de e-books (EPUB, PDF, MOBI).')
+    , @('mailspring', 'Mailspring', 'Comunicação', 'Foundry376.Mailspring', 'https://getmailspring.com/', 'mailspring', 'Cliente de e-mail moderno para várias contas.')
+    , @('ludusavi', 'Ludusavi', 'Jogos', 'mtkennerly.ludusavi', 'https://github.com/mtkennerly/ludusavi', 'ludusavi', 'Faz backup dos saves dos seus jogos.')
+    , @('sysinternals', 'Sysinternals Suite', 'Ferramentas da Microsoft', 'Microsoft.Sysinternals.Suite', 'https://learn.microsoft.com/sysinternals/', 'sysinternals', 'As ferramentas avançadas da Microsoft: Autoruns, Process Explorer, Process Monitor, TCPView e outras.')
+)
 
 # Desenvolvimento: só o que alguém que está começando usaria.
 $script:DevBasico = 'vscode', 'vscodium', 'Zed', 'sublimetext', 'notepadplus', 'python3', 'nodejslts', 'git', 'githubdesktop',
@@ -329,12 +441,47 @@ foreach ($p in $dados.PSObject.Properties) {
     $programas.Add($p2)
 }
 foreach ($e in $script:Extras) { $programas.Add($e) }
+foreach ($d in $script:DoFmhy) {
+    $programas.Add([ordered]@{ id = $d[0]; nome = $d[1]; descricao = $d[6]; categoria = $d[2]; wingetId = $d[3]; livre = $false; site = $d[4]; choco = $d[5]; winutil = '' })
+}
 
-# Ordem da página: categorias na ordem de $Categorias, nomes em ordem alfabética.
-$ordem = @($script:Categorias.Values)
-$final = @($programas | Sort-Object @{ Expression = { $ordem.IndexOf($_.categoria) } }, @{ Expression = { $_.nome } })
+# FMHY: o que fica, o que tem estrela e de onde veio.
+$entradas = @(Read-FmhyEntradas -Pasta $Fmhy)
+$indice = New-FmhyIndice -Entradas $entradas
+$inseguros = @($entradas | Where-Object Inseguro | ForEach-Object Simples | Select-Object -Unique)
+$fmhyRef = [ordered]@{}
+$fora = [System.Collections.Generic.List[string]]::new()
+$finais = foreach ($p in $programas) {
+    if ($script:Pagos -contains $p.id -or $script:Substituidos -contains $p.id) { continue }
+    $nomes = @($p.nome) + @(if ($script:NomesFmhy.ContainsKey($p.id)) { $script:NomesFmhy[$p.id] })
+    $r = Find-FmhyPrograma -Indice $indice -Nomes $nomes -Site $p.site
+    if (@(Get-FmhyFormasNome $p.nome | Where-Object { $inseguros -contains $_ }).Count -gt 0) { throw "$($p.id) está no unsafe.md do FMHY" }
+    if ($script:Populares -contains $p.id) {
+        $p.categoria = $script:CategoriaPopulares
+        $p.estrela = $false
+    }
+    elseif ($r.Achou) {
+        $p.estrela = $r.Estrela -and $script:SemEstrela -notcontains $p.id
+        $p.fmhy = $r.Onde
+        $fmhyRef[$p.id] = [ordered]@{ nomes = $nomes; estrela = $p.estrela; onde = $r.Onde }
+    }
+    else { $fora.Add("$($p.nome)"); continue }
+    foreach ($g in $script:Grupos.Keys) { if (@($script:Grupos[$g]) -contains $p.id) { $p.grupo = $g } }
+    $p
+}
+# Pasta só faz sentido com 2 ou mais na mesma categoria.
+foreach ($g in @($finais | Where-Object { $_.Contains('grupo') } | Group-Object { "$($_.categoria)|$($_['grupo'])" } | Where-Object Count -lt 2)) {
+    foreach ($p in $g.Group) { $p.Remove('grupo') }
+}
+
+# Ordem da página: categorias na ordem de $Categorias (populares no fim), com estrela primeiro, depois alfabética.
+$ordem = @($script:Categorias.Values) + $script:CategoriaPopulares
+$final = @($finais | Sort-Object @{ Expression = { $ordem.IndexOf($_.categoria) } }, @{ Expression = { -not $_.estrela } }, @{ Expression = { $_.nome } })
 $json = ConvertTo-Json -InputObject $final -Depth 4
 [IO.File]::WriteAllText((Join-Path $raiz 'modulos\programas\programas.json'), $json, (New-Object Text.UTF8Encoding $false))
 $ref = [ordered]@{ ForaDeProposito = 'desenvolvimento além do básico'; DevBasico = $script:DevBasico; Programas = $referencia }
 [IO.File]::WriteAllText((Join-Path $raiz 'testes\modulos\programas\winutil-apps.json'), (ConvertTo-Json -InputObject $ref -Depth 5), (New-Object Text.UTF8Encoding $false))
-"$($final.Count) programas em $(@($final | ForEach-Object categoria | Select-Object -Unique).Count) categorias"
+$refFmhy = [ordered]@{ Populares = $script:Populares; Pagos = $script:Pagos; Inseguros = $inseguros; Programas = $fmhyRef }
+[IO.File]::WriteAllText((Join-Path $raiz 'testes\modulos\programas\fmhy-referencia.json'), (ConvertTo-Json -InputObject $refFmhy -Depth 5), (New-Object Text.UTF8Encoding $false))
+"$($final.Count) programas em $(@($final | ForEach-Object categoria | Select-Object -Unique).Count) categorias; $(@($final | Where-Object estrela).Count) com estrela"
+"Fora (não estão no FMHY): $($fora -join ', ')"

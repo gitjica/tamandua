@@ -159,6 +159,10 @@ function Invoke-TmdComandoModulo {
         }
         $pergunta = "$rotulo $($selecionados.Count) item(ns)" + $(if ($bytes -gt 0) { " ($(Format-TmdTamanho $bytes))" } else { '' }) + '?'
         if ($info.Manifesto['AvisoConfirmacao']) { Write-Host ([string]$info.Manifesto['AvisoConfirmacao']) -ForegroundColor Yellow }
+        # Arriscado que vai ser aplicado (desfazer só volta ao normal): diz quais e o que pode dar errado em cada um.
+        foreach ($a in @($selecionados | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'Classificacao') -eq 'Arriscado' -and (Get-Propriedade -Objeto $_ -Nome 'Desfaz') -ne $true })) {
+            Write-Host "ARRISCADO: $(Get-Propriedade -Objeto $a -Nome 'Nome') — $(Get-Propriedade -Objeto $a -Nome 'Contratempo')" -ForegroundColor Red
+        }
         if (-not (Confirm-TmdExecucao -Pergunta $pergunta -Sim:$Sim)) {
             Write-Host 'Cancelado. Nada foi alterado.'
             return $script:CodigoSaida.Cancelado

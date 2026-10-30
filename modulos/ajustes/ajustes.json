@@ -8,6 +8,7 @@
     "descricao": "Cria um ponto de restauração do Windows antes dos outros ajustes marcados: se algo der errado, dá para voltar o sistema inteiro. Liga a Proteção do Sistema no disco do Windows se estiver desligada. (WinUtil: Restore Point - Create)",
     "categoria": "Segurança",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "executar": "Invoke-TmdCriarPontoRestauracao -Descricao 'Tamanduá'"
@@ -20,6 +21,7 @@
     "descricao": "Apaga tudo da pasta temporária do usuário e da do Windows (o que estiver em uso fica). Diferente do módulo Limpar, não guarda o que foi mexido nas últimas 24 horas. (WinUtil: Temporary Files - Remove)",
     "categoria": "Limpeza (uma vez)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "executar": "Clear-TmdConteudoPasta -Pasta ([IO.Path]::GetTempPath()) -Id 'acao-limpar-temporarios'; Clear-TmdConteudoPasta -Pasta (Join-Path $env:SystemRoot 'Temp') -Id 'acao-limpar-temporarios'"
@@ -32,6 +34,9 @@
     "descricao": "Roda a Limpeza de Disco do Windows em tudo (no fim ela mostra quanto liberou) e o DISM com /ResetBase: libera GBs de atualizações antigas, mas as atualizações já instaladas deixam de poder ser desinstaladas. Pode levar vários minutos. (WinUtil: Disk Cleanup - Run)",
     "categoria": "Limpeza (uma vez)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Demora (pode passar de meia hora) e, depois, não dá mais para desinstalar as atualizações do Windows que foram limpas.",
+    "seAcontecer": "Nada a desfazer: só deixe terminar. Se uma atualização nova der problema, a saída passa a ser o ponto de restauração.",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "executar": "[void](Invoke-TmdPrograma -Arquivo 'cleanmgr.exe' -Argumentos ('/d ' + $env:SystemDrive + ' /VERYLOWDISK') -Modulo 'ajustes' -Id 'acao-limpeza-disco'); $r = Invoke-TmdPrograma -Arquivo 'dism.exe' -Argumentos '/Online /Cleanup-Image /StartComponentCleanup /ResetBase' -Modulo 'ajustes' -Id 'acao-limpeza-disco'; if ($r.Codigo -ne 0) { throw ('o DISM terminou com código ' + $r.Codigo) }"
@@ -43,6 +48,7 @@
     "descricao": "Para o envio de dados de diagnóstico e uso para a Microsoft: serviço de telemetria, relatório de erros, coleta de digitação e tinta, pesquisas de opinião e a telemetria do PowerShell. (WinUtil: Telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -67,6 +73,7 @@
     "descricao": "O Windows deixa de registrar e enviar os apps e arquivos que você abre (linha do tempo). (WinUtil: Activity History)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -82,6 +89,7 @@
     "descricao": "Desliga os \"recursos de consumidor\": o Windows para de instalar sozinho Candy Crush, TikTok e afins depois de atualizações. (WinUtil: ConsumerFeatures)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -95,6 +103,7 @@
     "descricao": "O Windows para de usar a sua internet para mandar pedaços de atualizações para outros computadores. É o mesmo valor do item do módulo Atualizações: aplicar num aparece aplicado no outro. (WinUtil: Delivery Optimization - Disable)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -108,6 +117,9 @@
     "descricao": "Desliga o serviço de localização e a atualização automática de mapas. Apps de clima e mapas e o fuso horário automático deixam de saber onde você está. (WinUtil: Location Tracking)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Apps de mapa e clima não acham onde você está, o fuso horário automático para de funcionar e o \"Localizar meu dispositivo\" fica desligado.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -123,6 +135,7 @@
     "descricao": "Impede que apps usem um identificador seu para mostrar anúncios personalizados.",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -135,6 +148,7 @@
     "descricao": "A Microsoft deixa de usar seus dados de diagnóstico para dicas e anúncios sob medida.",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -147,6 +161,7 @@
     "descricao": "Tira os apps \"sugeridos\" (propaganda) do menu Iniciar.",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -159,6 +174,7 @@
     "descricao": "Para as notificações de \"dicas, truques e sugestões\" enquanto você usa o Windows.",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -171,6 +187,7 @@
     "descricao": "Impede o Windows de instalar, sem perguntar, apps promovidos pela Microsoft Store.",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -184,6 +201,9 @@
     "descricao": "A busca do menu Iniciar procura só no computador, sem mandar o que você digita para o Bing.",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Em algumas versões do Windows a busca do menu Iniciar fica em branco ou demora para mostrar resultados.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -197,6 +217,7 @@
     "descricao": "O Windows não baixa sozinho apps \"companheiros\" e ícones de fabricantes quando você conecta um aparelho. (WinUtil: Prevent Device Companion Apps)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -210,6 +231,7 @@
     "descricao": "A busca do Iniciar deixa de sugerir apps da Store, bloqueando o acesso ao arquivo de recomendações dela. (WinUtil: Microsoft Store Recommended Search Results)",
     "categoria": "Privacidade",
     "risco": "Medio",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -228,6 +250,7 @@
     "descricao": "Desliga de uma vez a \"entrega de conteúdo\": apps pré-instalados de parceiros, sugestões nas Configurações, na tela de bloqueio e no Iniciar, e avisos da conta Microsoft. (Atlas: Configure Content Delivery Manager)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -259,6 +282,7 @@
     "descricao": "Some com as faixas de \"experimente o OneDrive/Microsoft 365\" no Explorador. (Atlas: Disable Sync Provider Notifications)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -272,6 +296,7 @@
     "descricao": "O Office para de mandar dados de uso e de participar do programa de melhoria. (Atlas: Disable Office Telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -287,6 +312,7 @@
     "descricao": "O Painel de Controle da NVIDIA deixa de enviar dados de uso. (Atlas: Disable NVIDIA Control Panel Telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Avançado", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -300,6 +326,7 @@
     "descricao": "Para de aparecer, depois de atualizações, a tela que empurra conta Microsoft, OneDrive e Microsoft 365. (Atlas: Disable Suggested Ways to Finish Setting Up Your Device)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -313,6 +340,9 @@
     "descricao": "Tema, senhas de Wi-Fi, idioma e acessibilidade deixam de ir para a nuvem. Num PC novo, você terá de configurar de novo. (Atlas: Disable Settings Sync)",
     "categoria": "Privacidade",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Em outro computador com a mesma conta Microsoft, tema, senhas do Wi-Fi e preferências não vêm junto.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -335,6 +365,7 @@
     "descricao": "Mensagens SMS/MMS do Vincular ao Celular não vão para a nuvem. (Atlas: Disallow Message Service Cloud Sync)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -348,6 +379,9 @@
     "descricao": "Apps da Store não leem o diagnóstico de outros apps nem seu nome, foto e conta. (Atlas: Configure App Permissions)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Algum app da Microsoft Store pode não mostrar seu nome ou foto da conta, ou pedir para entrar de novo.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -362,6 +396,7 @@
     "descricao": "O Media Player antigo não busca informações online nem registra o que você toca. (Atlas: Configure Windows Media Player)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -377,6 +412,7 @@
     "descricao": "A Microsoft não liga e desliga recursos de teste no seu Windows. (Atlas: Disable Experimentation)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -390,6 +426,7 @@
     "descricao": "Não dá para abrir a câmera sem desbloquear o PC. (Atlas: Disable Lockscreen Camera)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -403,6 +440,7 @@
     "descricao": "Desliga o cenário de diagnóstico que registra lentidões e as manda para a Microsoft. (Atlas: Disable Performance Track)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -416,6 +454,7 @@
     "descricao": "Novos usuários deste PC pulam as perguntas de privacidade da primeira entrada (os ajustes daqui valem para eles). (Atlas: Disable OOBE Privacy Experience)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -429,6 +468,7 @@
     "descricao": "O Windows não baixa atualizações do reconhecimento de voz em segundo plano. (Atlas: Disable Automatic Updates Of Speech Data)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -442,6 +482,7 @@
     "descricao": "O Windows deixa de contar quais programas você mais abre. (Atlas: Disable Most Frequently Used Applications)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -455,6 +496,7 @@
     "descricao": "Um dado a menos para sites identificarem você. (Atlas: Disable Website Access to Language List)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -468,6 +510,9 @@
     "descricao": "Quando um programa trava, o Windows não monta nem envia relatório (vale junto com o serviço desligado pela telemetria). (Atlas: Disable Windows Error Reporting)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
+    "contratempo": "Quando um programa trava, o Windows não procura mais uma solução conhecida para o erro.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -489,6 +534,7 @@
     "descricao": "A ativação do Windows deixa de mandar dados extras para a Microsoft. (Atlas: Disable Key Management System Telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -502,6 +548,7 @@
     "descricao": "Sai do \"Programa de Aperfeiçoamento da Experiência do Usuário\" da Microsoft. (Atlas: Disable Customer Experience Improvement Program)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -516,6 +563,7 @@
     "descricao": "Caneta e teclado não mandam amostras nem estatísticas de digitação. (Atlas: Disable Input Telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -532,6 +580,7 @@
     "descricao": "Some com as fotos e \"curiosidades\" da Microsoft na tela de bloqueio, nas Configurações e na central de ações, e com as sugestões de terceiros. (Atlas: Disable Windows Spotlight)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -549,6 +598,7 @@
     "descricao": "Some com as notificações \"Como está sendo sua experiência?\". (Atlas: Disable Windows Feedback)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -563,6 +613,7 @@
     "descricao": "A ferramenta mensal da Microsoft continua limpando, mas não manda o que achou. (Atlas: Disable MSRT telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -576,6 +627,7 @@
     "descricao": "Desliga o envio de arquivos para PCs próximos por Bluetooth/Wi-Fi e as \"experiências compartilhadas\". (Atlas: Disable Shared Experiences)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -591,6 +643,7 @@
     "descricao": "O PC não oferece continuar no computador o que você estava fazendo no celular. (Atlas: Disable Cross Device Resume)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -604,6 +657,7 @@
     "descricao": "O espaço de trabalho da caneta não sugere apps da Store. (Atlas: Configure Windows Ink Workspace)",
     "categoria": "Privacidade",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -617,6 +671,7 @@
     "descricao": "Impede a troca automática para o \"novo Outlook\" e desliga a chavinha que tenta migrar. (WinUtil: Microsoft Outlook New Version)",
     "categoria": "Programas",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Privacidade"],
     "mudancas": [
@@ -632,6 +687,9 @@
     "descricao": "Arquivos Offline desligado; Mapas, Armazenamento e Compartilhamento de Internet só ligam quando alguém precisar. (WinUtil: Services - Set to Manual; aqui o Compartilhamento fica em manual, não desligado, para o Hotspot móvel continuar funcionando)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Os serviços continuam lá e ligam quando precisam, mas um recurso pouco usado pode demorar alguns segundos a mais na primeira vez.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -648,6 +706,7 @@
     "descricao": "O Windows deixa de rodar programas que o fabricante grava na BIOS/UEFI (ex.: utilitários que voltam sozinhos depois de formatar). Rastreadores antifurto de fabricante deixam de funcionar. (WinUtil: WPBT)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -661,6 +720,7 @@
     "descricao": "O Windows para de apagar sozinho arquivos da Lixeira e de Downloads para liberar espaço. (WinUtil: Storage Sense)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -674,6 +734,7 @@
     "descricao": "Programas compatíveis passam a aceitar caminhos com mais de 260 caracteres (útil para quem programa: node_modules, git). (WinUtil: Enable Long Paths)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -687,6 +748,7 @@
     "descricao": "A tela azul mostra o código e o driver que causou o erro, em vez do rostinho triste. (WinUtil: BSoD Verbose Mode)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -701,6 +763,7 @@
     "descricao": "Em vez de \"Bem-vindo\", mostra cada etapa (ajuda a ver onde trava). (WinUtil: Logon Verbose Mode)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -714,6 +777,7 @@
     "descricao": "Pula a imagem da tela de bloqueio e vai direto para a senha. (WinUtil: Lock Screen - Disable)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -727,6 +791,7 @@
     "descricao": "O app Configurações abre direto em Sistema, sem a página Início com propaganda de serviços. (WinUtil: Settings Home Page)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -740,6 +805,9 @@
     "descricao": "Apps da Microsoft Store só rodam quando abertos: economiza bateria e memória, mas alguns (ex.: Vincular ao Celular) param de avisar. (WinUtil: Background Apps)",
     "categoria": "Sistema",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Apps da Microsoft Store (WhatsApp, Teams, Spotify da Store) param de mostrar notificações e de atualizar enquanto estão fechados.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -753,6 +821,9 @@
     "descricao": "Esconde a central de notificações e o calendário da bandeja e desliga os avisos dos apps. Você deixa de ver lembretes e alertas. (WinUtil: System Tray Notifications & Calendar)",
     "categoria": "Sistema",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Nenhuma notificação aparece: nem de mensagens, nem de lembretes, nem avisos do Windows.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": false,
     "presets": [],
     "mudancas": [
@@ -767,6 +838,9 @@
     "descricao": "Para de vigiar programas antigos e de mostrar \"este programa pode não ter sido instalado corretamente\", e desliga o inventário de apps. (Atlas: Disable Program Compatibility Assistant (PCA))",
     "categoria": "Sistema",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Programas muito antigos deixam de receber os consertos automáticos que o Windows aplica e podem não abrir.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -785,6 +859,7 @@
     "descricao": "Deixa de gravar o histórico de políticas de grupo a cada login. Só importa em empresas. (Atlas: Disable Resultant Set of Policy (RSoP) Logging)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -798,6 +873,7 @@
     "descricao": "Desliga as dicas de \"primeiros passos\" do Windows para todas as contas. (Atlas: Disable Tips)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -811,6 +887,7 @@
     "descricao": "O app Configurações não baixa dicas e vídeos da internet. (Atlas: Disable Settings Tips)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -825,6 +902,7 @@
     "descricao": "A Microsoft não muda sozinha ícones fixados e itens do Iniciar. (Atlas: Disable Cloud Optimized Content on Taskbar)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -838,6 +916,7 @@
     "descricao": "Conectar pendrive, celular ou cartão não abre nada sozinho (também protege de vírus de pendrive). (Atlas: Disable AutoRun)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -851,6 +930,7 @@
     "descricao": "Arquivo de tipo desconhecido não manda você para a Microsoft Store. (Atlas: Disable Internet File Association Service)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -864,6 +944,9 @@
     "descricao": "O Windows para de avisar quando um disco está quase cheio. (Atlas: Disable Low Disk Space Checks)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "O disco pode encher sem nenhum aviso; com o disco cheio, o Windows fica lento e atualizações falham.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -877,6 +960,7 @@
     "descricao": "Some com os avisos de \"carregador fraco\" e de erro em aparelho USB. (Atlas: Disable Notify About USB Issues)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -891,6 +975,7 @@
     "descricao": "Esconde a página do Insider e impede o PC de entrar em versões de teste do Windows. (Atlas: Restrict Windows Insider)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -909,6 +994,7 @@
     "descricao": "\"Atualizar e desligar\" deixa de ser a opção padrão do menu Desligar, e some o link para a ferramenta de criação de mídia. (Atlas: Disable WU Nagging)",
     "categoria": "Sistema",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -923,6 +1009,9 @@
     "descricao": "Você decide quando atualizar os apps da Store. Correções de segurança dos apps também esperam você. (Atlas: Disable Automatic Updates for Apps in Store)",
     "categoria": "Sistema",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Os apps da Microsoft Store ficam desatualizados até você abrir a Store e atualizar à mão (Biblioteca > Obter atualizações).",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -936,6 +1025,7 @@
     "descricao": "Mostra o .exe, .pdf, .jpg no nome dos arquivos. Ajuda a não cair em \"foto.jpg.exe\". (WinUtil: File Explorer File Extensions)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -949,6 +1039,9 @@
     "descricao": "Mostra pastas como AppData. Arquivos protegidos do sistema continuam escondidos. (WinUtil: File Explorer Hidden Files)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
+    "contratempo": "Aparecem arquivos e pastas de sistema que o Windows escondia; apagar um deles pode estragar algum programa.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -961,6 +1054,7 @@
     "descricao": "Abre direto nas unidades e pastas do computador em vez de Início/Acesso rápido.",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -974,6 +1068,7 @@
     "descricao": "Some com \"Início\" e \"Galeria\" do painel da esquerda do Explorador (Windows 11). (WinUtil: File Explorer Home and Gallery)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -988,6 +1083,7 @@
     "descricao": "O Explorador para de decidir sozinho que uma pasta é \"de fotos\" ou \"de músicas\" (o que deixa pastas grandes lentas). Volta o modo de exibição salvo das pastas para o padrão. (WinUtil: File Explorer Automatic Folder Discovery)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -1006,6 +1102,7 @@
     "descricao": "Volta o menu completo do botão direito do Windows 10, sem precisar clicar em \"Mostrar mais opções\". Reinicia o Explorador. (WinUtil: Right-Click Menu Previous Layout)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1024,6 +1121,7 @@
     "descricao": "Atalhos novos ficam com o nome do programa, sem o \" - Atalho\" no fim. (Atlas: Remove Shortcut Text)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -1037,6 +1135,7 @@
     "descricao": "A janela de copiar/mover já abre com o gráfico de velocidade e o tempo restante. (Atlas: Show More Details by Default on Transfers)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1050,6 +1149,7 @@
     "descricao": "Tira as caixinhas que aparecem ao lado dos arquivos. (Atlas: Disable Use Check Boxes to Select Items)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Explorador"],
     "mudancas": [
@@ -1063,6 +1163,7 @@
     "descricao": "Menos espaço entre os itens: cabe mais coisa na tela. (Atlas: Use Compact Mode)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1076,6 +1177,7 @@
     "descricao": "Com mais de 15 arquivos selecionados, o botão direito continua mostrando \"Abrir\", \"Imprimir\" etc. (Atlas: Always Show the Full Context Menu On Items)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1089,6 +1191,7 @@
     "descricao": "O Início/Acesso rápido não mostra arquivos do Office e do OneDrive da sua conta. (Atlas: Don't Show Office Files)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade", "Explorador"],
     "mudancas": [
@@ -1102,6 +1205,9 @@
     "descricao": "O Explorador, o Iniciar e as listas de atalho da barra deixam de guardar o que você abriu. (Atlas: Hide Recent Items)",
     "categoria": "Explorador de Arquivos",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Somem as listas de arquivos recentes do Explorador, do menu Iniciar e de \"Abrir recente\" em vários programas.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -1120,6 +1226,7 @@
     "descricao": "Atalho quebrado avisa na hora, em vez de vasculhar o disco atrás do arquivo. (Atlas: Disable Searching for Invalid Shortcuts)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1134,6 +1241,7 @@
     "descricao": "A caixinha com tamanho e data aparece quase sem esperar ao passar o mouse. (Atlas: Minimize Mouse Hover Time for Item Info)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1147,6 +1255,7 @@
     "descricao": "Tira Documentos, Imagens, Músicas, Vídeos, Downloads, Área de Trabalho e Objetos 3D de \"Este Computador\" (continuam no painel da esquerda). (Atlas: Hide Folders from This PC)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Explorador"],
     "mudancas": [
@@ -1173,6 +1282,9 @@
     "descricao": "A caixa de busca do Explorador volta a ser a do Windows 10: mais rápida e sem sugestões da nuvem. (Atlas: Revert to Classic Search)",
     "categoria": "Explorador de Arquivos",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "A busca dentro das pastas volta a ser a antiga: sem sugestões e às vezes mais lenta.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1187,6 +1299,7 @@
     "descricao": "Fecha um programa travado direto pela barra de tarefas (Windows 11 23H2 ou mais novo). (WinUtil: End Task With Right Click)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -1200,6 +1313,7 @@
     "descricao": "Volta o botão Iniciar e os ícones para o canto esquerdo (Windows 11). (WinUtil: Taskbar Centered Icons)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Explorador"],
     "mudancas": [
@@ -1213,6 +1327,7 @@
     "descricao": "Tira a caixa/ícone de pesquisa da barra. Apertar a tecla Windows e digitar continua pesquisando. (WinUtil: Taskbar Search Icon)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Explorador"],
     "mudancas": [
@@ -1226,6 +1341,7 @@
     "descricao": "Tira o botão das áreas de trabalho virtuais da barra (Win+Tab continua funcionando). (WinUtil: Taskbar Task View Icon)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Explorador"],
     "mudancas": [
@@ -1239,6 +1355,7 @@
     "descricao": "Some com arquivos recentes e sugestões do menu Iniciar. Usa a mesma política das edições Education, por isso vale também no Home e no Pro. (WinUtil: Start Menu Recommendations)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Medio",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1254,6 +1371,7 @@
     "descricao": "Mostra o número da bateria ao lado do ícone (notebooks). (WinUtil: System Tray Battery Percentage)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Notebook"],
     "mudancas": [
@@ -1267,6 +1385,9 @@
     "descricao": "Volta o menu Iniciar do Windows 11 de antes da reformulação de 2025. Pode não funcionar nas versões mais novas. (WinUtil: Start Menu Previous Layout)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Usa uma opção escondida do Windows: uma atualização pode desligá-la ou deixar o menu Iniciar com cara estranha.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1280,6 +1401,9 @@
     "descricao": "Desinstala os Widgets (notícias e clima da barra) para todos os usuários. Desfazer reinstala pela Microsoft Store. (WinUtil: Widgets - Remove)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Remove o pacote dos Widgets: o painel de notícias e clima some (Win+W não abre nada).",
+    "seAcontecer": "Instale de novo pela Microsoft Store o \"Windows Web Experience Pack\" e reinicie.",
     "requerAdmin": true,
     "presets": ["Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -1298,6 +1422,7 @@
     "descricao": "Tira o ícone do Chat do Teams pessoal da barra de tarefas. (Atlas: Disable Windows Chat)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -1312,6 +1437,7 @@
     "descricao": "Tira o ícone do Skype \"Reunir agora\" (Windows 10). (Atlas: Hide 'Meet Now' on Taskbar)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -1325,6 +1451,7 @@
     "descricao": "O Alt+Tab deixa de mostrar cada aba do Edge como se fosse uma janela. (Atlas: Do Not Show Edge Tabs in Alt-Tab)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
@@ -1338,6 +1465,7 @@
     "descricao": "O Iniciar deixa de sugerir apps e de mostrar avisos sobre a conta Microsoft. (Atlas: Disable Recommendations in the Start Menu)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -1352,6 +1480,7 @@
     "descricao": "O Iniciar mostra mais uma fileira de fixados e menos recomendações. (Atlas: Show More Pins in Start)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1365,6 +1494,7 @@
     "descricao": "Windows e apps no modo escuro. (WinUtil: Dark Theme for Windows)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": [],
     "mudancas": [
@@ -1379,6 +1509,9 @@
     "descricao": "Desliga animações, sombras e transparência das janelas e menus, e abre menus mais rápido. O Windows fica com cara de mais simples e responde mais rápido em PCs fracos. Vale no próximo login. (WinUtil: Visual Effects - Set to Best Performance)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
+    "contratempo": "O Windows fica com cara mais simples: sem sombras, animações e fontes suavizadas em alguns lugares.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1401,6 +1534,7 @@
     "descricao": "As barras de rolagem não somem quando o mouse sai de cima. (WinUtil: Scrollbars Always Visible)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Explorador"],
     "mudancas": [
@@ -1414,6 +1548,7 @@
     "descricao": "Mostra a imagem de fundo da tela de login nítida, sem o efeito de vidro fosco. (WinUtil: Logon Screen Acrylic Blur)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1427,6 +1562,7 @@
     "descricao": "Arrastar uma janela até a borda da tela não a encaixa nem maximiza mais. (WinUtil: Window Snapping)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": [],
     "mudancas": [
@@ -1440,6 +1576,7 @@
     "descricao": "O Windows não controla os LEDs RGB de teclado e mouse (deixa para o programa do fabricante). (Atlas: Disable Dynamic Lighting)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1453,6 +1590,7 @@
     "descricao": "O Windows usa a imagem do papel de parede em qualidade máxima. (Atlas: Disable Wallpaper Compression)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1466,6 +1604,7 @@
     "descricao": "Passar o mouse no canto da barra não deixa as janelas transparentes. (Atlas: Disable Show Desktop Peek on Taskbar)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1479,6 +1618,7 @@
     "descricao": "Desliga o \"Aero Shake\", que minimiza tudo quando você chacoalha uma janela sem querer. (Atlas: Disable Aero Shake)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1492,6 +1632,7 @@
     "descricao": "Sem bipes ao ligar recursos de acessibilidade, sem o atalho que abre ferramentas de toque e sem a leitura automática do Narrador. (Atlas: Disable Ease of Access Sounds)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1509,6 +1650,7 @@
     "descricao": "A lista de dispositivos de som mostra só o que está conectado. (Atlas: Hide Disabled and Disconnected Devices in Sounds Panel)",
     "categoria": "Aparência",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1523,6 +1665,7 @@
     "descricao": "O ponteiro anda sempre a mesma distância para o mesmo movimento (\"Aumentar precisão do ponteiro\" desligado). Vale no próximo login. (WinUtil: Mouse Acceleration)",
     "categoria": "Mouse e teclado",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1538,6 +1681,7 @@
     "descricao": "Desliga o atalho que abre as Teclas de Aderência ao apertar Shift cinco vezes (comum em jogos). (WinUtil: Sticky Keys)",
     "categoria": "Mouse e teclado",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -1551,6 +1695,7 @@
     "descricao": "O teclado numérico já começa ligado, na tela de login e depois de entrar. (WinUtil: Num Lock on Startup)",
     "categoria": "Mouse e teclado",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1565,6 +1710,7 @@
     "descricao": "O Windows prioriza o jogo aberto e segura atualizações e notificações enquanto você joga. (WinUtil: Game Mode)",
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": false,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1579,6 +1725,9 @@
     "descricao": "O Windows espera 2 s (em vez de 5 a 20 s) por programas e serviços travados antes de fechá-los ao desligar. Um programa lento pode fechar sem salvar. (Atlas: Decrease Shutdown Time)",
     "categoria": "Desempenho e jogos",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Ao desligar, programas abertos têm menos tempo para fechar: um documento não salvo pode se perder.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1594,6 +1743,7 @@
     "descricao": "Os programas que abrem com o Windows começam na hora, sem a espera de ~10 s. (Atlas: Disable Startup Delay)",
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1607,6 +1757,7 @@
     "descricao": "O agendador multimídia reserva 10% (em vez de 20%) do processador para tarefas de fundo enquanto você joga ou ouve música. (Atlas: Configure the Multimedia Class Scheduler Service)",
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1620,6 +1771,7 @@
     "descricao": "O programa da janela ativa ganha fatias maiores do processador. (Atlas: Prioritize Foreground Applications)",
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1633,6 +1785,9 @@
     "descricao": "Sem Win+G nem gravação em segundo plano (Game DVR), que pesa em PCs mais fracos. Quem grava jogos pelo Windows perde isso. (Atlas: Disable Game Bar)",
     "categoria": "Desempenho e jogos",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Win+G não abre nada e não dá mais para gravar ou capturar jogos pela Xbox Game Bar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1650,6 +1805,7 @@
     "descricao": "O jogo e a música continuam no volume normal quando entra uma chamada (Discord, Teams). (Atlas: Do Not Reduce Sounds While in a Call)",
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": false,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1663,6 +1819,7 @@
     "descricao": "O Explorador guarda até 4096 ícones na memória e redesenha menos. (Atlas: Extend Icon Cache)",
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1676,6 +1833,9 @@
     "descricao": "Apaga o hiberfil.sys (alguns GB no disco C:) e desliga a Inicialização Rápida. Em notebook, sem hibernar, a bateria acaba se ele ficar dias suspenso. (WinUtil: Hibernation - Disable)",
     "categoria": "Energia",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Some a opção Hibernar e a Inicialização Rápida: o computador demora um pouco mais para ligar; no notebook, a bateria acaba se ficar muito tempo em suspensão.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1695,6 +1855,9 @@
     "descricao": "Cria e ativa o plano \"Desempenho Máximo\": o processador não economiza energia. Só para PC de mesa: em notebook gasta bateria e esquenta. Desfazer volta para o plano Equilibrado. (WinUtil: Ultimate Performance Profile)",
     "categoria": "Energia",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "O computador gasta mais energia e esquenta mais; no notebook, a bateria dura bem menos.",
+    "seAcontecer": "Volte ao plano Equilibrado em Configurações > Sistema > Energia, ou desfaça na página Ajustes.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1713,6 +1876,7 @@
     "descricao": "No modo de espera moderno, o notebook desliga o Wi-Fi quando está na bateria: gasta menos e não esquenta na mochila. (WinUtil: S0 Sleep Network Connectivity)",
     "categoria": "Energia",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Notebook"],
     "mudancas": [
@@ -1726,6 +1890,7 @@
     "descricao": "A manutenção roda quando o PC já está ligado, em vez de acordá-lo de madrugada (e gastar bateria na mochila). (Atlas: Configure Automatic Maintenance)",
     "categoria": "Energia",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -1739,6 +1904,9 @@
     "descricao": "Protocolo antigo de achar PCs na rede, usado em ataques em Wi-Fi público. Redes domésticas comuns não precisam dele. (Atlas: Disable LLMNR Protocol)",
     "categoria": "Rede",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Impressoras ou computadores antigos da rede podem não ser achados pelo nome.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1752,6 +1920,7 @@
     "descricao": "Copiar de pastas compartilhadas (NAS, outro PC) usa a rede toda, sem o freio do Windows. (Atlas: Disable SMB Bandwidth Throttling)",
     "categoria": "Rede",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1765,6 +1934,9 @@
     "descricao": "Ninguém na rede lista seus compartilhamentos e contas sem estar logado. Aparelhos de rede muito antigos podem deixar de ver o PC. (Atlas: Restrict Anonymous Access)",
     "categoria": "Rede",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Pastas compartilhadas de aparelhos antigos (NAS, roteador, impressora) que não pedem senha podem parar de abrir.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1780,6 +1952,9 @@
     "descricao": "DNS do Google. Troca o DNS de todas as placas de rede conectadas (8.8.8.8 e 8.8.4.4). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Google)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Algumas redes (empresa, escola, Wi-Fi de hotel com página de login) só funcionam com o DNS do próprio roteador.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático) ou, nessa rede, use outra conexão até sair dela.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1793,6 +1968,9 @@
     "descricao": "DNS da Cloudflare, costuma ser o mais rápido no Brasil. Troca o DNS de todas as placas de rede conectadas (1.1.1.1 e 1.0.0.1). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Cloudflare)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Algumas redes (empresa, escola, Wi-Fi de hotel com página de login) só funcionam com o DNS do próprio roteador.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1806,6 +1984,9 @@
     "descricao": "Cloudflare bloqueando sites de vírus e golpes. Troca o DNS de todas as placas de rede conectadas (1.1.1.2 e 1.0.0.2). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Cloudflare_Malware)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Bloqueia sites conhecidos por malware (às vezes algum site legítimo cai junto) e pode não funcionar em redes de empresa, escola ou hotel.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1819,6 +2000,9 @@
     "descricao": "Cloudflare bloqueando vírus, golpes e conteúdo adulto. Troca o DNS de todas as placas de rede conectadas (1.1.1.3 e 1.0.0.3). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Cloudflare_Malware_Adult)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Bloqueia sites adultos e de malware para todo o computador; pode não funcionar em redes de empresa, escola ou hotel.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1832,6 +2016,9 @@
     "descricao": "DNS da Cisco (OpenDNS). Troca o DNS de todas as placas de rede conectadas (208.67.222.222 e 208.67.220.220). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Open_DNS)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Algumas redes (empresa, escola, Wi-Fi de hotel com página de login) só funcionam com o DNS do próprio roteador.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1845,6 +2032,9 @@
     "descricao": "DNS sem fins lucrativos que bloqueia sites de vírus e golpes. Troca o DNS de todas as placas de rede conectadas (9.9.9.9 e 149.112.112.112). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Quad9)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Bloqueia sites conhecidos por malware e pode não funcionar em redes de empresa, escola ou hotel.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1858,6 +2048,9 @@
     "descricao": "AdGuard bloqueando propaganda e rastreadores em todo o PC. Troca o DNS de todas as placas de rede conectadas (94.140.14.14 e 94.140.15.15). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - AdGuard_Ads_Trackers)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Bloqueia anúncios e rastreadores no computador todo: algum site ou app pode quebrar (botão que não carrega, vídeo que não toca).",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": ["Privacidade"],
     "mudancas": [
@@ -1871,6 +2064,9 @@
     "descricao": "AdGuard bloqueando propaganda, rastreadores, vírus e conteúdo adulto. Troca o DNS de todas as placas de rede conectadas (94.140.14.15 e 94.140.15.16). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - AdGuard_Ads_Trackers_Malware_Adult)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Bloqueia anúncios, sites adultos e força a busca segura: algum site ou app pode quebrar.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -1884,6 +2080,9 @@
     "descricao": "Mede o tempo de resposta do Google e da Cloudflare daqui e usa o que respondeu mais rápido. Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Fastest)",
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Algumas redes (empresa, escola, Wi-Fi de hotel com página de login) só funcionam com o DNS do próprio roteador.",
+    "seAcontecer": "Desfaça na página Ajustes (o DNS volta para o automático).",
     "requerAdmin": true,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1897,6 +2096,9 @@
     "descricao": "Políticas do Edge: sem atalho novo na área de trabalho, sem compras, Rewards, coleções, recomendações, primeira execução e envio de dados. O Edge passa a dizer \"gerenciado pela sua organização\". (WinUtil: Microsoft Edge - Debloat)",
     "categoria": "Navegadores",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "O Edge passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é assim que o Windows aplica essas regras).",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Notebook", "Privacidade"],
     "mudancas": [
@@ -1926,6 +2128,9 @@
     "descricao": "Políticas do Brave: sem Rewards, carteira, VPN, IA (Leo), notícias, Talk, Tor e envio de estatísticas. (WinUtil: Brave Browser - Debloat)",
     "categoria": "Navegadores",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "O Brave passa a mostrar \"Gerenciado pela sua organização\" e alguns recursos (carteira, VPN, Leo) somem.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -1950,6 +2155,9 @@
     "descricao": "Desliga o Copilot, as capturas do Recall, a IA do Bloco de Notas e o serviço de IA, e desinstala o app Copilot. Desfazer reinstala o Copilot pela Store. (WinUtil: Windows AI - Disable And Remove)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "O Copilot some e recursos de IA do Windows (Recall, IA no Bloco de Notas e no Paint) param de funcionar; atualizações grandes podem trazer parte de volta.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -1973,6 +2181,9 @@
     "descricao": "Desinstala o OneDrive. Seus arquivos que já estão no PC ficam onde estão; os que estão só na nuvem deixam de aparecer (baixe antes o que precisar). Desfazer reinstala pelo winget. (WinUtil: Microsoft OneDrive - Remove)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Alto",
+    "classificacao": "Arriscado",
+    "contratempo": "Arquivos que estavam só na nuvem deixam de aparecer no PC, e a pasta Documentos/Área de Trabalho pode ficar apontando para a pasta do OneDrive.",
+    "seAcontecer": "Desfaça na página Ajustes (reinstala o OneDrive) e entre na conta: os arquivos da nuvem voltam a aparecer.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1991,6 +2202,9 @@
     "descricao": "Desinstala o Edge (o WebView2, usado por outros programas, fica). Diferente do WinUtil, não apaga o seu perfil do Edge (favoritos e senhas). Links de alguns lugares do Windows podem não abrir. Desfazer reinstala pelo winget. (WinUtil: Microsoft Edge - Remove)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Alto",
+    "classificacao": "Arriscado",
+    "contratempo": "Links de alguns lugares do Windows (ajuda, widgets, busca) não abrem, e alguns programas que abrem páginas pelo Edge reclamam.",
+    "seAcontecer": "Desfaça na página Ajustes (reinstala o Edge pelo winget) ou baixe em microsoft.com/edge.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2009,6 +2223,9 @@
     "descricao": "Libera os ~7 GB que o Windows guarda para atualizações. Com o disco cheio, uma atualização grande pode falhar. (WinUtil: Disable Reserved Storage)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Com o disco quase cheio, uma atualização grande do Windows pode falhar por falta de espaço.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -2027,6 +2244,9 @@
     "descricao": "Junta os serviços do Windows em menos processos svchost.exe (o Gerenciador de Tarefas fica mais limpo; usa um pouco menos de memória). Se um serviço travar, leva junto os do mesmo grupo. (WinUtil: svchost.exe Splitting - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Se um serviço travar, derruba junto os outros do mesmo processo (som, rede ou Wi-Fi podem cair juntos).",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2045,6 +2265,9 @@
     "descricao": "Só para quem usa Windows e Linux no mesmo PC: acaba com a hora errada ao trocar de sistema. Sem Linux, o relógio fica errado. (WinUtil: Set Time to UTC)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Sem Linux no mesmo computador, o relógio do Windows fica com a hora errada (adiantado ou atrasado algumas horas).",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois acerte a hora em Configurações > Hora e idioma > Sincronizar agora.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2058,6 +2281,9 @@
     "descricao": "Resolve tela piscando ou travadinhas em alguns PCs com placas NVIDIA/AMD e vários monitores. Sem esse problema, deixe como está. (WinUtil: Multiplane Overlay - Disabled)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Em PCs sem o problema de tela piscando, pode deixar vídeos e jogos em janela um pouco mais pesados.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -2071,6 +2297,9 @@
     "descricao": "Desliga o recurso opcional Recall (as capturas de tela da IA), nos PCs que têm. Vale depois de reiniciar. (WinUtil: parte do Windows AI - Disable And Remove)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "O Recall (linha do tempo de capturas da IA) deixa de existir nos PCs Copilot+.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -2089,6 +2318,9 @@
     "descricao": "Como o anterior, e também desliga as sobreposições no driver de vídeo. Só se o modo de compatibilidade não resolveu. Escolha só um dos dois. (WinUtil: Multiplane Overlay - Fully Disabled)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Além do anterior, mexe no driver de vídeo: em alguns PCs piora o desempenho de vídeo ou a tela fica preta por um instante ao trocar de janela.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2103,6 +2335,9 @@
     "descricao": "Impede o Windows de instalar o Razer Synapse e afins quando você conecta um periférico Razer (o hardware funciona sem). Também para o Windows Update de buscar drivers e apps de fabricante para aparelhos novos. (WinUtil: Razer Software Auto-Install - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "O Windows Update também para de instalar sozinho apps e drivers de fabricante para aparelhos novos (impressoras, controles, webcams).",
+    "seAcontecer": "Instale o driver pelo site do fabricante, ou desfaça na página Ajustes.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2123,6 +2358,9 @@
     "descricao": "Impede o Windows Update de reinstalar o assistente de download da Logitech que vem junto com os drivers. Mouse e teclado continuam funcionando. (WinUtil: Logitech Download Assistant Auto-Install - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "O assistente da Logitech não reinstala sozinho; para usar o Logi Options+ ou G HUB, instale pelo site da Logitech.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2142,6 +2380,9 @@
     "descricao": "Baixa o O&O ShutUp10++ (cerca de 82 MB) do site da O&O, confere a assinatura digital e abre. Nada é instalado; ele fica em %LOCALAPPDATA%\\Tamandua\\ooshutup. O que você mudar nele é por conta dele, não do Tamanduá. (WinUtil: O&O ShutUp10++ - Run)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "O O&O ShutUp10++ tem opções que desligam proteções e atualizações do Windows; o que você mudar nele não aparece no Histórico do Tamanduá.",
+    "seAcontecer": "No próprio O&O ShutUp10++: menu Ações > \"Desfazer todas as alterações\", ou use o ponto de restauração.",
     "requerAdmin": false,
     "presets": [],
     "executar": "$pasta = Join-Path (Get-TmdPastaDados) 'ooshutup'; [void][IO.Directory]::CreateDirectory($pasta); $exe = Join-Path $pasta 'OOSU10.exe'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -UseBasicParsing -TimeoutSec 180 -Uri 'https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe' -OutFile $exe; $a = Get-AuthenticodeSignature -FilePath $exe; if ([string]$a.Status -ne 'Valid' -or [string]$a.SignerCertificate.Subject -notmatch 'O&O Software') { [IO.File]::Delete($exe); throw ('o arquivo baixado não tem a assinatura da O&O (' + $a.Status + '); foi apagado') }; Start-Process -FilePath $exe"
@@ -2153,6 +2394,9 @@
     "descricao": "Abre arquivos .rdp sem a pergunta sobre arquivos não assinados. Um .rdp malicioso também abre sem aviso. (WinUtil: RDP Unsigned File Warnings - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Um arquivo .rdp malicioso (por e-mail, por exemplo) abre sem nenhum aviso.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2167,6 +2411,9 @@
     "descricao": "Mantém o IPv6 ligado, mas usa IPv4 primeiro (resolve lentidão em algumas redes). Escolha só um dos três ajustes de IPv6. (WinUtil: IPv6 - Set IPv4 as Preferred)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Serviços que funcionam melhor por IPv6 podem ficar um pouco mais lentos.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2180,6 +2427,9 @@
     "descricao": "Desliga o túnel IPv6 sobre IPv4. Pode ajudar a conexão de jogos online; o Xbox app pode reclamar de NAT. Escolha só um dos três ajustes de IPv6. (WinUtil: Teredo - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "O app Xbox pode mostrar \"NAT estrito / Teredo não qualifica\" e o chat de grupo do Xbox pode falhar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2199,6 +2449,9 @@
     "descricao": "Desliga o IPv6 em todas as placas de rede. Algumas redes e serviços (e partes do próprio Windows) esperam IPv6. Escolha só um dos três ajustes de IPv6. (WinUtil: IPv6 - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Alto",
+    "classificacao": "Arriscado",
+    "contratempo": "Algumas redes e serviços (e partes do próprio Windows, como o Grupo Doméstico e o Xbox) param de funcionar ou ficam lentos.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2218,6 +2471,9 @@
     "descricao": "Baixa a lista de endereços da Adobe (Ruddernation-Designs/Adobe-URL-Block-List) e bloqueia no arquivo hosts. Só entram linhas que bloqueiam um endereço (0.0.0.0 ou 127.0.0.1 + nome); desfazer tira exatamente o que foi posto. (WinUtil: Adobe URL Block List)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Programas da Adobe instalados de verdade (pagos) param de validar a licença e de atualizar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2236,6 +2492,9 @@
     "descricao": "Troca o modo de espera moderno pelo S3: o PC suspende de verdade e não acorda sozinho na mochila. Em muitos notebooks novos o S3 não existe e a suspensão para de funcionar. (WinUtil: S3 Sleep)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Alto",
+    "classificacao": "Arriscado",
+    "contratempo": "Em muitos notebooks novos o S3 não existe: a suspensão para de funcionar ou o notebook não acorda (precisa desligar no botão).",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador. Se ele não acordar da suspensão, segure o botão de ligar até desligar e então desfaça.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2249,6 +2508,9 @@
     "descricao": "O Defender deixa de enviar arquivos suspeitos para análise na nuvem da Microsoft. Mais privacidade, mas a proteção contra ameaças novas fica mais fraca. (WinUtil: parte do Telemetry)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Alto",
+    "classificacao": "Arriscado",
+    "contratempo": "O Defender demora mais a reconhecer vírus novos, que ainda não estão na lista dele.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2267,6 +2529,9 @@
     "descricao": "Descriptografa o disco C: (leva tempo e o disco fica legível por quem pegar o PC). Desfazer liga de novo só com o TPM: para ter a chave de recuperação, religue pelas Configurações. (WinUtil: BitLocker - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Alto",
+    "classificacao": "Arriscado",
+    "contratempo": "O disco fica sem criptografia: quem pegar o computador (ou o SSD) consegue ler seus arquivos. A descriptografia leva tempo.",
+    "seAcontecer": "Para criptografar de novo com chave de recuperação: Configurações > Privacidade e segurança > Criptografia do dispositivo (ou BitLocker no Painel de Controle).",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2285,6 +2550,9 @@
     "descricao": "O núcleo não vai para o arquivo de paginação e a memória não junta páginas iguais. Só faz sentido com bastante RAM (16 GB ou mais). (Atlas: Disable Paging Settings)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Com pouca memória (8 GB ou menos) o computador pode ficar mais lento ou fechar programas por falta de RAM.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2299,6 +2567,7 @@
     "descricao": "Manda sugestões e relatórios de erro para a Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Feedback Hub)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
@@ -2312,6 +2581,7 @@
     "descricao": "Guias e suporte da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Get Help)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
@@ -2325,6 +2595,7 @@
     "descricao": "O novo Outlook que vem com o Windows (o do Office não é afetado). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Outlook for Windows)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -2338,6 +2609,7 @@
     "descricao": "Teams pessoal/trabalho. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Microsoft Teams)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -2351,6 +2623,7 @@
     "descricao": "Editor de vídeo online da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Clipchamp)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
@@ -2364,6 +2637,7 @@
     "descricao": "Atalho para os apps e propaganda do Microsoft 365 (o Office instalado não é afetado). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Microsoft 365)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
@@ -2377,6 +2651,9 @@
     "descricao": "Player de música e vídeo do Windows. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Media Player)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Arquivos de música e vídeo deixam de ter um programa padrão para abrir.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Media Player\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2390,6 +2667,7 @@
     "descricao": "Integração do Bing com a busca do Windows. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Bing Search)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
@@ -2403,6 +2681,7 @@
     "descricao": "Acesso remoto para alguém te ajudar (também usado em golpes). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Quick Assist)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Remover apps"],
     "mudancas": [
@@ -2416,6 +2695,7 @@
     "descricao": "Painel para programadores (descontinuado pela Microsoft). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Dev Home)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
@@ -2429,6 +2709,9 @@
     "descricao": "Liga o celular ao PC (câmera, notificações). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Mobile Devices)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Recursos de celular no Windows (fotos e mensagens do celular no PC) param de funcionar.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Dispositivos Móveis\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2442,6 +2725,7 @@
     "descricao": "Lista de tarefas da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: To Do)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Remover apps"],
     "mudancas": [
@@ -2455,6 +2739,7 @@
     "descricao": "Automação de tarefas da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Power Automate)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
@@ -2468,6 +2753,9 @@
     "descricao": "Mensagens, fotos e chamadas do celular no PC. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Phone Link)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Não dá mais para ver mensagens, chamadas e fotos do celular no computador.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Vincular ao Celular\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2481,6 +2769,9 @@
     "descricao": "Notinhas na área de trabalho. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Sticky Notes)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "As notas autoadesivas somem do computador (se você entrou com a conta Microsoft, continuam salvas na nuvem).",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Notas Autoadesivas\").",
     "requerAdmin": true,
     "presets": ["Remover apps"],
     "mudancas": [
@@ -2494,6 +2785,7 @@
     "descricao": "Grava áudio do microfone. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Sound Recorder)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Remover apps"],
     "mudancas": [
@@ -2507,6 +2799,9 @@
     "descricao": "Alarmes, timer, cronômetro e sessões de foco. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Clock)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Alarmes, temporizador e cronômetro do Windows param de funcionar.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Relógio\").",
     "requerAdmin": true,
     "presets": ["Remover apps"],
     "mudancas": [
@@ -2520,6 +2815,9 @@
     "descricao": "O Paint. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Paint)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Imagens que abriam no Paint ficam sem programa para editar.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Paint\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2533,6 +2831,9 @@
     "descricao": "O Bloco de Notas (o antigo notepad.exe continua no sistema). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Notepad)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Arquivos .txt e de configuração ficam sem programa padrão para abrir.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Bloco de Notas\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2546,6 +2847,9 @@
     "descricao": "Print de tela com Win+Shift+S. Sem ele, o atalho para de funcionar. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Snipping Tool)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Win+Shift+S e a tecla Print Screen param de abrir a captura de tela.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Ferramenta de Captura\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2559,6 +2863,7 @@
     "descricao": "O app do Copilot. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Copilot)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade", "Remover apps"],
     "mudancas": [
@@ -2572,6 +2877,9 @@
     "descricao": "A Calculadora. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Calculator)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "A calculadora some (inclusive a tecla de calculadora do teclado).",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Calculadora\").",
     "requerAdmin": true,
     "presets": ["Remover apps"],
     "mudancas": [
@@ -2585,6 +2893,9 @@
     "descricao": "App da webcam. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Camera)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "O app Câmera some (a webcam continua funcionando em chamadas de vídeo).",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Câmera\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2598,6 +2909,9 @@
     "descricao": "Visualizador de fotos padrão. Sem ele, imagens abrem em outro programa. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Photos)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Fotos e imagens ficam sem programa padrão para abrir.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Fotos\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2611,6 +2925,7 @@
     "descricao": "Notícias do MSN. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: News)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
@@ -2624,6 +2939,7 @@
     "descricao": "Previsão do tempo do MSN. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Weather)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade", "Remover apps"],
     "mudancas": [
@@ -2637,6 +2953,9 @@
     "descricao": "Loja e Game Pass do Xbox no PC. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Xbox App)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Atencao",
+    "contratempo": "Jogos do Game Pass para PC e da loja Xbox não abrem nem instalam.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"App Xbox\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2650,6 +2969,9 @@
     "descricao": "Barra de jogo (Win+G): gravação, desempenho, chat. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Xbox Game Bar)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Win+G não abre nada e a gravação de jogos para de funcionar.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Xbox Game Bar\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2663,6 +2985,9 @@
     "descricao": "Login da conta Xbox em jogos do PC. Sem ele, jogos com conta Xbox não entram. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Xbox Identity Provider)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Arriscado",
+    "contratempo": "Jogos que usam a conta Xbox (Minecraft, Forza, Sea of Thieves, Game Pass) não conseguem entrar na conta e muitos nem abrem.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Provedor de identidade Xbox\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2676,6 +3001,7 @@
     "descricao": "Legendas de voz do chat de jogos. Remove para todos os usuários e das contas novas. Não está na Microsoft Store: o app Xbox reinstala quando precisar. (WinUtil: Xbox Speech To Text Overlay)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2689,6 +3015,9 @@
     "descricao": "Telas de amigos e convites do Xbox dentro dos jogos. Remove para todos os usuários e das contas novas. Não está na Microsoft Store: o app Xbox reinstala quando precisar. (WinUtil: Xbox TCUI)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Medio",
+    "classificacao": "Atencao",
+    "contratempo": "Jogos que usam a conta Xbox (Minecraft, Forza, Sea of Thieves) podem não conseguir entrar na conta.",
+    "seAcontecer": "Instale de novo pela Microsoft Store (procure por \"Xbox TCUI\").",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2702,6 +3031,7 @@
     "descricao": "Conteúdo e recomendações do menu Iniciar. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Start Experiences App)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
@@ -2715,6 +3045,7 @@
     "descricao": "Paciência e outros jogos de cartas (com propaganda). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Solitaire Collection)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Recomendado",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
@@ -2728,6 +3059,7 @@
     "descricao": "Player e loja de vídeos. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Movies & TV)",
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
+    "classificacao": "Opcional",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [

@@ -64,6 +64,23 @@ Describe 'Menu de contexto' {
         @($alvos | ForEach-Object Estado | Select-Object -Unique) | Should -Be 'NaoAplicado'
         ($alvos | Where-Object Id -eq 'menu-compartilhar').Presets | Should -Contain 'Recomendado'
         ($alvos | Where-Object Id -eq 'menu-ext-11111111-2222-3333-4444-555555555555').Presets | Should -Be @('Limpo ao máximo')
+        # Classificação: o que quase ninguém usa é Recomendado; item de programa é Opcional e diz que o programa continua.
+        ($alvos | Where-Object Id -eq 'menu-compartilhar').Classificacao | Should -Be 'Recomendado'
+        $prog = $alvos | Where-Object Id -eq 'menu-cmd-git-shell'
+        $prog.Classificacao | Should -Be 'Opcional'
+        $prog.Contratempo | Should -Match 'continua instalado'
+        foreach ($a in $alvos) { $a.Classificacao | Should -BeIn @('Recomendado', 'Opcional', 'Atencao', 'Arriscado') -Because $a.Id }
+    }
+
+    It 'itens do Windows com risco médio são Atenção, com o contratempo de cada um' {
+        InModuleScope menu-contexto {
+            foreach ($i in $script:ItensWindows | Where-Object { $_.ContainsKey('Risco') }) {
+                $c = Get-ClassificacaoItem -Item $i
+                $c.Classificacao | Should -Be 'Atencao' -Because $i.Id
+                $c.Contratempo | Should -Not -BeNullOrEmpty -Because $i.Id
+                $c.SeAcontecer | Should -Match 'Desfaça'
+            }
+        }
     }
 
     It 'tira e devolve: extensão bloqueada pelo CLSID (64 e 32 bits) e comando escondido nos dois lugares' {

@@ -104,7 +104,8 @@ function ConvertTo-LinhaAlvo {
                     -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
                     -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 }) `
                     -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent `
-                    -IconePng (Get-ValorPropriedade $a 'IconePng')))
+                    -IconePng (Get-ValorPropriedade $a 'IconePng') -Classe ([string](Get-ValorPropriedade $a 'Classificacao')) `
+                    -Estrela ((Get-ValorPropriedade $a 'Estrela') -eq $true)))
     }
     , $linhas.ToArray()
 }
@@ -118,15 +119,88 @@ function New-LinhaAlvo {
         # Em página de módulo que escreve, item sem caixa ainda guarda o espaço dela (as colunas não desalinham).
         [bool]$ReservaCaixa = $false,
         # Grade: ícone em PNG (vira imagem na janela, em Set-TmdImagensLinha); sem ícone, o quadro mostra a inicial do nome.
-        [byte[]]$IconePng = $null
+        [byte[]]$IconePng = $null,
+        # Ajustes: Recomendado, Opcional, Atencao ou Arriscado (selo colorido). Programas: estrela do FMHY.
+        [string]$Classe = '', [bool]$Estrela = $false
     )
     $inicial = if ($Nome) { $Nome.Trim().Substring(0, 1).ToUpperInvariant() } else { '' }
+    $rotulo = if ($script:RotuloClasse.ContainsKey($Classe)) { $script:RotuloClasse[$Classe] } else { '' }
     [pscustomobject]@{
         Tipo = $Tipo; Id = $Id; Nome = $Nome; Categoria = $Categoria; Detalhe = $Detalhe; Estado = $Estado; Nivel = $Nivel
         Valor = $Valor; TemValor = $TemValor; Selo = $Selo; TemSelo = [bool]$Selo; Alvo = $Alvo
         TemCaixa = $TemCaixa; Selecionado = $Selecionado; Tamanho = $Tamanho; RequerAdmin = $RequerAdmin; ReservaCaixa = $ReservaCaixa
         IconePng = $IconePng; Inicial = $inicial; Imagem = $null; TemImagem = $false
+        Classe = $Classe; RotuloClasse = $rotulo; TemClasse = [bool]$rotulo; DicaClasse = $(if ($rotulo) { $script:DicaClasse[$Classe] } else { $null })
+        Estrela = $Estrela
     }
+}
+
+# Pastas de alternativas (como as do menu Iniciar do Windows 11). Fechadas: os itens de um mesmo Grupo (2 ou mais
+# na categoria) viram uma linha 'Pasta' no lugar do primeiro, com até 4 miniaturas. -PastaAberta: só os itens dela,
+# com um título e um quadro 'Voltar'. Só muda o que aparece: a marca de cada item continua no próprio alvo.
+function ConvertTo-LinhasComPastas {
+    param([AllowEmptyCollection()][object[]]$Linhas = @(), [string]$PastaAberta = '')
+    $grupoDe = { param($l) if ($l.Tipo -eq 'Alvo') { [string](Get-ValorPropriedade $l.Alvo 'Grupo') } else { '' } }
+    if ($PastaAberta) {
+        $membros = @($Linhas | Where-Object { (& $grupoDe $_) -eq $PastaAberta })
+        if ($membros.Count -eq 0) { return , $Linhas }
+        $saida = @((New-LinhaAlvo -Tipo 'Categoria' -Nome $PastaAberta), (New-LinhaPasta -Tipo 'Voltar' -Nome 'Voltar' -Membros @())) + $membros
+        return , $saida
+    }
+    $contagem = @{}
+    foreach ($l in $Linhas) { $g = & $grupoDe $l; if ($g) { $chave = "$($l.Categoria)|$g"; $contagem[$chave] = 1 + [int]$contagem[$chave] } }
+    $feitas = @{}
+    $saida = [System.Collections.Generic.List[object]]::new()
+    foreach ($l in $Linhas) {
+        $g = & $grupoDe $l
+        $chave = "$($l.Categoria)|$g"
+        if (-not $g -or $contagem[$chave] -lt 2) { $saida.Add($l); continue }
+        if ($feitas.ContainsKey($chave)) { continue }
+        $feitas[$chave] = $true
+        $membros = @($Linhas | Where-Object { $_.Categoria -eq $l.Categoria -and (& $grupoDe $_) -eq $g })
+        $saida.Add((New-LinhaPasta -Tipo 'Pasta' -Nome $g -Categoria $l.Categoria -Membros $membros))
+    }
+    , $saida.ToArray()
+}
+
+function New-LinhaPasta {
+    param([string]$Tipo, [string]$Nome, [string]$Categoria = '', [object[]]$Membros)
+    $marcados = @($Membros | Where-Object Selecionado).Count
+    $selo = if ($Tipo -eq 'Voltar') { '' } elseif ($marcados -gt 0) { "$marcados de $($Membros.Count) marcados" } else { "$($Membros.Count) programas" }
+    $linha = New-LinhaAlvo -Tipo $Tipo -Nome $Nome -Categoria $Categoria -Selo $selo `
+        -Detalhe $(if ($Tipo -eq 'Voltar') { 'Fechar a pasta' } else { "Alternativas: $(($Membros | ForEach-Object Nome) -join ', ')" })
+    if ($Tipo -eq 'Voltar') { $linha.Inicial = [string][char]0x2190 }
+    # Miniaturas: imagens dos primeiros com ícone (objetos .NET puros, como em Set-TmdImagensLinha).
+    $mini = [System.Collections.Generic.List[object]]::new()
+    foreach ($m in $Membros) { if ($m.TemImagem -and $mini.Count -lt 4) { $mini.Add($m.Imagem) } }
+    $linha | Add-Member -NotePropertyName Miniaturas -NotePropertyValue $mini.ToArray()
+    $linha | Add-Member -NotePropertyName Membros -NotePropertyValue $Membros
+    $linha
+}
+
+# Texto do painel de detalhes: descrição, classificação, o que pode dar errado e como resolver, e o que acontece.
+function Get-TextoDetalheAlvo {
+    param([Parameter(Mandatory)]$Linha)
+    $partes = [System.Collections.Generic.List[string]]::new()
+    $partes.Add([string]$Linha.Detalhe)
+    if ($Linha.Estrela) { $partes.Add("$([char]0x2B50) Recomendado pelo FMHY.") }
+    if ($Linha.TemClasse) { $partes.Add("$($Linha.RotuloClasse): $($script:DicaClasse[$Linha.Classe])") }
+    $contra = [string](Get-ValorPropriedade $Linha.Alvo 'Contratempo')
+    $seAc = [string](Get-ValorPropriedade $Linha.Alvo 'SeAcontecer')
+    if ($contra) { $partes.Add("Pode dar problema:`n$contra") }
+    if ($seAc) { $partes.Add("Se acontecer:`n$seAc") }
+    $mudancas = @(Get-ValorPropriedade $Linha.Alvo 'Mudancas' | Where-Object { $_ })
+    if ($mudancas.Count -gt 0) { $partes.Add("O que acontece:`n• $($mudancas -join "`n• ")") }
+    ($partes | Where-Object { $_ }) -join "`n`n"
+}
+
+# Os quatro selos de classificação dos ajustes, com a explicação que aparece ao parar o mouse em cima.
+$script:RotuloClasse = @{ Recomendado = 'Recomendado'; Opcional = 'Opcional'; Atencao = 'Atenção'; Arriscado = 'Arriscado' }
+$script:DicaClasse = @{
+    Recomendado = 'Bom para quase todo mundo, sem efeito colateral que se note.'
+    Opcional    = 'Questão de gosto: não atrapalha nada.'
+    Atencao     = 'Funciona, mas pode dar um contratempo em certos casos. Veja nos detalhes o que pode acontecer e como resolver.'
+    Arriscado   = 'Mexe em segurança ou em algo que o Windows usa por baixo. Só se souber o que está fazendo; veja nos detalhes.'
 }
 
 # Igual ao Format-TmdTamanho do núcleo; a interface não carrega o núcleo na thread da janela.
@@ -157,6 +231,9 @@ function Get-ResumoSelecao {
         Reversiveis     = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Reversivel') -eq $true }).Count
         NaLixeira       = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Destino') -eq 'Lixeira' }).Count
         Desfazendo      = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Desfaz') -eq $true }).Count
+        # Arriscados que vão ser aplicados (desfazer um arriscado só volta ao normal).
+        Arriscados      = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Classificacao') -eq 'Arriscado' -and (Get-ValorPropriedade $_ 'Desfaz') -ne $true } |
+                ForEach-Object { [string](Get-ValorPropriedade $_ 'Nome') })
     }
 }
 
@@ -164,7 +241,9 @@ function Get-ResumoSelecao {
 function Get-AvisoConfirmacao {
     param([Parameter(Mandatory)]$Resumo, [bool]$Especial)
     $desfaz = if ((Get-ValorPropriedade $Resumo 'Desfazendo') -gt 0) { " $($Resumo.Desfazendo) já aplicado(s) será(ão) DESFEITO(S)." } else { '' }
-    $desfaz + (Get-AvisoReversao -Resumo $Resumo -Especial $Especial)
+    $arriscados = @(Get-ValorPropriedade $Resumo 'Arriscados' | Where-Object { $_ })
+    $risco = if ($arriscados.Count -gt 0) { " ARRISCADO ($($arriscados.Count)): $($arriscados -join ', ') — veja nos detalhes o que pode dar errado." } else { '' }
+    $risco + $desfaz + (Get-AvisoReversao -Resumo $Resumo -Especial $Especial)
 }
 
 function Get-AvisoReversao {

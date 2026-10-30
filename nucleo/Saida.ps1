@@ -30,6 +30,13 @@ $script:RotuloEstadoAlvo = @{ Aplicado = 'aplicado'; NaoAplicado = 'não aplicad
 $script:CorEstadoAlvo = @{ Aplicado = 'Green'; NaoAplicado = 'DarkGray'; Parcial = 'Yellow' }
 
 # Mostra os alvos de um módulo agrupados por Categoria, na ordem em que aparecem.
+$script:ClasseCli = @{
+    Recomendado = @{ Texto = 'Recomendado'; Cor = 'Green' }
+    Opcional    = @{ Texto = 'Opcional'; Cor = 'DarkGray' }
+    Atencao     = @{ Texto = 'Atenção'; Cor = 'Yellow' }
+    Arriscado   = @{ Texto = 'Arriscado'; Cor = 'Red' }
+}
+
 function Write-TmdAlvos {
     [CmdletBinding()]
     param([Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Alvos)
@@ -68,7 +75,13 @@ function Write-TmdAlvos {
             Write-Host ('{0,-15}' -f $selo) -NoNewline -ForegroundColor $corSelo
             if ($selo.Length -ge 15) { Write-Host ' ' -NoNewline }
         }
+        # Classificação dos ajustes ([Atenção], [Arriscado]...) e estrela do FMHY nos programas.
+        $classe = [string](Get-Propriedade -Objeto $a -Nome 'Classificacao')
+        if ($script:ClasseCli.ContainsKey($classe)) { Write-Host "[$($script:ClasseCli[$classe].Texto)] " -NoNewline -ForegroundColor $script:ClasseCli[$classe].Cor }
+        if ((Get-Propriedade -Objeto $a -Nome 'Estrela') -eq $true) { Write-Host '* ' -NoNewline -ForegroundColor Yellow }
         Write-Host ([string](Get-Propriedade -Objeto $a -Nome 'Detalhe')) -ForegroundColor $cor
+        $contra = [string](Get-Propriedade -Objeto $a -Nome 'Contratempo')
+        if ($contra -and $classe -in 'Atencao', 'Arriscado') { Write-Host "      pode dar problema: $contra" -ForegroundColor DarkGray }
     }
 }
 

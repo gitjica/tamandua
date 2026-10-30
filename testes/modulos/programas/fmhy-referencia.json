@@ -1,0 +1,1270 @@
+{
+    "Populares":  [
+                      "discord",
+                      "steam",
+                      "telegram",
+                      "whatsapp",
+                      "chrome",
+                      "epic",
+                      "dotnet6",
+                      "dotnet8",
+                      "dotnet9",
+                      "dotnet10",
+                      "vc2015-32",
+                      "vc2015-64"
+                  ],
+    "Pagos":  [
+                  "1password",
+                  "winrar",
+                  "startallback",
+                  "totalcommander",
+                  "sublimetext",
+                  "internetdownloadmanager",
+                  "mullvadvpn"
+              ],
+    "Inseguros":  [
+                      "untrustedsites",
+                      "fakefitgirlsites",
+                      "fakerevancedsites",
+                      "fake1337xsites"
+                  ],
+    "Programas":  {
+                      "7zip":  {
+                                   "nomes":  [
+                                                 "7-Zip"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "file-tools / Archiving / Compression"
+                               },
+                      "abdownloadmanager":  {
+                                                "nomes":  [
+                                                              "AB Download Manager"
+                                                          ],
+                                                "estrela":  true,
+                                                "onde":  "beginners-guide / Links; file-tools / Download Managers"
+                                            },
+                      "aimp":  {
+                                   "nomes":  [
+                                                 "AIMP"
+                                             ],
+                                   "estrela":  true,
+                                   "onde":  "audio / Audio Players"
+                               },
+                      "audacity":  {
+                                       "nomes":  [
+                                                     "Audacity"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "audio / Audio Editors"
+                                   },
+                      "autohotkey":  {
+                                         "nomes":  [
+                                                       "AutoHotkey"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "system-tools / Task Automation"
+                                     },
+                      "bitwarden":  {
+                                        "nomes":  [
+                                                      "Bitwarden"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "internet-tools / Password Managers"
+                                    },
+                      "blender":  {
+                                      "nomes":  [
+                                                    "Blender"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "image-tools / 3D Modeling Apps; video-tools / Video Editors; video-tools / Animation Tools"
+                                  },
+                      "brave":  {
+                                    "nomes":  [
+                                                  "Brave"
+                                              ],
+                                    "estrela":  false,
+                                    "onde":  "privacy / Browser Privacy"
+                                },
+                      "bulkcrapuninstaller":  {
+                                                  "nomes":  [
+                                                                "Bulk Crap Uninstaller"
+                                                            ],
+                                                  "estrela":  true,
+                                                  "onde":  "system-tools"
+                                              },
+                      "calibre":  {
+                                      "nomes":  [
+                                                    "Calibre"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "reading; reading / E-Reader Tools"
+                                  },
+                      "cemu":  {
+                                   "nomes":  [
+                                                 "Cemu"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "educational / Calculators"
+                               },
+                      "chatgpt":  {
+                                      "nomes":  [
+                                                    "ChatGPT"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "ai / Official Model Sites"
+                                  },
+                      "chatterino":  {
+                                         "nomes":  [
+                                                       "Chatterino"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "social-media-tools / Twitch Players"
+                                     },
+                      "claude":  {
+                                     "nomes":  [
+                                                   "Claude"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "ai / Official Model Sites"
+                                 },
+                      "cpuz":  {
+                                   "nomes":  [
+                                                 "CPU-Z"
+                                             ],
+                                   "estrela":  true,
+                                   "onde":  "system-tools"
+                               },
+                      "crystaldiskinfo":  {
+                                              "nomes":  [
+                                                            "Crystal Disk Info"
+                                                        ],
+                                              "estrela":  false,
+                                              "onde":  "system-tools / Disk Tools"
+                                          },
+                      "crystaldiskmark":  {
+                                              "nomes":  [
+                                                            "Crystal Disk Mark"
+                                                        ],
+                                              "estrela":  true,
+                                              "onde":  "system-tools / Disk Tools"
+                                          },
+                      "ddu":  {
+                                  "nomes":  [
+                                                "Display Driver Uninstaller"
+                                            ],
+                                  "estrela":  false,
+                                  "onde":  "system-tools / GPU Tools"
+                              },
+                      "dorion":  {
+                                     "nomes":  [
+                                                   "Dorion"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "social-media-tools / Discord Clients"
+                                 },
+                      "dropbox":  {
+                                      "nomes":  [
+                                                    "Dropbox"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "file-tools / Cloud Storage"
+                                  },
+                      "eartrumpet":  {
+                                         "nomes":  [
+                                                       "EarTrumpet"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "system-tools / System Tweaks"
+                                     },
+                      "enteauth":  {
+                                       "nomes":  [
+                                                     "Ente Auth"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "privacy / Password Privacy / 2FA"
+                                   },
+                      "files":  {
+                                    "nomes":  [
+                                                  "Files"
+                                              ],
+                                    "estrela":  false,
+                                    "onde":  "file-tools / File Managers"
+                                },
+                      "fileconverter":  {
+                                            "nomes":  [
+                                                          "File Converter"
+                                                      ],
+                                            "estrela":  true,
+                                            "onde":  "file-tools / File Converters; image-tools / Image Converters"
+                                        },
+                      "firefox":  {
+                                      "nomes":  [
+                                                    "Firefox"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "internet-tools / Firefox Tools"
+                                  },
+                      "flux":  {
+                                   "nomes":  [
+                                                 "F.lux"
+                                             ],
+                                   "estrela":  true,
+                                   "onde":  "system-tools / Monitor Tools"
+                               },
+                      "foobar":  {
+                                     "nomes":  [
+                                                   "foobar2000"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "audio / Audio Players"
+                                 },
+                      "gimp":  {
+                                   "nomes":  [
+                                                 "GIMP"
+                                             ],
+                                   "estrela":  true,
+                                   "onde":  "image-tools / Editing Software"
+                               },
+                      "git":  {
+                                  "nomes":  [
+                                                "Git"
+                                            ],
+                                  "estrela":  false,
+                                  "onde":  "developer-tools / Git Tools"
+                              },
+                      "githubdesktop":  {
+                                            "nomes":  [
+                                                          "GitHub Desktop"
+                                                      ],
+                                            "estrela":  true,
+                                            "onde":  "developer-tools / GitHub Tools"
+                                        },
+                      "gog":  {
+                                  "nomes":  [
+                                                "GOG Galaxy"
+                                            ],
+                                  "estrela":  false,
+                                  "onde":  "gaming-tools / Game Launchers"
+                              },
+                      "googledrive":  {
+                                          "nomes":  [
+                                                        "Google Drive"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "file-tools / Cloud Storage"
+                                      },
+                      "gpuz":  {
+                                   "nomes":  [
+                                                 "GPU-Z"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "system-tools"
+                               },
+                      "helium":  {
+                                     "nomes":  [
+                                                   "Helium"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "educational / Study Tools; privacy / Browser Privacy"
+                                 },
+                      "handbrake":  {
+                                        "nomes":  [
+                                                      "HandBrake"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "video-tools / Processing / Encoding"
+                                    },
+                      "heroic":  {
+                                     "nomes":  [
+                                                   "Heroic Games Launcher"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "gaming-tools / Game Launchers; gaming-tools / Client Tools"
+                                 },
+                      "hwinfo":  {
+                                     "nomes":  [
+                                                   "HWiNFO"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "system-tools / Hardware Monitors"
+                                 },
+                      "hwmonitor":  {
+                                        "nomes":  [
+                                                      "HWMonitor"
+                                                  ],
+                                        "estrela":  false,
+                                        "onde":  "system-tools / Hardware Monitors"
+                                    },
+                      "imhex":  {
+                                    "nomes":  [
+                                                  "ImHex"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "developer-tools"
+                                },
+                      "imageglass":  {
+                                         "nomes":  [
+                                                       "ImageGlass"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "image-tools / Image Viewers"
+                                     },
+                      "irfanview":  {
+                                        "nomes":  [
+                                                      "IrfanView"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "image-tools / Image Viewers"
+                                    },
+                      "itch":  {
+                                   "nomes":  [
+                                                 "Itch.io"
+                                             ],
+                                   "estrela":  true,
+                                   "onde":  "gaming / Indie Games"
+                               },
+                      "jellyfinmediaplayer":  {
+                                                  "nomes":  [
+                                                                "Jellyfin Media Player",
+                                                                "Jellyfin"
+                                                            ],
+                                                  "estrela":  true,
+                                                  "onde":  "video-tools"
+                                              },
+                      "jellyfinserver":  {
+                                             "nomes":  [
+                                                           "Jellyfin Server",
+                                                           "Jellyfin"
+                                                       ],
+                                             "estrela":  true,
+                                             "onde":  "video-tools"
+                                         },
+                      "jpegview":  {
+                                       "nomes":  [
+                                                     "JPEG View"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "image-tools / Image Viewers"
+                                   },
+                      "joplin":  {
+                                     "nomes":  [
+                                                   "Joplin"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "text-tools / Note-Taking"
+                                 },
+                      "keepassxc":  {
+                                        "nomes":  [
+                                                      "KeePassXC"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "internet-tools / Password Managers; privacy / Password Privacy / 2FA"
+                                    },
+                      "kodi":  {
+                                   "nomes":  [
+                                                 "Kodi Media Center",
+                                                 "Kodi"
+                                             ],
+                                   "estrela":  true,
+                                   "onde":  "video-tools; video"
+                               },
+                      "libreoffice":  {
+                                          "nomes":  [
+                                                        "LibreOffice"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "text-tools / Office Suites"
+                                      },
+                      "librewolf":  {
+                                        "nomes":  [
+                                                      "LibreWolf"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "privacy / Browser Privacy"
+                                    },
+                      "localsend":  {
+                                        "nomes":  [
+                                                      "LocalSend"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "file-tools"
+                                    },
+                      "mpc-qt":  {
+                                     "nomes":  [
+                                                   "mpc-qt"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "video-tools"
+                                 },
+                      "mpv":  {
+                                  "nomes":  [
+                                                "mpv"
+                                            ],
+                                  "estrela":  true,
+                                  "onde":  "video-tools"
+                              },
+                      "matrix":  {
+                                     "nomes":  [
+                                                   "Element"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "audio / Audio Editors"
+                                 },
+                      "minitoolpartitionwizard":  {
+                                                      "nomes":  [
+                                                                    "MiniTool Partition Wizard"
+                                                                ],
+                                                      "estrela":  false,
+                                                      "onde":  "system-tools / Disk Tools"
+                                                  },
+                      "modrinth":  {
+                                       "nomes":  [
+                                                     "Modrinth App"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "gaming-tools / Minecraft Mods"
+                                   },
+                      "moonlight":  {
+                                        "nomes":  [
+                                                      "Moonlight"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "developer-tools; gaming-tools; system-tools / Remote Desktop"
+                                    },
+                      "mpchc":  {
+                                    "nomes":  [
+                                                  "MPC-HC"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "video-tools"
+                                },
+                      "msedgeredirect":  {
+                                             "nomes":  [
+                                                           "MSEdgeRedirect"
+                                                       ],
+                                             "estrela":  false,
+                                             "onde":  "system-tools / System Tweaks"
+                                         },
+                      "msiafterburner":  {
+                                             "nomes":  [
+                                                           "MSI Afterburner"
+                                                       ],
+                                             "estrela":  true,
+                                             "onde":  "gaming-tools / Optimization Tools"
+                                         },
+                      "mullvadbrowser":  {
+                                             "nomes":  [
+                                                           "Mullvad Browser"
+                                                       ],
+                                             "estrela":  true,
+                                             "onde":  "privacy / Browser Privacy"
+                                         },
+                      "nomacs":  {
+                                     "nomes":  [
+                                                   "nomacs"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "image-tools / Image Viewers"
+                                 },
+                      "nanazip":  {
+                                      "nomes":  [
+                                                    "NanaZip"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "file-tools / Archiving / Compression"
+                                  },
+                      "netbird":  {
+                                      "nomes":  [
+                                                    "NetBird"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "privacy / VPN Server"
+                                  },
+                      "tailscale":  {
+                                        "nomes":  [
+                                                      "Tailscale"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "privacy / VPN Server"
+                                    },
+                      "naps2":  {
+                                    "nomes":  [
+                                                  "NAPS2"
+                                              ],
+                                    "estrela":  false,
+                                    "onde":  "text-tools"
+                                },
+                      "nextclouddesktop":  {
+                                               "nomes":  [
+                                                             "Nextcloud Desktop",
+                                                             "NextCloud"
+                                                         ],
+                                               "estrela":  true,
+                                               "onde":  "internet-tools; misc / Collaboration Platforms"
+                                           },
+                      "nmap":  {
+                                   "nomes":  [
+                                                 "Nmap"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "developer-tools"
+                               },
+                      "notepadpp":  {
+                                        "nomes":  [
+                                                      "Notepad++"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "text-tools; text-tools / Online Editors"
+                                    },
+                      "nvclean":  {
+                                      "nomes":  [
+                                                    "NVCleanstall"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "system-tools / GPU Tools"
+                                  },
+                      "obs":  {
+                                  "nomes":  [
+                                                "OBS Studio"
+                                            ],
+                                  "estrela":  true,
+                                  "onde":  "video-tools / Screen Recording; video-tools / Live Streaming"
+                              },
+                      "obsidian":  {
+                                       "nomes":  [
+                                                     "Obsidian"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "gaming / Unblocked Games; text-tools / Note-Taking"
+                                   },
+                      "okular":  {
+                                     "nomes":  [
+                                                   "Okular"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "reading / Ebook Readers"
+                                 },
+                      "onlyoffice":  {
+                                         "nomes":  [
+                                                       "ONLYOFFICE Desktop"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "text-tools / Office Suites"
+                                     },
+                      "openrgb":  {
+                                      "nomes":  [
+                                                    "OpenRGB"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "system-tools"
+                                  },
+                      "ovirtualbox":  {
+                                          "nomes":  [
+                                                        "VirtualBox"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "system-tools / Virtual Machines"
+                                      },
+                      "policyplus":  {
+                                         "nomes":  [
+                                                       "Policy Plus"
+                                                   ],
+                                         "estrela":  false,
+                                         "onde":  "system-tools"
+                                     },
+                      "paintdotnet":  {
+                                          "nomes":  [
+                                                        "Paint.NET"
+                                                    ],
+                                          "estrela":  false,
+                                          "onde":  "image-tools / Editing Software"
+                                      },
+                      "parsec":  {
+                                     "nomes":  [
+                                                   "Parsec"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "system-tools / Remote Desktop"
+                                 },
+                      "peazip":  {
+                                     "nomes":  [
+                                                   "PeaZip"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "file-tools / Archiving / Compression"
+                                 },
+                      "pdf24creator":  {
+                                           "nomes":  [
+                                                         "PDF24 Creator",
+                                                         "PDF24"
+                                                     ],
+                                           "estrela":  true,
+                                           "onde":  "file-tools / Offline PDF Toolkits"
+                                       },
+                      "playnite":  {
+                                       "nomes":  [
+                                                     "Playnite"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "gaming-tools / Game Launchers"
+                                   },
+                      "plex":  {
+                                   "nomes":  [
+                                                 "Plex Media Server"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "video-tools; video / Free w/ Ads"
+                               },
+                      "plexdesktop":  {
+                                          "nomes":  [
+                                                        "Plex Desktop"
+                                                    ],
+                                          "estrela":  false,
+                                          "onde":  "video-tools; video / Free w/ Ads"
+                                      },
+                      "powershell":  {
+                                         "nomes":  [
+                                                       "PowerShell"
+                                                   ],
+                                         "estrela":  false,
+                                         "onde":  "system-tools / Terminal / CLI"
+                                     },
+                      "powertoys":  {
+                                        "nomes":  [
+                                                      "PowerToys"
+                                                  ],
+                                        "estrela":  false,
+                                        "onde":  "system-tools"
+                                    },
+                      "prismlauncher":  {
+                                            "nomes":  [
+                                                          "Prism Launcher"
+                                                      ],
+                                            "estrela":  true,
+                                            "onde":  "gaming-tools / Premium Only Launchers; text-tools / LaTeX Tools"
+                                        },
+                      "processlasso":  {
+                                           "nomes":  [
+                                                         "Process Lasso"
+                                                     ],
+                                           "estrela":  false,
+                                           "onde":  "system-tools"
+                                       },
+                      "protonauth":  {
+                                         "nomes":  [
+                                                       "Proton Authenticator"
+                                                   ],
+                                         "estrela":  false,
+                                         "onde":  "privacy / Password Privacy / 2FA"
+                                     },
+                      "protonmail":  {
+                                         "nomes":  [
+                                                       "Proton Mail"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "privacy / Email Privacy"
+                                     },
+                      "protondrive":  {
+                                          "nomes":  [
+                                                        "Proton Drive"
+                                                    ],
+                                          "estrela":  false,
+                                          "onde":  "file-tools / Cloud Storage"
+                                      },
+                      "protonpass":  {
+                                         "nomes":  [
+                                                       "Proton Pass"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "internet-tools / Password Managers"
+                                     },
+                      "protonvpn":  {
+                                        "nomes":  [
+                                                      "Proton VPN"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "privacy"
+                                    },
+                      "putty":  {
+                                    "nomes":  [
+                                                  "PuTTY"
+                                              ],
+                                    "estrela":  false,
+                                    "onde":  "developer-tools"
+                                },
+                      "qbittorrent":  {
+                                          "nomes":  [
+                                                        "qBittorrent"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "torrenting"
+                                      },
+                      "qownnotes":  {
+                                        "nomes":  [
+                                                      "QOwnNotes"
+                                                  ],
+                                        "estrela":  false,
+                                        "onde":  "text-tools / Note-Taking"
+                                    },
+                      "qtox":  {
+                                   "nomes":  [
+                                                 "QTox"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "privacy / Encrypted Messengers"
+                               },
+                      "revo":  {
+                                   "nomes":  [
+                                                 "Revo Uninstaller"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "system-tools"
+                               },
+                      "rufus":  {
+                                    "nomes":  [
+                                                  "Rufus"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "system-tools / USB / Bootloaders"
+                                },
+                      "sdio":  {
+                                   "nomes":  [
+                                                 "Snappy Driver Installer Origin",
+                                                 "SDIO"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "system-tools"
+                               },
+                      "sharex":  {
+                                     "nomes":  [
+                                                   "ShareX"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "image-tools / Screenshot Tools; video-tools / Screen Recording"
+                                 },
+                      "systeminformer":  {
+                                             "nomes":  [
+                                                           "System Informer"
+                                                       ],
+                                             "estrela":  false,
+                                             "onde":  "system-tools / Hardware Monitors"
+                                         },
+                      "signal":  {
+                                     "nomes":  [
+                                                   "Signal"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "audio / Browser Editors / Synths; privacy / Encrypted Messengers"
+                                 },
+                      "simplenote":  {
+                                         "nomes":  [
+                                                       "Simplenote"
+                                                   ],
+                                         "estrela":  false,
+                                         "onde":  "text-tools / Note-Taking"
+                                     },
+                      "simplewall":  {
+                                         "nomes":  [
+                                                       "Simplewall"
+                                                   ],
+                                         "estrela":  false,
+                                         "onde":  "privacy / Network Security"
+                                     },
+                      "sumatrapdf":  {
+                                         "nomes":  [
+                                                       "Sumatra PDF"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "reading / Ebook Readers"
+                                     },
+                      "sunshine":  {
+                                       "nomes":  [
+                                                     "Sunshine"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "gaming-tools; system-tools / Remote Desktop"
+                                   },
+                      "syncthing":  {
+                                        "nomes":  [
+                                                      "Syncthing"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "file-tools / File Sync"
+                                    },
+                      "terminal":  {
+                                       "nomes":  [
+                                                     "Windows Terminal"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "system-tools / Terminal / CLI"
+                                   },
+                      "thunderbird":  {
+                                          "nomes":  [
+                                                        "Thunderbird"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "internet-tools / Email Clients"
+                                      },
+                      "betterbird":  {
+                                         "nomes":  [
+                                                       "Betterbird"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "internet-tools / Email Clients"
+                                     },
+                      "tor":  {
+                                  "nomes":  [
+                                                "Tor Browser"
+                                            ],
+                                  "estrela":  true,
+                                  "onde":  "privacy / Browser Privacy"
+                              },
+                      "treesize":  {
+                                       "nomes":  [
+                                                     "TreeSize Free",
+                                                     "TreeSize"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "system-tools / Disk Tools"
+                                   },
+                      "ttaskbar":  {
+                                       "nomes":  [
+                                                     "TranslucentTB"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "system-tools"
+                                   },
+                      "everything":  {
+                                         "nomes":  [
+                                                       "Everything"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "file-tools / File Searching"
+                                     },
+                      "vesktop":  {
+                                      "nomes":  [
+                                                    "Vesktop"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "social-media-tools / Discord Clients"
+                                  },
+                      "vlc":  {
+                                  "nomes":  [
+                                                "VLC"
+                                            ],
+                                  "estrela":  true,
+                                  "onde":  "video-tools"
+                              },
+                      "vscode":  {
+                                     "nomes":  [
+                                                   "Visual Studio Code"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "developer-tools"
+                                 },
+                      "vscodium":  {
+                                       "nomes":  [
+                                                     "VSCodium"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "developer-tools"
+                                   },
+                      "wingetui":  {
+                                       "nomes":  [
+                                                     "UniGetUI"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "system-tools / Package Managers"
+                                   },
+                      "winscp":  {
+                                     "nomes":  [
+                                                   "WinSCP"
+                                               ],
+                                     "estrela":  false,
+                                     "onde":  "file-tools"
+                                 },
+                      "wireguard":  {
+                                        "nomes":  [
+                                                      "WireGuard"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "privacy / VPN Server"
+                                    },
+                      "wireshark":  {
+                                        "nomes":  [
+                                                      "Wireshark"
+                                                  ],
+                                        "estrela":  false,
+                                        "onde":  "internet-tools / Network Tools"
+                                    },
+                      "wiztree":  {
+                                      "nomes":  [
+                                                    "WizTree"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "system-tools / Disk Tools"
+                                  },
+                      "xournal":  {
+                                      "nomes":  [
+                                                    "Xournal++"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "text-tools / Whiteboards / Handwritten"
+                                  },
+                      "zoom":  {
+                                   "nomes":  [
+                                                 "Zoom"
+                                             ],
+                                   "estrela":  false,
+                                   "onde":  "file-tools"
+                               },
+                      "tightvnc":  {
+                                       "nomes":  [
+                                                     "TightVNC"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "system-tools / Remote Desktop"
+                                   },
+                      "glazewm":  {
+                                      "nomes":  [
+                                                    "GlazeWM"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "system-tools / Window Managers"
+                                  },
+                      "overwolf":  {
+                                       "nomes":  [
+                                                     "CurseForge"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "gaming-tools / Mod Packs / Indexes; gaming-tools / Minecraft Mods"
+                                   },
+                      "zenbrowser":  {
+                                         "nomes":  [
+                                                       "Zen Browser"
+                                                   ],
+                                         "estrela":  false,
+                                         "onde":  "privacy"
+                                     },
+                      "zed":  {
+                                  "nomes":  [
+                                                "Zed"
+                                            ],
+                                  "estrela":  true,
+                                  "onde":  "developer-tools"
+                              },
+                      "zotero":  {
+                                     "nomes":  [
+                                                   "Zotero"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "educational / Research Tools"
+                                 },
+                      "deskflow":  {
+                                       "nomes":  [
+                                                     "Deskflow"
+                                                 ],
+                                       "estrela":  false,
+                                       "onde":  "system-tools / Mouse / Keyboard"
+                                   },
+                      "cloudflarewarp":  {
+                                             "nomes":  [
+                                                           "Cloudflare WARP",
+                                                           "Cloudflare One"
+                                                       ],
+                                             "estrela":  true,
+                                             "onde":  "privacy"
+                                         },
+                      "spotify":  {
+                                      "nomes":  [
+                                                    "Spotify"
+                                                ],
+                                      "estrela":  false,
+                                      "onde":  "audio / Streaming Sites"
+                                  },
+                      "windhawk":  {
+                                       "nomes":  [
+                                                     "Windhawk"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "system-tools / System Tweaks"
+                                   },
+                      "superf4":  {
+                                      "nomes":  [
+                                                    "SuperF4"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "system-tools"
+                                  },
+                      "altsnap":  {
+                                      "nomes":  [
+                                                    "AltSnap"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "system-tools / System Tweaks"
+                                  },
+                      "ditto":  {
+                                    "nomes":  [
+                                                  "Ditto"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "system-tools / Clipboard Managers"
+                                },
+                      "everythingtoolbar":  {
+                                                "nomes":  [
+                                                              "EverythingToolbar"
+                                                          ],
+                                                "estrela":  true,
+                                                "onde":  "system-tools / System Tweaks"
+                                            },
+                      "compactgui":  {
+                                         "nomes":  [
+                                                       "CompactGUI"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "file-tools / Archiving / Compression"
+                                     },
+                      "czkawka":  {
+                                      "nomes":  [
+                                                    "Czkawka"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "file-tools; image-tools"
+                                  },
+                      "monitorian":  {
+                                         "nomes":  [
+                                                       "Monitorian"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "system-tools / Monitor Tools"
+                                     },
+                      "rainmeter":  {
+                                        "nomes":  [
+                                                      "Rainmeter"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "system-tools"
+                                    },
+                      "textgrab":  {
+                                       "nomes":  [
+                                                     "Text Grab"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "image-tools / Image to Text / OCR"
+                                   },
+                      "advancedrenamer":  {
+                                              "nomes":  [
+                                                            "Advanced Renamer"
+                                                        ],
+                                              "estrela":  true,
+                                              "onde":  "file-tools / Data Automation"
+                                          },
+                      "deepl":  {
+                                    "nomes":  [
+                                                  "DeepL"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "text-tools / Translators"
+                                },
+                      "flameshot":  {
+                                        "nomes":  [
+                                                      "Flameshot"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "image-tools / Screenshot Tools"
+                                    },
+                      "kopia":  {
+                                    "nomes":  [
+                                                  "Kopia"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "file-tools / File Backup"
+                                },
+                      "lively":  {
+                                     "nomes":  [
+                                                   "Lively Wallpaper",
+                                                   "Lively"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "system-tools / Wallpaper Tools"
+                                 },
+                      "testdisk":  {
+                                       "nomes":  [
+                                                     "TestDisk e PhotoRec",
+                                                     "TestDisk"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "file-tools / File Recovery"
+                                   },
+                      "veracrypt":  {
+                                        "nomes":  [
+                                                      "VeraCrypt"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "file-tools / File Encryption"
+                                    },
+                      "cryptomator":  {
+                                          "nomes":  [
+                                                        "Cryptomator"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "file-tools / File Encryption"
+                                      },
+                      "adwcleaner":  {
+                                         "nomes":  [
+                                                       "AdwCleaner"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "privacy"
+                                     },
+                      "malwarebytes":  {
+                                           "nomes":  [
+                                                         "Malwarebytes"
+                                                     ],
+                                           "estrela":  true,
+                                           "onde":  "privacy"
+                                       },
+                      "windscribe":  {
+                                         "nomes":  [
+                                                       "Windscribe"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "privacy"
+                                     },
+                      "inkscape":  {
+                                       "nomes":  [
+                                                     "Inkscape"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "image-tools / Painting / Drawing"
+                                   },
+                      "krita":  {
+                                    "nomes":  [
+                                                  "Krita"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "image-tools / Painting / Drawing"
+                                },
+                      "pinta":  {
+                                    "nomes":  [
+                                                  "Pinta"
+                                              ],
+                                    "estrela":  true,
+                                    "onde":  "image-tools / Painting / Drawing"
+                                },
+                      "kdenlive":  {
+                                       "nomes":  [
+                                                     "Kdenlive"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "video-tools / Video Editors"
+                                   },
+                      "shotcut":  {
+                                      "nomes":  [
+                                                    "Shotcut"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "video-tools / Video Editors"
+                                  },
+                      "losslesscut":  {
+                                          "nomes":  [
+                                                        "LosslessCut"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "video-tools / Video Editors"
+                                      },
+                      "shutterencoder":  {
+                                             "nomes":  [
+                                                           "Shutter Encoder"
+                                                       ],
+                                             "estrela":  true,
+                                             "onde":  "audio; video-tools / Processing / Encoding"
+                                         },
+                      "upscayl":  {
+                                      "nomes":  [
+                                                    "Upscayl"
+                                                ],
+                                      "estrela":  true,
+                                      "onde":  "image-tools / Upscale / Restore"
+                                  },
+                      "mp3tag":  {
+                                     "nomes":  [
+                                                   "Mp3tag"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "audio / Audio Metadata"
+                                 },
+                      "musescore":  {
+                                        "nomes":  [
+                                                      "MuseScore"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "audio / Sheet Music / Notation"
+                                    },
+                      "voicemeeter":  {
+                                          "nomes":  [
+                                                        "Voicemeeter"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "system-tools / System Audio"
+                                      },
+                      "freetube":  {
+                                       "nomes":  [
+                                                     "FreeTube"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "social-media-tools / Players / Frontends"
+                                   },
+                      "logseq":  {
+                                     "nomes":  [
+                                                   "Logseq"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "text-tools / Note-Taking"
+                                 },
+                      "notesnook":  {
+                                        "nomes":  [
+                                                      "Notesnook"
+                                                  ],
+                                        "estrela":  true,
+                                        "onde":  "text-tools / Note-Taking"
+                                    },
+                      "drawio":  {
+                                     "nomes":  [
+                                                   "draw.io"
+                                               ],
+                                     "estrela":  true,
+                                     "onde":  "storage / Visualization Tools"
+                                 },
+                      "koodoreader":  {
+                                          "nomes":  [
+                                                        "Koodo Reader",
+                                                        "Koodo"
+                                                    ],
+                                          "estrela":  true,
+                                          "onde":  "reading / Ebook Readers"
+                                      },
+                      "mailspring":  {
+                                         "nomes":  [
+                                                       "Mailspring"
+                                                   ],
+                                         "estrela":  true,
+                                         "onde":  "internet-tools / Email Clients"
+                                     },
+                      "ludusavi":  {
+                                       "nomes":  [
+                                                     "Ludusavi"
+                                                 ],
+                                       "estrela":  true,
+                                       "onde":  "gaming-tools / Game Saves"
+                                   },
+                      "sysinternals":  {
+                                           "nomes":  [
+                                                         "Sysinternals Suite",
+                                                         "Sysinternals"
+                                                     ],
+                                           "estrela":  true,
+                                           "onde":  "system-tools"
+                                       }
+                  }
+}

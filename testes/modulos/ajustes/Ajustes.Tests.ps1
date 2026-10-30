@@ -70,6 +70,35 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         }
     }
 
+    It 'todo ajuste tem classificação; Atenção e Arriscado dizem o que pode dar errado e como resolver' {
+        foreach ($a in $catalogo) {
+            $a.classificacao | Should -BeIn @('Recomendado', 'Opcional', 'Atencao', 'Arriscado') -Because $a.id
+            if ($a.classificacao -in 'Atencao', 'Arriscado') {
+                $a.contratempo | Should -Match '^\S.{20,}\.$' -Because "$($a.id): contratempo"
+                $a.seAcontecer | Should -Match '^\S.{10,}\.$' -Because "$($a.id): como resolver"
+            }
+            if ($a.categoria -like 'Avançado*') { $a.classificacao | Should -Be 'Arriscado' -Because $a.id }
+            if ($a.risco -eq 'Alto') { $a.classificacao | Should -Be 'Arriscado' -Because $a.id }
+            if ($a.classificacao -eq 'Recomendado') { $a.risco | Should -Not -Be 'Alto' -Because $a.id }
+        }
+        foreach ($c in 'Recomendado', 'Opcional', 'Atencao', 'Arriscado') { @($catalogo | Where-Object classificacao -eq $c).Count | Should -BeGreaterThan 5 -Because $c }
+    }
+
+    It 'presets para qualquer um (Mínimo, Essencial, Notebook, Explorador) não têm nada Arriscado' {
+        foreach ($p in 'Mínimo', 'Essencial', 'Notebook', 'Explorador') {
+            $ruins = @($catalogo | Where-Object { @($_.presets) -contains $p -and $_.classificacao -eq 'Arriscado' } | ForEach-Object id)
+            $ruins | Should -BeNullOrEmpty -Because "$p tem: $($ruins -join ', ')"
+        }
+    }
+
+    It 'Find-Alvos leva a classificação e os textos para a tela' {
+        $alvos = @(Find-Alvos -RaizRegistro (New-RaizRegistro))
+        $alvos[0].PSObject.Properties.Name | Should -Contain 'Classificacao'
+        $dns = @(Find-Alvos -RaizRegistro (New-RaizRegistro)) | Where-Object { $_.Classificacao -eq 'Atencao' } | Select-Object -First 1
+        $dns.Contratempo | Should -Not -BeNullOrEmpty
+        $dns.SeAcontecer | Should -Not -BeNullOrEmpty
+    }
+
     It 'categorias e presets conhecidos' {
         foreach ($a in $catalogo) {
             $a.categoria | Should -BeIn $script:Categorias -Because $a.id

@@ -29,6 +29,16 @@ Describe 'Regras do catálogo' {
         foreach ($p in $catalogo) { ($p | ConvertTo-Json -Depth 5) | Should -Not -Match $proibido -Because $p.id }
     }
 
+    It 'toda política tem classificação; Atenção diz o que pode dar errado e como resolver' {
+        foreach ($p in $catalogo) {
+            $p.classificacao | Should -BeIn @('Recomendado', 'Opcional', 'Atencao', 'Arriscado') -Because $p.id
+            if ($p.classificacao -in 'Atencao', 'Arriscado') {
+                $p.contratempo | Should -Not -BeNullOrEmpty -Because $p.id
+                $p.seAcontecer | Should -Not -BeNullOrEmpty -Because $p.id
+            }
+        }
+    }
+
     It 'tudo em HKLM com requerAdmin, padraoWindows declarado, ids com prefixo wu-' {
         foreach ($p in $catalogo) {
             $p.id | Should -MatchExactly '^wu-[a-z0-9-]+$'
