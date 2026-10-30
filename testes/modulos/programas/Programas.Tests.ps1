@@ -47,11 +47,55 @@ Describe 'Catálogo' {
         @($catalogo | ForEach-Object id | Select-Object -Unique).Count | Should -Be $catalogo.Count
         foreach ($p in $catalogo) {
             $p.id | Should -MatchExactly '^[a-z0-9-]+$'
-            $p.wingetId | Should -Match '^[\w+-]+(\.[\w+-]+)+$' -Because $p.id
+            # Microsoft Store: o ID da loja (9NKSQGP7F2NH); winget: Editor.Programa.
+            if ($p.PSObject.Properties['fonte']) {
+                $p.fonte | Should -Be 'msstore' -Because $p.id
+                $p.wingetId | Should -MatchExactly '^[0-9A-Z]{12}$' -Because $p.id
+            }
+            else { $p.wingetId | Should -Match '^[\w+-]+(\.[\w+-]+)+$' -Because $p.id }
             $p.nome | Should -Not -BeNullOrEmpty
-            $p.categoria | Should -Not -BeNullOrEmpty
+            $p.descricao | Should -MatchExactly '^[^\p{Ll}\s].*\.$' -Because "$($p.id): descrição em frase"
             $p.livre | Should -BeOfType [bool]
         }
+    }
+
+    It 'categorias conhecidas, na ordem da página' {
+        $ordem = 'Navegadores', 'Comunicação', 'Multimídia', 'Documentos', 'Utilitários', 'Jogos', 'Desenvolvimento', 'Ferramentas da Microsoft', 'Ferramentas avançadas', 'Servidor em casa'
+        $vistas = @($catalogo | ForEach-Object categoria | Select-Object -Unique)
+        ($vistas -join '|') | Should -Be ($ordem -join '|')
+    }
+
+    It 'tem todos os programas do WinUtil (winutil-apps.json), fora a parte de desenvolvimento além do básico' {
+        $ref = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'winutil-apps.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+        $nossos = @($catalogo | ForEach-Object { $_.PSObject.Properties['winutil'] } | Where-Object { $_ -and $_.Value } | ForEach-Object Value)
+        $faltando = foreach ($p in $ref.Programas.PSObject.Properties) {
+            $dev = $p.Value.categoria -eq 'Development'
+            if ($dev -and @($ref.DevBasico) -notcontains $p.Name) { continue }
+            if ($nossos -notcontains $p.Name) { "$($p.Name) ($($p.Value.nome))" }
+        }
+        $faltando | Should -BeNullOrEmpty -Because ($faltando -join ', ')
+        @($catalogo | Where-Object categoria -eq 'Desenvolvimento').Count | Should -BeLessOrEqual 15 -Because 'desenvolvimento é só o básico'
+        # O ID do winget é o mesmo do WinUtil (com "msstore:" separado em "fonte").
+        foreach ($p in $catalogo | Where-Object { $_.PSObject.Properties['winutil'] -and $_.winutil }) {
+            $w = [string]$ref.Programas.($p.winutil).winget
+            $esperado = if ($p.PSObject.Properties['fonte']) { "msstore:$($p.wingetId)" } else { $p.wingetId }
+            $esperado | Should -Be $w -Because $p.id
+        }
+    }
+
+    It 'ícones vêm com o projeto: PNG 64x64 válido para quase todos, nenhum órfão, com a origem anotada' {
+        Add-Type -AssemblyName System.Drawing
+        $pasta = Join-Path $script:RaizProjeto 'modulos\programas\icones'
+        $fontes = Get-Content -LiteralPath (Join-Path $pasta 'fontes.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+        $ids = @($catalogo | ForEach-Object id)
+        $arquivos = @(Get-ChildItem -LiteralPath $pasta -Filter '*.png')
+        foreach ($a in $arquivos) {
+            $ids | Should -Contain $a.BaseName -Because "ícone órfão: $($a.Name)"
+            $fontes.PSObject.Properties.Name | Should -Contain $a.BaseName -Because "sem origem anotada: $($a.Name)"
+            $img = [Drawing.Image]::FromFile($a.FullName)
+            try { "$($img.Width)x$($img.Height)" | Should -Be '64x64' -Because $a.Name } finally { $img.Dispose() }
+        }
+        $arquivos.Count | Should -BeGreaterOrEqual ($catalogo.Count - 3) -Because 'quase todo programa tem ícone (o resto mostra a inicial)'
     }
 }
 
@@ -67,6 +111,15 @@ Describe 'Find-Alvos' {
         ($alvos | Where-Object Id -eq 'vlc').Selo | Should -Be 'não instalado'
         ($alvos | Where-Object Id -eq 'vlc').Mudancas[0] | Should -Be 'winget install --id VideoLAN.VLC --exact --source winget'
         @($alvos | Where-Object Selecionado).Count | Should -Be 0
+    }
+
+    It 'ícone do projeto mesmo para o que não está instalado; Microsoft Store pela fonte msstore' {
+        $alvos = @(Find-Alvos)
+        @(($alvos | Where-Object Id -eq 'vlc').Icone)[0] | Should -BeLike '*\modulos\programas\icones\vlc.png'
+        $zap = $alvos | Where-Object Id -eq 'whatsapp'
+        $zap.Mudancas[0] | Should -Be 'winget install --id 9NKSQGP7F2NH --exact --source msstore'
+        $zap.Detalhe | Should -Match 'Microsoft Store'
+        Get-TmdIconePng -Caminho @($zap.Icone)[0] | Should -Not -BeNullOrEmpty
     }
 
     It '"Atualizar tudo" lista todas as atualizações, inclusive de fora do catálogo' {
@@ -108,6 +161,11 @@ Describe 'Invoke-Acao' {
         $global:TmdTesteChamadas[0] | Should -Match 'VideoLAN\.VLC'
         ($r | Where-Object Id -eq 'Malware.Inc').Status | Should -Be 'Erro'
         $global:TmdTesteChamadas.Count | Should -Be 1
+    }
+
+    It 'programa da Microsoft Store instala pela fonte msstore' {
+        Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'whatsapp' }) | Out-Null
+        $global:TmdTesteChamadas[0] | Should -Match '^install --id 9NKSQGP7F2NH --exact --source msstore --silent'
     }
 
     It '"Atualizar tudo" chama winget upgrade --all' {

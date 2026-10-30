@@ -30,11 +30,11 @@ function Invoke-Winget {
     [pscustomobject]@{ Codigo = $LASTEXITCODE; Saida = $saida }
 }
 
-# IDs instalados que a fonte winget conhece (pelo "winget export", que dá JSON em vez de tabela).
+# IDs instalados que as fontes winget e msstore conhecem (pelo "winget export", que dá JSON em vez de tabela).
 function Get-WingetInstalado {
     $arquivo = New-TmdArquivoTemporario -Extensao '.json'
     try {
-        $r = Invoke-Winget -Argumentos @('export', '-o', $arquivo, '--source', 'winget', '--disable-interactivity')
+        $r = Invoke-Winget -Argumentos @('export', '-o', $arquivo, '--disable-interactivity', '--accept-source-agreements')
         if (-not (Test-Path -LiteralPath $arquivo)) { throw "winget export falhou (código $($r.Codigo))" }
         $json = [IO.File]::ReadAllText($arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json
         $ids = @{}
@@ -73,7 +73,7 @@ function Find-Alvos {
 
     $instalados = Get-WingetInstalado
     $atualizacoes = Get-WingetAtualizacao
-    $icones = Get-TmdIconesInstalados
+    $icones = $null
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) {
         $instalado = $instalados.ContainsKey($p.wingetId)
         $nova = if ($atualizacoes.ContainsKey($p.wingetId)) { $atualizacoes[$p.wingetId] } else { $null }
@@ -81,9 +81,16 @@ function Find-Alvos {
         $selo = if (-not $instalado) { 'não instalado' } elseif ($nova) { "atualizar para $nova" } else { 'instalado' }
         $acao = if (-not $instalado) { 'install' } elseif ($nova) { 'upgrade' } else { $null }
         $livre = if ($p.livre) { ' Software livre.' } else { '' }
-        New-AlvoPrograma -Id $p.id -Nome $p.nome -Categoria $p.categoria -Estado $estado -Selo $selo -Icone (Find-IconePrograma -Icones $icones -Nome $p.nome -Instalado $instalado) `
-            -Detalhe "$($p.descricao)$livre" -Mudancas @(
-            $(if ($acao) { "winget $acao --id $($p.wingetId) --exact --source winget" } else { 'Já instalado e atualizado: nada a fazer.' })
+        $loja = if ((Get-FontePrograma $p) -eq 'msstore') { ' Vem da Microsoft Store.' } else { '' }
+        # Ícone que vem com o projeto (icones\<id>.png); faltou, o do programa instalado (lido só quando precisa).
+        $icone = @(Get-IconeProjeto -Id $p.id)
+        if ($icone.Count -eq 0 -and $instalado) {
+            if ($null -eq $icones) { $icones = Get-TmdIconesInstalados }
+            $icone = @(Find-IconePrograma -Icones $icones -Nome $p.nome -Instalado $true)
+        }
+        New-AlvoPrograma -Id $p.id -Nome $p.nome -Categoria $p.categoria -Estado $estado -Selo $selo -Icone $icone `
+            -Detalhe "$($p.descricao)$livre$loja" -Mudancas @(
+            $(if ($acao) { "winget $acao --id $($p.wingetId) --exact --source $(Get-FontePrograma $p)" } else { 'Já instalado e atualizado: nada a fazer.' })
         )
     }
     $outras = @($atualizacoes.Keys | Sort-Object)
@@ -91,6 +98,20 @@ function Find-Alvos {
         New-AlvoPrograma -Id 'atualizar-tudo' -Nome "Atualizar tudo ($($outras.Count))" -Categoria 'Atualizações' -Estado 'Parcial' `
             -Selo "$($outras.Count) com atualização" -Detalhe ($outras -join ', ') -Mudancas @('winget upgrade --all --source winget')
     }
+}
+
+# "winget" (padrão) ou "msstore" (programas que só existem na Microsoft Store, como o WhatsApp).
+function Get-FontePrograma {
+    param($Programa)
+    $f = $Programa.PSObject.Properties['fonte']
+    if ($f -and $f.Value -eq 'msstore') { 'msstore' } else { 'winget' }
+}
+
+# Ícone do programa que vem com o projeto (baixado por ferramentas\baixar-icones-programas.ps1).
+function Get-IconeProjeto {
+    param([string]$Id)
+    $arquivo = Join-Path $PSScriptRoot "icones\$Id.png"
+    if ([IO.File]::Exists($arquivo)) { $arquivo }
 }
 
 # Onde achar o ícone do programa instalado com esse nome ("7-Zip" acha "7-Zip 24.08 (x64)"); sem registro com esse
@@ -126,19 +147,20 @@ function Invoke-Acao {
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) { $porId[$p.id] = $p }
     $instalados = Get-WingetInstalado
     $atualizacoes = Get-WingetAtualizacao
-    $comuns = @('--source', 'winget', '--silent', '--disable-interactivity', '--accept-package-agreements', '--accept-source-agreements')
+    $comuns = @('--silent', '--disable-interactivity', '--accept-package-agreements', '--accept-source-agreements')
 
     foreach ($a in $Alvos) {
         $id = [string]$a.Id
         if ($id -eq 'atualizar-tudo') {
-            $argumentos = @('upgrade', '--all') + $comuns
+            $argumentos = @('upgrade', '--all', '--source', 'winget') + $comuns
             $nome = 'Atualizar tudo'
         }
         elseif ($porId.ContainsKey($id)) {
             $p = $porId[$id]
             $nome = $p.nome
-            if (-not $instalados.ContainsKey($p.wingetId)) { $argumentos = @('install', '--id', $p.wingetId, '--exact') + $comuns }
-            elseif ($atualizacoes.ContainsKey($p.wingetId)) { $argumentos = @('upgrade', '--id', $p.wingetId, '--exact') + $comuns }
+            $fonte = @('--source', (Get-FontePrograma $p))
+            if (-not $instalados.ContainsKey($p.wingetId)) { $argumentos = @('install', '--id', $p.wingetId, '--exact') + $fonte + $comuns }
+            elseif ($atualizacoes.ContainsKey($p.wingetId)) { $argumentos = @('upgrade', '--id', $p.wingetId, '--exact') + $fonte + $comuns }
             else {
                 New-ResultadoPrograma -Id $id -Nome $nome -Status 'Feito' -Motivo 'já instalado e atualizado' -Simular $Simular
                 continue

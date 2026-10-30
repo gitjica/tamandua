@@ -353,8 +353,13 @@ function Get-TmdIconePng {
     $arquivo = [Environment]::ExpandEnvironmentVariables($arquivo.Trim().Trim('"'))
     $png = $null
     try {
+        # PNG pronto (ícones que vêm com o projeto): só confere a assinatura e usa como está.
+        if ($arquivo -like '*.png' -and [IO.File]::Exists($arquivo)) {
+            $bytes = [IO.File]::ReadAllBytes($arquivo)
+            if ($bytes.Length -gt 8 -and $bytes[0] -eq 0x89 -and $bytes[1] -eq 0x50 -and $bytes[2] -eq 0x4E -and $bytes[3] -eq 0x47) { $png = $bytes }
+        }
         # Atalho (.lnk): o ícone é o que o atalho mostra (IconLocation) ou o do programa para onde ele aponta. Só lê.
-        if ($arquivo -like '*.lnk' -and [IO.File]::Exists($arquivo)) {
+        elseif ($arquivo -like '*.lnk' -and [IO.File]::Exists($arquivo)) {
             $atalho = (New-Object -ComObject WScript.Shell).CreateShortcut($arquivo)
             $local = [string]$atalho.IconLocation
             $alvo = if ($local -and $local -notmatch '^,\s*-?\d+$') { $local } else { [string]$atalho.TargetPath }

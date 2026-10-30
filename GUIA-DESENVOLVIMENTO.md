@@ -621,8 +621,16 @@ do nome do módulo na CLI é erro.
   (guardados em `estado\restos.json`); aparecem desmarcados e vão para a Lixeira. Restos em Arquivos de Programas não são
   oferecidos (árvore protegida). Desinstalador e lista do registro passam por `Start-Desinstalador` e `Get-RegistroPrograma` (Mock nos testes).
 - **programas:** só IDs exatos do winget (`--exact --id`), com `--accept-source-agreements` apenas depois de o usuário aceitar na primeira execução.
-  Implementado: catálogo `modulos/programas/programas.json` (37 programas, IDs conferidos no winget). Instalados pelo
-  `winget export --source winget` (JSON), atualizações pelo `winget upgrade` lendo as colunas pela **posição das palavras do
+  Implementado: catálogo `modulos/programas/programas.json` (210 programas) gerado por `ferramentas/gerar-programas.ps1`
+  a partir do `config/applications.json` do WinUtil: tudo, menos desenvolvimento além do básico (editores, Python, Node,
+  Git); nomes, descrições e categorias em português ficam no gerador. Um teste confere contra
+  `testes/modulos/programas/winutil-apps.json` que nada do WinUtil ficou de fora. Programa só da Microsoft Store tem
+  `"fonte": "msstore"` e o ID da loja em `wingetId` (instala com `--source msstore`).
+  **Ícones vêm com o projeto** (`modulos/programas/icones/<id>.png`, 64x64; origem de cada um em `fontes.json`): quem vai
+  instalar ainda não tem o programa no disco. `ferramentas/baixar-icones-programas.ps1` baixa (ícone do pacote no
+  Chocolatey, ícone declarado pelo site, favicon do Google; `$Manuais` para os que o automático erra) e redesenha cada
+  imagem num PNG novo; o programa nunca baixa nada. Sem ícone no projeto, usa o do programa instalado, e sem esse, a
+  inicial. Instalados pelo `winget export` (JSON, fontes winget e msstore), atualizações pelo `winget upgrade` lendo as colunas pela **posição das palavras do
   cabeçalho** (um Id longo encosta na versão com um espaço só). Nada vem marcado; o selo diz "instalado",
   "atualizar para X" ou "não instalado". "Atualizar tudo" roda `winget upgrade --all`. Os termos são aceitos (`--accept-*`)
   só na confirmação, que avisa disso pelo `AvisoConfirmacao` do manifesto. Todo acesso ao winget passa por `Invoke-Winget`

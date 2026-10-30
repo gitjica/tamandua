@@ -1,0 +1,1215 @@
+{
+    "ForaDeProposito":  "desenvolvimento além do básico",
+    "DevBasico":  [
+                      "vscode",
+                      "vscodium",
+                      "Zed",
+                      "sublimetext",
+                      "notepadplus",
+                      "python3",
+                      "nodejslts",
+                      "git",
+                      "githubdesktop",
+                      "cursor",
+                      "claude",
+                      "chatgpt",
+                      "visualstudio2026"
+                  ],
+    "Programas":  {
+                      "1password":  {
+                                        "nome":  "1Password",
+                                        "winget":  "AgileBits.1Password",
+                                        "categoria":  "Utilities"
+                                    },
+                      "7zip":  {
+                                   "nome":  "7-Zip",
+                                   "winget":  "7zip.7zip",
+                                   "categoria":  "Utilities"
+                               },
+                      "abdownloadmanager":  {
+                                                "nome":  "AB Download Manager",
+                                                "winget":  "amir1376.ABDownloadManager",
+                                                "categoria":  "Utilities"
+                                            },
+                      "adobe":  {
+                                    "nome":  "Adobe Acrobat Reader",
+                                    "winget":  "Adobe.Acrobat.Reader.64-bit",
+                                    "categoria":  "Document"
+                                },
+                      "advancedip":  {
+                                         "nome":  "Advanced IP Scanner",
+                                         "winget":  "Famatech.AdvancedIPScanner",
+                                         "categoria":  "Pro Tools"
+                                     },
+                      "aimp":  {
+                                   "nome":  "AIMP (Music Player)",
+                                   "winget":  "AIMP.AIMP",
+                                   "categoria":  "Multimedia Tools"
+                               },
+                      "angryipscanner":  {
+                                             "nome":  "Angry IP Scanner",
+                                             "winget":  "angryziber.AngryIPScanner",
+                                             "categoria":  "Pro Tools"
+                                         },
+                      "anydesk":  {
+                                      "nome":  "AnyDesk",
+                                      "winget":  "AnyDesk.AnyDesk",
+                                      "categoria":  "Utilities"
+                                  },
+                      "audacity":  {
+                                       "nome":  "Audacity",
+                                       "winget":  "Audacity.Audacity",
+                                       "categoria":  "Multimedia Tools"
+                                   },
+                      "autoruns":  {
+                                       "nome":  "Autoruns",
+                                       "winget":  "Microsoft.Sysinternals.Autoruns",
+                                       "categoria":  "Microsoft Tools"
+                                   },
+                      "rdcman":  {
+                                     "nome":  "RDCMan",
+                                     "winget":  "Microsoft.Sysinternals.RDCMan",
+                                     "categoria":  "Microsoft Tools"
+                                 },
+                      "autohotkey":  {
+                                         "nome":  "AutoHotkey",
+                                         "winget":  "AutoHotkey.AutoHotkey",
+                                         "categoria":  "Utilities"
+                                     },
+                      "battlenet":  {
+                                        "nome":  "Battle.net",
+                                        "winget":  "Blizzard.BattleNet",
+                                        "categoria":  "Games"
+                                    },
+                      "bitwarden":  {
+                                        "nome":  "Bitwarden",
+                                        "winget":  "Bitwarden.Bitwarden",
+                                        "categoria":  "Utilities"
+                                    },
+                      "blender":  {
+                                      "nome":  "Blender (3D Graphics)",
+                                      "winget":  "BlenderFoundation.Blender",
+                                      "categoria":  "Multimedia Tools"
+                                  },
+                      "brave":  {
+                                    "nome":  "Brave",
+                                    "winget":  "Brave.Brave",
+                                    "categoria":  "Browsers"
+                                },
+                      "bruno":  {
+                                    "nome":  "Bruno",
+                                    "winget":  "Bruno.Bruno",
+                                    "categoria":  "Development"
+                                },
+                      "bulkcrapuninstaller":  {
+                                                  "nome":  "Bulk Crap Uninstaller",
+                                                  "winget":  "Klocman.BulkCrapUninstaller",
+                                                  "categoria":  "Utilities"
+                                              },
+                      "blurautoclicker":  {
+                                              "nome":  "BlurAutoClicker",
+                                              "winget":  "Blur009.BlurAutoClicker",
+                                              "categoria":  "Utilities"
+                                          },
+                      "calibre":  {
+                                      "nome":  "Calibre",
+                                      "winget":  "calibre.calibre",
+                                      "categoria":  "Multimedia Tools"
+                                  },
+                      "cemu":  {
+                                   "nome":  "Cemu",
+                                   "winget":  "Cemu.Cemu",
+                                   "categoria":  "Games"
+                               },
+                      "chatgpt":  {
+                                      "nome":  "ChatGPT Desktop",
+                                      "winget":  "msstore:9NT1R1C2HH7J",
+                                      "categoria":  "Development"
+                                  },
+                      "chatterino":  {
+                                         "nome":  "Chatterino",
+                                         "winget":  "ChatterinoTeam.Chatterino",
+                                         "categoria":  "Communications"
+                                     },
+                      "chrome":  {
+                                     "nome":  "Chrome",
+                                     "winget":  "Google.Chrome",
+                                     "categoria":  "Browsers"
+                                 },
+                      "chromium":  {
+                                       "nome":  "Chromium",
+                                       "winget":  "Hibbiki.Chromium",
+                                       "categoria":  "Browsers"
+                                   },
+                      "cinebenchr23":  {
+                                           "nome":  "Cinebench R23",
+                                           "winget":  "Maxon.CinebenchR23",
+                                           "categoria":  "Pro Tools"
+                                       },
+                      "claude":  {
+                                     "nome":  "Claude Desktop",
+                                     "winget":  "Anthropic.Claude",
+                                     "categoria":  "Development"
+                                 },
+                      "claude-code":  {
+                                          "nome":  "Claude Code",
+                                          "winget":  "Anthropic.ClaudeCode",
+                                          "categoria":  "Development"
+                                      },
+                      "cmake":  {
+                                    "nome":  "CMake",
+                                    "winget":  "Kitware.CMake",
+                                    "categoria":  "Development"
+                                },
+                      "codex":  {
+                                    "nome":  "Codex",
+                                    "winget":  "OpenAI.Codex",
+                                    "categoria":  "Development"
+                                },
+                      "cpuz":  {
+                                   "nome":  "CPU-Z",
+                                   "winget":  "CPUID.CPU-Z",
+                                   "categoria":  "Pro Tools"
+                               },
+                      "crystaldiskinfo":  {
+                                              "nome":  "Crystal Disk Info",
+                                              "winget":  "CrystalDewWorld.CrystalDiskInfo",
+                                              "categoria":  "Utilities"
+                                          },
+                      "crystaldiskmark":  {
+                                              "nome":  "Crystal Disk Mark",
+                                              "winget":  "CrystalDewWorld.CrystalDiskMark",
+                                              "categoria":  "Utilities"
+                                          },
+                      "cursor":  {
+                                     "nome":  "Cursor",
+                                     "winget":  "Anysphere.Cursor",
+                                     "categoria":  "Development"
+                                 },
+                      "ddu":  {
+                                  "nome":  "Display Driver Uninstaller",
+                                  "winget":  "Wagnardsoft.DisplayDriverUninstaller",
+                                  "categoria":  "Pro Tools"
+                              },
+                      "discord":  {
+                                      "nome":  "Discord",
+                                      "winget":  "Discord.Discord",
+                                      "categoria":  "Communications"
+                                  },
+                      "dismtools":  {
+                                        "nome":  "DISMTools",
+                                        "winget":  "CodingWondersSoftware.DISMTools.Stable",
+                                        "categoria":  "Microsoft Tools"
+                                    },
+                      "ntlite":  {
+                                     "nome":  "NTLite",
+                                     "winget":  "Nlitesoft.NTLite",
+                                     "categoria":  "Microsoft Tools"
+                                 },
+                      "dorion":  {
+                                     "nome":  "Dorion",
+                                     "winget":  "SpikeHD.Dorion",
+                                     "categoria":  "Communications"
+                                 },
+                      "dockerdesktop":  {
+                                            "nome":  "Docker Desktop",
+                                            "winget":  "Docker.DockerDesktop",
+                                            "categoria":  "Development"
+                                        },
+                      "dotnet6":  {
+                                      "nome":  ".NET Desktop Runtime 6",
+                                      "winget":  "Microsoft.DotNet.DesktopRuntime.6",
+                                      "categoria":  "Microsoft Tools"
+                                  },
+                      "dotnet8":  {
+                                      "nome":  ".NET Desktop Runtime 8",
+                                      "winget":  "Microsoft.DotNet.DesktopRuntime.8",
+                                      "categoria":  "Microsoft Tools"
+                                  },
+                      "dotnet9":  {
+                                      "nome":  ".NET Desktop Runtime 9",
+                                      "winget":  "Microsoft.DotNet.DesktopRuntime.9",
+                                      "categoria":  "Microsoft Tools"
+                                  },
+                      "dotnet10":  {
+                                       "nome":  ".NET Desktop Runtime 10",
+                                       "winget":  "Microsoft.DotNet.DesktopRuntime.10",
+                                       "categoria":  "Microsoft Tools"
+                                   },
+                      "dropbox":  {
+                                      "nome":  "Dropbox",
+                                      "winget":  "Dropbox.Dropbox",
+                                      "categoria":  "Utilities"
+                                  },
+                      "eaapp":  {
+                                    "nome":  "EA App",
+                                    "winget":  "ElectronicArts.EADesktop",
+                                    "categoria":  "Games"
+                                },
+                      "eartrumpet":  {
+                                         "nome":  "EarTrumpet (Audio)",
+                                         "winget":  "File-New-Project.EarTrumpet",
+                                         "categoria":  "Multimedia Tools"
+                                     },
+                      "edge":  {
+                                   "nome":  "Edge",
+                                   "winget":  "Microsoft.Edge",
+                                   "categoria":  "Browsers"
+                               },
+                      "es-de":  {
+                                    "nome":  "EmulationStation Desktop Edition",
+                                    "winget":  "ES-DE.EmulationStation-DE",
+                                    "categoria":  "Games"
+                                },
+                      "enteauth":  {
+                                       "nome":  "Ente Auth",
+                                       "winget":  "ente-io.auth-desktop",
+                                       "categoria":  "Utilities"
+                                   },
+                      "epicgames":  {
+                                        "nome":  "Epic Games Launcher",
+                                        "winget":  "EpicGames.EpicGamesLauncher",
+                                        "categoria":  "Games"
+                                    },
+                      "files":  {
+                                    "nome":  "Files",
+                                    "winget":  "FilesCommunity.Files",
+                                    "categoria":  "Utilities"
+                                },
+                      "fileconverter":  {
+                                            "nome":  "File Converter",
+                                            "winget":  "AdrienAllard.FileConverter",
+                                            "categoria":  "Multimedia Tools"
+                                        },
+                      "firefox":  {
+                                      "nome":  "Firefox",
+                                      "winget":  "Mozilla.Firefox",
+                                      "categoria":  "Browsers"
+                                  },
+                      "firefoxesr":  {
+                                         "nome":  "Firefox ESR",
+                                         "winget":  "Mozilla.Firefox.ESR",
+                                         "categoria":  "Browsers"
+                                     },
+                      "floorp":  {
+                                     "nome":  "Floorp",
+                                     "winget":  "Ablaze.Floorp",
+                                     "categoria":  "Browsers"
+                                 },
+                      "flux":  {
+                                   "nome":  "F.lux",
+                                   "winget":  "flux.flux",
+                                   "categoria":  "Utilities"
+                               },
+                      "foobar":  {
+                                     "nome":  "foobar2000 (Music Player)",
+                                     "winget":  "PeterPawlowski.foobar2000",
+                                     "categoria":  "Multimedia Tools"
+                                 },
+                      "fnm":  {
+                                  "nome":  "Fast Node Manager",
+                                  "winget":  "Schniz.fnm",
+                                  "categoria":  "Development"
+                              },
+                      "foxpdfreader":  {
+                                           "nome":  "Foxit PDF Reader",
+                                           "winget":  "Foxit.FoxitReader",
+                                           "categoria":  "Document"
+                                       },
+                      "geforcenow":  {
+                                         "nome":  "GeForce NOW",
+                                         "winget":  "Nvidia.GeForceNow",
+                                         "categoria":  "Games"
+                                     },
+                      "gimp":  {
+                                   "nome":  "GIMP (Image Editor)",
+                                   "winget":  "GIMP.GIMP.3",
+                                   "categoria":  "Multimedia Tools"
+                               },
+                      "git":  {
+                                  "nome":  "Git",
+                                  "winget":  "Git.Git",
+                                  "categoria":  "Development"
+                              },
+                      "gitextensions":  {
+                                            "nome":  "Git Extensions",
+                                            "winget":  "GitExtensionsTeam.GitExtensions",
+                                            "categoria":  "Development"
+                                        },
+                      "githubcli":  {
+                                        "nome":  "GitHub CLI",
+                                        "winget":  "GitHub.cli",
+                                        "categoria":  "Development"
+                                    },
+                      "githubdesktop":  {
+                                            "nome":  "GitHub Desktop",
+                                            "winget":  "GitHub.GitHubDesktop",
+                                            "categoria":  "Development"
+                                        },
+                      "gog":  {
+                                  "nome":  "GOG Galaxy",
+                                  "winget":  "GOG.Galaxy",
+                                  "categoria":  "Games"
+                              },
+                      "golang":  {
+                                     "nome":  "Go",
+                                     "winget":  "GoLang.Go",
+                                     "categoria":  "Development"
+                                 },
+                      "googledrive":  {
+                                          "nome":  "Google Drive",
+                                          "winget":  "Google.GoogleDrive",
+                                          "categoria":  "Utilities"
+                                      },
+                      "gpuz":  {
+                                   "nome":  "GPU-Z",
+                                   "winget":  "TechPowerUp.GPU-Z",
+                                   "categoria":  "Pro Tools"
+                               },
+                      "gsudo":  {
+                                    "nome":  "gsudo",
+                                    "winget":  "gerardog.gsudo",
+                                    "categoria":  "Pro Tools"
+                                },
+                      "helium":  {
+                                     "nome":  "Helium",
+                                     "winget":  "ImputNet.Helium",
+                                     "categoria":  "Browsers"
+                                 },
+                      "hugo":  {
+                                   "nome":  "Hugo",
+                                   "winget":  "Hugo.Hugo.Extended",
+                                   "categoria":  "Development"
+                               },
+                      "handbrake":  {
+                                        "nome":  "HandBrake",
+                                        "winget":  "HandBrake.HandBrake",
+                                        "categoria":  "Multimedia Tools"
+                                    },
+                      "heroiclauncher":  {
+                                             "nome":  "Heroic Games Launcher",
+                                             "winget":  "HeroicGamesLauncher.HeroicGamesLauncher",
+                                             "categoria":  "Games"
+                                         },
+                      "hwinfo":  {
+                                     "nome":  "HWiNFO",
+                                     "winget":  "REALiX.HWiNFO",
+                                     "categoria":  "Pro Tools"
+                                 },
+                      "hwmonitor":  {
+                                        "nome":  "HWMonitor",
+                                        "winget":  "CPUID.HWMonitor",
+                                        "categoria":  "Pro Tools"
+                                    },
+                      "imhex":  {
+                                    "nome":  "ImHex",
+                                    "winget":  "WerWolv.ImHex",
+                                    "categoria":  "Pro Tools"
+                                },
+                      "imageglass":  {
+                                         "nome":  "ImageGlass (Image Viewer)",
+                                         "winget":  "DuongDieuPhap.ImageGlass",
+                                         "categoria":  "Multimedia Tools"
+                                     },
+                      "internetdownloadmanager":  {
+                                                      "nome":  "Internet Download Manager",
+                                                      "winget":  "Tonec.InternetDownloadManager",
+                                                      "categoria":  "Utilities"
+                                                  },
+                      "irfanview":  {
+                                        "nome":  "IrfanView",
+                                        "winget":  "IrfanSkiljan.IrfanView",
+                                        "categoria":  "Multimedia Tools"
+                                    },
+                      "itch":  {
+                                   "nome":  "Itch.io",
+                                   "winget":  "ItchIo.Itch",
+                                   "categoria":  "Games"
+                               },
+                      "itunes":  {
+                                     "nome":  "iTunes",
+                                     "winget":  "Apple.iTunes",
+                                     "categoria":  "Multimedia Tools"
+                                 },
+                      "java8":  {
+                                    "nome":  "Amazon Corretto 8 (LTS)",
+                                    "winget":  "Amazon.Corretto.8.JDK",
+                                    "categoria":  "Development"
+                                },
+                      "java21":  {
+                                     "nome":  "Amazon Corretto 21 (LTS)",
+                                     "winget":  "Amazon.Corretto.21.JDK",
+                                     "categoria":  "Development"
+                                 },
+                      "java25":  {
+                                     "nome":  "Amazon Corretto 25 (LTS)",
+                                     "winget":  "Amazon.Corretto.25.JDK",
+                                     "categoria":  "Development"
+                                 },
+                      "jellyfinmediaplayer":  {
+                                                  "nome":  "Jellyfin Media Player",
+                                                  "winget":  "Jellyfin.JellyfinMediaPlayer",
+                                                  "categoria":  "Selfhosted Tools"
+                                              },
+                      "jellyfinserver":  {
+                                             "nome":  "Jellyfin Server",
+                                             "winget":  "Jellyfin.Server",
+                                             "categoria":  "Selfhosted Tools"
+                                         },
+                      "jetbrains":  {
+                                        "nome":  "Jetbrains Toolbox",
+                                        "winget":  "JetBrains.Toolbox",
+                                        "categoria":  "Development"
+                                    },
+                      "jpegview":  {
+                                       "nome":  "JPEG View",
+                                       "winget":  "sylikc.JPEGView",
+                                       "categoria":  "Utilities"
+                                   },
+                      "joplin":  {
+                                     "nome":  "Joplin",
+                                     "winget":  "Joplin.Joplin",
+                                     "categoria":  "Document"
+                                 },
+                      "keepassxc":  {
+                                        "nome":  "KeePassXC",
+                                        "winget":  "KeePassXCTeam.KeePassXC",
+                                        "categoria":  "Utilities"
+                                    },
+                      "klite":  {
+                                    "nome":  "K-Lite Codec Standard",
+                                    "winget":  "CodecGuide.K-LiteCodecPack.Standard",
+                                    "categoria":  "Multimedia Tools"
+                                },
+                      "kodi":  {
+                                   "nome":  "Kodi Media Center",
+                                   "winget":  "XBMCFoundation.Kodi",
+                                   "categoria":  "Selfhosted Tools"
+                               },
+                      "lazygit":  {
+                                      "nome":  "Lazygit",
+                                      "winget":  "JesseDuffield.lazygit",
+                                      "categoria":  "Development"
+                                  },
+                      "libreoffice":  {
+                                          "nome":  "LibreOffice",
+                                          "winget":  "TheDocumentFoundation.LibreOffice",
+                                          "categoria":  "Document"
+                                      },
+                      "librewolf":  {
+                                        "nome":  "LibreWolf",
+                                        "winget":  "LibreWolf.LibreWolf",
+                                        "categoria":  "Browsers"
+                                    },
+                      "localsend":  {
+                                        "nome":  "LocalSend",
+                                        "winget":  "LocalSend.LocalSend",
+                                        "categoria":  "Selfhosted Tools"
+                                    },
+                      "mpc-qt":  {
+                                     "nome":  "mpc-qt",
+                                     "winget":  "mpc-qt.mpc-qt",
+                                     "categoria":  "Multimedia Tools"
+                                 },
+                      "mpv":  {
+                                  "nome":  "mpv",
+                                  "winget":  "shinchiro.mpv",
+                                  "categoria":  "Multimedia Tools"
+                              },
+                      "matrix":  {
+                                     "nome":  "Element",
+                                     "winget":  "Element.Element",
+                                     "categoria":  "Communications"
+                                 },
+                      "minitoolpartitionwizard":  {
+                                                      "nome":  "MiniTool Partition Wizard",
+                                                      "winget":  "MiniTool.PartitionWizard.Free",
+                                                      "categoria":  "Utilities"
+                                                  },
+                      "modrinth":  {
+                                       "nome":  "Modrinth App",
+                                       "winget":  "Modrinth.ModrinthApp",
+                                       "categoria":  "Games"
+                                   },
+                      "moonlight":  {
+                                        "nome":  "Moonlight/GameStream Client",
+                                        "winget":  "MoonlightGameStreamingProject.Moonlight",
+                                        "categoria":  "Selfhosted Tools"
+                                    },
+                      "mpchc":  {
+                                    "nome":  "Media Player Classic - Home Cinema",
+                                    "winget":  "clsid2.mpc-hc",
+                                    "categoria":  "Multimedia Tools"
+                                },
+                      "msedgeredirect":  {
+                                             "nome":  "MSEdgeRedirect",
+                                             "winget":  "rcmaehl.MSEdgeRedirect",
+                                             "categoria":  "Utilities"
+                                         },
+                      "msiafterburner":  {
+                                             "nome":  "MSI Afterburner",
+                                             "winget":  "Guru3D.Afterburner",
+                                             "categoria":  "Pro Tools"
+                                         },
+                      "mullvadvpn":  {
+                                         "nome":  "Mullvad VPN",
+                                         "winget":  "MullvadVPN.MullvadVPN",
+                                         "categoria":  "Pro Tools"
+                                     },
+                      "mullvadbrowser":  {
+                                             "nome":  "Mullvad Browser",
+                                             "winget":  "MullvadVPN.MullvadBrowser",
+                                             "categoria":  "Browsers"
+                                         },
+                      "nomacs":  {
+                                     "nome":  "nomacs",
+                                     "winget":  "nomacs.nomacs",
+                                     "categoria":  "Multimedia Tools"
+                                 },
+                      "nanazip":  {
+                                      "nome":  "NanaZip",
+                                      "winget":  "M2Team.NanaZip",
+                                      "categoria":  "Utilities"
+                                  },
+                      "netbird":  {
+                                      "nome":  "NetBird",
+                                      "winget":  "Netbird.Netbird",
+                                      "categoria":  "Selfhosted Tools"
+                                  },
+                      "tailscale":  {
+                                        "nome":  "Tailscale",
+                                        "winget":  "Tailscale.Tailscale",
+                                        "categoria":  "Pro Tools"
+                                    },
+                      "naps2":  {
+                                    "nome":  "NAPS2 (Scanner)",
+                                    "winget":  "Cyanfish.NAPS2",
+                                    "categoria":  "Document"
+                                },
+                      "neovim":  {
+                                     "nome":  "Neovim",
+                                     "winget":  "Neovim.Neovim",
+                                     "categoria":  "Development"
+                                 },
+                      "nextclouddesktop":  {
+                                               "nome":  "Nextcloud Desktop",
+                                               "winget":  "Nextcloud.NextcloudDesktop",
+                                               "categoria":  "Selfhosted Tools"
+                                           },
+                      "nmap":  {
+                                   "nome":  "Nmap",
+                                   "winget":  "Insecure.Nmap",
+                                   "categoria":  "Pro Tools"
+                               },
+                      "nodejs":  {
+                                     "nome":  "NodeJS",
+                                     "winget":  "OpenJS.NodeJS",
+                                     "categoria":  "Development"
+                                 },
+                      "nodejslts":  {
+                                        "nome":  "NodeJS LTS",
+                                        "winget":  "OpenJS.NodeJS.LTS",
+                                        "categoria":  "Development"
+                                    },
+                      "pnpm":  {
+                                   "nome":  "pnpm",
+                                   "winget":  "pnpm.pnpm",
+                                   "categoria":  "Development"
+                               },
+                      "notepadplus":  {
+                                          "nome":  "Notepad++",
+                                          "winget":  "Notepad++.Notepad++",
+                                          "categoria":  "Development"
+                                      },
+                      "nuget":  {
+                                    "nome":  "NuGet",
+                                    "winget":  "Microsoft.NuGet",
+                                    "categoria":  "Microsoft Tools"
+                                },
+                      "nvclean":  {
+                                      "nome":  "NVCleanstall",
+                                      "winget":  "TechPowerUp.NVCleanstall",
+                                      "categoria":  "Utilities"
+                                  },
+                      "obs":  {
+                                  "nome":  "OBS Studio",
+                                  "winget":  "OBSProject.OBSStudio",
+                                  "categoria":  "Multimedia Tools"
+                              },
+                      "obsidian":  {
+                                       "nome":  "Obsidian",
+                                       "winget":  "Obsidian.Obsidian",
+                                       "categoria":  "Document"
+                                   },
+                      "okular":  {
+                                     "nome":  "Okular",
+                                     "winget":  "KDE.Okular",
+                                     "categoria":  "Document"
+                                 },
+                      "onedrive":  {
+                                       "nome":  "OneDrive",
+                                       "winget":  "Microsoft.OneDrive",
+                                       "categoria":  "Microsoft Tools"
+                                   },
+                      "onlyoffice":  {
+                                         "nome":  "ONLYOFFICE Desktop",
+                                         "winget":  "ONLYOFFICE.DesktopEditors",
+                                         "categoria":  "Document"
+                                     },
+                      "OPAutoClicker":  {
+                                            "nome":  "OPAutoClicker",
+                                            "winget":  "OPAutoClicker.OPAutoClicker",
+                                            "categoria":  "Utilities"
+                                        },
+                      "opencode":  {
+                                       "nome":  "OpenCode",
+                                       "winget":  "SST.opencode",
+                                       "categoria":  "Development"
+                                   },
+                      "openrgb":  {
+                                      "nome":  "OpenRGB",
+                                      "winget":  "OpenRGB.OpenRGB",
+                                      "categoria":  "Utilities"
+                                  },
+                      "OpenVPN":  {
+                                      "nome":  "OpenVPN Connect",
+                                      "winget":  "OpenVPNTechnologies.OpenVPNConnect",
+                                      "categoria":  "Pro Tools"
+                                  },
+                      "OVirtualBox":  {
+                                          "nome":  "Oracle VirtualBox",
+                                          "winget":  "Oracle.VirtualBox",
+                                          "categoria":  "Utilities"
+                                      },
+                      "policyplus":  {
+                                         "nome":  "Policy Plus",
+                                         "winget":  "Fleex255.PolicyPlus",
+                                         "categoria":  "Utilities"
+                                     },
+                      "processexplorer":  {
+                                              "nome":  "Process Explorer",
+                                              "winget":  "Microsoft.Sysinternals.ProcessExplorer",
+                                              "categoria":  "Microsoft Tools"
+                                          },
+                      "Paintdotnet":  {
+                                          "nome":  "Paint.NET",
+                                          "winget":  "dotPDN.PaintDotNet",
+                                          "categoria":  "Multimedia Tools"
+                                      },
+                      "parsec":  {
+                                     "nome":  "Parsec",
+                                     "winget":  "Parsec.Parsec",
+                                     "categoria":  "Utilities"
+                                 },
+                      "peazip":  {
+                                     "nome":  "PeaZip",
+                                     "winget":  "Giorgiotani.Peazip",
+                                     "categoria":  "Utilities"
+                                 },
+                      "pdf-xchange":  {
+                                          "nome":  "PDF-XChange Editor",
+                                          "winget":  "TrackerSoftware.PDF-XChangeEditor",
+                                          "categoria":  "Document"
+                                      },
+                      "pdf24creator":  {
+                                           "nome":  "PDF24 Creator",
+                                           "winget":  "geeksoftwareGmbH.PDF24Creator",
+                                           "categoria":  "Document"
+                                       },
+                      "pdfgear":  {
+                                      "nome":  "PDFgear",
+                                      "winget":  "PDFgear.PDFgear",
+                                      "categoria":  "Document"
+                                  },
+                      "pdfsam":  {
+                                     "nome":  "PDFsam Basic",
+                                     "winget":  "PDFsam.PDFsam",
+                                     "categoria":  "Document"
+                                 },
+                      "playnite":  {
+                                       "nome":  "Playnite",
+                                       "winget":  "Playnite.Playnite",
+                                       "categoria":  "Games"
+                                   },
+                      "plex":  {
+                                   "nome":  "Plex Media Server",
+                                   "winget":  "Plex.PlexMediaServer",
+                                   "categoria":  "Selfhosted Tools"
+                               },
+                      "plexdesktop":  {
+                                          "nome":  "Plex Desktop",
+                                          "winget":  "Plex.Plex",
+                                          "categoria":  "Selfhosted Tools"
+                                      },
+                      "posh":  {
+                                   "nome":  "Oh My Posh (Prompt)",
+                                   "winget":  "JanDeDobbeleer.OhMyPosh",
+                                   "categoria":  "Development"
+                               },
+                      "postman":  {
+                                      "nome":  "Postman",
+                                      "winget":  "Postman.Postman",
+                                      "categoria":  "Development"
+                                  },
+                      "powershell":  {
+                                         "nome":  "PowerShell",
+                                         "winget":  "Microsoft.PowerShell",
+                                         "categoria":  "Microsoft Tools"
+                                     },
+                      "powertoys":  {
+                                        "nome":  "PowerToys",
+                                        "winget":  "Microsoft.PowerToys",
+                                        "categoria":  "Microsoft Tools"
+                                    },
+                      "prismlauncher":  {
+                                            "nome":  "Prism Launcher",
+                                            "winget":  "PrismLauncher.PrismLauncher",
+                                            "categoria":  "Games"
+                                        },
+                      "processlasso":  {
+                                           "nome":  "Process Lasso",
+                                           "winget":  "BitSum.ProcessLasso",
+                                           "categoria":  "Utilities"
+                                       },
+                      "protonauth":  {
+                                         "nome":  "Proton Authenticator",
+                                         "winget":  "Proton.ProtonAuthenticator",
+                                         "categoria":  "Utilities"
+                                     },
+                      "protonmail":  {
+                                         "nome":  "Proton Mail",
+                                         "winget":  "Proton.ProtonMail",
+                                         "categoria":  "Communications"
+                                     },
+                      "protondrive":  {
+                                          "nome":  "Proton Drive",
+                                          "winget":  "Proton.ProtonDrive",
+                                          "categoria":  "Utilities"
+                                      },
+                      "protonpass":  {
+                                         "nome":  "Proton Pass",
+                                         "winget":  "Proton.ProtonPass",
+                                         "categoria":  "Utilities"
+                                     },
+                      "protonvpn":  {
+                                        "nome":  "Proton VPN",
+                                        "winget":  "Proton.ProtonVPN",
+                                        "categoria":  "Pro Tools"
+                                    },
+                      "processmonitor":  {
+                                             "nome":  "Process Monitor",
+                                             "winget":  "Microsoft.Sysinternals.ProcessMonitor",
+                                             "categoria":  "Microsoft Tools"
+                                         },
+                      "pstools":  {
+                                      "nome":  "PsTools",
+                                      "winget":  "Microsoft.Sysinternals.PsTools",
+                                      "categoria":  "Microsoft Tools"
+                                  },
+                      "putty":  {
+                                    "nome":  "PuTTY",
+                                    "winget":  "PuTTY.PuTTY",
+                                    "categoria":  "Pro Tools"
+                                },
+                      "python3":  {
+                                      "nome":  "Python3",
+                                      "winget":  "Python.Python.3.14",
+                                      "categoria":  "Development"
+                                  },
+                      "qbittorrent":  {
+                                          "nome":  "qBittorrent",
+                                          "winget":  "qBittorrent.qBittorrent",
+                                          "categoria":  "Utilities"
+                                      },
+                      "qownnotes":  {
+                                        "nome":  "QOwnNotes",
+                                        "winget":  "pbek.QOwnNotes",
+                                        "categoria":  "Document"
+                                    },
+                      "qtox":  {
+                                   "nome":  "QTox",
+                                   "winget":  "Tox.qTox",
+                                   "categoria":  "Communications"
+                               },
+                      "revo":  {
+                                   "nome":  "Revo Uninstaller",
+                                   "winget":  "RevoUninstaller.RevoUninstaller",
+                                   "categoria":  "Utilities"
+                               },
+                      "WiseProgramUninstaller":  {
+                                                     "nome":  "Wise Program Uninstaller (WiseCleaner)",
+                                                     "winget":  "WiseCleaner.WiseProgramUninstaller",
+                                                     "categoria":  "Utilities"
+                                                 },
+                      "rufus":  {
+                                    "nome":  "Rufus Imager",
+                                    "winget":  "Rufus.Rufus",
+                                    "categoria":  "Pro Tools"
+                                },
+                      "rustlang":  {
+                                       "nome":  "Rust",
+                                       "winget":  "Rustlang.Rust.MSVC",
+                                       "categoria":  "Development"
+                                   },
+                      "sdio":  {
+                                   "nome":  "Snappy Driver Installer Origin",
+                                   "winget":  "GlennDelahoy.SnappyDriverInstallerOrigin",
+                                   "categoria":  "Utilities"
+                               },
+                      "sharex":  {
+                                     "nome":  "ShareX (Screenshots)",
+                                     "winget":  "ShareX.ShareX",
+                                     "categoria":  "Multimedia Tools"
+                                 },
+                      "nilesoftShell":  {
+                                            "nome":  "Nilesoft Shell",
+                                            "winget":  "Nilesoft.Shell",
+                                            "categoria":  "Utilities"
+                                        },
+                      "systeminformer":  {
+                                             "nome":  "System Informer",
+                                             "winget":  "WinsiderSS.SystemInformer",
+                                             "categoria":  "Pro Tools"
+                                         },
+                      "signal":  {
+                                     "nome":  "Signal",
+                                     "winget":  "OpenWhisperSystems.Signal",
+                                     "categoria":  "Communications"
+                                 },
+                      "signalrgb":  {
+                                        "nome":  "SignalRGB",
+                                        "winget":  "WhirlwindFX.SignalRgb",
+                                        "categoria":  "Utilities"
+                                    },
+                      "simplenote":  {
+                                         "nome":  "Simplenote",
+                                         "winget":  "Automattic.Simplenote",
+                                         "categoria":  "Document"
+                                     },
+                      "simplewall":  {
+                                         "nome":  "Simplewall",
+                                         "winget":  "Henry++.simplewall",
+                                         "categoria":  "Pro Tools"
+                                     },
+                      "slack":  {
+                                    "nome":  "Slack",
+                                    "winget":  "SlackTechnologies.Slack",
+                                    "categoria":  "Communications"
+                                },
+                      "startallback":  {
+                                           "nome":  "StartAllBack",
+                                           "winget":  "StartIsBack.StartAllBack",
+                                           "categoria":  "Utilities"
+                                       },
+                      "starship":  {
+                                       "nome":  "Starship (Shell Prompt)",
+                                       "winget":  "Starship.Starship",
+                                       "categoria":  "Development"
+                                   },
+                      "steam":  {
+                                    "nome":  "Steam",
+                                    "winget":  "Valve.Steam",
+                                    "categoria":  "Games"
+                                },
+                      "roblox":  {
+                                     "nome":  "Roblox",
+                                     "winget":  "Roblox.Roblox",
+                                     "categoria":  "Games"
+                                 },
+                      "sublimetext":  {
+                                          "nome":  "Sublime Text",
+                                          "winget":  "SublimeHQ.SublimeText.4",
+                                          "categoria":  "Development"
+                                      },
+                      "sumatra":  {
+                                      "nome":  "Sumatra PDF",
+                                      "winget":  "SumatraPDF.SumatraPDF",
+                                      "categoria":  "Document"
+                                  },
+                      "sunshine":  {
+                                       "nome":  "Sunshine/GameStream Server",
+                                       "winget":  "LizardByte.Sunshine",
+                                       "categoria":  "Selfhosted Tools"
+                                   },
+                      "synctrayzor":  {
+                                          "nome":  "SyncTrayzor",
+                                          "winget":  "GermanCoding.SyncTrayzor",
+                                          "categoria":  "Selfhosted Tools"
+                                      },
+                      "syncthing":  {
+                                        "nome":  "Syncthing (CLI / Web UI)",
+                                        "winget":  "Syncthing.Syncthing",
+                                        "categoria":  "Selfhosted Tools"
+                                    },
+                      "tcpview":  {
+                                      "nome":  "TCPView",
+                                      "winget":  "Microsoft.Sysinternals.TCPView",
+                                      "categoria":  "Microsoft Tools"
+                                  },
+                      "teams":  {
+                                    "nome":  "Teams",
+                                    "winget":  "Microsoft.Teams",
+                                    "categoria":  "Communications"
+                                },
+                      "teamviewer":  {
+                                         "nome":  "TeamViewer",
+                                         "winget":  "TeamViewer.TeamViewer",
+                                         "categoria":  "Utilities"
+                                     },
+                      "teamspeak3":  {
+                                         "nome":  "TeamSpeak 3",
+                                         "winget":  "TeamSpeakSystems.TeamSpeakClient",
+                                         "categoria":  "Communications"
+                                     },
+                      "teamspeak6":  {
+                                         "nome":  "TeamSpeak 6",
+                                         "winget":  "TeamSpeakSystems.TeamSpeakClient.Beta.6",
+                                         "categoria":  "Communications"
+                                     },
+                      "telegram":  {
+                                       "nome":  "Telegram",
+                                       "winget":  "Telegram.TelegramDesktop",
+                                       "categoria":  "Communications"
+                                   },
+                      "terminal":  {
+                                       "nome":  "Windows Terminal",
+                                       "winget":  "Microsoft.WindowsTerminal",
+                                       "categoria":  "Microsoft Tools"
+                                   },
+                      "thunderbird":  {
+                                          "nome":  "Thunderbird",
+                                          "winget":  "Mozilla.Thunderbird",
+                                          "categoria":  "Communications"
+                                      },
+                      "betterbird":  {
+                                         "nome":  "Betterbird",
+                                         "winget":  "Betterbird.Betterbird",
+                                         "categoria":  "Communications"
+                                     },
+                      "tor":  {
+                                  "nome":  "Tor Browser",
+                                  "winget":  "TorProject.TorBrowser",
+                                  "categoria":  "Browsers"
+                              },
+                      "totalcommander":  {
+                                             "nome":  "Total Commander",
+                                             "winget":  "Ghisler.TotalCommander",
+                                             "categoria":  "Utilities"
+                                         },
+                      "treesize":  {
+                                       "nome":  "TreeSize Free",
+                                       "winget":  "JAMSoftware.TreeSize.Free",
+                                       "categoria":  "Utilities"
+                                   },
+                      "ttaskbar":  {
+                                       "nome":  "TranslucentTB",
+                                       "winget":  "CharlesMilette.TranslucentTB",
+                                       "categoria":  "Utilities"
+                                   },
+                      "ubisoft":  {
+                                      "nome":  "Ubisoft Connect",
+                                      "winget":  "Ubisoft.Connect",
+                                      "categoria":  "Games"
+                                  },
+                      "ungoogled":  {
+                                        "nome":  "Ungoogled Chromium",
+                                        "winget":  "eloston.ungoogled-chromium",
+                                        "categoria":  "Browsers"
+                                    },
+                      "unity":  {
+                                    "nome":  "Unity Game Engine",
+                                    "winget":  "Unity.UnityHub",
+                                    "categoria":  "Development"
+                                },
+                      "vagrant":  {
+                                      "nome":  "Vagrant",
+                                      "winget":  "Hashicorp.Vagrant",
+                                      "categoria":  "Development"
+                                  },
+                      "everything":  {
+                                         "nome":  "Everything",
+                                         "winget":  "voidtools.Everything",
+                                         "categoria":  "Utilities"
+                                     },
+                      "vc2015_32":  {
+                                        "nome":  "Visual C++ 2015-2022 32-bit",
+                                        "winget":  "Microsoft.VCRedist.2015+.x86",
+                                        "categoria":  "Microsoft Tools"
+                                    },
+                      "vc2015_64":  {
+                                        "nome":  "Visual C++ 2015-2022 64-bit",
+                                        "winget":  "Microsoft.VCRedist.2015+.x64",
+                                        "categoria":  "Microsoft Tools"
+                                    },
+                      "ventoy":  {
+                                     "nome":  "Ventoy",
+                                     "winget":  "Ventoy.Ventoy",
+                                     "categoria":  "Pro Tools"
+                                 },
+                      "vesktop":  {
+                                      "nome":  "Vesktop",
+                                      "winget":  "Vencord.Vesktop",
+                                      "categoria":  "Communications"
+                                  },
+                      "viber":  {
+                                    "nome":  "Viber",
+                                    "winget":  "Rakuten.Viber",
+                                    "categoria":  "Communications"
+                                },
+                      "visualstudio2022":  {
+                                               "nome":  "Visual Studio 2022",
+                                               "winget":  "Microsoft.VisualStudio.2022.Community",
+                                               "categoria":  "Development"
+                                           },
+                      "visualstudio2026":  {
+                                               "nome":  "Visual Studio 2026",
+                                               "winget":  "Microsoft.VisualStudio.Community",
+                                               "categoria":  "Development"
+                                           },
+                      "vivaldi":  {
+                                      "nome":  "Vivaldi",
+                                      "winget":  "Vivaldi.Vivaldi",
+                                      "categoria":  "Browsers"
+                                  },
+                      "vlc":  {
+                                  "nome":  "VLC (Video Player)",
+                                  "winget":  "VideoLAN.VLC",
+                                  "categoria":  "Multimedia Tools"
+                              },
+                      "vrdesktopstreamer":  {
+                                                "nome":  "Virtual Desktop Streamer",
+                                                "winget":  "VirtualDesktop.Streamer",
+                                                "categoria":  "Games"
+                                            },
+                      "vscode":  {
+                                     "nome":  "VS Code",
+                                     "winget":  "Microsoft.VisualStudioCode",
+                                     "categoria":  "Development"
+                                 },
+                      "vscodium":  {
+                                       "nome":  "VS Codium",
+                                       "winget":  "VSCodium.VSCodium",
+                                       "categoria":  "Development"
+                                   },
+                      "waterfox":  {
+                                       "nome":  "Waterfox",
+                                       "winget":  "Waterfox.Waterfox",
+                                       "categoria":  "Browsers"
+                                   },
+                      "whatsapp":  {
+                                       "nome":  "WhatsApp Desktop",
+                                       "winget":  "msstore:9NKSQGP7F2NH",
+                                       "categoria":  "Communications"
+                                   },
+                      "wingetui":  {
+                                       "nome":  "UniGetUI",
+                                       "winget":  "Devolutions.UniGetUI",
+                                       "categoria":  "Utilities"
+                                   },
+                      "winrar":  {
+                                     "nome":  "WinRAR",
+                                     "winget":  "RARLab.WinRAR",
+                                     "categoria":  "Utilities"
+                                 },
+                      "winscp":  {
+                                     "nome":  "WinSCP",
+                                     "winget":  "WinSCP.WinSCP",
+                                     "categoria":  "Pro Tools"
+                                 },
+                      "wireguard":  {
+                                        "nome":  "WireGuard",
+                                        "winget":  "WireGuard.WireGuard",
+                                        "categoria":  "Pro Tools"
+                                    },
+                      "wireshark":  {
+                                        "nome":  "Wireshark",
+                                        "winget":  "WiresharkFoundation.Wireshark",
+                                        "categoria":  "Pro Tools"
+                                    },
+                      "wiztree":  {
+                                      "nome":  "WizTree",
+                                      "winget":  "AntibodySoftware.WizTree",
+                                      "categoria":  "Utilities"
+                                  },
+                      "xeheditor":  {
+                                        "nome":  "HxD Hex Editor",
+                                        "winget":  "MHNexus.HxD",
+                                        "categoria":  "Utilities"
+                                    },
+                      "xournal":  {
+                                      "nome":  "Xournal++",
+                                      "winget":  "Xournal++.Xournal++",
+                                      "categoria":  "Document"
+                                  },
+                      "yarn":  {
+                                   "nome":  "Yarn",
+                                   "winget":  "Yarn.Yarn",
+                                   "categoria":  "Development"
+                               },
+                      "zoom":  {
+                                   "nome":  "Zoom",
+                                   "winget":  "Zoom.Zoom",
+                                   "categoria":  "Communications"
+                               },
+                      "uv":  {
+                                 "nome":  "uv",
+                                 "winget":  "astral-sh.uv",
+                                 "categoria":  "Development"
+                             },
+                      "tightvnc":  {
+                                       "nome":  "TightVNC",
+                                       "winget":  "GlavSoft.TightVNC",
+                                       "categoria":  "Utilities"
+                                   },
+                      "glazewm":  {
+                                      "nome":  "GlazeWM",
+                                      "winget":  "glzr-io.glazewm",
+                                      "categoria":  "Utilities"
+                                  },
+                      "Overwolf":  {
+                                       "nome":  "CurseForge",
+                                       "winget":  "Overwolf.CurseForge",
+                                       "categoria":  "Games"
+                                   },
+                      "OFGB":  {
+                                   "nome":  "OFGB (Oh Frick Go Back)",
+                                   "winget":  "xM4ddy.OFGB",
+                                   "categoria":  "Utilities"
+                               },
+                      "ZenBrowser":  {
+                                         "nome":  "Zen Browser",
+                                         "winget":  "Zen-Team.Zen-Browser",
+                                         "categoria":  "Browsers"
+                                     },
+                      "Zed":  {
+                                  "nome":  "Zed",
+                                  "winget":  "ZedIndustries.Zed",
+                                  "categoria":  "Development"
+                              },
+                      "zotero":  {
+                                     "nome":  "Zotero",
+                                     "winget":  "DigitalScholar.Zotero",
+                                     "categoria":  "Document"
+                                 },
+                      "deskflow":  {
+                                       "nome":  "Deskflow",
+                                       "winget":  "Deskflow.Deskflow",
+                                       "categoria":  "Utilities"
+                                   },
+                      "Ruby":  {
+                                   "nome":  "Ruby",
+                                   "winget":  "RubyInstallerTeam.Ruby.4.0",
+                                   "categoria":  "Development"
+                               },
+                      "Lua":  {
+                                  "nome":  "Lua",
+                                  "winget":  "rjpcomputing.luaforwindows",
+                                  "categoria":  "Development"
+                              },
+                      "CloudflareWARP":  {
+                                             "nome":  "Cloudflare WARP",
+                                             "winget":  "Cloudflare.Warp",
+                                             "categoria":  "Utilities"
+                                         }
+                  }
+}
