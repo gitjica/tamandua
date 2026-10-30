@@ -58,6 +58,8 @@ function Get-AjusteDisponivel {
 function Find-Alvos {
     param([string]$Catalogo = $script:ArquivoCatalogo, [string]$RaizRegistro = (Get-RaizRegistroPadrao))
 
+    # As leituras lentas do Windows (apps da Store, DNS, Teredo, Defender...) ao mesmo tempo, em vez de uma depois da outra.
+    if (-not $RaizRegistro) { Update-TmdLeiturasLentas }
     foreach ($a in Get-AjusteDisponivel -Catalogo $Catalogo -RaizRegistro $RaizRegistro) {
         $acao = Test-EhAcao $a
         $estado = if ($acao) { 'NaoSeAplica' } else { Get-TmdEstadoAjuste -Ajuste $a -RaizRegistro $RaizRegistro }

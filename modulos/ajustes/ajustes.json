@@ -1411,7 +1411,7 @@
         "tipo": "Script",
         "aplicar": "Get-Process -Name '*Widget*' -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; foreach ($n in 'MicrosoftWindows.Client.WebExperience', 'Microsoft.WidgetsPlatformRuntime') { Get-AppxPackage -AllUsers -Name $n | Remove-AppxPackage -AllUsers -ErrorAction Stop }",
         "desfazer": "$s = winget install --id 9MSSGKG348SP --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -and $LASTEXITCODE -ne -1978335135) { throw ('winget falhou: ' + $LASTEXITCODE) }",
-        "verificar": "@(Get-AppxPackage -Name 'MicrosoftWindows.Client.WebExperience').Count -eq 0"
+        "verificar": "-not (Test-TmdAppxInstalado -Nome 'MicrosoftWindows.Client.WebExperience')"
       }
     ]
   },
@@ -2170,7 +2170,7 @@
         "tipo": "Script",
         "aplicar": "Get-AppxPackage -AllUsers -Name '*Copilot*' | Remove-AppxPackage -AllUsers -ErrorAction Stop",
         "desfazer": "$s = winget install --id 9NHT9RB2F4HD --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity; if ($LASTEXITCODE -and $LASTEXITCODE -ne -1978335135) { throw ('winget falhou: ' + $LASTEXITCODE) }",
-        "verificar": "@(Get-AppxPackage -Name '*Copilot*').Count -eq 0"
+        "verificar": "-not (Test-TmdAppxInstalado -Nome '*Copilot*')"
       }
     ]
   },
@@ -2233,7 +2233,7 @@
         "tipo": "Script",
         "aplicar": "Set-WindowsReservedStorageState -State Disabled -ErrorAction Stop",
         "desfazer": "Set-WindowsReservedStorageState -State Enabled -ErrorAction Stop",
-        "verificar": "[string](Get-WindowsReservedStorageState -ErrorAction Stop).ReservedStorageState -eq 'Disabled'"
+        "verificar": "$v = Get-TmdLeitura -Chave 'armazenamentoReservado'; [string]$v[0] -eq 'Disabled'"
       }
     ]
   },
@@ -2307,7 +2307,7 @@
         "tipo": "Script",
         "aplicar": "$f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction SilentlyContinue; if ($f -and [string]$f.State -eq 'Enabled') { Disable-WindowsOptionalFeature -Online -FeatureName Recall -NoRestart -ErrorAction Stop | Out-Null }",
         "desfazer": "$f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction SilentlyContinue; if ($f) { Enable-WindowsOptionalFeature -Online -FeatureName Recall -NoRestart -ErrorAction Stop | Out-Null }",
-        "verificar": "$f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction Stop; -not $f -or [string]$f.State -ne 'Enabled'"
+        "verificar": "$v = Get-TmdLeitura -Chave 'recall'; [string]$v[0] -ne 'Enabled'"
       }
     ]
   },
@@ -2438,7 +2438,7 @@
         "tipo": "Script",
         "aplicar": "Set-NetTeredoConfiguration -Type Disabled -ErrorAction Stop",
         "desfazer": "Set-NetTeredoConfiguration -Type Default -ErrorAction Stop",
-        "verificar": "[string](Get-NetTeredoConfiguration -ErrorAction Stop).Type -eq 'Disabled'"
+        "verificar": "$v = Get-TmdLeitura -Chave 'teredo'; [string]$v[0] -eq 'Disabled'"
       }
     ]
   },
@@ -2518,7 +2518,7 @@
         "tipo": "Script",
         "aplicar": "Set-MpPreference -SubmitSamplesConsent 2 -ErrorAction Stop",
         "desfazer": "Set-MpPreference -SubmitSamplesConsent 1 -ErrorAction Stop",
-        "verificar": "[int](Get-MpPreference -ErrorAction Stop).SubmitSamplesConsent -eq 2"
+        "verificar": "$v = Get-TmdLeitura -Chave 'defenderAmostras'; [int]$v[0] -eq 2"
       }
     ]
   },

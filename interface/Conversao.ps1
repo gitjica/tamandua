@@ -73,13 +73,27 @@ function ConvertTo-ItemNavegacao {
 
 # Linhas da lista de alvos, com um cabeçalho por categoria. -Busca filtra por nome, detalhe ou categoria.
 # -Escreve: módulo que altera o sistema; cada linha ganha uma caixa de seleção.
+# -Cache (Id -> linha): linhas já montadas para estes mesmos alvos são reusadas (só a marca é atualizada). A busca
+# refaz a lista a cada tecla e montar 190 linhas custava ~0,35 s; quem chama zera o cache quando os alvos mudam.
 function ConvertTo-LinhaAlvo {
-    param([AllowEmptyCollection()][object[]]$Alvos = @(), [string]$Busca, [switch]$Escreve)
+    param([AllowEmptyCollection()][object[]]$Alvos = @(), [string]$Busca, [switch]$Escreve, [hashtable]$Cache)
 
     $termo = if ($Busca) { $Busca.Trim() } else { '' }
     $linhas = [System.Collections.Generic.List[object]]::new()
     $categoriaAtual = $null
     foreach ($a in $Alvos) {
+        $id = [string](Get-ValorPropriedade $a 'Id')
+        $guardada = if ($null -ne $Cache -and $id -and $Cache.ContainsKey($id) -and [object]::ReferenceEquals($Cache[$id].Alvo, $a)) { $Cache[$id] } else { $null }
+        if ($guardada) {
+            if ($termo -and "$($guardada.Nome) $($guardada.Detalhe) $($guardada.Categoria)".IndexOf($termo, [StringComparison]::OrdinalIgnoreCase) -lt 0) { continue }
+            if ($guardada.Categoria -ne $categoriaAtual) {
+                $categoriaAtual = $guardada.Categoria
+                $linhas.Add((New-LinhaAlvo -Tipo 'Categoria' -Nome $categoriaAtual))
+            }
+            $guardada.Selecionado = $Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true
+            $linhas.Add($guardada)
+            continue
+        }
         $nome = [string](Get-ValorPropriedade $a 'Nome')
         $categoria = [string](Get-ValorPropriedade $a 'Categoria')
         $detalhe = [string](Get-ValorPropriedade $a 'Detalhe')
@@ -97,15 +111,17 @@ function ConvertTo-LinhaAlvo {
         $seloProprio = [string](Get-ValorPropriedade $a 'Selo')
         $selo = if ($seloProprio) { $seloProprio } elseif ($script:TextoSelo.ContainsKey($estado)) { $script:TextoSelo[$estado] } else { '' }
         $tamanho = Get-ValorPropriedade $a 'Tamanho'
-        $linhas.Add((New-LinhaAlvo -Tipo 'Alvo' -Nome $nome -Categoria $categoria -Detalhe $detalhe -Estado $estado `
-                    -Nivel $(if ($nivel) { $nivel } else { 'Normal' }) -Valor $(if ($temValor) { [double]$valor } else { 0 }) `
-                    -TemValor $temValor -Selo $selo -Id ([string](Get-ValorPropriedade $a 'Id')) -Alvo $a `
-                    -TemCaixa ($Escreve -and (Get-ValorPropriedade $a 'Selecionavel') -ne $false) `
-                    -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
-                    -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 }) `
-                    -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent `
-                    -IconePng (Get-ValorPropriedade $a 'IconePng') -Classe ([string](Get-ValorPropriedade $a 'Classificacao')) `
-                    -Estrela ((Get-ValorPropriedade $a 'Estrela') -eq $true)))
+        $linha = New-LinhaAlvo -Tipo 'Alvo' -Nome $nome -Categoria $categoria -Detalhe $detalhe -Estado $estado `
+            -Nivel $(if ($nivel) { $nivel } else { 'Normal' }) -Valor $(if ($temValor) { [double]$valor } else { 0 }) `
+            -TemValor $temValor -Selo $selo -Id $id -Alvo $a `
+            -TemCaixa ($Escreve -and (Get-ValorPropriedade $a 'Selecionavel') -ne $false) `
+            -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
+            -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 }) `
+            -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent `
+            -IconePng (Get-ValorPropriedade $a 'IconePng') -Classe ([string](Get-ValorPropriedade $a 'Classificacao')) `
+            -Estrela ((Get-ValorPropriedade $a 'Estrela') -eq $true)
+        if ($null -ne $Cache -and $id) { $Cache[$id] = $linha }
+        $linhas.Add($linha)
     }
     , $linhas.ToArray()
 }
@@ -132,6 +148,9 @@ function New-LinhaAlvo {
         IconePng = $IconePng; Inicial = $inicial; Imagem = $null; TemImagem = $false
         Classe = $Classe; RotuloClasse = $rotulo; TemClasse = [bool]$rotulo; DicaClasse = $(if ($rotulo) { $script:DicaClasse[$Classe] } else { $null })
         Estrela = $Estrela
+        # Pastas: até 4 miniaturas e os itens dentro. Toda linha tem as propriedades (vazias): Binding que não acha a
+        # propriedade custa caro no WPF, multiplicado por cada quadro da grade.
+        Mini0 = $null; Mini1 = $null; Mini2 = $null; Mini3 = $null; Membros = $null
     }
 }
 
@@ -140,25 +159,32 @@ function New-LinhaAlvo {
 # com um título e um quadro 'Voltar'. Só muda o que aparece: a marca de cada item continua no próprio alvo.
 function ConvertTo-LinhasComPastas {
     param([AllowEmptyCollection()][object[]]$Linhas = @(), [string]$PastaAberta = '')
-    $grupoDe = { param($l) if ($l.Tipo -eq 'Alvo') { [string](Get-ValorPropriedade $l.Alvo 'Grupo') } else { '' } }
+    # Uma passada para saber o grupo de cada linha e juntar os membros; outra para montar a saída.
+    $grupos = [object[]]::new($Linhas.Count)
+    $membrosDe = @{}
+    for ($i = 0; $i -lt $Linhas.Count; $i++) {
+        $l = $Linhas[$i]
+        $g = if ($l.Tipo -eq 'Alvo') { [string](Get-ValorPropriedade $l.Alvo 'Grupo') } else { '' }
+        $grupos[$i] = $g
+        if (-not $g) { continue }
+        $chave = if ($PastaAberta) { $g } else { "$($l.Categoria)|$g" }
+        if (-not $membrosDe.ContainsKey($chave)) { $membrosDe[$chave] = [System.Collections.Generic.List[object]]::new() }
+        $membrosDe[$chave].Add($l)
+    }
     if ($PastaAberta) {
-        $membros = @($Linhas | Where-Object { (& $grupoDe $_) -eq $PastaAberta })
-        if ($membros.Count -eq 0) { return , $Linhas }
-        $saida = @((New-LinhaAlvo -Tipo 'Categoria' -Nome $PastaAberta), (New-LinhaPasta -Tipo 'Voltar' -Nome 'Voltar' -Membros @())) + $membros
+        if (-not $membrosDe.ContainsKey($PastaAberta)) { return , $Linhas }
+        $saida = @((New-LinhaAlvo -Tipo 'Categoria' -Nome $PastaAberta), (New-LinhaPasta -Tipo 'Voltar' -Nome 'Voltar' -Membros @())) + $membrosDe[$PastaAberta].ToArray()
         return , $saida
     }
-    $contagem = @{}
-    foreach ($l in $Linhas) { $g = & $grupoDe $l; if ($g) { $chave = "$($l.Categoria)|$g"; $contagem[$chave] = 1 + [int]$contagem[$chave] } }
     $feitas = @{}
     $saida = [System.Collections.Generic.List[object]]::new()
-    foreach ($l in $Linhas) {
-        $g = & $grupoDe $l
+    for ($i = 0; $i -lt $Linhas.Count; $i++) {
+        $l = $Linhas[$i]; $g = $grupos[$i]
         $chave = "$($l.Categoria)|$g"
-        if (-not $g -or $contagem[$chave] -lt 2) { $saida.Add($l); continue }
+        if (-not $g -or $membrosDe[$chave].Count -lt 2) { $saida.Add($l); continue }
         if ($feitas.ContainsKey($chave)) { continue }
         $feitas[$chave] = $true
-        $membros = @($Linhas | Where-Object { $_.Categoria -eq $l.Categoria -and (& $grupoDe $_) -eq $g })
-        $saida.Add((New-LinhaPasta -Tipo 'Pasta' -Nome $g -Categoria $l.Categoria -Membros $membros))
+        $saida.Add((New-LinhaPasta -Tipo 'Pasta' -Nome $g -Categoria $l.Categoria -Membros $membrosDe[$chave].ToArray()))
     }
     , $saida.ToArray()
 }
@@ -171,27 +197,38 @@ function New-LinhaPasta {
         -Detalhe $(if ($Tipo -eq 'Voltar') { 'Fechar a pasta' } else { "Alternativas: $(($Membros | ForEach-Object Nome) -join ', ')" })
     if ($Tipo -eq 'Voltar') { $linha.Inicial = [string][char]0x2190 }
     # Miniaturas: imagens dos primeiros com ícone (objetos .NET puros, como em Set-TmdImagensLinha).
-    $mini = [System.Collections.Generic.List[object]]::new()
-    foreach ($m in $Membros) { if ($m.TemImagem -and $mini.Count -lt 4) { $mini.Add($m.Imagem) } }
-    $linha | Add-Member -NotePropertyName Miniaturas -NotePropertyValue $mini.ToArray()
-    $linha | Add-Member -NotePropertyName Membros -NotePropertyValue $Membros
+    $i = 0
+    foreach ($m in $Membros) { if ($m.TemImagem -and $i -lt 4) { $linha."Mini$i" = $m.Imagem; $i++ } }
+    $linha.Membros = $Membros
     $linha
 }
 
-# Texto do painel de detalhes: descrição, classificação, o que pode dar errado e como resolver, e o que acontece.
-function Get-TextoDetalheAlvo {
+# Conteúdo do painel de detalhes, em pedaços (a janela desenha cada um num cartão): o que é, selos (estado,
+# classificação, estrela), o que pode dar errado e como resolver (com o tom da classificação) e o que acontece.
+function Get-DetalheAlvo {
     param([Parameter(Mandatory)]$Linha)
-    $partes = [System.Collections.Generic.List[string]]::new()
-    $partes.Add([string]$Linha.Detalhe)
-    if ($Linha.Estrela) { $partes.Add("$([char]0x2B50) Recomendado pelo FMHY.") }
-    if ($Linha.TemClasse) { $partes.Add("$($Linha.RotuloClasse): $($script:DicaClasse[$Linha.Classe])") }
-    $contra = [string](Get-ValorPropriedade $Linha.Alvo 'Contratempo')
-    $seAc = [string](Get-ValorPropriedade $Linha.Alvo 'SeAcontecer')
-    if ($contra) { $partes.Add("Pode dar problema:`n$contra") }
-    if ($seAc) { $partes.Add("Se acontecer:`n$seAc") }
+    $selos = [System.Collections.Generic.List[object]]::new()
+    if ($Linha.TemSelo) {
+        $tom = switch ($Linha.Estado) { 'Aplicado' { 'Sucesso' } 'Parcial' { 'Aviso' } default { 'TextoSecundario' } }
+        $fundo = switch ($Linha.Estado) { 'Aplicado' { 'SucessoFundo' } 'Parcial' { 'AvisoFundo' } default { 'SuperficieLateral' } }
+        $selos.Add([pscustomobject]@{ Texto = $Linha.Selo; Tom = $tom; Fundo = $fundo; Dica = $null })
+    }
+    if ($Linha.TemClasse) {
+        $cores = @{ Recomendado = 'Sucesso', 'SucessoFundo'; Opcional = 'TextoSecundario', 'SuperficieLateral'; Atencao = 'Aviso', 'AvisoFundo'; Arriscado = 'Perigo', 'PerigoFundo' }
+        $cor = $cores[$Linha.Classe]
+        $selos.Add([pscustomobject]@{ Texto = $Linha.RotuloClasse; Tom = $cor[0]; Fundo = $cor[1]; Dica = $script:DicaClasse[$Linha.Classe] })
+    }
+    if ($Linha.Estrela) { $selos.Add([pscustomobject]@{ Texto = "$([char]0x2B50) Recomendado pelo FMHY"; Tom = 'Aviso'; Fundo = 'AvisoFundo'; Dica = $null }) }
+    $sobre = [string]$Linha.Detalhe
     $mudancas = @(Get-ValorPropriedade $Linha.Alvo 'Mudancas' | Where-Object { $_ })
-    if ($mudancas.Count -gt 0) { $partes.Add("O que acontece:`n• $($mudancas -join "`n• ")") }
-    ($partes | Where-Object { $_ }) -join "`n`n"
+    [pscustomobject]@{
+        Sobre    = $sobre
+        Selos    = $selos.ToArray()
+        Problema = [string](Get-ValorPropriedade $Linha.Alvo 'Contratempo')
+        Solucao  = [string](Get-ValorPropriedade $Linha.Alvo 'SeAcontecer')
+        Tom      = switch ($Linha.Classe) { 'Arriscado' { 'Perigo' } 'Atencao' { 'Aviso' } default { '' } }
+        Mudancas = if ($mudancas.Count -gt 0) { '• ' + ($mudancas -join "`n• ") } else { '' }
+    }
 }
 
 # Os quatro selos de classificação dos ajustes, com a explicação que aparece ao parar o mouse em cima.

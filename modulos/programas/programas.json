@@ -70,6 +70,19 @@
         "grupo":  "Baseados no Firefox"
     },
     {
+        "id":  "chrome",
+        "nome":  "Google Chrome",
+        "descricao":  "Navegador do Google.",
+        "categoria":  "Navegadores",
+        "wingetId":  "Google.Chrome",
+        "livre":  false,
+        "site":  "https://www.google.com/chrome/",
+        "choco":  "googlechrome",
+        "winutil":  "chrome",
+        "estrela":  false,
+        "grupo":  "Baseados no Chromium"
+    },
+    {
         "id":  "helium",
         "nome":  "Helium",
         "descricao":  "Navegador leve baseado no Chromium, sem rastreamento.",
@@ -181,6 +194,19 @@
         "grupo":  "E-mail"
     },
     {
+        "id":  "discord",
+        "nome":  "Discord",
+        "descricao":  "Chat de voz e texto.",
+        "categoria":  "Comunicação",
+        "wingetId":  "Discord.Discord",
+        "livre":  false,
+        "site":  "https://discord.com/",
+        "choco":  "discord",
+        "winutil":  "discord",
+        "estrela":  false,
+        "grupo":  "Mensagens"
+    },
+    {
         "id":  "dorion",
         "nome":  "Dorion",
         "descricao":  "Discord mais leve, com temas e plugins.",
@@ -223,6 +249,19 @@
         "grupo":  "Mensagens"
     },
     {
+        "id":  "telegram",
+        "nome":  "Telegram",
+        "descricao":  "Mensagens.",
+        "categoria":  "Comunicação",
+        "wingetId":  "Telegram.TelegramDesktop",
+        "livre":  true,
+        "site":  "https://telegram.org/",
+        "choco":  "telegram",
+        "winutil":  "telegram",
+        "estrela":  false,
+        "grupo":  "Mensagens"
+    },
+    {
         "id":  "vesktop",
         "nome":  "Vesktop",
         "descricao":  "Discord com Vencord (temas e plugins).",
@@ -235,6 +274,20 @@
         "estrela":  false,
         "fmhy":  "social-media-tools / Discord Clients",
         "grupo":  "Discord com extras"
+    },
+    {
+        "id":  "whatsapp",
+        "nome":  "WhatsApp",
+        "descricao":  "O WhatsApp para Windows (Microsoft Store).",
+        "categoria":  "Comunicação",
+        "wingetId":  "9NKSQGP7F2NH",
+        "fonte":  "msstore",
+        "livre":  false,
+        "site":  "https://www.whatsapp.com/download",
+        "choco":  "",
+        "winutil":  "whatsapp",
+        "estrela":  false,
+        "grupo":  "Mensagens"
     },
     {
         "id":  "zoom",
@@ -1798,6 +1851,19 @@
         "grupo":  "Minecraft"
     },
     {
+        "id":  "epic",
+        "nome":  "Epic Games",
+        "descricao":  "Loja da Epic (jogos grátis toda semana).",
+        "categoria":  "Jogos",
+        "wingetId":  "EpicGames.EpicGamesLauncher",
+        "livre":  false,
+        "site":  "https://www.epicgames.com/store/en-US/",
+        "choco":  "epicgameslauncher",
+        "winutil":  "epicgames",
+        "estrela":  false,
+        "grupo":  "Launchers de jogos"
+    },
+    {
         "id":  "gog",
         "nome":  "GOG Galaxy",
         "descricao":  "Loja e biblioteca de jogos da GOG, sem DRM.",
@@ -1824,6 +1890,19 @@
         "estrela":  false,
         "fmhy":  "gaming-tools / Minecraft Mods",
         "grupo":  "Minecraft"
+    },
+    {
+        "id":  "steam",
+        "nome":  "Steam",
+        "descricao":  "Loja e biblioteca de jogos.",
+        "categoria":  "Jogos",
+        "wingetId":  "Valve.Steam",
+        "livre":  false,
+        "site":  "https://store.steampowered.com/about/",
+        "choco":  "steam-client",
+        "winutil":  "steam",
+        "estrela":  false,
+        "grupo":  "Launchers de jogos"
     },
     {
         "id":  "githubdesktop",
@@ -1950,6 +2029,58 @@
         "fmhy":  "system-tools"
     },
     {
+        "id":  "dotnet10",
+        "nome":  ".NET Desktop Runtime 10",
+        "descricao":  "O que programas feitos em .NET 10 precisam para abrir.",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.10",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/10.0",
+        "choco":  "dotnet-10.0-runtime",
+        "winutil":  "dotnet10",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "dotnet6",
+        "nome":  ".NET Desktop Runtime 6",
+        "descricao":  "O que programas feitos em .NET 6 precisam para abrir.",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.6",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/6.0",
+        "choco":  "dotnet-6.0-runtime",
+        "winutil":  "dotnet6",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "dotnet8",
+        "nome":  ".NET Desktop Runtime 8",
+        "descricao":  "O que programas feitos em .NET 8 precisam para abrir.",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.8",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/8.0",
+        "choco":  "dotnet-8.0-runtime",
+        "winutil":  "dotnet8",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "dotnet9",
+        "nome":  ".NET Desktop Runtime 9",
+        "descricao":  "O que programas feitos em .NET 9 precisam para abrir.",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.DotNet.DesktopRuntime.9",
+        "livre":  true,
+        "site":  "https://dotnet.microsoft.com/download/dotnet/9.0",
+        "choco":  "dotnet-9.0-runtime",
+        "winutil":  "dotnet9",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
         "id":  "powershell",
         "nome":  "PowerShell",
         "descricao":  "PowerShell 7, a versão mais nova.",
@@ -1974,6 +2105,32 @@
         "winutil":  "powertoys",
         "estrela":  false,
         "fmhy":  "system-tools"
+    },
+    {
+        "id":  "vc2015-32",
+        "nome":  "Visual C++ 2015-2022 (32 bits)",
+        "descricao":  "O que muitos programas e jogos precisam para abrir (32 bits).",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.VCRedist.2015+.x86",
+        "livre":  false,
+        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
+        "choco":  "vcredist2015",
+        "winutil":  "vc2015_32",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
+    },
+    {
+        "id":  "vc2015-64",
+        "nome":  "Visual C++ 2015-2022 (64 bits)",
+        "descricao":  "O que muitos programas e jogos precisam para abrir (64 bits).",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "Microsoft.VCRedist.2015+.x64",
+        "livre":  false,
+        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
+        "choco":  "vcredist2015",
+        "winutil":  "vc2015_64",
+        "estrela":  false,
+        "grupo":  "Componentes do Windows"
     },
     {
         "id":  "terminal",
@@ -2380,161 +2537,5 @@
         "estrela":  false,
         "fmhy":  "video-tools; video / Free w/ Ads",
         "grupo":  "Plex"
-    },
-    {
-        "id":  "dotnet10",
-        "nome":  ".NET Desktop Runtime 10",
-        "descricao":  "O que programas feitos em .NET 10 precisam para abrir.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.10",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/10.0",
-        "choco":  "dotnet-10.0-runtime",
-        "winutil":  "dotnet10",
-        "estrela":  false,
-        "grupo":  "Componentes do Windows"
-    },
-    {
-        "id":  "dotnet6",
-        "nome":  ".NET Desktop Runtime 6",
-        "descricao":  "O que programas feitos em .NET 6 precisam para abrir.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.6",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/6.0",
-        "choco":  "dotnet-6.0-runtime",
-        "winutil":  "dotnet6",
-        "estrela":  false,
-        "grupo":  "Componentes do Windows"
-    },
-    {
-        "id":  "dotnet8",
-        "nome":  ".NET Desktop Runtime 8",
-        "descricao":  "O que programas feitos em .NET 8 precisam para abrir.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.8",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/8.0",
-        "choco":  "dotnet-8.0-runtime",
-        "winutil":  "dotnet8",
-        "estrela":  false,
-        "grupo":  "Componentes do Windows"
-    },
-    {
-        "id":  "dotnet9",
-        "nome":  ".NET Desktop Runtime 9",
-        "descricao":  "O que programas feitos em .NET 9 precisam para abrir.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Microsoft.DotNet.DesktopRuntime.9",
-        "livre":  true,
-        "site":  "https://dotnet.microsoft.com/download/dotnet/9.0",
-        "choco":  "dotnet-9.0-runtime",
-        "winutil":  "dotnet9",
-        "estrela":  false,
-        "grupo":  "Componentes do Windows"
-    },
-    {
-        "id":  "discord",
-        "nome":  "Discord",
-        "descricao":  "Chat de voz e texto.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Discord.Discord",
-        "livre":  false,
-        "site":  "https://discord.com/",
-        "choco":  "discord",
-        "winutil":  "discord",
-        "estrela":  false,
-        "grupo":  "Mensagens"
-    },
-    {
-        "id":  "epic",
-        "nome":  "Epic Games",
-        "descricao":  "Loja da Epic (jogos grátis toda semana).",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "EpicGames.EpicGamesLauncher",
-        "livre":  false,
-        "site":  "https://www.epicgames.com/store/en-US/",
-        "choco":  "epicgameslauncher",
-        "winutil":  "epicgames",
-        "estrela":  false,
-        "grupo":  "Launchers de jogos"
-    },
-    {
-        "id":  "chrome",
-        "nome":  "Google Chrome",
-        "descricao":  "Navegador do Google.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Google.Chrome",
-        "livre":  false,
-        "site":  "https://www.google.com/chrome/",
-        "choco":  "googlechrome",
-        "winutil":  "chrome",
-        "estrela":  false
-    },
-    {
-        "id":  "steam",
-        "nome":  "Steam",
-        "descricao":  "Loja e biblioteca de jogos.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Valve.Steam",
-        "livre":  false,
-        "site":  "https://store.steampowered.com/about/",
-        "choco":  "steam-client",
-        "winutil":  "steam",
-        "estrela":  false,
-        "grupo":  "Launchers de jogos"
-    },
-    {
-        "id":  "telegram",
-        "nome":  "Telegram",
-        "descricao":  "Mensagens.",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Telegram.TelegramDesktop",
-        "livre":  true,
-        "site":  "https://telegram.org/",
-        "choco":  "telegram",
-        "winutil":  "telegram",
-        "estrela":  false,
-        "grupo":  "Mensagens"
-    },
-    {
-        "id":  "vc2015-32",
-        "nome":  "Visual C++ 2015-2022 (32 bits)",
-        "descricao":  "O que muitos programas e jogos precisam para abrir (32 bits).",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Microsoft.VCRedist.2015+.x86",
-        "livre":  false,
-        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
-        "choco":  "vcredist2015",
-        "winutil":  "vc2015_32",
-        "estrela":  false,
-        "grupo":  "Componentes do Windows"
-    },
-    {
-        "id":  "vc2015-64",
-        "nome":  "Visual C++ 2015-2022 (64 bits)",
-        "descricao":  "O que muitos programas e jogos precisam para abrir (64 bits).",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "Microsoft.VCRedist.2015+.x64",
-        "livre":  false,
-        "site":  "https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads",
-        "choco":  "vcredist2015",
-        "winutil":  "vc2015_64",
-        "estrela":  false,
-        "grupo":  "Componentes do Windows"
-    },
-    {
-        "id":  "whatsapp",
-        "nome":  "WhatsApp",
-        "descricao":  "O WhatsApp para Windows (Microsoft Store).",
-        "categoria":  "Populares (fora do FMHY)",
-        "wingetId":  "9NKSQGP7F2NH",
-        "fonte":  "msstore",
-        "livre":  false,
-        "site":  "https://www.whatsapp.com/download",
-        "choco":  "",
-        "winutil":  "whatsapp",
-        "estrela":  false,
-        "grupo":  "Mensagens"
     }
 ]

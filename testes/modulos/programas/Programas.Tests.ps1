@@ -60,17 +60,17 @@ Describe 'Catálogo' {
     }
 
     It 'categorias conhecidas, na ordem da página' {
-        $ordem = 'Navegadores', 'Comunicação', 'Multimídia', 'Documentos', 'Utilitários', 'Jogos', 'Desenvolvimento', 'Ferramentas da Microsoft', 'Ferramentas avançadas', 'Servidor em casa', 'Populares (fora do FMHY)'
+        $ordem = 'Navegadores', 'Comunicação', 'Multimídia', 'Documentos', 'Utilitários', 'Jogos', 'Desenvolvimento', 'Ferramentas da Microsoft', 'Ferramentas avançadas', 'Servidor em casa'
         $vistas = @($catalogo | ForEach-Object categoria | Select-Object -Unique)
         ($vistas -join '|') | Should -Be ($ordem -join '|')
     }
 
-    It 'só o que está no FMHY (fmhy-referencia.json), com a mesma estrela; populares à parte, sem estrela; nada pago nem do unsafe.md' {
+    It 'só o que está no FMHY (fmhy-referencia.json), com a mesma estrela; populares na categoria normal, sem estrela; nada pago nem do unsafe.md' {
         $ref = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'fmhy-referencia.json') -Raw -Encoding UTF8 | ConvertFrom-Json
         foreach ($p in $catalogo) {
             $estrela = $p.PSObject.Properties['estrela'] -and $p.estrela -eq $true
             if (@($ref.Populares) -contains $p.id) {
-                $p.categoria | Should -Be 'Populares (fora do FMHY)' -Because $p.id
+                $p.categoria | Should -Not -Match 'FMHY' -Because $p.id
                 $estrela | Should -BeFalse -Because $p.id
                 continue
             }
@@ -127,6 +127,9 @@ Describe 'Find-Alvos' {
         $alvos = @(Find-Alvos)
         ($alvos | Where-Object Id -eq 'firefox').Estado | Should -Be 'Aplicado'
         ($alvos | Where-Object Id -eq 'firefox').Selo | Should -Be 'instalado'
+        # Instalado: o comando continua visível nos detalhes.
+        ($alvos | Where-Object Id -eq 'firefox').Mudancas | Should -Contain 'Instalado com: winget install --id Mozilla.Firefox --exact --source winget'
+        ($alvos | Where-Object Id -eq 'obsidian').Mudancas[0] | Should -Be 'winget upgrade --id Obsidian.Obsidian --exact --source winget'
         ($alvos | Where-Object Id -eq 'obsidian').Estado | Should -Be 'Parcial'
         ($alvos | Where-Object Id -eq 'obsidian').Selo | Should -Be 'atualizar para 1.14.5'
         ($alvos | Where-Object Id -eq 'vlc').Selo | Should -Be 'não instalado'
@@ -143,12 +146,12 @@ Describe 'Find-Alvos' {
         Get-TmdIconePng -Caminho @($zap.Icone)[0] | Should -Not -BeNullOrEmpty
     }
 
-    It 'estrela do FMHY vai para a tela; o preset "Recomendados (FMHY)" só marca os com estrela que faltam instalar' {
+    It 'estrela do FMHY vai para a tela; não há preset de programas' {
         $alvos = @(Find-Alvos)
         $vlc = $alvos | Where-Object Id -eq 'vlc'
         $vlc.Estrela | Should -BeTrue
-        $vlc.Presets | Should -Contain 'Recomendados (FMHY)'
-        ($alvos | Where-Object Id -eq 'obsidian').Presets | Should -BeNullOrEmpty -Because 'já está instalado'
+        $vlc.PSObject.Properties.Name | Should -Not -Contain 'Presets'
+        ($alvos | Where-Object Id -eq 'chrome').Categoria | Should -Be 'Navegadores'
         ($alvos | Where-Object Id -eq 'whatsapp').Estrela | Should -BeFalse
     }
 

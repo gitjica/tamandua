@@ -230,16 +230,82 @@ $script:CacheLeitura = @{}
 function Get-TmdLeituraGuardada {
     param([Parameter(Mandatory)][string]$Chave, [Parameter(Mandatory)][scriptblock]$Ler, [int]$Segundos = 20)
     $g = $script:CacheLeitura[$Chave]
-    if ($g -and ([DateTime]::UtcNow - $g.Quando).TotalSeconds -lt $Segundos) { return , $g.Valor }
+    if ($g -and ([DateTime]::UtcNow - $g.Quando).TotalSeconds -lt $Segundos) {
+        # Leitura que falhou (ex.: precisa de admin) também fica guardada: não vale tentar de novo na mesma página.
+        if ($g.ContainsKey('Erro')) { throw $g['Erro'] }
+        return , $g.Valor
+    }
     $valor = @(& $Ler)
     $script:CacheLeitura[$Chave] = @{ Quando = [DateTime]::UtcNow; Valor = $valor }
     , $valor
 }
 
+# Leituras lentas do Windows (cada uma carrega um módulo e consulta o sistema: 0,5 a 3 s). Os "verificar" do catálogo
+# usam Get-TmdLeitura <chave>, e Update-TmdLeiturasLentas lê todas ao mesmo tempo no começo da página de ajustes.
+# Cada bloco tem que se virar sozinho (roda num runspace sem o núcleo).
+$script:LeiturasLentas = [ordered]@{
+    appx                   = { Get-AppxPackage -ErrorAction Stop | ForEach-Object { [string]$_.Name } }
+    # Primeiro DNS IPv4 de cada placa física conectada. Física = a marca NCF_PHYSICAL (4) que o Get-NetAdapter -Physical
+    # também usa, lida direto do registro; o DNS vem do .NET. ~0,1 s, contra ~2 s do Get-NetAdapter/Get-DnsClient (CIM).
+    dns                    = {
+        $classe = 'HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e972-e325-11ce-bfc1-08002be10318}'
+        $fisicas = @{}
+        foreach ($k in @(Get-ChildItem -LiteralPath $classe -ErrorAction SilentlyContinue)) {
+            $p = Get-ItemProperty -LiteralPath $k.PSPath -ErrorAction SilentlyContinue
+            if ($p -and $p.PSObject.Properties['NetCfgInstanceId'] -and $p.PSObject.Properties['Characteristics'] -and ([int]$p.Characteristics -band 4)) {
+                $fisicas[[string]$p.NetCfgInstanceId] = $true
+            }
+        }
+        foreach ($n in [Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces()) {
+            if ([string]$n.OperationalStatus -ne 'Up' -or -not $fisicas.ContainsKey($n.Id)) { continue }
+            $s = @($n.GetIPProperties().DnsAddresses | Where-Object { $_.AddressFamily -eq 'InterNetwork' } | ForEach-Object { $_.IPAddressToString })
+            if ($s.Count -gt 0) { [string]$s[0] } else { '' }
+        }
+    }
+    teredo                 = { [string](Get-NetTeredoConfiguration -ErrorAction Stop).Type }
+    defenderAmostras       = { [int](Get-MpPreference -ErrorAction Stop).SubmitSamplesConsent }
+    armazenamentoReservado = { [string](Get-WindowsReservedStorageState -ErrorAction Stop).ReservedStorageState }
+    recall                 = { $f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction Stop; if ($f) { [string]$f.State } else { '' } }
+}
+
+function Get-TmdLeitura {
+    param([Parameter(Mandatory)][string]$Chave)
+    if (-not $script:LeiturasLentas.Contains($Chave)) { throw "leitura desconhecida: $Chave" }
+    $segundos = if ($Chave -eq 'dns') { 10 } else { 20 }
+    Get-TmdLeituraGuardada -Chave $Chave -Segundos $segundos -Ler $script:LeiturasLentas[$Chave]
+}
+
+# Faz todas as leituras lentas de uma vez, em paralelo, e guarda (inclusive as que falharam). Sempre lê de novo:
+# a página de ajustes chama isto ao abrir, então o estado mostrado é o de agora, mesmo logo depois de aplicar.
+function Update-TmdLeiturasLentas {
+    [CmdletBinding()]
+    param([string[]]$Chaves = @($script:LeiturasLentas.Keys))
+    $conjunto = [runspacefactory]::CreateRunspacePool(1, [Math]::Max(1, $Chaves.Count))
+    $conjunto.Open()
+    try {
+        $tarefas = foreach ($k in $Chaves) {
+            $ps = [powershell]::Create()
+            $ps.RunspacePool = $conjunto
+            [void]$ps.AddScript("`$ErrorActionPreference = 'Stop'; $($script:LeiturasLentas[$k].ToString())")
+            [pscustomobject]@{ Chave = $k; Ps = $ps; Espera = $ps.BeginInvoke() }
+        }
+        foreach ($t in $tarefas) {
+            try {
+                $valor = @($t.Ps.EndInvoke($t.Espera))
+                if ($t.Ps.HadErrors -and $t.Ps.Streams.Error.Count -gt 0) { throw $t.Ps.Streams.Error[0].Exception }
+                $script:CacheLeitura[$t.Chave] = @{ Quando = [DateTime]::UtcNow; Valor = $valor }
+            }
+            catch { $script:CacheLeitura[$t.Chave] = @{ Quando = [DateTime]::UtcNow; Erro = (Get-TmdExcecaoInterna $_.Exception).Message } }
+            finally { $t.Ps.Dispose() }
+        }
+    }
+    finally { $conjunto.Close(); $conjunto.Dispose() }
+}
+
 # App da Store instalado para o usuário atual? (uma leitura de Get-AppxPackage serve para os 34 apps do catálogo)
 function Test-TmdAppxInstalado {
     param([Parameter(Mandatory)][string]$Nome)
-    $nomes = Get-TmdLeituraGuardada -Chave 'appx' -Ler { Get-AppxPackage -ErrorAction Stop | ForEach-Object { [string]$_.Name } }
+    $nomes = Get-TmdLeitura -Chave 'appx'
     @($nomes | Where-Object { $_ -like $Nome }).Count -gt 0
 }
 
@@ -262,12 +328,7 @@ function Install-TmdAppxDaLoja {
 
 # DNS IPv4 principal de cada placa de rede física conectada.
 function Get-TmdDnsAtual {
-    Get-TmdLeituraGuardada -Chave 'dns' -Segundos 10 -Ler {
-        foreach ($a in @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq 'Up')) {
-            $s = @((Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -ErrorAction Stop).ServerAddresses)
-            if ($s.Count -gt 0) { [string]$s[0] } else { '' }
-        }
-    }
+    Get-TmdLeitura -Chave 'dns'
 }
 
 # Troca o DNS de todas as placas físicas conectadas (IPv4 e, se der, IPv6). Sem endereços: volta para o automático (DHCP).

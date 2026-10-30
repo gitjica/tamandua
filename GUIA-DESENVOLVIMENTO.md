@@ -103,6 +103,15 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
   `GetSystemTimes` no intervalo em que o resto é lido. Em CIM, peça só os campos usados (`-Property`).
 - Medir antes e depois de mexer em desempenho: `.\ferramentas\medir-tempos.ps1 -Vezes 3` (abre a janela de verdade,
   passa por todos os módulos e devolve a mediana em ms; `-Esperar` simula quem espera a leitura antecipada).
+- Leituras lentas do Windows (cada cmdlet que carrega um módulo CIM leva 0,5 a 3 s) ficam em `$script:LeiturasLentas`
+  (`nucleo/MotorAjustes.ps1`): os "verificar" do catálogo chamam `Get-TmdLeitura <chave>` e a página de ajustes faz
+  `Update-TmdLeiturasLentas` no começo, que lê todas em paralelo (runspaces) e guarda até os erros. Ajustes: ~10 s → ~2 s.
+  O DNS saiu do `Get-NetAdapter` (CIM, ~2 s) para registro + `NetworkInterface` do .NET (~0,1 s), com o mesmo resultado.
+  Em `$hashtable.Chave` com chave que não existe, o StrictMode lança: use `.ContainsKey()`.
+- A tela não remonta linhas à toa: `ConvertTo-LinhaAlvo -Cache` reusa a linha de cada Id enquanto os alvos da página
+  são os mesmos (a busca refaz a lista a cada tecla), e as pastas são montadas numa passada só. Redesenhar Programas:
+  ~1,3 s → ~0,6 s. No modelo da grade, toda linha tem todas as propriedades ligadas por Binding (vazias se não usar):
+  Binding que não acha a propriedade custa caro em cada quadro.
 - Testes: nada de `<...>` no nome de `It`/`Describe` fora de `-ForEach` — o Pester tenta expandir como variável.
 - Testes: `-Skip:(...)` é avaliado na descoberta; o que ele usa vem de `BeforeDiscovery`, não de `BeforeAll`.
 - `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
@@ -403,7 +412,9 @@ mundo), `Opcional` (gosto), `Atencao` (pode dar contratempo) ou `Arriscado` (seg
 baixo; tudo de "Avançado"). Atenção e Arriscado têm `contratempo` (o que pode acontecer, em linguagem de gente) e
 `seAcontecer` (como resolver). Os textos dos ajustes ficam em `ferramentas/classificar-ajustes.ps1`, que grava no
 `ajustes.json` sem mexer no resto do arquivo; no menu de contexto saem de `Get-ClassificacaoItem`. Na tela: selo
-colorido na linha (com a explicação ao passar o mouse), "Pode dar problema" e "Se acontecer" nos detalhes, e a
+colorido na linha (com a explicação ao passar o mouse), "Pode dar problema" e "Se acontecer" num cartão amarelo ou
+vermelho no painel de detalhes (que rola, com cartões Sobre / problema / O que acontece, montados por `Get-DetalheAlvo`;
+os comandos ficam numa caixa que dá para selecionar e copiar), e a
 confirmação lista os arriscados que vão ser aplicados. Na CLI: `[Atenção]` na listagem e aviso antes de confirmar.
 Presets Mínimo, Essencial, Notebook e Explorador nunca têm Arriscado (teste).
 
@@ -641,15 +652,16 @@ do nome do módulo na CLI é erro.
     antes do " - "; links depois de " / " são do mesmo programa (GitHub, Discord) e não contam; a ⭐ vale só para o
     primeiro nome em negrito. Links `rentry…/FMHYB64` (versões crackeadas) e o `unsafe.md` são ignorados/proibidos.
     A estrela só conta se o link for do mesmo site do programa (o "Plex" ⭐ é o site de filmes; `$SemEstrela`).
-  - **Exceção:** `$Populares` (Discord, Steam, Telegram, WhatsApp, Chrome, Epic, .NET, Visual C++) ficam na categoria
-    "Populares (fora do FMHY)", sem estrela.
+  - **Exceção:** `$Populares` (Discord, Steam, Telegram, WhatsApp, Chrome, Epic, .NET, Visual C++) ficam, na categoria
+    normal de cada um e sem estrela.
   - Programas com ⭐ no FMHY que não estão no WinUtil entram por `$DoFmhy` (escolhidos à mão: janela, usuário comum,
     nada de pirataria, linha de comando ou mod de jogo).
   - Desenvolvimento só com o básico. Dentro da categoria, os com estrela vêm primeiro.
   - **Pastas de alternativas** (`$Grupos`, campo `grupo`): na grade, programas do mesmo grupo na mesma categoria viram
     um quadro "pasta" com 4 miniaturas (como as pastas do menu Iniciar do Windows 11); clicar abre, "Voltar" ou Esc
     fecham. É só visual (`ConvertTo-LinhasComPastas`): a marca fica no alvo, a busca e a lista mostram tudo solto.
-  - Preset "Recomendados (FMHY)": os com estrela que não estão instalados.
+  - Sem preset na página Programas; os populares ficam na categoria normal deles (e nas pastas), sem estrela.
+  - Nos detalhes, o comando do winget aparece sempre, até com o programa instalado ("Instalado com: winget install ...").
   O que justificou cada programa vai para `testes/modulos/programas/fmhy-referencia.json`, que os testes conferem.
   Programa só da Microsoft Store tem `"fonte": "msstore"` e o ID da loja em `wingetId` (instala com `--source msstore`).
   **Ícones vêm com o projeto** (`modulos/programas/icones/<id>.png`, 64x64; origem de cada um em `fontes.json`): quem vai

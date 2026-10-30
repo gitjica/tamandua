@@ -90,11 +90,13 @@ function Find-Alvos {
         }
         $estrela = $p.PSObject.Properties['estrela'] -and $p.estrela -eq $true
         $grupo = if ($p.PSObject.Properties['grupo']) { [string]$p.grupo } else { '' }
-        # Preset "Recomendados (FMHY)": os com estrela que ainda não estão instalados.
         New-AlvoPrograma -Id $p.id -Nome $p.nome -Categoria $p.categoria -Estado $estado -Selo $selo -Icone $icone -Estrela $estrela -Grupo $grupo `
-            -Presets @(if ($estrela -and -not $instalado) { 'Recomendados (FMHY)' }) `
             -Detalhe "$($p.descricao)$livre$loja" -Mudancas @(
-            $(if ($acao) { "winget $acao --id $($p.wingetId) --exact --source $(Get-FontePrograma $p)" } else { 'Já instalado e atualizado: nada a fazer.' })
+            # O comando aparece sempre, mesmo com o programa já instalado (para quem quer rodar à mão ou conferir).
+            $instalar = "winget install --id $($p.wingetId) --exact --source $(Get-FontePrograma $p)"
+            if ($acao -eq 'install') { $instalar }
+            elseif ($acao -eq 'upgrade') { "winget upgrade --id $($p.wingetId) --exact --source $(Get-FontePrograma $p)"; "Instalado com: $instalar" }
+            else { 'Já instalado e atualizado: nada a fazer.'; "Instalado com: $instalar" }
         )
     }
     $outras = @($atualizacoes.Keys | Sort-Object)
@@ -131,11 +133,11 @@ function Find-IconePrograma {
 
 function New-AlvoPrograma {
     param([string]$Id, [string]$Nome, [string]$Categoria, [string]$Estado, [string]$Selo, [string]$Detalhe, [string[]]$Mudancas,
-        [string[]]$Icone = @(), [bool]$Estrela = $false, [string[]]$Presets = @(), [string]$Grupo = '')
+        [string[]]$Icone = @(), [bool]$Estrela = $false, [string]$Grupo = '')
     [pscustomobject]@{
         Id = $Id; Nome = $Nome; Categoria = $Categoria; Caminho = ''; Tamanho = [int64]0; Estado = $Estado; Selo = $Selo
         Detalhe = $Detalhe; Nivel = 'Normal'; Valor = $null; Risco = 'Baixo'; Selecionado = $false; Destino = 'NaoSeAplica'
-        RequerAdmin = $false; Reversivel = $null; Mudancas = $Mudancas; Icone = $Icone; Estrela = $Estrela; Presets = $Presets
+        RequerAdmin = $false; Reversivel = $null; Mudancas = $Mudancas; Icone = $Icone; Estrela = $Estrela
         # Alternativas: na grade, os do mesmo grupo ficam numa pasta.
         Grupo = $Grupo
     }

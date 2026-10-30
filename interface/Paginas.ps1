@@ -24,6 +24,8 @@ function Initialize-TmdTela {
         # Pasta de alternativas aberta na grade (nome do grupo), ou vazio; e o quadro onde o botão do mouse desceu.
         PastaAberta   = ''
         PastaApertada = $null
+        # Linhas já montadas da página atual (Id -> linha), para a busca e as pastas não remontarem tudo.
+        CacheLinhas   = @{}
         # Páginas já lidas (nome -> Alvos e Quando) e a leitura antecipada em andamento. Ver Start-TmdAntecipacao.
         Cache         = @{}
         Geracao       = 0
@@ -236,6 +238,7 @@ function Open-TmdPagina {
     Stop-TmdCargaPagina -Silencioso
     $script:Estado.ModuloAtual = $Nome
     $script:Estado.Alvos = @()
+    $script:Estado.CacheLinhas = @{}
     $script:Estado.PastaAberta = ''
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
@@ -343,6 +346,7 @@ function Show-TmdPaginaLida {
     param([object[]]$Saida, $StatusDepois, [datetime]$Quando)
     $c = $script:Tela.Controles
     $script:Estado.Alvos = @($Saida)
+    $script:Estado.CacheLinhas = @{}
     Update-TmdBusca
     $m = Get-TmdModuloAtual
     if ($StatusDepois) { Set-TmdStatus $StatusDepois.Texto $StatusDepois.Cor }
@@ -424,7 +428,9 @@ function Select-TmdPreset {
 }
 
 function Get-TmdResumoAtual {
-    Get-ResumoSelecao -Linhas (ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Escreve)
+    # Mesmo cache da tela só em página que escreve (lá as linhas também têm caixa).
+    $cache = if ((Get-ValorPropriedade (Get-TmdModuloAtual) 'Escreve') -eq $true) { $script:Estado.CacheLinhas } else { $null }
+    Get-ResumoSelecao -Linhas (ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Escreve -Cache $cache)
 }
 
 function Update-TmdBarraAcao {
@@ -566,7 +572,7 @@ function Update-TmdBusca {
     $modulo = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $script:Estado.ModuloAtual })[0]
     if ($modulo.Estado -ne 'ok') { return }
 
-    $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca -Escreve:$modulo.Escreve
+    $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca -Escreve:$modulo.Escreve -Cache $script:Estado.CacheLinhas
     if (Test-TmdEmGrade) {
         Set-TmdImagensLinha -Linhas $linhas
         # Pastas de alternativas só na grade e sem busca (a busca acha o que está dentro delas).
@@ -666,17 +672,7 @@ function Show-TmdDetalhe {
     $c = $script:Tela.Controles
     $linha = $c.ListaAlvos.SelectedItem
     # Pasta selecionada (teclado) só mostra o que tem dentro; abrir é com clique ou Enter.
-    if ($linha -and $linha.Tipo -in 'Pasta', 'Voltar') {
-        $c.PainelSemSelecao.Visibility = 'Collapsed'
-        $c.PainelDetalhe.Visibility = 'Visible'
-        $c.DetalheNome.Text = $linha.Nome
-        $c.DetalheCategoria.Text = $linha.Categoria
-        $c.DetalheTexto.Text = $linha.Detalhe
-        $c.DetalheEstado.Text = if ($linha.Tipo -eq 'Pasta') { "$($linha.Selo) · clique ou Enter para abrir" } else { 'clique, Enter ou Esc para voltar' }
-        $c.DetalheId.Text = ''
-        return
-    }
-    if ($null -eq $linha -or $linha.Tipo -ne 'Alvo') {
+    if ($null -eq $linha -or $linha.Tipo -notin 'Alvo', 'Pasta', 'Voltar') {
         $c.PainelDetalhe.Visibility = 'Collapsed'
         $c.PainelSemSelecao.Visibility = 'Visible'
         return
@@ -685,9 +681,53 @@ function Show-TmdDetalhe {
     $c.PainelDetalhe.Visibility = 'Visible'
     $c.DetalheNome.Text = $linha.Nome
     $c.DetalheCategoria.Text = $linha.Categoria
-    $c.DetalheTexto.Text = Get-TextoDetalheAlvo -Linha $linha
-    $c.DetalheEstado.Text = Get-TextoEstadoAlvo -Linha $linha
-    $c.DetalheId.Text = "id: $($linha.Id)"
+    if ($linha.Tipo -ne 'Alvo') {
+        $d = [pscustomobject]@{ Sobre = $linha.Detalhe; Selos = @(); Problema = ''; Solucao = ''; Tom = ''; Mudancas = '' }
+        $c.DetalheEstado.Text = if ($linha.Tipo -eq 'Pasta') { "$($linha.Selo) · clique ou Enter para abrir" } else { 'clique, Enter ou Esc para voltar' }
+        $c.DetalheId.Text = ''
+    }
+    else {
+        $d = Get-DetalheAlvo -Linha $linha
+        $c.DetalheEstado.Text = Get-TextoEstadoAlvo -Linha $linha
+        $c.DetalheId.Text = "id: $($linha.Id)"
+    }
+    Show-TmdCartoesDetalhe -Detalhe $d
+}
+
+# Desenha os selos e cartões do painel de detalhes a partir de Get-DetalheAlvo.
+function Show-TmdCartoesDetalhe {
+    param([Parameter(Mandatory)]$Detalhe)
+    $c = $script:Tela.Controles
+    $c.DetalheTexto.Text = $Detalhe.Sobre
+    $c.DetalheSelos.Children.Clear()
+    foreach ($s in @($Detalhe.Selos)) {
+        $texto = New-Object Windows.Controls.TextBlock
+        $texto.Text = $s.Texto; $texto.FontSize = 11
+        $texto.SetResourceReference([Windows.Controls.TextBlock]::ForegroundProperty, $s.Tom)
+        $selo = New-Object Windows.Controls.Border
+        $selo.CornerRadius = New-Object Windows.CornerRadius(4); $selo.Padding = New-Object Windows.Thickness(7, 1, 7, 1)
+        $selo.Margin = New-Object Windows.Thickness(0, 0, 6, 4)
+        $selo.SetResourceReference([Windows.Controls.Border]::BackgroundProperty, $s.Fundo)
+        $selo.Child = $texto
+        if ($s.Dica) { $selo.ToolTip = $s.Dica }
+        [void]$c.DetalheSelos.Children.Add($selo)
+    }
+    $c.DetalheSelos.Visibility = if (@($Detalhe.Selos).Count -gt 0) { 'Visible' } else { 'Collapsed' }
+    if ($Detalhe.Problema -or $Detalhe.Solucao) {
+        $c.CartaoProblema.Visibility = 'Visible'
+        $c.DetalheProblema.Text = $Detalhe.Problema
+        $c.DetalheSolucao.Text = $Detalhe.Solucao
+        $c.DetalheProblema.Visibility = if ($Detalhe.Problema) { 'Visible' } else { 'Collapsed' }
+        $c.TituloProblema.Visibility = $c.DetalheProblema.Visibility
+        $c.TituloSolucao.Visibility = if ($Detalhe.Solucao) { 'Visible' } else { 'Collapsed' }
+        # Arriscado em vermelho, Atenção em amarelo; o resto com a cor normal do cartão.
+        $fundo = switch ($Detalhe.Tom) { 'Perigo' { 'PerigoFundo' } 'Aviso' { 'AvisoFundo' } default { 'Superficie' } }
+        $c.CartaoProblema.SetResourceReference([Windows.Controls.Border]::BackgroundProperty, $fundo)
+        $c.CartaoProblema.SetResourceReference([Windows.Controls.Border]::BorderBrushProperty, $(if ($Detalhe.Tom) { $Detalhe.Tom } else { 'Borda' }))
+    }
+    else { $c.CartaoProblema.Visibility = 'Collapsed' }
+    $c.CartaoMudancas.Visibility = if ($Detalhe.Mudancas) { 'Visible' } else { 'Collapsed' }
+    $c.DetalheMudancas.Text = $Detalhe.Mudancas
 }
 
 # Abre a pasta (-Nome) ou fecha (vazio). Ao fechar, a lista volta no lugar da pasta, não no topo.

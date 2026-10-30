@@ -6,8 +6,8 @@
 .DESCRIPTION
     Regras (pedido do usuário):
       - Só fica o que está no FMHY; ⭐ no FMHY vira "estrela": true aqui.
-      - Exceção: $Populares (muito usados que o FMHY não lista, e componentes que jogos e programas precisam), numa
-        categoria à parte e sem estrela.
+      - Exceção: $Populares (muito usados que o FMHY não lista, e componentes que jogos e programas precisam): ficam
+        na categoria normal deles, sem estrela.
       - Só programas grátis (a versão gratuita tem que bastar): $Pagos ficam de fora mesmo estando no FMHY.
       - Programas com ⭐ do FMHY que não estão no WinUtil entram por $DoFmhy (escolhidos à mão: com pacote no winget,
         com janela, para usuário comum; nada de pirataria, linha de comando ou mod de jogo).
@@ -24,8 +24,7 @@ $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
 . (Join-Path $PSScriptRoot 'Fmhy.ps1')
 
-# Muito usados que o FMHY não lista: ficam, à parte. (Decisão do usuário em 30/10/2026.)
-$script:CategoriaPopulares = 'Populares (fora do FMHY)'
+# Muito usados que o FMHY não lista: ficam, na categoria de sempre e sem estrela. (Decisão do usuário em 30/10/2026.)
 $script:Populares = 'discord', 'steam', 'telegram', 'whatsapp', 'chrome', 'epic', 'dotnet6', 'dotnet8', 'dotnet9', 'dotnet10', 'vc2015-32', 'vc2015-64'
 
 # Pagos ou teste com prazo: fora, mesmo estando no FMHY. (Mullvad VPN: o app é grátis, mas só funciona com conta paga.)
@@ -42,7 +41,7 @@ $script:NomesFmhy = @{
 # Windows 11. Só dentro da mesma categoria; pasta com um programa só não aparece.
 $script:Grupos = [ordered]@{
     'Baseados no Firefox'      = 'firefox', 'librewolf', 'zenbrowser', 'mullvadbrowser', 'tor'
-    'Baseados no Chromium'     = 'brave', 'helium'
+    'Baseados no Chromium'     = 'brave', 'helium', 'chrome'
     'E-mail'                   = 'thunderbird', 'betterbird', 'mailspring', 'protonmail'
     'Mensagens'                = 'signal', 'matrix', 'qtox', 'discord', 'telegram', 'whatsapp'
     'Discord com extras'       = 'vesktop', 'dorion'
@@ -456,10 +455,7 @@ $finais = foreach ($p in $programas) {
     $nomes = @($p.nome) + @(if ($script:NomesFmhy.ContainsKey($p.id)) { $script:NomesFmhy[$p.id] })
     $r = Find-FmhyPrograma -Indice $indice -Nomes $nomes -Site $p.site
     if (@(Get-FmhyFormasNome $p.nome | Where-Object { $inseguros -contains $_ }).Count -gt 0) { throw "$($p.id) está no unsafe.md do FMHY" }
-    if ($script:Populares -contains $p.id) {
-        $p.categoria = $script:CategoriaPopulares
-        $p.estrela = $false
-    }
+    if ($script:Populares -contains $p.id) { $p.estrela = $false }
     elseif ($r.Achou) {
         $p.estrela = $r.Estrela -and $script:SemEstrela -notcontains $p.id
         $p.fmhy = $r.Onde
@@ -474,8 +470,8 @@ foreach ($g in @($finais | Where-Object { $_.Contains('grupo') } | Group-Object 
     foreach ($p in $g.Group) { $p.Remove('grupo') }
 }
 
-# Ordem da página: categorias na ordem de $Categorias (populares no fim), com estrela primeiro, depois alfabética.
-$ordem = @($script:Categorias.Values) + $script:CategoriaPopulares
+# Ordem da página: categorias na ordem de $Categorias, com estrela primeiro, depois alfabética.
+$ordem = @($script:Categorias.Values)
 $final = @($finais | Sort-Object @{ Expression = { $ordem.IndexOf($_.categoria) } }, @{ Expression = { -not $_.estrela } }, @{ Expression = { $_.nome } })
 $json = ConvertTo-Json -InputObject $final -Depth 4
 [IO.File]::WriteAllText((Join-Path $raiz 'modulos\programas\programas.json'), $json, (New-Object Text.UTF8Encoding $false))

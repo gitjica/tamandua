@@ -60,4 +60,5 @@ Export-ModuleMember -Function @(
     'Get-TmdEstadoAjuste'
     'Test-TmdAjusteReversivel'
     'Get-TmdTextoDesfaz'
+    'Update-TmdLeiturasLentas'
 )

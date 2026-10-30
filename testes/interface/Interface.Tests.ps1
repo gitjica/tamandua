@@ -421,9 +421,11 @@ Describe 'Seleção e resultado (funções puras)' {
             $linhas[0].RotuloClasse | Should -Be 'Recomendado'
             $linhas[1].RotuloClasse | Should -Be 'Arriscado'
             $linhas[1].TemClasse | Should -BeTrue
-            $texto = Get-TextoDetalheAlvo -Linha $linhas[1]
-            $texto | Should -Match 'Pode dar problema:\s+O Wi-Fi pode cair\.'
-            $texto | Should -Match 'Se acontecer:\s+Desfaça e reinicie\.'
+            $d = Get-DetalheAlvo -Linha $linhas[1]
+            $d.Problema | Should -Be 'O Wi-Fi pode cair.'
+            $d.Solucao | Should -Be 'Desfaça e reinicie.'
+            $d.Tom | Should -Be 'Perigo'
+            @($d.Selos | ForEach-Object Texto) | Should -Contain 'Arriscado'
             $aviso = Get-AvisoConfirmacao -Resumo (Get-ResumoSelecao -Linhas $linhas)
             $aviso | Should -Match 'ARRISCADO \(1\): Perigoso' -Because 'desfazer um arriscado não conta'
         }

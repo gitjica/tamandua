@@ -60,6 +60,22 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Acento}"/>
     </Style>
 
+    <!-- Cartões do painel de detalhes -->
+    <Style x:Key="Cartao" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource Superficie}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource Borda}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="CornerRadius" Value="8"/>
+        <Setter Property="Padding" Value="12,10"/>
+        <Setter Property="Margin" Value="0,0,0,10"/>
+    </Style>
+    <Style x:Key="TituloCartao" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{DynamicResource TextoSutil}"/>
+        <Setter Property="Margin" Value="0,0,0,4"/>
+    </Style>
+
     <Style x:Key="BotaoIcone" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
@@ -302,16 +318,12 @@
                         <!-- Pasta de alternativas: até 4 miniaturas num quadrado, como no menu Iniciar do Windows 11 -->
                         <Border x:Name="FundoPasta" CornerRadius="8" Background="{DynamicResource SuperficieLateral}" Padding="3"
                                 Visibility="Collapsed">
-                            <ItemsControl ItemsSource="{Binding Miniaturas}" Focusable="False">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate><UniformGrid Rows="2" Columns="2"/></ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Image Source="{Binding}" Width="15" Height="15" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <UniformGrid Rows="2" Columns="2">
+                                <Image Source="{Binding Mini0}" Width="15" Height="15" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Image Source="{Binding Mini1}" Width="15" Height="15" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Image Source="{Binding Mini2}" Width="15" Height="15" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <Image Source="{Binding Mini3}" Width="15" Height="15" Margin="1" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </UniformGrid>
                         </Border>
                     </Grid>
                     <TextBlock Text="{Binding Nome}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
