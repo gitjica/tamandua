@@ -148,6 +148,33 @@ $script:ScriptCarregarModulos = {
     }
 }
 
+# Barra lateral provisória, para a janela não ficar vazia enquanto os módulos carregam de verdade (~0,8 s: importar
+# cada um e conferir os requisitos). Só lê o catálogo e os manifestos (~0,15 s, na própria janela); todo módulo vem
+# como "ok" até a lista de verdade chegar e trocar esta. Qualquer problema: lista vazia, e a janela espera como antes.
+function Get-TmdModulosProvisorios {
+    param([Parameter(Mandatory)][string]$Raiz)
+    try {
+        $catalogo = Import-PowerShellDataFile -LiteralPath (Join-Path $Raiz 'nucleo\catalogo.psd1') -ErrorAction Stop
+        foreach ($c in @($catalogo['Modulos'])) {
+            if (-not ($c -is [hashtable]) -or -not $c['Nome']) { continue }
+            $nome = [string]$c['Nome']
+            $man = @{}
+            try { $man = Import-PowerShellDataFile -LiteralPath (Join-Path $Raiz "modulos\$nome\modulo.psd1") -ErrorAction Stop } catch { $man = @{} }
+            [pscustomobject]@{
+                Nome = $nome; Titulo = $(if ($c['Titulo']) { [string]$c['Titulo'] } else { $nome }); Grupo = [string]$c['Grupo']
+                Descricao = [string]$c['Descricao']; Estado = 'ok'; Motivo = $null
+                Escreve = [bool]$man['Escreve']
+                RotuloAcao = if ($man['RotuloAcao']) { [string]$man['RotuloAcao'] } else { 'Aplicar' }
+                Resultado = if ($man['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
+                AvisoConfirmacao = if ($man['AvisoConfirmacao']) { [string]$man['AvisoConfirmacao'] } else { '' }
+                Visualizacao = if ($man['Visualizacao'] -eq 'Grade') { 'Grade' } else { 'Lista' }
+                Provisorio = $true
+            }
+        }
+    }
+    catch { Write-Verbose "sem barra lateral provisória: $($_.Exception.Message)" }
+}
+
 # Lê a primeira página do catálogo ao mesmo tempo que a lista de módulos carrega (ao abrir o programa).
 # Confere os requisitos só desse módulo; se ele não estiver ok, devolve sem alvos e a janela segue o caminho normal.
 $script:ScriptPrimeiraPagina = {

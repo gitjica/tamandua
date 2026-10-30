@@ -21,6 +21,10 @@ function Initialize-TmdTela {
         JaAvisouCarga = $false
         # Módulo -> 'Lista' quando o usuário trocou a grade por lista nele.
         Visao         = @{}
+        # Barra lateral provisória (catálogo) na tela até a lista de verdade chegar; e a troca de uma pela outra.
+        ListaProvisoria = $false
+        TrocandoLista = $false
+        CargaPendente = $false
         # Pasta de alternativas aberta na grade (nome do grupo), ou vazio; e o quadro onde o botão do mouse desceu.
         PastaAberta   = ''
         PastaApertada = $null
@@ -174,6 +178,9 @@ function Start-TmdCargaModulos {
             $inicial.Erro = $erro
             if ($r -and $r.Ok) { $inicial.Nome = $r.Nome; $inicial.Alvos = @($r.Alvos) }
             $espera = $script:Estado.Esperando
+            # Lista provisória e o módulo da primeira página não está ok de verdade (faltando, quebrado...): quem
+            # mostra a mensagem certa é a lista de verdade, quando chegar (Update-TmdListaDeVerdade).
+            if ($script:Estado.ListaProvisoria -and -not ($r -and $r.Ok)) { return }
             if ($espera -and $espera.Inicial) {
                 $script:Estado.Esperando = $null
                 Set-TmdOcupado $false
@@ -184,7 +191,10 @@ function Start-TmdCargaModulos {
             -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz } `
             -AoTerminar {
             param($saida, $erro, $avisos)
-            Set-TmdOcupado $false
+            $provisoria = $script:Estado.ListaProvisoria
+            $script:Estado.ListaProvisoria = $false
+            # A página da lista provisória pode ainda estar carregando: a barra de ocupado é dela.
+            if (-not $provisoria -or (-not $script:Estado.Esperando -and -not $script:Estado.TarefaPagina)) { Set-TmdOcupado $false }
             if ($erro) {
                 Show-TmdMensagem -Icone $script:MarcadorEstado.quebrado -Titulo 'Não foi possível carregar os módulos' -Texto (Format-Frase $erro) -Tom 'Perigo'
                 Set-TmdStatus "Erro: $erro" 'Perigo'
@@ -196,10 +206,47 @@ function Start-TmdCargaModulos {
             $texto = "$disponiveis de $($modulos.Count) módulos disponíveis"
             if (-not (Test-TmdAdmin)) { $texto += ' · sem administrador: o que tem escudo pede permissão na hora' }
             $script:Estado.Modulos = $modulos + $script:PaginaHistorico
+            if ($provisoria) { Update-TmdListaDeVerdade -Texto $texto -Avisos $avisos; return }
             $script:Tela.Controles.ListaModulos.ItemsSource = ConvertTo-ItemNavegacao -Modulos $script:Estado.Modulos
             if ($avisos) { Set-TmdStatus "$texto · $($avisos -join ' · ')" 'Aviso' } else { Set-TmdStatus $texto }
             Select-TmdModuloInicial
         })
+    # Enquanto isso, a barra lateral já aparece pelo catálogo e a primeira página começa a abrir (a leitura dela já
+    # está em andamento acima): o usuário não espera os módulos carregarem para ver alguma coisa.
+    $provisorios = @(Get-TmdModulosProvisorios -Raiz $script:Estado.Raiz)
+    if ($provisorios.Count -gt 0) {
+        $script:Estado.ListaProvisoria = $true
+        $script:Estado.Modulos = $provisorios + $script:PaginaHistorico
+        $script:Tela.Controles.ListaModulos.ItemsSource = ConvertTo-ItemNavegacao -Modulos $script:Estado.Modulos
+        Select-TmdModuloInicial
+    }
+}
+
+# Chegou a lista de verdade depois da provisória: troca a barra lateral sem reabrir a página que está na tela
+# (a seleção é refeita sem disparar a abertura). Se o módulo aberto, na verdade, está com problema, reabre para
+# mostrar a mensagem certa. A leitura antecipada das outras páginas só começa agora, com a lista certa.
+function Update-TmdListaDeVerdade {
+    param([string]$Texto, [string[]]$Avisos)
+    $c = $script:Tela.Controles
+    $script:Estado.TrocandoLista = $true
+    try {
+        $c.ListaModulos.ItemsSource = ConvertTo-ItemNavegacao -Modulos $script:Estado.Modulos
+        $c.ListaModulos.SelectedItem = @($c.ListaModulos.ItemsSource | Where-Object { $_.Tipo -eq 'Modulo' -and $_.Nome -eq $script:Estado.ModuloAtual })[0]
+    }
+    finally { $script:Estado.TrocandoLista = $false }
+    $atual = Get-TmdModuloAtual
+    $esperaInicial = $script:Estado.Esperando -and $script:Estado.Esperando.Inicial -and $script:Estado.Inicial -and $script:Estado.Inicial.Pronto
+    if (-not $atual -or $atual.Estado -ne 'ok' -or $esperaInicial) {
+        # Módulo com problema, ou a primeira página ficou esperando esta lista: abre de novo, agora com a lista certa.
+        $script:Estado.Esperando = $null
+        Set-TmdOcupado $false
+        if ($c.ListaModulos.SelectedItem) { Open-TmdPagina -Nome $script:Estado.ModuloAtual } else { Select-TmdModuloInicial }
+    }
+    elseif ($Avisos) { Set-TmdStatus "$Texto · $($Avisos -join ' · ')" 'Aviso' }
+    elseif ($script:Estado.Esperando -or $script:Estado.TarefaPagina) { Set-TmdStatus $Texto }
+    # A página que já estava pronta avisa agora (com a lista certa na tela) e as outras começam a ser lidas.
+    if ($script:Estado.CargaPendente) { $script:Estado.CargaPendente = $false; Complete-TmdCargaInicial }
+    if (-not $script:Estado.Esperando -and -not $script:Estado.TarefaPagina) { Start-TmdAntecipacao }
 }
 
 function Select-TmdModuloInicial {
@@ -218,6 +265,7 @@ function Select-TmdModuloInicial {
 }
 
 function Open-TmdPaginaSelecionada {
+    if ($script:Estado.TrocandoLista) { return }
     $item = $script:Tela.Controles.ListaModulos.SelectedItem
     if ($null -eq $item -or $item.Tipo -ne 'Modulo') { return }
     Open-TmdPagina -Nome $item.Nome
@@ -370,6 +418,8 @@ function Show-TmdPaginaLida {
 # Depois que a primeira página aparece, lê as outras em segundo plano, uma por vez, na ordem da barra lateral:
 # quando o usuário clicar, a página abre na hora. Só leitura (Find-Alvos); nada é alterado.
 function Start-TmdAntecipacao {
+    # Com a lista provisória ainda na tela, espera a de verdade (ela sabe quais módulos estão disponíveis).
+    if ($script:Estado.ListaProvisoria) { return }
     if ($null -eq $script:Estado.Fila) {
         $script:Estado.Fila = [System.Collections.Generic.Queue[string]]::new()
         foreach ($m in $script:Estado.Modulos) { if (Test-TmdPaginaGuardavel -Modulo $m) { $script:Estado.Fila.Enqueue($m.Nome) } }
@@ -756,6 +806,8 @@ function Get-TmdLinhaDoEvento {
 
 # Avisa quem abriu a janela (testes, captura de tela) uma única vez, quando a primeira página terminou.
 function Complete-TmdCargaInicial {
+    # Com a lista provisória na tela, "carregou" ainda não é verdade: avisa quando a de verdade chegar.
+    if ($script:Estado.ListaProvisoria) { $script:Estado.CargaPendente = $true; return }
     if ($script:Estado.JaAvisouCarga -or -not $script:Estado.AoCarregar) { return }
     $script:Estado.JaAvisouCarga = $true
     & $script:Estado.AoCarregar $script:Tela

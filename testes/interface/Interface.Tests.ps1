@@ -360,6 +360,48 @@ function Invoke-Acao { param($Alvos, [switch]$Simular) }
         $r.AbriuDepois | Should -BeFalse
     }
 
+    It 'barra lateral e primeira página aparecem antes de um módulo lento terminar de carregar; depois a lista de verdade troca a provisória' {
+        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'rapido', 'lento' -ComInterface
+        New-ModuloFalso -Raiz $raiz -Nome 'rapido' -Codigo @'
+function Test-Requisitos { @{ Ok = $true } }
+function Find-Alvos { [pscustomobject]@{ Id = 'a'; Nome = 'Item rápido'; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = 'd' } }
+'@ | Out-Null
+        New-ModuloFalso -Raiz $raiz -Nome 'lento' -Codigo @'
+function Test-Requisitos { Start-Sleep -Seconds 4; @{ Ok = $false; Motivo = 'demorou e não serve' } }
+function Find-Alvos { }
+'@ | Out-Null
+        $global:TmdTesteProvisoria = @{ Relogio = [Diagnostics.Stopwatch]::StartNew(); Lista = $null; Pagina = $null }
+        Add-Type -AssemblyName WindowsBase, PresentationFramework
+        $vigia = New-Object Windows.Threading.DispatcherTimer
+        $vigia.Interval = [TimeSpan]::FromMilliseconds(100)
+        $vigia.Add_Tick({
+                $r = $global:TmdTesteProvisoria
+                $tela = InModuleScope Interface { $script:Tela }
+                if (-not $tela) { return }
+                $c = $tela.Controles
+                if ($null -eq $r.Lista -and @($c.ListaModulos.ItemsSource).Count -gt 0) { $r.Lista = $r.Relogio.ElapsedMilliseconds }
+                if ($null -eq $r.Pagina -and @($c.ListaAlvos.ItemsSource | Where-Object { $_.Tipo -eq 'Alvo' }).Count -gt 0) { $r.Pagina = $r.Relogio.ElapsedMilliseconds }
+            })
+        $vigia.Start()
+        $aoCarregar = {
+            param($tela)
+            $r = $global:TmdTesteProvisoria
+            $r.Carregou = $r.Relogio.ElapsedMilliseconds
+            $r.Lento = @($tela.Controles.ListaModulos.ItemsSource | Where-Object Nome -eq 'lento')[0].Estado
+            $r.Titulo = $tela.Controles.TituloPagina.Text
+            $tela.Janela.Close()
+        }
+        try { Start-TmdInterface -Raiz $raiz -AoCarregar $aoCarregar -FecharAposSeg 30 }
+        finally { $vigia.Stop() }
+        $r = $global:TmdTesteProvisoria
+        Remove-Variable -Name TmdTesteProvisoria -Scope Global
+        $r.Lista | Should -BeLessThan 3000 -Because 'a barra lateral vem do catálogo, sem esperar os módulos'
+        $r.Pagina | Should -BeLessThan 3500 -Because 'a primeira página abre sem esperar o módulo lento'
+        $r.Carregou | Should -BeGreaterThan 3900 -Because '"carregou" só depois da lista de verdade'
+        $r.Lento | Should -Be 'indisponivel' -Because 'a lista de verdade troca a provisória (que achava tudo ok)'
+        $r.Titulo | Should -Be 'Rapido'
+    }
+
     It 'módulo que falha ao buscar: a janela continua de pé e mostra o erro' {
         $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'ruim' -ComInterface
         New-ModuloFalso -Raiz $raiz -Nome 'ruim' -Codigo @'
