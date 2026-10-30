@@ -685,9 +685,13 @@ do nome do módulo na CLI é erro.
   - Programas com ⭐ no FMHY que não estão no WinUtil entram por `$DoFmhy` (escolhidos à mão: janela, usuário comum,
     nada de pirataria, linha de comando ou mod de jogo).
   - Desenvolvimento só com o básico. Dentro da categoria, os com estrela vêm primeiro.
-  - **Pastas de alternativas** (`$Grupos`, campo `grupo`): na grade, programas do mesmo grupo na mesma categoria viram
-    um quadro "pasta" com 4 miniaturas (como as pastas do menu Iniciar do Windows 11); clicar abre, "Voltar" ou Esc
-    fecham. É só visual (`ConvertTo-LinhasComPastas`): a marca fica no alvo, a busca e a lista mostram tudo solto.
+  - **Categorias como pastas** (página com 4+ categorias, ou seja, Programas): na grade sem busca, cada categoria vira
+    um quadro grande com 4 ícones (o "View: Category" do Iniciar do Windows 11, `ConvertTo-LinhasPorCategoria`);
+    clicar abre, "Voltar" ou Esc fecham. Dentro, o `grupo` de cada programa (`$Grupos`) vira subtítulo ("Players de
+    vídeo"...). Categoria de um item só (o "Atualizar tudo") aparece direto, do tamanho das pastas (`Grande`). É só
+    visual: a marca fica no alvo, a busca e a lista mostram tudo solto. Páginas com poucas categorias continuam com as
+    pastas de alternativas (`ConvertTo-LinhasComPastas`). A grade é centralizada; o subtítulo tem a largura das colunas
+    (`LarguraLinhaGrade`, recalculada no SizeChanged da lista).
   - Sem preset na página Programas; os populares ficam na categoria normal deles (e nas pastas), sem estrela.
   - **Sem winget** (Windows LTSC/IoT não traz o "Instalador de Aplicativo"): a página abre do mesmo jeito (tudo "não
     verificado") e, ao instalar, `Install-TmdWinget` (`nucleo/Winget.ps1`) instala o winget antes: última versão do

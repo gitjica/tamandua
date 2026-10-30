@@ -54,10 +54,36 @@
     </Style>
 
     <!-- Uma ação principal por tela. -->
+    <!-- Modelo próprio: o hover do botão comum troca o fundo pela cor clara da janela, e o texto (claro) sumia.
+         Aqui o fundo continua o acento e só clareia um pouco (ou escurece, apertado). -->
     <Style x:Key="BotaoPrincipal" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Foreground" Value="{DynamicResource NoAcento}"/>
         <Setter Property="Background" Value="{DynamicResource Acento}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource Acento}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Caixa" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" CornerRadius="6" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Caixa" Property="Opacity" Value="0.86"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Caixa" Property="Opacity" Value="0.72"/>
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource Texto}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Caixa" Property="Opacity" Value="0.45"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- Cartões do painel de detalhes -->
@@ -253,10 +279,12 @@
 
     <!-- ===== Grade (módulos com Visualizacao = 'Grade'): quadros com ícone, nome e selo. ===== -->
     <ItemsPanelTemplate x:Key="PainelGrade">
-        <WrapPanel Orientation="Horizontal" Margin="8,4,8,8"/>
+        <!-- Centralizada: sobra igual dos dois lados. O subtítulo de categoria tem a largura das colunas (LarguraLinhaGrade,
+         calculada em Paginas.ps1), não a da janela, para não empurrar a grade para a esquerda. -->
+        <WrapPanel Orientation="Horizontal" Margin="8,4,8,8" HorizontalAlignment="Center"/>
     </ItemsPanelTemplate>
 
-    <!-- Quadro; o cabeçalho de categoria ocupa a linha inteira (largura da área visível da lista). -->
+    <!-- Quadro; o cabeçalho de categoria ocupa a linha inteira (largura das colunas de quadros, LarguraLinhaGrade). -->
     <Style x:Key="ItemAlvoGrade" TargetType="ListBoxItem">
         <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
         <Setter Property="Margin" Value="4"/>
@@ -289,7 +317,7 @@
                 <Setter Property="IsHitTestVisible" Value="False"/>
                 <Setter Property="Focusable" Value="False"/>
                 <Setter Property="Margin" Value="4,14,4,0"/>
-                <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollContentPresenter}}"/>
+                <Setter Property="Width" Value="{DynamicResource LarguraLinhaGrade}"/>
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -308,9 +336,19 @@
                            VerticalAlignment="Top" Margin="8" Visibility="Collapsed" Foreground="{DynamicResource Aviso}"
                            ToolTip="Recomendado pelo FMHY" AutomationProperties.Name="Recomendado pelo FMHY"/>
                 <StackPanel VerticalAlignment="Center" Margin="8,18,8,6">
-                    <Grid Width="40" Height="40" HorizontalAlignment="Center">
+                    <!-- Categoria (página Programas, como as pastas do menu Iniciar do Windows 11): 4 ícones grandes -->
+                    <Border x:Name="PastaGrande" Width="112" Height="112" CornerRadius="12" Background="{DynamicResource SuperficieLateral}"
+                            Padding="8" HorizontalAlignment="Center" Visibility="Collapsed">
+                        <UniformGrid Rows="2" Columns="2">
+                            <Image Source="{Binding Mini0}" Width="38" Height="38" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image Source="{Binding Mini1}" Width="38" Height="38" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image Source="{Binding Mini2}" Width="38" Height="38" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <Image Source="{Binding Mini3}" Width="38" Height="38" RenderOptions.BitmapScalingMode="HighQuality"/>
+                        </UniformGrid>
+                    </Border>
+                    <Grid x:Name="Icone40" Width="40" Height="40" HorizontalAlignment="Center">
                         <Border x:Name="FundoInicial" CornerRadius="20" Background="{DynamicResource AcentoFundo}">
-                            <TextBlock Text="{Binding Inicial}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource Acento}"
+                            <TextBlock x:Name="LetraInicial" Text="{Binding Inicial}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource Acento}"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <Image x:Name="Imagem" Source="{Binding Imagem}" Width="32" Height="32" Visibility="Collapsed"
@@ -326,7 +364,7 @@
                             </UniformGrid>
                         </Border>
                     </Grid>
-                    <TextBlock Text="{Binding Nome}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                    <TextBlock x:Name="NomeQuadro" Text="{Binding Nome}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                MaxHeight="34" Margin="0,8,0,4"/>
                     <Border x:Name="Selo" CornerRadius="4" Padding="6,1" HorizontalAlignment="Center"
                             Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
@@ -347,6 +385,29 @@
             </DataTrigger>
             <DataTrigger Binding="{Binding Estrela}" Value="True">
                 <Setter TargetName="Estrela" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Tipo}" Value="Secao">
+                <Setter TargetName="Quadro" Property="Width" Value="196"/>
+                <Setter TargetName="Quadro" Property="Height" Value="196"/>
+                <Setter TargetName="PastaGrande" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Icone40" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="NomeQuadro" Property="FontSize" Value="13"/>
+                <Setter TargetName="NomeQuadro" Property="FontWeight" Value="SemiBold"/>
+                <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <!-- Item solto entre as pastas de categoria (o "Atualizar tudo"): do tamanho delas, para a grade não desalinhar -->
+            <DataTrigger Binding="{Binding Grande}" Value="True">
+                <Setter TargetName="Quadro" Property="Width" Value="196"/>
+                <Setter TargetName="Quadro" Property="Height" Value="196"/>
+                <Setter TargetName="Icone40" Property="Width" Value="112"/>
+                <Setter TargetName="Icone40" Property="Height" Value="112"/>
+                <Setter TargetName="FundoInicial" Property="CornerRadius" Value="12"/>
+                <Setter TargetName="FundoInicial" Property="Background" Value="{DynamicResource SuperficieLateral}"/>
+                <Setter TargetName="LetraInicial" Property="FontSize" Value="44"/>
+                <Setter TargetName="Imagem" Property="Width" Value="64"/>
+                <Setter TargetName="Imagem" Property="Height" Value="64"/>
+                <Setter TargetName="NomeQuadro" Property="FontSize" Value="13"/>
+                <Setter TargetName="NomeQuadro" Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tipo}" Value="Pasta">
                 <Setter TargetName="FundoPasta" Property="Visibility" Value="Visible"/>

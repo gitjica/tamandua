@@ -47,6 +47,14 @@ function Initialize-TmdTela {
 
     $c.ListaModulos.Add_SelectionChanged({ Invoke-TmdProtegido { Open-TmdPaginaSelecionada } })
     $c.ListaAlvos.Add_SelectionChanged({ Invoke-TmdProtegido { Show-TmdDetalhe } })
+    # Grade: o subtítulo de categoria tem a largura exata das colunas de quadros que cabem (quadro de 150 + borda e
+    # margem = 160), e não a da janela; assim a grade centralizada fica centralizada também com subtítulos.
+    $lista = $c.ListaAlvos
+    $lista.Resources['LarguraLinhaGrade'] = [double]632
+    $lista.Add_SizeChanged({
+            $colunas = [math]::Max(1, [math]::Floor(($lista.ActualWidth - 36) / 160))
+            $lista.Resources['LarguraLinhaGrade'] = [double]($colunas * 160 - 8)
+        }.GetNewClosure())
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
     $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Forcar } })
     $c.BotaoVisao.Add_Click({ Invoke-TmdProtegido { Switch-TmdVisao } })
@@ -75,8 +83,8 @@ function Initialize-TmdTela {
                 $linha = Get-TmdLinhaDoEvento -Origem $evento.OriginalSource
                 $apertada = $script:Estado.PastaApertada
                 $script:Estado.PastaApertada = $null
-                if ($linha -and $linha -eq $apertada -and $linha.Tipo -in 'Pasta', 'Voltar') {
-                    Open-TmdPasta -Nome $(if ($linha.Tipo -eq 'Pasta') { $linha.Nome } else { '' })
+                if ($linha -and $linha -eq $apertada -and $linha.Tipo -in 'Pasta', 'Secao', 'Voltar') {
+                    Open-TmdPasta -Nome $(if ($linha.Tipo -ne 'Voltar') { $linha.Nome } else { '' })
                     $evento.Handled = $true
                 }
             }
@@ -104,9 +112,9 @@ function Initialize-TmdTela {
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'Enter' -and $script:Tela.Controles.ListaAlvos.IsKeyboardFocusWithin -and
-                $script:Tela.Controles.ListaAlvos.SelectedItem -and $script:Tela.Controles.ListaAlvos.SelectedItem.Tipo -in 'Pasta', 'Voltar') {
+                $script:Tela.Controles.ListaAlvos.SelectedItem -and $script:Tela.Controles.ListaAlvos.SelectedItem.Tipo -in 'Pasta', 'Secao', 'Voltar') {
                 $sel = $script:Tela.Controles.ListaAlvos.SelectedItem
-                Invoke-TmdProtegido { Open-TmdPasta -Nome $(if ($sel.Tipo -eq 'Pasta') { $sel.Nome } else { '' }) }
+                Invoke-TmdProtegido { Open-TmdPasta -Nome $(if ($sel.Tipo -ne 'Voltar') { $sel.Nome } else { '' }) }
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'Escape' -and $script:Estado.PastaAberta -and -not $script:Tela.Controles.CampoBusca.IsKeyboardFocused) {
@@ -630,8 +638,14 @@ function Update-TmdBusca {
     $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca -Escreve:$modulo.Escreve -Cache $script:Estado.CacheLinhas
     if (Test-TmdEmGrade) {
         Set-TmdImagensLinha -Linhas $linhas
+        foreach ($l in $linhas) { $l.Grande = $false }
         # Pastas de alternativas só na grade e sem busca (a busca acha o que está dentro delas).
-        if (-not $busca) { $linhas = ConvertTo-LinhasComPastas -Linhas $linhas -PastaAberta $script:Estado.PastaAberta }
+        # Página com muitas categorias (Programas): as categorias viram pastas e, dentro, os itens ficam separados por tipo.
+        # Com poucas (Desinstalar): só as pastas de alternativas, se houver.
+        if (-not $busca) {
+            if (@($linhas | Where-Object { $_.Tipo -eq 'Categoria' }).Count -ge 4) { $linhas = ConvertTo-LinhasPorCategoria -Linhas $linhas -Aberta $script:Estado.PastaAberta }
+            else { $linhas = ConvertTo-LinhasComPastas -Linhas $linhas -PastaAberta $script:Estado.PastaAberta }
+        }
     }
     if ($linhas.Count -eq 0) {
         if ($busca) {
@@ -743,7 +757,7 @@ function Show-TmdDetalhe {
     $c = $script:Tela.Controles
     $linha = $c.ListaAlvos.SelectedItem
     # Pasta selecionada (teclado) só mostra o que tem dentro; abrir é com clique ou Enter.
-    if ($null -eq $linha -or $linha.Tipo -notin 'Alvo', 'Pasta', 'Voltar') {
+    if ($null -eq $linha -or $linha.Tipo -notin 'Alvo', 'Pasta', 'Secao', 'Voltar') {
         $c.PainelDetalhe.Visibility = 'Collapsed'
         $c.PainelSemSelecao.Visibility = 'Visible'
         return
@@ -754,7 +768,7 @@ function Show-TmdDetalhe {
     $c.DetalheCategoria.Text = $linha.Categoria
     if ($linha.Tipo -ne 'Alvo') {
         $d = [pscustomobject]@{ Sobre = $linha.Detalhe; Selos = @(); Problema = ''; Solucao = ''; Tom = ''; Mudancas = '' }
-        $c.DetalheEstado.Text = if ($linha.Tipo -eq 'Pasta') { "$($linha.Selo) · clique ou Enter para abrir" } else { 'clique, Enter ou Esc para voltar' }
+        $c.DetalheEstado.Text = if ($linha.Tipo -ne 'Voltar') { "$($linha.Selo) · clique ou Enter para abrir" } else { 'clique, Enter ou Esc para voltar' }
         $c.DetalheId.Text = ''
     }
     else {
@@ -811,7 +825,7 @@ function Open-TmdPasta {
     Update-TmdBusca -Inteira
     $c.ListaAlvos.SelectedItem = $null
     $linhas = @($c.ListaAlvos.ItemsSource)
-    $alvo = if (-not $Nome -and $anterior) { @($linhas | Where-Object { $_.Tipo -eq 'Pasta' -and $_.Nome -eq $anterior })[0] } else { $linhas[0] }
+    $alvo = if (-not $Nome -and $anterior) { @($linhas | Where-Object { $_.Tipo -in 'Pasta', 'Secao' -and $_.Nome -eq $anterior })[0] } else { $linhas[0] }
     if ($alvo) { $c.ListaAlvos.ScrollIntoView($alvo) }
     Show-TmdDetalhe
 }

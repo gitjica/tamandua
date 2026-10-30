@@ -147,7 +147,7 @@ function New-LinhaAlvo {
         TemCaixa = $TemCaixa; Selecionado = $Selecionado; Tamanho = $Tamanho; RequerAdmin = $RequerAdmin; ReservaCaixa = $ReservaCaixa
         IconePng = $IconePng; Inicial = $inicial; Imagem = $null; TemImagem = $false
         Classe = $Classe; RotuloClasse = $rotulo; TemClasse = [bool]$rotulo; DicaClasse = $(if ($rotulo) { $script:DicaClasse[$Classe] } else { $null })
-        Estrela = $Estrela
+        Estrela = $Estrela; Grande = $false
         # Pastas: até 4 miniaturas e os itens dentro. Toda linha tem as propriedades (vazias): Binding que não acha a
         # propriedade custa caro no WPF, multiplicado por cada quadro da grade.
         Mini0 = $null; Mini1 = $null; Mini2 = $null; Mini3 = $null; Membros = $null
@@ -189,12 +189,51 @@ function ConvertTo-LinhasComPastas {
     , $saida.ToArray()
 }
 
+# Categorias como pastas (o "View: Category" do menu Iniciar do Windows 11). Fechada: um quadro grande por categoria,
+# com os 4 primeiros ícones. Aberta: o Voltar e os itens da categoria, separados por tipo (o Grupo de cada um vira um
+# subtítulo, "Players de vídeo", "Edição de imagem"...); os sem grupo vêm primeiro. Só muda o que aparece.
+function ConvertTo-LinhasPorCategoria {
+    param([AllowEmptyCollection()][object[]]$Linhas = @(), [string]$Aberta = '')
+    $ordem = [System.Collections.Generic.List[string]]::new()
+    $membros = @{}
+    foreach ($l in $Linhas) {
+        if ($l.Tipo -ne 'Alvo') { continue }
+        if (-not $membros.ContainsKey($l.Categoria)) { $membros[$l.Categoria] = [System.Collections.Generic.List[object]]::new(); $ordem.Add($l.Categoria) }
+        $membros[$l.Categoria].Add($l)
+    }
+    if (-not $Aberta) {
+        # Categoria de um item só (o "Atualizar tudo") não vira pasta: o item aparece direto, antes das pastas.
+        # Fica do tamanho das pastas (Grande); quem chama zera isso nas outras vistas, porque a linha vem do cache.
+        $sos = @(foreach ($cat in $ordem) { if ($membros[$cat].Count -eq 1) { $membros[$cat][0].Grande = $true; $membros[$cat][0] } })
+        $pastas = @(foreach ($cat in $ordem) { if ($membros[$cat].Count -gt 1) { New-LinhaPasta -Tipo 'Secao' -Nome $cat -Membros $membros[$cat].ToArray() } })
+        return , @($sos + $pastas)
+    }
+    if (-not $membros.ContainsKey($Aberta)) { return , $Linhas }
+    $soltos = [System.Collections.Generic.List[object]]::new()
+    $grupos = [ordered]@{}
+    foreach ($l in $membros[$Aberta]) {
+        $g = [string](Get-ValorPropriedade $l.Alvo 'Grupo')
+        if (-not $g) { $soltos.Add($l); continue }
+        if (-not $grupos.Contains($g)) { $grupos[$g] = [System.Collections.Generic.List[object]]::new() }
+        $grupos[$g].Add($l)
+    }
+    $saida = [System.Collections.Generic.List[object]]::new()
+    $saida.Add((New-LinhaAlvo -Tipo 'Categoria' -Nome $Aberta))
+    $saida.Add((New-LinhaPasta -Tipo 'Voltar' -Nome 'Voltar' -Membros @()))
+    foreach ($l in $soltos) { $saida.Add($l) }
+    foreach ($g in $grupos.Keys) {
+        $saida.Add((New-LinhaAlvo -Tipo 'Categoria' -Nome $g))
+        foreach ($l in $grupos[$g]) { $saida.Add($l) }
+    }
+    , $saida.ToArray()
+}
+
 function New-LinhaPasta {
     param([string]$Tipo, [string]$Nome, [string]$Categoria = '', [object[]]$Membros)
     $marcados = @($Membros | Where-Object Selecionado).Count
-    $selo = if ($Tipo -eq 'Voltar') { '' } elseif ($marcados -gt 0) { "$marcados de $($Membros.Count) marcados" } else { "$($Membros.Count) programas" }
+    $selo = if ($Tipo -eq 'Voltar') { '' } elseif ($marcados -gt 0) { "$marcados de $($Membros.Count) marcados" } elseif ($Membros.Count -eq 1) { '1 programa' } else { "$($Membros.Count) programas" }
     $linha = New-LinhaAlvo -Tipo $Tipo -Nome $Nome -Categoria $Categoria -Selo $selo `
-        -Detalhe $(if ($Tipo -eq 'Voltar') { 'Fechar a pasta' } else { "Alternativas: $(($Membros | ForEach-Object Nome) -join ', ')" })
+        -Detalhe $(if ($Tipo -eq 'Voltar') { 'Fechar a pasta' } elseif ($Tipo -eq 'Secao') { "$($Membros.Count) programas: $(($Membros | Select-Object -First 6 | ForEach-Object Nome) -join ', ')$(if ($Membros.Count -gt 6) { '...' })" } else { "Alternativas: $(($Membros | ForEach-Object Nome) -join ', ')" })
     if ($Tipo -eq 'Voltar') { $linha.Inicial = [string][char]0x2190 }
     # Miniaturas: imagens dos primeiros com ícone (objetos .NET puros, como em Set-TmdImagensLinha).
     $i = 0

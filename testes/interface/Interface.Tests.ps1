@@ -527,6 +527,26 @@ Describe 'Seleção e resultado (funções puras)' {
         }
     }
 
+    It 'categorias como pastas: fechada, um quadro por categoria; aberta, o Voltar e os itens separados por tipo' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'vlc'; Nome = 'VLC'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $true; Grupo = 'Players de vídeo' }
+            [pscustomobject]@{ Id = 'blender'; Nome = 'Blender'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = '' }
+            [pscustomobject]@{ Id = 'mpv'; Nome = 'mpv'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = 'Players de vídeo' }
+            [pscustomobject]@{ Id = 'gimp'; Nome = 'GIMP'; Categoria = 'Multimídia'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = 'Edição de imagem' }
+            [pscustomobject]@{ Id = 'firefox'; Nome = 'Firefox'; Categoria = 'Navegadores'; Estado = 'NaoAplicado'; Detalhe = ''; Selecionado = $false; Grupo = '' }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            $linhas = ConvertTo-LinhaAlvo -Alvos $A -Escreve
+            $fechadas = ConvertTo-LinhasPorCategoria -Linhas $linhas
+            ($fechadas | ForEach-Object { "$($_.Tipo):$($_.Nome)" }) -join ',' | Should -Be 'Alvo:Firefox,Secao:Multimídia'
+            ($fechadas | Where-Object Nome -eq 'Multimídia').Selo | Should -Be '1 de 4 marcados'
+            $aberta = ConvertTo-LinhasPorCategoria -Linhas $linhas -Aberta 'Multimídia'
+            ($aberta | ForEach-Object { "$($_.Tipo):$($_.Nome)" }) -join ',' |
+                Should -Be 'Categoria:Multimídia,Voltar:Voltar,Alvo:Blender,Categoria:Players de vídeo,Alvo:VLC,Alvo:mpv,Categoria:Edição de imagem,Alvo:GIMP'
+        }
+    }
+
     It 'Histórico: cada linha sem caixa diz por que não dá para desfazer' {
         InModuleScope Interface {
             $ops = @(
