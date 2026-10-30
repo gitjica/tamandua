@@ -6,6 +6,7 @@ $script:NomesControles = @(
     'PainelSemSelecao', 'PainelDetalhe', 'DetalheNome', 'DetalheCategoria', 'DetalheTexto', 'DetalheEstado', 'DetalheId'
     'DetalheSelos', 'CartaoProblema', 'TituloProblema', 'DetalheProblema', 'TituloSolucao', 'DetalheSolucao', 'CartaoMudancas', 'DetalheMudancas'
     'BarraTarefa', 'BotaoAplicar', 'BotaoSimular', 'BotaoAtualizar', 'BotaoCancelar', 'TextoStatus'
+    'DicaPagina', 'TextoDicaPagina', 'CartaoAmostra', 'TextoAmostra', 'CartaoValor', 'TituloValor', 'UnidadeValor', 'CampoValor', 'ReguaValor', 'DicaValor'
 )
 
 function Import-TmdXaml {

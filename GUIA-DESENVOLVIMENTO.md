@@ -741,6 +741,19 @@ do nome do módulo na CLI é erro.
   (a OpenDyslexic dá 97%, que é o que tinha sido escolhido a olho). "Apagar cópias" só apaga cópias que o registro não
   usa (`Remove-TmdCopiaFonte`; carregada pelo Windows = `MoveFileEx` para apagar no boot) e pastas de trabalho velhas.
   Testes: registro (`TAMANDUA_REGISTRO_TESTE`) e pasta de fontes (`TAMANDUA_FONTES_TESTE`) falsos, com a Arial de modelo.
+  Na janela é grade em pastas (como Programas): Sem serifa, Com serifa, Monoespaçadas, Manuscritas e decorativas, Outros
+  alfabetos (pelo Panose e `post.isFixedPitch` lidos por `Tamandua.LeitorFonte`, que só lê o cabeçalho; sem Panose, pelo
+  nome em palavras inteiras), depois Tamanho do texto e Segoe UI. Cada quadro mostra "Aa" na própria fonte
+  (`AmostraFonte` = `file:///arquivo#Família`, para o WPF pegar o arquivo certo). Tamanho: Auto (padrão, nada marcado),
+  90 a 110%, ou Personalizado (70 a 130%, régua no painel; na CLI, `tam-97.5`).
+- **Recursos genéricos da janela que a página Fonte usa** (servem para qualquer módulo):
+  - Manifesto `Dica`: faixa de passos no alto da página. `Grupos` (`Nome`, `Rotulo`, `Vazio`): a barra de baixo diz o
+    escolhido em cada grupo ("Fonte: Arial · Tamanho: automático"). `NomeItens` (`"opção|opções"`): o texto das pastas.
+  - Alvo com `Exclusivo` (nome do grupo): um marcado por grupo; clicar no quadro já marca (`Set-TmdSelecao -Redesenhar`,
+    que copia as marcas dos alvos para as linhas e dá `Items.Refresh`). A pasta mostra "✓ <escolhido>".
+  - Alvo com `PedeValor` (`Titulo`, `Minimo`, `Maximo`, `Passo`, `Unidade`, `Padrao`): o painel de detalhes mostra régua e
+    campo; o valor vai no alvo como `ValorEscolhido` (chega ao módulo também no processo de admin, pelo JSON do pedido).
+  - Alvo com `Amostra`/`AmostraFonte`: texto grande no lugar do ícone e cartão "Prévia" no painel (quando é "Aa").
 - **atualizacoes:** políticas do Windows Update como ajustes do motor (`modulos/atualizacoes/atualizacoes.json`, chaves em
   `HKLM:\SOFTWARE\Policies`): adiar versões grandes por 365 dias, esperar 4 dias pelas mensais, não reiniciar sozinho com
   alguém conectado, não instalar drivers, não compartilhar atualizações (`DODownloadMode = 0`). Presets "Equilibrado" e

@@ -547,6 +547,32 @@ Describe 'Seleção e resultado (funções puras)' {
         }
     }
 
+    It 'escolha única: a barra diz o escolhido em cada grupo, e a pasta mostra o escolhido e as amostras' {
+        $alvos = @(
+            [pscustomobject]@{ Id = 'fam-arial'; Nome = 'Arial'; Categoria = 'Sem serifa'; Estado = 'NaoSeAplica'; Detalhe = ''; Selecionado = $true; Exclusivo = 'fonte'; Amostra = 'Aa'; AmostraFonte = 'Arial' }
+            [pscustomobject]@{ Id = 'fam-verdana'; Nome = 'Verdana'; Categoria = 'Sem serifa'; Estado = 'NaoSeAplica'; Detalhe = ''; Selecionado = $false; Exclusivo = 'fonte'; Amostra = 'Aa'; AmostraFonte = 'Verdana' }
+            [pscustomobject]@{ Id = 'tam-custom'; Nome = 'Personalizado'; Categoria = 'Tamanho do texto'; Estado = 'NaoSeAplica'; Detalhe = ''; Selecionado = $true; Exclusivo = 'tamanho'; ValorEscolhido = 97.5; Selo = '97,5%' }
+            [pscustomobject]@{ Id = 'limpar-copias'; Nome = 'Apagar cópias'; Categoria = 'Segoe UI'; Estado = 'NaoSeAplica'; Detalhe = ''; Selecionado = $true }
+        )
+        InModuleScope Interface -Parameters @{ A = $alvos } {
+            param($A)
+            $grupos = @([pscustomobject]@{ Nome = 'fonte'; Rotulo = 'Fonte'; Vazio = 'escolha uma' }, [pscustomobject]@{ Nome = 'tamanho'; Rotulo = 'Tamanho'; Vazio = 'automático' })
+            Get-ResumoGrupos -Grupos $grupos -Alvos $A | Should -Be 'Fonte: Arial · Tamanho: Personalizado (97,5%) · + 1 item'
+            Get-ResumoGrupos -Grupos $grupos -Alvos @($A[1]) | Should -Be 'Fonte: escolha uma · Tamanho: automático'
+
+            $linhas = ConvertTo-LinhaAlvo -Alvos @($A[0], $A[1]) -Escreve
+            $script:NomeItens = 'opção|opções'
+            try { $pasta = New-LinhaPasta -Tipo 'Secao' -Nome 'Sem serifa' -Membros @($linhas | Where-Object Tipo -eq 'Alvo') }
+            finally { $script:NomeItens = 'programa|programas' }
+            $pasta.Selo | Should -Be "$([char]0x2713) Arial"
+            $pasta.TemMiniTexto | Should -BeTrue
+            "$($pasta.MiniTexto0)|$($pasta.MiniFonte1)" | Should -Be 'Aa|Verdana'
+            $linhas[1].Selecionado = $false
+            $linhas[0].Selecionado = $false
+            (New-LinhaPasta -Tipo 'Secao' -Nome 'Sem serifa' -Membros @($linhas | Where-Object Tipo -eq 'Alvo')).Selo | Should -Be '2 programas'
+        }
+    }
+
     It 'Histórico: cada linha sem caixa diz por que não dá para desfazer' {
         InModuleScope Interface {
             $ops = @(

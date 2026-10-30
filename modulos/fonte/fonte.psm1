@@ -26,14 +26,25 @@ $script:Vagas = [ordered]@{
     'Segoe UI Variable (TrueType)'         = @('SegUIVar', 400, $false)
 }
 
+# Tamanhos prontos (Id -> texto do quadro e nome). "tam-custom" pede o número na janela (PedeValor); pela linha de
+# comando, qualquer "tam-<número>" vale (ex.: tam-97.5).
 $script:Tamanhos = [ordered]@{
-    'tam-auto' = 'Automático (mesmo tamanho aparente da Segoe UI)'
-    'tam-90'   = '90%'
-    'tam-95'   = '95%'
-    'tam-100'  = '100% (o desenho original da fonte)'
-    'tam-105'  = '105%'
-    'tam-110'  = '110%'
+    'tam-auto'   = @('Auto', 'Automático (padrão)')
+    'tam-90'     = @('90%', 'Bem menor')
+    'tam-95'     = @('95%', 'Um pouco menor')
+    'tam-100'    = @('100%', 'Original da fonte')
+    'tam-105'    = @('105%', 'Um pouco maior')
+    'tam-110'    = @('110%', 'Bem maior')
+    'tam-custom' = @('…', 'Personalizado')
 }
+$script:TamanhoMinimo = 70
+$script:TamanhoMaximo = 130
+
+# Pastas da página, na ordem: primeiro os tipos de fonte (passo 1), depois o tamanho (passo 2), por fim a Segoe UI.
+$script:Categorias = @('Sem serifa', 'Com serifa', 'Monoespaçadas', 'Manuscritas e decorativas', 'Outros alfabetos', 'Tamanho do texto', 'Segoe UI (a do Windows)')
+# Fontes feitas para outra escrita (o latim delas é secundário). As faixas Unicode da fonte não servem para isso: a
+# Arial, por exemplo, também declara árabe e hebraico.
+$script:OutrosAlfabetos = 'Arabic|Hebrew|Armenian|Georgian|\bLao\b|Lisu|Myanmar|Kufi|Naskh|Thai|Khmer|Ethiopic|Devanagari|Bengali|Tamil|Telugu|Kannada|Malayalam|Gujarati|Gurmukhi|Sinhala|Tibetan|Himalaya|Mongolian|Tai L[eu]|New Tai|PhagsPa|Yi Baiti|Javanese|Ebrima|Gadugi|Nirmala|Leelawadee|Malgun|SimSun|MingLiU|Yu Gothic|Meiryo|Batang|Gulim|Amiri|Scheherazade|Reem|\bAlef\b|\bCLM\b|Hofshi|David Libre|Miriam Libre|Sylfaen'
 
 # Palavras de estilo no fim do nome do registro ("Inter Semi Bold Italic (TrueType)" -> família "Inter").
 $script:PalavrasEstilo = @('thin', 'hairline', 'extralight', 'ultralight', 'light', 'semilight', 'demilight', 'book', 'regular',
@@ -116,9 +127,10 @@ function Get-NomeFamilia {
 }
 
 # Famílias instaladas (.ttf/.otf; coleções .ttc e fontes de bitmap ficam de fora), agrupadas pelo nome do registro.
-# O peso de verdade de cada arquivo só é lido ao aplicar (ler todos os arquivos de fonte demoraria).
+# De cada arquivo só o cabeçalho é lido (Tamandua.LeitorFonte): peso, itálico, nome de dentro e o tipo (Panose).
 function Get-FamiliasInstaladas {
     param([string]$RaizRegistro = (Get-RaizRegistroPadrao), [string]$PastaFontes = (Get-PastaFontes))
+    Initialize-TmdTipos
     $familias = @{}
     foreach ($f in Get-FontesRegistradas -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes) {
         if ([IO.Path]::GetExtension($f.Arquivo).ToLowerInvariant() -notin '.ttf', '.otf') { continue }
@@ -129,25 +141,53 @@ function Get-FamiliasInstaladas {
         $chave = ConvertTo-TmdNomeSimples $nf.Familia
         if (-not $chave -or -not [IO.File]::Exists($f.Arquivo)) { continue }
         if (-not $familias.ContainsKey($chave)) {
-            $familias[$chave] = [pscustomobject]@{ Id = "fam-$chave"; Nome = $nf.Familia; Estilos = [System.Collections.Generic.List[string]]::new(); Arquivos = [System.Collections.Generic.List[string]]::new() }
+            $familias[$chave] = [pscustomobject]@{
+                Id = "fam-$chave"; Nome = $nf.Familia; Estilos = [System.Collections.Generic.List[string]]::new()
+                Arquivos = [System.Collections.Generic.List[string]]::new(); Dados = [System.Collections.Generic.List[object]]::new()
+                Regular = $null; Categoria = ''; Amostra = ''
+            }
         }
         $fam = $familias[$chave]
-        if ($fam.Arquivos -notcontains $f.Arquivo) { $fam.Arquivos.Add($f.Arquivo); $fam.Estilos.Add($nf.Estilo) }
+        if ($fam.Arquivos -contains $f.Arquivo) { continue }
+        $d = [Tamandua.LeitorFonte]::Ler($f.Arquivo)
+        if (-not $d) { continue }
+        $fam.Arquivos.Add($f.Arquivo)
+        $fam.Estilos.Add($nf.Estilo)
+        $fam.Dados.Add([pscustomobject]@{ Arquivo = $f.Arquivo; Peso = $d.Peso; Largura = $d.Largura; Italico = $d.Italico; Info = $d })
     }
-    # Sem um estilo normal (reto e não negrito) não dá para ocupar a Regular. Ex.: a Cambria, cuja Regular fica numa coleção .ttc.
-    $familias.Values | Where-Object { @($_.Estilos | Where-Object { $_ -notmatch 'Bold|Black|Heavy|Italic|Oblique' }).Count -gt 0 } | Sort-Object Nome
+    foreach ($fam in $familias.Values | Sort-Object Nome) {
+        if ($fam.Dados.Count -eq 0) { continue }
+        # Sem um estilo normal (reto e não negrito) não dá para ocupar a Regular. Ex.: a Cambria, cuja Regular fica numa
+        # coleção .ttc e por isso não entra aqui.
+        $normal = Select-ArquivoVaga -Estilos $fam.Dados.ToArray() -Peso 400 -Italico $false
+        if ($normal.Italico -or $normal.Peso -ge 600) { continue }
+        $fam.Regular = $normal.Arquivo
+        $fam.Categoria = Get-CategoriaFonte -Info $normal.Info -Nome $fam.Nome
+        # Amostra na janela: o próprio arquivo, pelo nome de dentro dele (o WPF acha a família certa mesmo se houver
+        # outra fonte com o mesmo nome).
+        $fam.Amostra = 'file:///' + ($normal.Arquivo -replace '\\', '/') + '#' + $normal.Info.Familia
+        $fam
+    }
 }
 
-# Peso, largura e itálico de cada arquivo, lidos de dentro dele (OS/2 e head). Arquivo ilegível fica de fora.
+# A pasta onde a família aparece: pelo Panose (a "ficha" de desenho que vem dentro da fonte) e, quando ele não diz
+# (muitas fontes deixam zerado), pelo nome.
+function Get-CategoriaFonte {
+    param([Parameter(Mandatory)]$Info, [string]$Nome)
+    if ($Nome -match $script:OutrosAlfabetos) { return 'Outros alfabetos' }
+    # Só o post.isFixedPitch e o nome em palavras inteiras ("Lucida Sans Unicode" tem "code" no meio e não é monoespaçada).
+    if ($Info.Mono -or $Nome -match '\b(Mono|Code|Console|Courier|Terminal)\b') { return 'Monoespaçadas' }
+    if ($Info.PanoseTipo -in 3, 4 -or $Nome -match 'Script|Hand|Comic|Ink Free|Gabriola|MV Boli|Brush|Chiller|Jokerman') { return 'Manuscritas e decorativas' }
+    if ($Info.PanoseTipo -eq 2 -and $Info.PanoseSerifa -ge 11) { return 'Sem serifa' }
+    if ($Info.PanoseTipo -eq 2 -and $Info.PanoseSerifa -ge 2) { return 'Com serifa' }
+    if ($Nome -notmatch 'Sans' -and $Nome -match 'Serif|Roman|Times|Georgia|Garamond|Libertine|Cambria|Constantia|Palatino|Caladea|Book|Sitka') { return 'Com serifa' }
+    'Sem serifa'
+}
+
+# Peso, largura e itálico de cada arquivo da família (já lidos de dentro dos arquivos por Get-FamiliasInstaladas).
 function Get-EstilosArquivos {
-    param([string[]]$Arquivos)
-    foreach ($a in $Arquivos | Select-Object -Unique) {
-        try { $s = [Sfnt]::Load($a) } catch { continue }
-        if (-not $s.Has('OS/2') -or -not $s.Has('head') -or -not $s.Has('cmap')) { continue }
-        $os2 = $s.Get('OS/2')
-        $italico = ([Sfnt]::U16($os2, 62) -band 1) -ne 0 -or ([Sfnt]::U16($s.Get('head'), 44) -band 2) -ne 0
-        [pscustomobject]@{ Arquivo = $a; Peso = [int][Sfnt]::U16($os2, 4); Largura = [int][Sfnt]::U16($os2, 6); Italico = $italico }
-    }
+    param([Parameter(Mandatory)]$Familia)
+    @($Familia.Dados)
 }
 
 # O arquivo da família que ocupa uma vaga: largura normal primeiro (nada de Condensed no lugar da Regular), depois o
@@ -365,14 +405,18 @@ function Get-CopiasSobrando {
 
 # ---------- Contrato ----------
 
+# Além do contrato: Amostra (texto grande do quadro) e AmostraFonte (fonte em que ele é desenhado), Exclusivo (só um
+# marcado por grupo: uma fonte, um tamanho) e PedeValor (o quadro "Personalizado" pede o número no painel de detalhes).
 function New-AlvoFonte {
     param([string]$Id, [string]$Nome, [string]$Categoria, [string]$Estado = 'NaoAplicado', [string]$Selo = '', [string]$Detalhe = '',
         [string]$Risco = 'Medio', [bool]$Selecionavel = $true, [int64]$Tamanho = 0, [string]$Destino = 'NaoSeAplica', [bool]$RequerAdmin = $true,
-        [object]$Reversivel = $true, [string[]]$Mudancas = @())
+        [object]$Reversivel = $true, [string[]]$Mudancas = @(), [string]$Amostra = '', [string]$AmostraFonte = '', [string]$Exclusivo = '',
+        $PedeValor = $null)
     [pscustomobject]@{
         Id = $Id; Nome = $Nome; Categoria = $Categoria; Caminho = ''; Tamanho = $Tamanho; Estado = $Estado; Selo = $Selo; Detalhe = $Detalhe
         Nivel = 'Normal'; Valor = $null; Risco = $Risco; Selecionado = $false; Selecionavel = $Selecionavel; Destino = $Destino
         RequerAdmin = $RequerAdmin; Reversivel = $Reversivel; Mudancas = $Mudancas
+        Amostra = $Amostra; AmostraFonte = $AmostraFonte; Exclusivo = $Exclusivo; PedeValor = $PedeValor; ValorEscolhido = $null
     }
 }
 
@@ -384,16 +428,60 @@ function Find-Alvos {
     $nossa = $null -ne $estado -and $atual.Sufixo -and $estado.Sufixo -eq $atual.Sufixo
     $nomeAtual = if ($atual.Original) { 'Segoe UI (a do Windows)' } elseif ($nossa) { "$($estado.Familia) a $($estado.Porcentagem)%" } else { "personalizada, de fora do Tamanduá ($($atual.Sufixo))" }
 
-    New-AlvoFonte -Id 'segoe-original' -Nome 'Segoe UI original (a do Windows)' -Categoria 'Segoe UI' -Risco 'Baixo' -RequerAdmin $admin `
-        -Estado $(if ($atual.Original) { 'Aplicado' } else { 'NaoAplicado' }) -Selecionavel (-not $atual.Original) `
-        -Selo $(if ($atual.Original) { 'em uso' } else { "agora: $nomeAtual" }) `
+    # Passo 1: a fonte, numa pasta por tipo.
+    $familias = @(Get-FamiliasInstaladas -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes)
+    foreach ($categoria in $script:Categorias) {
+        foreach ($f in $familias | Where-Object Categoria -eq $categoria) {
+            $emUso = $nossa -and $estado.Id -eq $f.Id
+            New-AlvoFonte -Id $f.Id -Nome $f.Nome -Categoria $categoria -Estado $(if ($emUso) { 'Aplicado' } else { 'NaoSeAplica' }) `
+                -Selo $(if ($emUso) { "em uso · $($estado.Porcentagem)%" } else { '' }) -RequerAdmin $admin `
+                -Amostra 'Aa' -AmostraFonte $f.Amostra -Exclusivo 'fonte' `
+                -Detalhe "Estilos: $(($f.Estilos | Select-Object -Unique) -join ', ')." `
+                -Mudancas @(
+                    "Gera cópias de $($f.Nome) com o nome da Segoe UI (os pesos que faltarem usam o mais parecido) e põe em Windows\Fonts."
+                    'Aponta os pesos da Segoe UI no registro para essas cópias (antes, guarda como estava e um .reg da chave).'
+                    'Vale depois de reiniciar o Windows: barra de tarefas, Configurações, Explorador, apps e a tela de entrada.'
+                    'Os arquivos da Segoe UI não mudam. Para voltar: Segoe UI original, ou Histórico > Desfazer.'
+                )
+        }
+    }
+
+    # Passo 2 (opcional): o tamanho. Nada marcado = automático.
+    $porcentagemUsada = if ($nossa) { [double]$estado.Porcentagem } else { 100 }
+    foreach ($id in $script:Tamanhos.Keys) {
+        $amostra, $nome = $script:Tamanhos[$id]
+        $usado = $nossa -and $estado.Tamanho -eq $id
+        $pede = if ($id -eq 'tam-custom') {
+            [pscustomobject]@{ Titulo = 'Tamanho personalizado'; Minimo = $script:TamanhoMinimo; Maximo = $script:TamanhoMaximo; Passo = 0.5; Unidade = '%'; Padrao = $porcentagemUsada }
+        }
+        $detalhe = switch ($id) {
+            'tam-auto' { 'O padrão: o tamanho que deixa a fonte com a mesma cara de tamanho da Segoe UI (calculado para cada fonte).' }
+            'tam-100' { 'O desenho da fonte do jeito que ela veio, sem aumentar nem diminuir.' }
+            'tam-custom' { "Qualquer tamanho entre $($script:TamanhoMinimo)% e $($script:TamanhoMaximo)%: marque e ajuste no painel ao lado." }
+            default { "As letras ficam com $amostra do tamanho do desenho original da fonte." }
+        }
+        New-AlvoFonte -Id $id -Nome $nome -Categoria 'Tamanho do texto' -Risco 'Baixo' -RequerAdmin $admin `
+            -Estado $(if ($usado) { 'Aplicado' } else { 'NaoSeAplica' }) -Selo $(if ($usado -and $id -eq 'tam-custom') { "em uso · $($estado.Porcentagem)%" } elseif ($usado) { 'em uso' } else { '' }) `
+            -Amostra $amostra -Exclusivo 'tamanho' -PedeValor $pede -Detalhe $detalhe `
+            -Mudancas @(
+                'Muda o tamanho das letras em todos os programas, sem mexer na escala do Windows.'
+                'Marque junto com uma fonte. Marcado sozinho, gera de novo a fonte que já está em uso, com este tamanho.'
+            )
+    }
+
+    # Voltar e limpar.
+    New-AlvoFonte -Id 'segoe-original' -Nome 'Segoe UI original' -Categoria 'Segoe UI (a do Windows)' -Risco 'Baixo' -RequerAdmin $admin `
+        -Estado $(if ($atual.Original) { 'Aplicado' } else { 'NaoSeAplica' }) -Selecionavel (-not $atual.Original) `
+        -Selo $(if ($atual.Original) { 'em uso' } else { '' }) -Amostra 'Aa' -Exclusivo 'fonte' `
+        -AmostraFonte ('file:///' + ((Join-Path $PastaFontes 'segoeui.ttf') -replace '\\', '/') + '#Segoe UI') `
         -Detalhe "Volta para a fonte de fábrica do Windows. Fonte em uso agora: $nomeAtual." `
         -Mudancas @('Aponta os pesos da Segoe UI no registro de volta para os arquivos originais (segoeui.ttf...).', 'Vale depois de reiniciar o Windows.')
 
     $sobra = Get-CopiasSobrando -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes
     $qtd = $sobra.Copias.Count + $sobra.Trabalho.Count
-    New-AlvoFonte -Id 'limpar-copias' -Nome 'Apagar cópias de trocas antigas' -Categoria 'Segoe UI' -Risco 'Baixo' -RequerAdmin $admin `
+    New-AlvoFonte -Id 'limpar-copias' -Nome 'Apagar cópias de trocas antigas' -Categoria 'Segoe UI (a do Windows)' -Risco 'Baixo' -RequerAdmin $admin `
         -Estado 'NaoSeAplica' -Selecionavel ($qtd -gt 0) -Tamanho $sobra.Bytes -Destino 'Permanente' -Reversivel $false `
+        -Amostra ([string][char]0xE74D) -AmostraFonte 'Segoe Fluent Icons, Segoe MDL2 Assets' `
         -Selo $(if ($qtd -gt 0) { "$($sobra.Copias.Count) cópia(s)" } else { 'nada sobrando' }) `
         -Detalhe 'Cada troca deixa cópias da fonte em Windows\Fonts. Apaga só as que o registro não usa mais.' `
         -Mudancas @(
@@ -402,29 +490,6 @@ function Find-Alvos {
             foreach ($t in $sobra.Trabalho) { "apaga $($t.FullName)" }
             'Cópia ainda carregada pelo Windows (de uma troca desfeita agora) é apagada no próximo reinício.'
         )
-
-    foreach ($id in $script:Tamanhos.Keys) {
-        $usado = $nossa -and $estado.Tamanho -eq $id
-        New-AlvoFonte -Id $id -Nome $script:Tamanhos[$id] -Categoria 'Tamanho do texto' -Risco 'Baixo' -RequerAdmin $admin `
-            -Estado $(if ($usado) { 'Aplicado' } else { 'NaoAplicado' }) -Selo $(if ($usado) { 'em uso' } else { '' }) `
-            -Detalhe 'Marque junto com uma fonte. Sozinho, gera de novo a fonte em uso com este tamanho. Sem marcar nenhum: automático.' `
-            -Mudancas @('Muda o tamanho do desenho das letras em todos os programas, sem mexer na escala do Windows.')
-    }
-
-    foreach ($f in Get-FamiliasInstaladas -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes) {
-        $emUso = $nossa -and $estado.Id -eq $f.Id
-        New-AlvoFonte -Id $f.Id -Nome $f.Nome -Categoria 'Fontes instaladas' -Estado $(if ($emUso) { 'Aplicado' } else { 'NaoAplicado' }) `
-            -Selo $(if ($emUso) { "em uso · $($estado.Porcentagem)%" } else { '' }) -RequerAdmin $admin `
-            -Detalhe (($f.Estilos | Select-Object -Unique) -join ', ') `
-            -Mudancas @(
-                'Marque esta fonte (e, se quiser, um tamanho; sem tamanho, é o automático) e aplique.'
-                "Gera cópias de $($f.Nome) com o nome da Segoe UI (os pesos que faltarem usam o mais parecido) e põe em Windows\Fonts."
-                'Aponta os pesos da Segoe UI no registro para essas cópias (antes, guarda como estava e um .reg da chave).'
-                'Vale depois de reiniciar o Windows: barra de tarefas, Configurações, Explorador, apps e a tela de entrada.'
-                'Os arquivos da Segoe UI não mudam. Para voltar: Histórico > Desfazer, ou "Segoe UI original" nesta página.'
-            )
-    }
-
 }
 
 function New-ResultadoFonte {
@@ -432,11 +497,33 @@ function New-ResultadoFonte {
     [pscustomobject]@{ Id = $Id; Status = $Status; Liberado = $Liberado; Motivo = $Motivo; Mudancas = $Mudancas }
 }
 
+# O tamanho pedido pelo alvo marcado: $null = automático. Inválido lança (com a mensagem para o usuário).
+function Get-TamanhoPedido {
+    param($Alvo)
+    if (-not $Alvo) { return $null }
+    $id = [string]$Alvo.Id
+    if ($id -eq 'tam-auto') { return $null }
+    $valor = if ($id -eq 'tam-custom') {
+        $v = if ($Alvo.PSObject.Properties['ValorEscolhido']) { $Alvo.ValorEscolhido } else { $null }
+        if ($null -eq $v -or "$v" -eq '') { throw 'escolha o tamanho personalizado no painel ao lado (ou marque outro tamanho)' }
+        $v
+    }
+    elseif ($id -match '^tam-(\d+(?:[.,]\d+)?)$') { $Matches[1] -replace ',', '.' }
+    else { throw "tamanho desconhecido: $id" }
+    $n = 0.0
+    if (-not [double]::TryParse([string]$valor, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$n)) { throw "tamanho inválido: $valor" }
+    if ($n -lt $script:TamanhoMinimo -or $n -gt $script:TamanhoMaximo) { throw "o tamanho precisa ficar entre $($script:TamanhoMinimo)% e $($script:TamanhoMaximo)%" }
+    [math]::Round($n, 1)
+}
+
 # Gera, instala e aponta o registro. Sem fonte marcada (só um tamanho): gera de novo a fonte que o Tamanduá pôs.
 function Set-FonteSistema {
-    param([string]$IdFamilia, [string]$IdTamanho, [bool]$Simular, [string]$RaizRegistro, [string]$PastaFontes)
+    param([string]$IdFamilia, $AlvoTamanho, [bool]$Simular, [string]$RaizRegistro, [string]$PastaFontes)
     $estado = Read-EstadoFonte
-    $idResultado = if ($IdFamilia) { $IdFamilia } else { $IdTamanho }
+    $idTamanho = if ($AlvoTamanho) { [string]$AlvoTamanho.Id } else { 'tam-auto' }
+    $idResultado = if ($IdFamilia) { $IdFamilia } else { $idTamanho }
+    try { $pedido = Get-TamanhoPedido -Alvo $AlvoTamanho }
+    catch { return New-ResultadoFonte -Id $idResultado -Status 'Erro' -Motivo "$($_.Exception.Message) (nada mudou)" }
     if (-not $IdFamilia) {
         if (-not $estado) { return New-ResultadoFonte -Id $idResultado -Status 'Erro' -Motivo 'marque também a fonte (o tamanho sozinho só vale para a fonte que o Tamanduá pôs)' }
         $IdFamilia = $estado.Id
@@ -448,13 +535,9 @@ function Set-FonteSistema {
     if (-not [IO.File]::Exists($segoe)) { return New-ResultadoFonte -Id $idResultado -Status 'Erro' -Motivo 'segoeui.ttf não está na pasta de fontes' }
 
     Initialize-TmdFontKit
-    $estilos = @(Get-EstilosArquivos -Arquivos $familia.Arquivos)
-    if ($estilos.Count -eq 0) { return New-ResultadoFonte -Id $idResultado -Status 'Erro' -Motivo "não deu para ler os arquivos de $($familia.Nome)" }
-    $normal = Select-ArquivoVaga -Estilos $estilos -Peso 400 -Italico $false
-    if ($normal.Italico -or $normal.Peso -ge 600) { return New-ResultadoFonte -Id $idResultado -Status 'Erro' -Motivo "$($familia.Nome) não tem um estilo normal (só negrito ou itálico)" }
-    $regular = $normal.Arquivo
-    if (-not $IdTamanho) { $IdTamanho = 'tam-auto' }
-    $porcentagem = if ($IdTamanho -eq 'tam-auto') { Get-TamanhoAutomatico -Regular $regular -Segoe $segoe } else { [double]($IdTamanho -replace '^tam-', '') }
+    $estilos = @(Get-EstilosArquivos -Familia $familia)
+    $regular = $familia.Regular
+    $porcentagem = if ($null -eq $pedido) { Get-TamanhoAutomatico -Regular $regular -Segoe $segoe } else { $pedido }
 
     $plano = @(foreach ($vaga in $script:Vagas.Keys) {
             $original, $peso, $italico = $script:Vagas[$vaga]
@@ -488,7 +571,7 @@ function Set-FonteSistema {
     }
     $r = Set-TmdAjuste -Ajuste $ajuste -RaizRegistro $RaizRegistro -Modulo 'fonte'
     if ($r.Status -eq 'Feito') {
-        Save-EstadoFonte -Estado @{ Id = $familia.Id; Familia = $familia.Nome; Tamanho = $IdTamanho; Porcentagem = $porcentagem; Sufixo = $sufixo; Data = (Get-Date).ToString('o') }
+        Save-EstadoFonte -Estado @{ Id = $familia.Id; Familia = $familia.Nome; Tamanho = $idTamanho; Porcentagem = $porcentagem; Sufixo = $sufixo; Data = (Get-Date).ToString('o') }
         $r.Motivo = "$($familia.Nome) a $porcentagem%: reinicie o Windows para ver"
     }
     New-ResultadoFonte -Id $idResultado -Status $r.Status -Motivo $r.Motivo -Mudancas $descricoes
@@ -542,22 +625,28 @@ function Invoke-Acao {
     )
     $ids = @($Alvos | ForEach-Object { [string]$_.Id })
     $familias = @($ids | Where-Object { $_ -like 'fam-*' })
-    $tamanhos = @($ids | Where-Object { $_ -like 'tam-*' })
+    $tamanhos = @($Alvos | Where-Object { [string]$_.Id -like 'tam-*' })
+    $original = $ids -contains 'segoe-original'
     $erro = if ($familias.Count -gt 1) { 'marque só uma fonte' }
     elseif ($tamanhos.Count -gt 1) { 'marque só um tamanho' }
-    elseif ($ids -contains 'segoe-original' -and ($familias.Count + $tamanhos.Count) -gt 0) { 'marque a Segoe UI original ou uma fonte, não os dois' }
+    elseif ($original -and $familias.Count -gt 0) { 'marque a Segoe UI original ou uma fonte, não os dois' }
     if ($erro) {
         foreach ($id in $ids) { New-ResultadoFonte -Id $id -Status 'Erro' -Motivo "$erro (nada mudou)" }
         return
     }
-    if ($familias.Count + $tamanhos.Count -gt 0) {
-        $r = Set-FonteSistema -IdFamilia $(if ($familias.Count) { $familias[0] } else { '' }) -IdTamanho $(if ($tamanhos.Count) { $tamanhos[0] } else { '' }) `
+    if ($original) {
+        Restore-SegoeOriginal -Simular ([bool]$Simular) -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes
+        # A Segoe UI original é sempre do tamanho de fábrica.
+        foreach ($t in $tamanhos) { New-ResultadoFonte -Id ([string]$t.Id) -Status 'Ignorado' -Motivo 'o tamanho não vale para a Segoe UI original' }
+    }
+    elseif ($familias.Count + $tamanhos.Count -gt 0) {
+        $tamanho = if ($tamanhos.Count) { $tamanhos[0] } else { $null }
+        $r = Set-FonteSistema -IdFamilia $(if ($familias.Count) { $familias[0] } else { '' }) -AlvoTamanho $tamanho `
             -Simular ([bool]$Simular) -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes
         $r
         # Fonte e tamanho marcados juntos: um resultado para cada, com o mesmo desfecho.
-        if ($familias.Count -and $tamanhos.Count) { New-ResultadoFonte -Id $tamanhos[0] -Status $r.Status -Motivo $r.Motivo }
+        if ($familias.Count -and $tamanho) { New-ResultadoFonte -Id ([string]$tamanho.Id) -Status $r.Status -Motivo $r.Motivo }
     }
-    if ($ids -contains 'segoe-original') { Restore-SegoeOriginal -Simular ([bool]$Simular) -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes }
     # Por último: uma troca feita agora deixa as cópias anteriores sem uso.
     if ($ids -contains 'limpar-copias') { Clear-CopiasSobrando -Simular ([bool]$Simular) -RaizRegistro $RaizRegistro -PastaFontes $PastaFontes }
 }

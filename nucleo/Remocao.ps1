@@ -325,6 +325,75 @@ namespace Tamandua {
             return SHLoadIndirectString(fonte, sb, sb.Capacity, System.IntPtr.Zero) == 0 ? sb.ToString() : fonte;
         }
     }
+    // O que a página Fonte precisa saber de um .ttf/.otf, lendo só o cabeçalho e as tabelas pequenas (name, OS/2, head,
+    // post), sem carregar o arquivo inteiro: ler as ~250 fontes do Windows assim leva milissegundos.
+    public class DadosFonte {
+        public string Familia = "", Estilo = "", FamiliaTipografica = "";
+        public int Peso = 400, Largura = 5, PanoseTipo, PanoseSerifa, PanoseProporcao;
+        public bool Italico, Mono, Latino = true;
+    }
+    public static class LeitorFonte {
+        static int U16(byte[] b, int o) { return b[o] << 8 | b[o + 1]; }
+        static uint U32(byte[] b, int o) { return (uint)(b[o] << 24 | b[o + 1] << 16 | b[o + 2] << 8 | b[o + 3]); }
+        static byte[] Bytes(System.IO.FileStream f, long pos, int n) {
+            var b = new byte[n];
+            f.Seek(pos, System.IO.SeekOrigin.Begin);
+            int lidos = 0;
+            while (lidos < n) { int r = f.Read(b, lidos, n - lidos); if (r <= 0) throw new System.IO.EndOfStreamException(); lidos += r; }
+            return b;
+        }
+        // null: não é uma fonte TrueType/OpenType simples (coleção .ttc, bitmap) ou está corrompida.
+        public static DadosFonte Ler(string caminho) {
+            try {
+                using (var f = new System.IO.FileStream(caminho, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete)) {
+                    var cab = Bytes(f, 0, 12);
+                    uint versao = U32(cab, 0);
+                    if (versao != 0x00010000 && versao != 0x4F54544F && versao != 0x74727565) return null;
+                    int n = U16(cab, 4);
+                    var dir = Bytes(f, 12, 16 * n);
+                    var t = new System.Collections.Generic.Dictionary<string, uint[]>();
+                    for (int i = 0; i < n; i++) t[System.Text.Encoding.ASCII.GetString(dir, 16 * i, 4)] = new uint[] { U32(dir, 16 * i + 8), U32(dir, 16 * i + 12) };
+                    var d = new DadosFonte();
+                    uint[] e;
+                    if (t.TryGetValue("OS/2", out e) && e[1] >= 64) {
+                        var o = Bytes(f, e[0], 64);
+                        d.Peso = U16(o, 4); d.Largura = U16(o, 6);
+                        d.PanoseTipo = o[32]; d.PanoseSerifa = o[33]; d.PanoseProporcao = o[35];
+                        // Faixas Unicode todas zeradas (fonte antiga): não dá para saber, conta como latina.
+                        bool zeradas = U32(o, 42) == 0 && U32(o, 46) == 0 && U32(o, 50) == 0 && U32(o, 54) == 0;
+                        d.Latino = zeradas || (U32(o, 42) & 1) != 0;
+                        d.Italico = (U16(o, 62) & 1) != 0;
+                    }
+                    if (t.TryGetValue("head", out e) && e[1] >= 46) d.Italico |= (U16(Bytes(f, e[0], 46), 44) & 2) != 0;
+                    if (t.TryGetValue("post", out e) && e[1] >= 16) d.Mono = U32(Bytes(f, e[0], 16), 12) != 0;
+                    if (t.TryGetValue("name", out e) && e[1] >= 6 && e[1] < 4 * 1024 * 1024) {
+                        var nm = Bytes(f, e[0], (int)e[1]);
+                        int qtd = U16(nm, 2), textos = U16(nm, 4);
+                        var achados = new System.Collections.Generic.Dictionary<int, string>();
+                        var nota = new System.Collections.Generic.Dictionary<int, int>();
+                        for (int i = 0; i < qtd && 6 + 12 * i + 12 <= nm.Length; i++) {
+                            int r = 6 + 12 * i, plat = U16(nm, r), cod = U16(nm, r + 2), lang = U16(nm, r + 4), id = U16(nm, r + 6), len = U16(nm, r + 8), off = U16(nm, r + 10);
+                            if (id != 1 && id != 2 && id != 16) continue;
+                            if (textos + off + len > nm.Length) continue;
+                            // Preferência: Windows em inglês dos EUA; depois Windows em qualquer língua; depois Mac (Roman).
+                            int p = plat == 3 && (cod == 1 || cod == 0) ? (lang == 0x409 ? 3 : 2) : (plat == 1 && cod == 0 ? 1 : 0);
+                            if (p == 0) continue;
+                            int atual;
+                            if (nota.TryGetValue(id, out atual) && atual >= p) continue;
+                            nota[id] = p;
+                            achados[id] = plat == 3 ? System.Text.Encoding.BigEndianUnicode.GetString(nm, textos + off, len) : System.Text.Encoding.ASCII.GetString(nm, textos + off, len);
+                        }
+                        string s;
+                        if (achados.TryGetValue(1, out s)) d.Familia = s;
+                        if (achados.TryGetValue(2, out s)) d.Estilo = s;
+                        d.FamiliaTipografica = achados.TryGetValue(16, out s) ? s : d.Familia;
+                    }
+                    return d;
+                }
+            }
+            catch (System.Exception) { return null; }
+        }
+    }
     public static class ApagarAoReiniciar {
         [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
         private static extern bool MoveFileEx(string existente, string novo, int opcoes);

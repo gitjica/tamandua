@@ -64,6 +64,13 @@ function Initialize-TmdTela {
             $lista.Resources['LarguraPasta'] = [double][math]::Max(196, [math]::Floor($disponivel / $colunas) - 10)
         }.GetNewClosure())
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
+    # Cartão de valor (tamanho personalizado da página Fonte): régua e campo andam juntos.
+    $c.ReguaValor.Add_ValueChanged({ Invoke-TmdProtegido { Set-TmdValorDoCartao -Valor ([math]::Round($script:Tela.Controles.ReguaValor.Value, 1)) } })
+    $c.CampoValor.Add_LostFocus({ Invoke-TmdProtegido { Read-TmdCampoValor } })
+    $c.CampoValor.Add_KeyDown({
+            $e = $args[1]
+            if ($e.Key -eq 'Enter') { Invoke-TmdProtegido { Read-TmdCampoValor }; $e.Handled = $true }
+        })
     $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Forcar } })
     $c.BotaoVisao.Add_Click({ Invoke-TmdProtegido { Switch-TmdVisao } })
     # O jeito "lista" é o que está no janela.xaml; a grade vem de estilos.xaml (Set-TmdVisao troca entre os dois).
@@ -94,6 +101,11 @@ function Initialize-TmdTela {
                 if ($linha -and $linha -eq $apertada -and $linha.Tipo -in 'Pasta', 'Secao', 'Voltar') {
                     Open-TmdPasta -Nome $(if ($linha.Tipo -ne 'Voltar') { $linha.Nome } else { '' })
                     $evento.Handled = $true
+                }
+                # Escolha única (página Fonte): clicar no quadro já escolhe (ou desfaz a escolha), sem mirar na caixinha.
+                elseif ($linha -and $linha -eq $apertada -and $linha.Tipo -eq 'Alvo' -and $linha.TemCaixa -and $linha.Alvo -and
+                    [string](Get-ValorPropriedade $linha.Alvo 'Exclusivo') -and -not (Test-TmdCliqueNaCaixa -Origem $evento.OriginalSource)) {
+                    Set-TmdSelecao -Linha $linha -Selecionado (-not $linha.Selecionado) -Redesenhar
                 }
             }
         })
@@ -307,6 +319,11 @@ function Open-TmdPagina {
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
     $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
+    $dica = [string](Get-ValorPropriedade $modulo 'Dica')
+    $c.TextoDicaPagina.Text = $dica
+    $c.DicaPagina.Visibility = if ($dica) { 'Visible' } else { 'Collapsed' }
+    $nomeItens = [string](Get-ValorPropriedade $modulo 'NomeItens')
+    $script:NomeItens = if ($nomeItens) { $nomeItens } else { 'programa|programas' }
     $c.BotaoSimular.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoAplicar.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoSimular.IsEnabled = $false
@@ -475,13 +492,69 @@ function Clear-TmdCache {
 }
 
 # Marca ou desmarca um alvo. A marca fica no próprio alvo, então sobrevive à busca.
+# Alvo com Exclusivo (ex.: a página Fonte: uma fonte, um tamanho): marcar um desmarca os outros do mesmo grupo.
+# -Redesenhar: a marca mudou por fora da caixinha (clique no quadro), e a lista precisa mostrar.
 function Set-TmdSelecao {
-    param([Parameter(Mandatory)]$Linha, [bool]$Selecionado)
+    param([Parameter(Mandatory)]$Linha, [bool]$Selecionado, [switch]$Redesenhar)
     if ($Linha.Tipo -ne 'Alvo') { return }
     $Linha.Selecionado = $Selecionado
     if ($Linha.Alvo -and $Linha.Alvo.PSObject.Properties['Selecionado']) { $Linha.Alvo.Selecionado = $Selecionado }
+    $grupo = if ($Selecionado -and $Linha.Alvo) { [string](Get-ValorPropriedade $Linha.Alvo 'Exclusivo') } else { '' }
+    $mudou = [bool]$Redesenhar
+    if ($grupo) {
+        foreach ($a in $script:Estado.Alvos) {
+            if ([object]::ReferenceEquals($a, $Linha.Alvo) -or [string](Get-ValorPropriedade $a 'Exclusivo') -ne $grupo) { continue }
+            if ($a.Selecionado) { $a.Selecionado = $false; $mudou = $true }
+        }
+    }
+    # Item que pede um valor (tamanho personalizado): marcado sem valor ainda, começa no padrão dele.
+    $pede = if ($Selecionado -and $Linha.Alvo) { Get-ValorPropriedade $Linha.Alvo 'PedeValor' } else { $null }
+    if ($pede -and $null -eq (Get-ValorPropriedade $Linha.Alvo 'ValorEscolhido')) { Set-TmdValorEscolhido -Linha $Linha -Valor ([double]$pede.Padrao) -SemRedesenhar; $mudou = $true }
+    if ($mudou) { Update-TmdMarcasNaTela }
     Exit-TmdConfirmacao
     Update-TmdBarraAcao
+}
+
+# Os quadros não avisam a tela quando a marca muda por fora da caixinha: copia a marca dos alvos para as linhas na
+# lista e redesenha (a rolagem fica onde está).
+function Update-TmdMarcasNaTela {
+    $c = $script:Tela.Controles
+    $linhas = @($c.ListaAlvos.ItemsSource)
+    foreach ($l in $linhas) {
+        if ($l.Tipo -eq 'Alvo' -and $l.Alvo -and $l.Alvo.PSObject.Properties['Selecionado']) { $l.Selecionado = [bool]$l.Alvo.Selecionado }
+        elseif ($l.Tipo -in 'Pasta', 'Secao' -and $l.Membros) {
+            # O selo da pasta diz o que está escolhido dentro dela.
+            foreach ($m in $l.Membros) { if ($m.Alvo -and $m.Alvo.PSObject.Properties['Selecionado']) { $m.Selecionado = [bool]$m.Alvo.Selecionado } }
+            $nova = New-LinhaPasta -Tipo $l.Tipo -Nome $l.Nome -Categoria $l.Categoria -Membros $l.Membros
+            $l.Selo = $nova.Selo; $l.TemSelo = [bool]$nova.Selo
+        }
+    }
+    $script:Estado.RedesenhandoMarcas = $true
+    try { $c.ListaAlvos.Items.Refresh() } finally { $script:Estado.RedesenhandoMarcas = $false }
+}
+
+# Valor escolhido para um item que pede valor (PedeValor): fica no alvo (vai junto para o módulo) e aparece no selo.
+function Set-TmdValorEscolhido {
+    param([Parameter(Mandatory)]$Linha, [double]$Valor, [switch]$SemRedesenhar)
+    $pede = Get-ValorPropriedade $Linha.Alvo 'PedeValor'
+    $texto = '{0}{1}' -f $Valor.ToString('0.#', [Globalization.CultureInfo]::GetCultureInfo('pt-BR')), $pede.Unidade
+    $Linha.Alvo.ValorEscolhido = $Valor
+    $Linha.Alvo.Selo = $texto
+    $Linha.Selo = $texto
+    $Linha.TemSelo = $true
+    if (-not $Linha.Selecionado) { Set-TmdSelecao -Linha $Linha -Selecionado $true -Redesenhar; return }
+    if (-not $SemRedesenhar) { Update-TmdMarcasNaTela; Update-TmdBarraAcao }
+}
+
+# O clique veio de dentro da caixinha de um quadro? (ela já marca sozinha; o quadro não deve marcar de novo)
+function Test-TmdCliqueNaCaixa {
+    param($Origem)
+    $o = $Origem
+    while ($o -and -not ($o -is [System.Windows.Controls.ListBoxItem])) {
+        if ($o -is [System.Windows.Controls.CheckBox]) { return $true }
+        $o = if ($o -is [System.Windows.Media.Visual] -or $o -is [System.Windows.Media.Media3D.Visual3D]) { [System.Windows.Media.VisualTreeHelper]::GetParent($o) } else { $null }
+    }
+    $false
 }
 
 function Select-TmdPreset {
@@ -502,7 +575,10 @@ function Get-TmdResumoAtual {
 function Update-TmdBarraAcao {
     $m = Get-TmdModuloAtual
     if (-not $m -or -not $m.Escreve -or $script:Estado.Confirmando) { return }
-    Set-TmdStatus "$((Get-TmdResumoAtual).Texto) · nada é alterado sem confirmação"
+    # Página com grupos de escolha única: diz o que está escolhido em cada um ("Fonte: Arial · Tamanho: automático").
+    $grupos = @(Get-ValorPropriedade $m 'Grupos' | Where-Object { $_ })
+    $resumo = if ($grupos.Count -gt 0) { Get-ResumoGrupos -Grupos $grupos -Alvos $script:Estado.Alvos } else { (Get-TmdResumoAtual).Texto }
+    Set-TmdStatus "$resumo · nada é alterado sem confirmação"
 }
 
 function Exit-TmdConfirmacao {
@@ -785,6 +861,58 @@ function Show-TmdDetalhe {
         $c.DetalheId.Text = "id: $($linha.Id)"
     }
     Show-TmdCartoesDetalhe -Detalhe $d
+    # Prévia de texto (fontes: o quadro tem "Aa" desenhado numa fonte) e o valor que o item pede (tamanho personalizado).
+    $previa = $linha.Tipo -eq 'Alvo' -and $linha.Amostra -eq 'Aa'
+    $c.CartaoAmostra.Visibility = if ($previa) { 'Visible' } else { 'Collapsed' }
+    if ($previa) { $c.TextoAmostra.FontFamily = New-Object Windows.Media.FontFamily($linha.AmostraFonte) }
+    $pede = if ($linha.Tipo -eq 'Alvo' -and $linha.Alvo) { Get-ValorPropriedade $linha.Alvo 'PedeValor' } else { $null }
+    $c.CartaoValor.Visibility = if ($pede) { 'Visible' } else { 'Collapsed' }
+    if ($pede) {
+        $valor = Get-ValorPropriedade $linha.Alvo 'ValorEscolhido'
+        if ($null -eq $valor) { $valor = $pede.Padrao }
+        $script:Estado.MostrandoValor = $true
+        try {
+            $c.TituloValor.Text = $pede.Titulo
+            $c.UnidadeValor.Text = $pede.Unidade
+            $c.ReguaValor.Minimum = [double]$pede.Minimo
+            $c.ReguaValor.Maximum = [double]$pede.Maximo
+            $c.ReguaValor.TickFrequency = [double]$pede.Passo
+            $c.ReguaValor.SmallChange = [double]$pede.Passo
+            $c.ReguaValor.LargeChange = 5
+            $c.ReguaValor.Value = [double]$valor
+            $c.CampoValor.Text = ([double]$valor).ToString('0.#', [Globalization.CultureInfo]::GetCultureInfo('pt-BR'))
+        }
+        finally { $script:Estado.MostrandoValor = $false }
+    }
+}
+
+# Número digitado no campo do cartão de valor (aceita vírgula ou ponto). Texto que não é número: fica como estava.
+function Read-TmdCampoValor {
+    $n = 0.0
+    $texto = $script:Tela.Controles.CampoValor.Text.Trim() -replace ',', '.'
+    if ([double]::TryParse($texto, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$n)) { Set-TmdValorDoCartao -Valor ([math]::Round($n, 1)) }
+}
+
+# Régua ou campo do cartão de valor mudou: grava no item selecionado (e marca ele).
+function Set-TmdValorDoCartao {
+    param([double]$Valor)
+    if ($script:Estado.MostrandoValor -or $script:Estado.RedesenhandoMarcas) { return }
+    $c = $script:Tela.Controles
+    $linha = $c.ListaAlvos.SelectedItem
+    if (-not $linha -or $linha.Tipo -ne 'Alvo' -or -not $linha.Alvo -or -not (Get-ValorPropriedade $linha.Alvo 'PedeValor')) { return }
+    $pede = Get-ValorPropriedade $linha.Alvo 'PedeValor'
+    $Valor = [math]::Min([double]$pede.Maximo, [math]::Max([double]$pede.Minimo, $Valor))
+    $atual = Get-ValorPropriedade $linha.Alvo 'ValorEscolhido'
+    if ($null -ne $atual -and [double]$atual -eq $Valor -and $linha.Selecionado) { return }
+    Set-TmdValorEscolhido -Linha $linha -Valor $Valor
+    # A lista redesenhada pode trocar o item selecionado; volta para este, para o cartão continuar aberto.
+    if ($c.ListaAlvos.SelectedItem -ne $linha) { $c.ListaAlvos.SelectedItem = $linha }
+    $script:Estado.MostrandoValor = $true
+    try {
+        $c.ReguaValor.Value = $Valor
+        $c.CampoValor.Text = $Valor.ToString('0.#', [Globalization.CultureInfo]::GetCultureInfo('pt-BR'))
+    }
+    finally { $script:Estado.MostrandoValor = $false }
 }
 
 # Desenha os selos e cartões do painel de detalhes a partir de Get-DetalheAlvo.

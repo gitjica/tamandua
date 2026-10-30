@@ -144,7 +144,24 @@ $script:ScriptCarregarModulos = {
             Resultado = if ($m.Manifesto -and $m.Manifesto['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
             AvisoConfirmacao = if ($m.Manifesto -and $m.Manifesto['AvisoConfirmacao']) { [string]$m.Manifesto['AvisoConfirmacao'] } else { '' }
             Visualizacao = if ($m.Manifesto -and $m.Manifesto['Visualizacao'] -eq 'Grade') { 'Grade' } else { 'Lista' }
+            Dica      = if ($m.Manifesto -and $m.Manifesto['Dica']) { [string]$m.Manifesto['Dica'] } else { '' }
+            # Grupos de escolha única (ex.: uma fonte e um tamanho); este bloco roda num runspace, sem as funções da janela.
+            Grupos    = @(if ($m.Manifesto) {
+                    foreach ($g in @($m.Manifesto['Grupos'])) {
+                        if ($g -is [hashtable] -and $g['Nome']) { [pscustomobject]@{ Nome = [string]$g['Nome']; Rotulo = [string]$g['Rotulo']; Vazio = [string]$g['Vazio'] } }
+                    }
+                })
+            NomeItens = if ($m.Manifesto -and $m.Manifesto['NomeItens']) { [string]$m.Manifesto['NomeItens'] } else { 'programa|programas' }
         }
+    }
+}
+
+# Grupos de escolha única do manifesto (ex.: uma fonte e um tamanho), em objetos simples para a janela.
+function ConvertTo-TmdGruposManifesto {
+    param($Grupos)
+    foreach ($g in @($Grupos)) {
+        if (-not ($g -is [hashtable]) -or -not $g['Nome']) { continue }
+        [pscustomobject]@{ Nome = [string]$g['Nome']; Rotulo = [string]$g['Rotulo']; Vazio = [string]$g['Vazio'] }
     }
 }
 
@@ -168,6 +185,9 @@ function Get-TmdModulosProvisorios {
                 Resultado = if ($man['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
                 AvisoConfirmacao = if ($man['AvisoConfirmacao']) { [string]$man['AvisoConfirmacao'] } else { '' }
                 Visualizacao = if ($man['Visualizacao'] -eq 'Grade') { 'Grade' } else { 'Lista' }
+                Dica = [string]$man['Dica']
+                Grupos = if ($man['Grupos']) { @(ConvertTo-TmdGruposManifesto $man['Grupos']) } else { @() }
+                NomeItens = if ($man['NomeItens']) { [string]$man['NomeItens'] } else { 'programa|programas' }
                 Provisorio = $true
             }
         }

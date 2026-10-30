@@ -86,12 +86,19 @@ Describe 'Fonte do sistema' {
         $alvos = @(Find-Alvos)
         $arial = $alvos | Where-Object Id -eq 'fam-arial'
         $arial.Nome | Should -Be 'Arial'
-        $arial.Detalhe | Should -Be 'Regular, Bold, Italic'
-        @($alvos | Where-Object { $_.Nome -like 'Segoe*' -and $_.Categoria -eq 'Fontes instaladas' }).Count | Should -Be 0
+        $arial.Detalhe | Should -Be 'Estilos: Regular, Bold, Italic.'
+        $arial.Categoria | Should -Be 'Sem serifa'
+        $arial.Amostra | Should -Be 'Aa'
+        $arial.AmostraFonte | Should -Be ('file:///' + ((Join-Path $W.Pasta 'arial.ttf') -replace '\\', '/') + '#Arial')
+        $arial.Exclusivo | Should -Be 'fonte'
+        @($alvos | Where-Object { $_.Nome -like 'Segoe*' -and $_.Exclusivo -eq 'fonte' -and $_.Id -ne 'segoe-original' }).Count | Should -Be 0
         @($alvos | Where-Object Id -eq 'fam-verdana').Count | Should -Be 0 -Because 'só tem negrito'
         ($alvos | Where-Object Id -eq 'segoe-original').Estado | Should -Be 'Aplicado'
         ($alvos | Where-Object Id -eq 'limpar-copias').Selecionavel | Should -BeFalse
-        @($alvos | Where-Object Categoria -eq 'Tamanho do texto').Count | Should -Be 6
+        @($alvos | Where-Object Categoria -eq 'Tamanho do texto').Count | Should -Be 7
+        ($alvos | Where-Object Id -eq 'tam-custom').PedeValor.Maximo | Should -Be 130
+        # Pastas na ordem dos passos: fontes, tamanho, Segoe UI.
+        @($alvos | ForEach-Object Categoria | Select-Object -Unique) -join '|' | Should -Be 'Sem serifa|Tamanho do texto|Segoe UI (a do Windows)'
     }
 
     It 'simular não gera, não copia e não muda o registro' {
@@ -122,7 +129,7 @@ Describe 'Fonte do sistema' {
         $alvos = @(Find-Alvos)
         ($alvos | Where-Object Id -eq 'fam-arial').Estado | Should -Be 'Aplicado'
         ($alvos | Where-Object Id -eq 'tam-95').Estado | Should -Be 'Aplicado'
-        ($alvos | Where-Object Id -eq 'segoe-original').Estado | Should -Be 'NaoAplicado'
+        ($alvos | Where-Object Id -eq 'segoe-original').Estado | Should -Be 'NaoSeAplica'
 
         (Undo-TmdAjuste -Id 'fonte-sistema').Status | Should -Be 'Feito'
         Get-ValorFonte $W.Chave 'Segoe UI Bold (TrueType)' | Should -Be 'segoeuib.ttf'
@@ -148,7 +155,7 @@ Describe 'Fonte do sistema' {
         (@(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'segoe-original' }))[0]).Status | Should -Be 'Feito'
         Get-ValorFonte $W.Chave 'Segoe UI (TrueType)' | Should -Be 'segoeui.ttf'
         Get-ValorFonte $W.Chave 'Segoe UI Variable (TrueType)' | Should -Be 'SegUIVar.ttf'
-        (@(Find-Alvos) | Where-Object Id -eq 'fam-arial').Estado | Should -Be 'NaoAplicado'
+        (@(Find-Alvos) | Where-Object Id -eq 'fam-arial').Estado | Should -Be 'NaoSeAplica'
     }
 
     It 'combinações sem sentido não mudam nada' {
@@ -159,6 +166,42 @@ Describe 'Fonte do sistema' {
         $soTamanho[0].Status | Should -Be 'Erro'
         $soTamanho[0].Motivo | Should -Match 'marque também a fonte'
         Get-ValorFonte $W.Chave 'Segoe UI (TrueType)' | Should -Be 'segoeui.ttf'
+    }
+
+    It 'tamanho personalizado: o valor escolhido na janela vai junto e vira o tamanho' {
+        $r = @(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'fam-arial' }, [pscustomobject]@{ Id = 'tam-custom'; ValorEscolhido = 97.5 }))
+        $r[0].Status | Should -Be 'Feito' -Because $r[0].Motivo
+        $r[0].Motivo | Should -Match 'Arial a 97,5%|Arial a 97\.5%'
+        $arquivo = Join-Path $W.Pasta (Get-ValorFonte $W.Chave 'Segoe UI (TrueType)')
+        [Sfnt]::U16(([Sfnt]::Load($arquivo)).Get('head'), 18) | Should -Be ([int][math]::Round(2048 * 100 / 97.5))
+        $custom = @(Find-Alvos) | Where-Object Id -eq 'tam-custom'
+        $custom.Estado | Should -Be 'Aplicado'
+        $custom.PedeValor.Padrao | Should -Be 97.5 -Because 'o painel abre no tamanho em uso'
+    }
+
+    It 'tamanho personalizado sem valor ou fora da faixa: erro, nada muda; com a Segoe UI original, o tamanho é ignorado' {
+        $sem = @(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'fam-arial' }, [pscustomobject]@{ Id = 'tam-custom' }))
+        $sem[0].Status | Should -Be 'Erro'
+        $sem[0].Motivo | Should -Match 'escolha o tamanho'
+        $fora = @(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'fam-arial' }, [pscustomobject]@{ Id = 'tam-200' }))
+        $fora[0].Motivo | Should -Match 'entre 70% e 130%'
+        Get-ValorFonte $W.Chave 'Segoe UI (TrueType)' | Should -Be 'segoeui.ttf'
+        $o = @(Invoke-Acao -Alvos @([pscustomobject]@{ Id = 'segoe-original' }, [pscustomobject]@{ Id = 'tam-90' }) -Simular)
+        ($o | Where-Object Id -eq 'tam-90').Status | Should -Be 'Ignorado'
+    }
+
+    It 'tipo de cada fonte pelo Panose e, quando ele não diz, pelo nome' {
+        InModuleScope fonte {
+            $info = { param($t, $s, $m) [pscustomobject]@{ PanoseTipo = $t; PanoseSerifa = $s; Mono = $m } }
+            Get-CategoriaFonte -Info (& $info 2 11 $false) -Nome 'Arial' | Should -Be 'Sem serifa'
+            Get-CategoriaFonte -Info (& $info 2 2 $false) -Nome 'Times New Roman' | Should -Be 'Com serifa'
+            Get-CategoriaFonte -Info (& $info 2 11 $true) -Nome 'Consolas' | Should -Be 'Monoespaçadas'
+            Get-CategoriaFonte -Info (& $info 2 11 $false) -Nome 'Lucida Sans Unicode' | Should -Be 'Sem serifa' -Because '"code" dentro de Unicode não conta'
+            Get-CategoriaFonte -Info (& $info 3 15 $false) -Nome 'Comic Sans MS' | Should -Be 'Manuscritas e decorativas'
+            Get-CategoriaFonte -Info (& $info 0 0 $false) -Nome 'OpenDyslexic Display' | Should -Be 'Sem serifa'
+            Get-CategoriaFonte -Info (& $info 0 0 $false) -Nome 'Linux Libertine G' | Should -Be 'Com serifa'
+            Get-CategoriaFonte -Info (& $info 2 11 $false) -Nome 'Noto Sans Hebrew' | Should -Be 'Outros alfabetos'
+        }
     }
 }
 

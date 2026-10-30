@@ -1,4 +1,4 @@
-<!-- Estilos da interface. Só usa cores por DynamicResource, para a troca de tema valer na hora. -->
+﻿<!-- Estilos da interface. Só usa cores por DynamicResource, para a troca de tema valer na hora. -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -300,6 +300,10 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource Fundo}"/>
                         </Trigger>
+                        <!-- Marcado: borda de destaque (dá para ver o que foi escolhido sem olhar a caixinha) -->
+                        <DataTrigger Binding="{Binding Selecionado}" Value="True">
+                            <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource Acento}"/>
+                        </DataTrigger>
                         <Trigger Property="IsSelected" Value="True">
                             <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource AcentoFundo}"/>
                             <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource Acento}"/>
@@ -346,6 +350,19 @@
                             <Image Source="{Binding Mini3}" Width="38" Height="38" RenderOptions.BitmapScalingMode="HighQuality"/>
                         </UniformGrid>
                     </Border>
+                    <!-- Pasta de itens com amostra de texto (página Fonte): o "Aa" das 4 primeiras fontes -->
+                    <Border x:Name="PastaTexto" Width="112" Height="112" CornerRadius="12" Background="{DynamicResource SuperficieLateral}"
+                            Padding="6" HorizontalAlignment="Center" Visibility="Collapsed">
+                        <UniformGrid Rows="2" Columns="2">
+                            <Viewbox StretchDirection="DownOnly" MaxWidth="46" MaxHeight="40"><TextBlock Text="{Binding MiniTexto0}" FontFamily="{Binding MiniFonte0}" FontSize="22"/></Viewbox>
+                            <Viewbox StretchDirection="DownOnly" MaxWidth="46" MaxHeight="40"><TextBlock Text="{Binding MiniTexto1}" FontFamily="{Binding MiniFonte1}" FontSize="22"/></Viewbox>
+                            <Viewbox StretchDirection="DownOnly" MaxWidth="46" MaxHeight="40"><TextBlock Text="{Binding MiniTexto2}" FontFamily="{Binding MiniFonte2}" FontSize="22"/></Viewbox>
+                            <Viewbox StretchDirection="DownOnly" MaxWidth="46" MaxHeight="40"><TextBlock Text="{Binding MiniTexto3}" FontFamily="{Binding MiniFonte3}" FontSize="22"/></Viewbox>
+                        </UniformGrid>
+                    </Border>
+                    <!-- Amostra grande no lugar do ícone (página Fonte: "Aa" desenhado na própria fonte) -->
+                    <TextBlock x:Name="AmostraGrande" Text="{Binding Amostra}" FontFamily="{Binding AmostraFonte}" FontSize="32" Height="46"
+                               HorizontalAlignment="Center" TextAlignment="Center" Visibility="Collapsed"/>
                     <Grid x:Name="Icone40" Width="40" Height="40" HorizontalAlignment="Center">
                         <Border x:Name="FundoInicial" CornerRadius="20" Background="{DynamicResource AcentoFundo}">
                             <TextBlock x:Name="LetraInicial" Text="{Binding Inicial}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource Acento}"
@@ -408,6 +425,14 @@
                 <Setter TargetName="Imagem" Property="Height" Value="64"/>
                 <Setter TargetName="NomeQuadro" Property="FontSize" Value="13"/>
                 <Setter TargetName="NomeQuadro" Property="FontWeight" Value="SemiBold"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemAmostra}" Value="True">
+                <Setter TargetName="AmostraGrande" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Icone40" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemMiniTexto}" Value="True">
+                <Setter TargetName="PastaTexto" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="PastaGrande" Property="Visibility" Value="Collapsed"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tipo}" Value="Pasta">
                 <Setter TargetName="FundoPasta" Property="Visibility" Value="Visible"/>

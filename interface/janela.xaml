@@ -128,6 +128,15 @@
                         <StackPanel>
                             <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
                             <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>
+                            <!-- Passos da página (Dica no manifesto), ex.: como trocar a fonte -->
+                            <Border x:Name="DicaPagina" Background="{DynamicResource AcentoFundo}" CornerRadius="6" Padding="10,6"
+                                    Margin="0,8,0,0" Visibility="Collapsed">
+                                <DockPanel>
+                                    <TextBlock Style="{DynamicResource Icone}" Text="&#xE946;" Foreground="{DynamicResource Acento}" Margin="0,2,8,0"
+                                               VerticalAlignment="Top"/>
+                                    <TextBlock x:Name="TextoDicaPagina" TextWrapping="Wrap" Foreground="{DynamicResource Texto}" LineHeight="19"/>
+                                </DockPanel>
+                            </Border>
                         </StackPanel>
                     </DockPanel>
                 </Border>
@@ -275,6 +284,31 @@
                         <TextBlock x:Name="DetalheNome" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
                         <TextBlock x:Name="DetalheCategoria" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,8"/>
                         <WrapPanel x:Name="DetalheSelos" Margin="0,0,0,10"/>
+                        <!-- Prévia de texto na fonte do item (página Fonte) -->
+                        <Border x:Name="CartaoAmostra" Style="{DynamicResource Cartao}" Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="Prévia" Style="{DynamicResource TituloCartao}"/>
+                                <TextBlock x:Name="TextoAmostra" TextWrapping="Wrap" FontSize="15" LineHeight="22"
+                                           Text="Área de Trabalho · Configurações · Explorador de Arquivos&#10;Você já pode reiniciar o computador.&#10;ABC abc 0123456789 çãéô"/>
+                            </StackPanel>
+                        </Border>
+                        <!-- Valor que o item pede (ex.: tamanho personalizado): régua e campo -->
+                        <Border x:Name="CartaoValor" Style="{DynamicResource Cartao}" Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock x:Name="TituloValor" Style="{DynamicResource TituloCartao}"/>
+                                <DockPanel Margin="0,4,0,0">
+                                    <TextBlock x:Name="UnidadeValor" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                                    <TextBox x:Name="CampoValor" DockPanel.Dock="Right" Width="56" Padding="4,2" VerticalAlignment="Center"
+                                             Background="{DynamicResource Fundo}" Foreground="{DynamicResource Texto}"
+                                             BorderBrush="{DynamicResource Borda}" CaretBrush="{DynamicResource Texto}"
+                                             AutomationProperties.Name="Valor"/>
+                                    <Slider x:Name="ReguaValor" VerticalAlignment="Center" Margin="0,0,10,0" IsSnapToTickEnabled="True"
+                                            AutomationProperties.Name="Valor"/>
+                                </DockPanel>
+                                <TextBlock x:Name="DicaValor" Foreground="{DynamicResource TextoSecundario}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Text="Mexer aqui já marca este item."/>
+                            </StackPanel>
+                        </Border>
                         <Border Style="{DynamicResource Cartao}">
                             <StackPanel>
                                 <TextBlock Text="Sobre" Style="{DynamicResource TituloCartao}"/>

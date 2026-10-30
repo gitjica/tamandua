@@ -120,7 +120,8 @@ function ConvertTo-LinhaAlvo {
             -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 }) `
             -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent `
             -IconePng (Get-ValorPropriedade $a 'IconePng') -Classe ([string](Get-ValorPropriedade $a 'Classificacao')) `
-            -Estrela ((Get-ValorPropriedade $a 'Estrela') -eq $true)
+            -Estrela ((Get-ValorPropriedade $a 'Estrela') -eq $true) `
+            -Amostra ([string](Get-ValorPropriedade $a 'Amostra')) -AmostraFonte ([string](Get-ValorPropriedade $a 'AmostraFonte'))
         if ($null -ne $Cache -and $id) { $Cache[$id] = $linha }
         $linhas.Add($linha)
     }
@@ -138,7 +139,9 @@ function New-LinhaAlvo {
         # Grade: ícone em PNG (vira imagem na janela, em Set-TmdImagensLinha); sem ícone, o quadro mostra a inicial do nome.
         [byte[]]$IconePng = $null,
         # Ajustes: Recomendado, Opcional, Atencao ou Arriscado (selo colorido). Programas: estrela do FMHY.
-        [string]$Classe = '', [bool]$Estrela = $false
+        [string]$Classe = '', [bool]$Estrela = $false,
+        # Grade: texto grande no lugar do ícone (a página Fonte mostra "Aa" desenhado na própria fonte de AmostraFonte).
+        [string]$Amostra = '', [string]$AmostraFonte = ''
     )
     $inicial = if ($Nome) { $Nome.Trim().Substring(0, 1).ToUpperInvariant() } else { '' }
     $rotulo = if ($script:RotuloClasse.ContainsKey($Classe)) { $script:RotuloClasse[$Classe] } else { '' }
@@ -149,9 +152,13 @@ function New-LinhaAlvo {
         IconePng = $IconePng; Inicial = $inicial; Imagem = $null; TemImagem = $false
         Classe = $Classe; RotuloClasse = $rotulo; TemClasse = [bool]$rotulo; DicaClasse = $(if ($rotulo) { $script:DicaClasse[$Classe] } else { $null })
         Estrela = $Estrela; Grande = $false
-        # Pastas: até 4 miniaturas e os itens dentro. Toda linha tem as propriedades (vazias): Binding que não acha a
-        # propriedade custa caro no WPF, multiplicado por cada quadro da grade.
+        # Sem AmostraFonte, a fonte da própria janela (o Binding não aceita texto vazio como fonte).
+        Amostra = $Amostra; AmostraFonte = $(if ($AmostraFonte) { $AmostraFonte } else { 'Segoe UI' }); TemAmostra = [bool]$Amostra
+        # Pastas: até 4 miniaturas (imagens, ou as amostras de texto dos itens) e os itens dentro. Toda linha tem as
+        # propriedades (vazias): Binding que não acha a propriedade custa caro no WPF, multiplicado por cada quadro da grade.
         Mini0 = $null; Mini1 = $null; Mini2 = $null; Mini3 = $null; Membros = $null
+        MiniTexto0 = ''; MiniTexto1 = ''; MiniTexto2 = ''; MiniTexto3 = ''
+        MiniFonte0 = 'Segoe UI'; MiniFonte1 = 'Segoe UI'; MiniFonte2 = 'Segoe UI'; MiniFonte3 = 'Segoe UI'; TemMiniTexto = $false
     }
 }
 
@@ -229,16 +236,34 @@ function ConvertTo-LinhasPorCategoria {
     , $saida.ToArray()
 }
 
+# Como contar os itens de uma pasta: "singular|plural" (o manifesto pode trocar; a página Fonte usa "opção|opções").
+$script:NomeItens = 'programa|programas'
+
 function New-LinhaPasta {
     param([string]$Tipo, [string]$Nome, [string]$Categoria = '', [object[]]$Membros)
-    $marcados = @($Membros | Where-Object Selecionado).Count
-    $selo = if ($Tipo -eq 'Voltar') { '' } elseif ($marcados -gt 0) { "$marcados de $($Membros.Count) marcados" } elseif ($Membros.Count -eq 1) { '1 programa' } else { "$($Membros.Count) programas" }
+    $nomes = @($script:NomeItens -split '\|', 2)
+    $um = $nomes[0]
+    $varios = if ($nomes.Count -gt 1) { $nomes[1] } else { $nomes[0] }
+    $marcadas = @($Membros | Where-Object Selecionado)
+    # Item de escolha única marcado (ex.: a fonte escolhida): a pasta diz qual.
+    $unico = $marcadas.Count -eq 1 -and $marcadas[0].Alvo -and [string](Get-ValorPropriedade $marcadas[0].Alvo 'Exclusivo')
+    $selo = if ($Tipo -eq 'Voltar') { '' } elseif ($unico) { "$([char]0x2713) $($marcadas[0].Nome)" } elseif ($marcadas.Count -gt 0) { "$($marcadas.Count) de $($Membros.Count) marcados" } elseif ($Membros.Count -eq 1) { "1 $um" } else { "$($Membros.Count) $varios" }
     $linha = New-LinhaAlvo -Tipo $Tipo -Nome $Nome -Categoria $Categoria -Selo $selo `
-        -Detalhe $(if ($Tipo -eq 'Voltar') { 'Fechar a pasta' } elseif ($Tipo -eq 'Secao') { "$($Membros.Count) programas: $(($Membros | Select-Object -First 6 | ForEach-Object Nome) -join ', ')$(if ($Membros.Count -gt 6) { '...' })" } else { "Alternativas: $(($Membros | ForEach-Object Nome) -join ', ')" })
+        -Detalhe $(if ($Tipo -eq 'Voltar') { 'Fechar a pasta' } elseif ($Tipo -eq 'Secao') { "$($Membros.Count) $($varios): $(($Membros | Select-Object -First 6 | ForEach-Object Nome) -join ', ')$(if ($Membros.Count -gt 6) { '...' })" } else { "Alternativas: $(($Membros | ForEach-Object Nome) -join ', ')" })
     if ($Tipo -eq 'Voltar') { $linha.Inicial = [string][char]0x2190 }
-    # Miniaturas: imagens dos primeiros com ícone (objetos .NET puros, como em Set-TmdImagensLinha).
+    # Miniaturas: imagens dos primeiros com ícone (objetos .NET puros, como em Set-TmdImagensLinha); sem imagens, as
+    # amostras de texto dos primeiros (o "Aa" de cada fonte).
     $i = 0
     foreach ($m in $Membros) { if ($m.TemImagem -and $i -lt 4) { $linha."Mini$i" = $m.Imagem; $i++ } }
+    if ($i -eq 0) {
+        foreach ($m in $Membros) {
+            if (-not $m.TemAmostra -or $i -ge 4) { continue }
+            $linha."MiniTexto$i" = $m.Amostra
+            $linha."MiniFonte$i" = $m.AmostraFonte
+            $i++
+        }
+        $linha.TemMiniTexto = $i -gt 0
+    }
     $linha.Membros = $Membros
     $linha
 }
@@ -291,6 +316,26 @@ function Format-TamanhoTela {
 }
 
 # "2 selecionados · 3,2 GB", contando só linhas de alvo marcadas (e que podem ser marcadas).
+# O que está escolhido em cada grupo de escolha única (manifesto Grupos): "Fonte: Arial · Tamanho: automático".
+# Grupo sem escolha mostra o texto Vazio dele; itens marcados fora dos grupos entram como "+ N item(ns)".
+function Get-ResumoGrupos {
+    param([AllowEmptyCollection()][object[]]$Grupos = @(), [AllowEmptyCollection()][object[]]$Alvos = @())
+    $marcados = @($Alvos | Where-Object { (Get-ValorPropriedade $_ 'Selecionado') -eq $true })
+    $partes = [System.Collections.Generic.List[string]]::new()
+    foreach ($g in $Grupos) {
+        $escolhido = @($marcados | Where-Object { [string](Get-ValorPropriedade $_ 'Exclusivo') -eq $g.Nome })
+        $texto = if ($escolhido.Count -eq 0) { $g.Vazio } else {
+            $a = $escolhido[0]
+            $valor = Get-ValorPropriedade $a 'ValorEscolhido'
+            if ($null -ne $valor) { "$(Get-ValorPropriedade $a 'Nome') ($(Get-ValorPropriedade $a 'Selo'))" } else { [string](Get-ValorPropriedade $a 'Nome') }
+        }
+        $partes.Add("$($g.Rotulo): $texto")
+    }
+    $outros = @($marcados | Where-Object { -not [string](Get-ValorPropriedade $_ 'Exclusivo') }).Count
+    if ($outros -gt 0) { $partes.Add("+ $outros $(if ($outros -eq 1) { 'item' } else { 'itens' })") }
+    $partes -join ' · '
+}
+
 function Get-ResumoSelecao {
     param([AllowEmptyCollection()][object[]]$Linhas = @())
     $marcadas = @($Linhas | Where-Object { $_.Tipo -eq 'Alvo' -and $_.Selecionado -and $_.TemCaixa })
