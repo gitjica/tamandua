@@ -4,7 +4,16 @@ Limpeza, ajustes e manutenção profunda para Windows. 10 módulos: status, limp
 
 ## Como abrir
 
-Baixe a pasta inteira (no GitHub: **Code > Download ZIP**, e extraia) e dê dois cliques em **`Tamandua.cmd`**.
+**Jeito mais rápido**: abra o PowerShell (botão direito no Iniciar > Terminal) e cole:
+
+```powershell
+irm https://raw.githubusercontent.com/gitjica/tamandua/main/instalar.ps1 | iex
+```
+
+Ele baixa a versão mais nova do GitHub, guarda em `%LOCALAPPDATA%\Tamandua\app` e abre. Rodar de novo atualiza
+(o histórico e as configurações ficam). Só funciona com o repositório público.
+
+**Ou baixando**: baixe a pasta inteira (no GitHub: **Code > Download ZIP**, e extraia) e dê dois cliques em **`Tamandua.cmd`**.
 Ele pede permissão de administrador uma vez (dá para recusar: abre assim mesmo, e o que precisar pede na hora).
 
 - Por que o `.cmd` e não o `.ps1`: o Windows vem com scripts do PowerShell bloqueados (política "Restricted") e

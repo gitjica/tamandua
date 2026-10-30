@@ -11,7 +11,12 @@ Describe '<Relativo>' -ForEach $arquivos {
     It 'está em UTF-8 com BOM (sem BOM o 5.1 lê acentos errado)' {
         $bytes = [System.IO.File]::ReadAllBytes($Caminho)
         $temBom = $bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF
-        $temBom | Should -BeTrue
+        if ($Relativo -eq 'instalar.ps1') {
+            # Exceção: roda por "irm ... | iex", e o iex não aceita o BOM. Por isso só ASCII (sem acentos), sem BOM.
+            $temBom | Should -BeFalse
+            @($bytes | Where-Object { $_ -gt 127 }).Count | Should -Be 0 -Because 'sem BOM, acento sairia errado'
+        }
+        else { $temBom | Should -BeTrue }
     }
 
     It 'é válido no parser do PowerShell 5.1' {
