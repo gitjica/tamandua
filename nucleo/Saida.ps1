@@ -160,7 +160,6 @@ function Write-TmdAjuda {
     Write-Host '  menu            menu de texto'
     Write-Host '  modulos         estado de cada módulo'
     Write-Host '  <módulo>        executa um módulo (veja a lista em: tamandua modulos)'
-    Write-Host '    <pasta>       em módulos que navegam (ex.: tamandua analisar C:\Users)'
     Write-Host '    -Simular      mostra o que seria feito, sem alterar nada'
     Write-Host '    -Sim          confirma sem perguntar (para scripts)'
     Write-Host '    -Preset X     marca os itens do preset X (ex.: tamandua ajustes -Preset Essencial)'

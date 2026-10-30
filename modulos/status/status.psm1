@@ -15,7 +15,7 @@ $script:Limites = @{
 
 function Test-Requisitos {
     try {
-        Get-CimInstance -ClassName Win32_OperatingSystem | Out-Null
+        Get-CimInstance -ClassName Win32_OperatingSystem -Property Caption | Out-Null
         @{ Ok = $true; Motivo = '' }
     }
     catch {
@@ -30,22 +30,22 @@ function Find-Alvos {
 # Cada seção é lida isolada: se uma falhar, vira $null e as outras continuam.
 # Seções de lista devolvem @() quando não há nada (ex.: desktop sem bateria) e $null quando a leitura falhou.
 function Get-LeituraSistema {
-    $os = Invoke-Secao { Get-CimInstance -ClassName Win32_OperatingSystem }
+    # A CPU é medida no intervalo em que as outras seções são lidas: não fica parada esperando.
+    $cpu = Invoke-Secao { Start-TmdMedidaCpu }
+    $os = Invoke-Secao {
+        Get-CimInstance -ClassName Win32_OperatingSystem -Property Caption, BuildNumber, LastBootUpTime, TotalVisibleMemorySize, FreePhysicalMemory
+    }
     $sistema = $null
     $memoria = $null
     if ($os) {
         $sistema = [pscustomobject]@{ Nome = $os.Caption; Build = $os.BuildNumber; Inicio = $os.LastBootUpTime }
         $memoria = [pscustomobject]@{ TotalBytes = [int64]$os.TotalVisibleMemorySize * 1KB; LivreBytes = [int64]$os.FreePhysicalMemory * 1KB }
     }
-    [pscustomobject]@{
+    $leitura = [pscustomobject]@{
         Agora      = Get-Date
         Sistema    = $sistema
         Memoria    = $memoria
-        Cpu        = Invoke-Secao {
-            $cargas = @(Get-CimInstance -ClassName Win32_Processor | Where-Object { $null -ne $_.LoadPercentage } |
-                    ForEach-Object { $_.LoadPercentage })
-            if ($cargas.Count -gt 0) { [pscustomobject]@{ Percentual = [int]($cargas | Measure-Object -Average).Average } }
-        }
+        Cpu        = $null
         Discos     = Invoke-Secao -Lista {
             Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType = 3' | ForEach-Object {
                 [pscustomobject]@{ Letra = $_.DeviceID; Rotulo = $_.VolumeName; TotalBytes = [int64]$_.Size; LivreBytes = [int64]$_.FreeSpace }
@@ -69,6 +69,8 @@ function Get-LeituraSistema {
             }
         }
     }
+    if ($cpu) { $leitura.Cpu = Invoke-Secao { [pscustomobject]@{ Percentual = Get-TmdUsoCpu -Desde $cpu } } }
+    $leitura
 }
 
 function Invoke-Secao {

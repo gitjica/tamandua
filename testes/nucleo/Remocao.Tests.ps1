@@ -65,6 +65,14 @@ Describe 'Remove-TmdItem' {
         Test-Path "$raiz\cache\a.bin" | Should -BeFalse
     }
 
+    It 'arquivo do sistema dentro da pasta (ntuser.dat de um perfil copiado) fica; o resto vai' {
+        New-ArvoreFalsa -Pasta "$raiz\cache" -Arquivos @{ 'perfil\NTUSER.DAT' = 'n' } | Out-Null
+        $r = Remove-TmdItem -Caminho "$raiz\cache" -Raizes $raiz
+        $r.Status | Should -Be 'Parcial'
+        Test-Path "$raiz\cache\perfil\NTUSER.DAT" | Should -BeTrue
+        Test-Path "$raiz\cache\a.bin" | Should -BeFalse
+    }
+
     It 'item que já não existe é ignorado' {
         $r = Remove-TmdItem -Caminho "$raiz\nao-existe.tmp" -Raizes $raiz
         $r.Status | Should -Be 'Ignorado'
@@ -223,6 +231,46 @@ Describe 'Measure-TmdTamanho' {
 }
 
 # Opcional porque deixa um arquivinho na Lixeira real: rode com $env:TAMANDUA_TESTE_LIXEIRA = '1'.
+Describe 'Uso de CPU' {
+    It 'devolve de 0 a 100; -Desde só espera o que falta do intervalo' {
+        $u = Get-TmdUsoCpu -IntervaloMs 100
+        $u | Should -BeGreaterOrEqual 0
+        $u | Should -BeLessOrEqual 100
+        $m = Start-TmdMedidaCpu
+        Start-Sleep -Milliseconds 300
+        $relogio = [Diagnostics.Stopwatch]::StartNew()
+        [void](Get-TmdUsoCpu -Desde $m -IntervaloMs 250)
+        $relogio.ElapsedMilliseconds | Should -BeLessThan 100 -Because 'o intervalo já passou enquanto outras coisas eram lidas'
+    }
+}
+
+Describe 'Esvaziar a Lixeira (falsa)' {
+    BeforeEach {
+        $env:TAMANDUA_LIXEIRA_TESTE = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        New-ArvoreFalsa -Pasta $env:TAMANDUA_LIXEIRA_TESTE -Arquivos @{ 'a.txt' = 'aaa'; 'p\b.txt' = 'b' } | Out-Null
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+    }
+    AfterEach { Remove-Item Env:\TAMANDUA_LIXEIRA_TESTE -ErrorAction SilentlyContinue }
+
+    It 'mede, simula sem apagar, esvazia e registra no log' {
+        $l = Get-TmdLixeira
+        $l.Itens | Should -Be 2
+        $l.Bytes | Should -Be 4
+        (Clear-TmdLixeira -Simular -Modulo 'teste').Status | Should -Be 'Simulado'
+        (Get-TmdLixeira).Itens | Should -Be 2
+        $r = Clear-TmdLixeira -Modulo 'teste' -Id 'lixeira'
+        $r.Status | Should -Be 'Feito'
+        $r.Liberado | Should -Be 4
+        (Get-TmdLixeira).Itens | Should -Be 0
+        @(Get-TmdHistorico -Ultimos 1)[0].Caminho | Should -Be 'Lixeira'
+    }
+
+    It 'Lixeira falsa fora da pasta temporária é recusada' {
+        $env:TAMANDUA_LIXEIRA_TESTE = 'C:\LixeiraFalsaForaDoTemp'
+        { Get-TmdLixeira } | Should -Throw '*pasta temporária*'
+    }
+}
+
 Describe 'Lixeira de verdade' -Skip:($env:TAMANDUA_TESTE_LIXEIRA -ne '1') {
     It 'Move-TmdParaLixeira compila e tira um arquivo da sandbox do lugar' {
         $arquivo = Join-Path $TestDrive 'tamandua-teste-lixeira.txt'

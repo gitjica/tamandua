@@ -179,7 +179,7 @@ Describe 'Tarefas em segundo plano' {
         }
         Wait-Tarefas
         $r.Erro | Should -BeNullOrEmpty
-        $r.Saida.Count | Should -Be 12
+        $r.Saida.Count | Should -Be 10
         ($r.Saida | Where-Object Nome -eq 'status').Estado | Should -Be 'ok'
         ($r.Saida | Where-Object Nome -eq 'atualizacoes').Titulo | Should -Be 'Atualizações'
     }
@@ -238,7 +238,7 @@ Describe 'Janela de verdade' {
     It 'abre no projeto real, mostra os módulos e carrega o status' {
         $r = Invoke-InterfaceTeste -Raiz $script:RaizProjeto
         $r.Carregou | Should -BeTrue
-        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 13 -Because '12 do catálogo + a página Histórico'
+        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 11 -Because '10 do catálogo + a página Histórico'
         @($r.Modulos | Where-Object Tipo -eq 'Modulo')[-1].Nome | Should -Be 'historico'
         $r.Titulo | Should -Be 'Status'
         $r.Mensagem | Should -BeNullOrEmpty
@@ -552,6 +552,59 @@ Describe 'Desfazer pela página Histórico' {
     }
 }
 
+Describe 'Cache e leitura antecipada na janela' {
+    It 'cada página é lida uma vez ao abrir (a primeira junto com a lista, as outras em segundo plano); F5 lê de novo' {
+        $projeto = New-ProjetoFalso -Pai $TestDrive -Catalogo 'alfa', 'beta' -ComInterface
+        # Cada Find-Alvos anota uma linha no arquivo: dá para contar quantas vezes cada página foi lida de verdade.
+        $contador = Join-Path $TestDrive "leituras-$([guid]::NewGuid().ToString('N')).txt"
+        foreach ($nome in 'alfa', 'beta') {
+            New-ModuloFalso -Raiz $projeto -Nome $nome -Codigo @"
+function Test-Requisitos { @{ Ok = `$true } }
+function Find-Alvos {
+    [IO.File]::AppendAllText('$contador', "$nome``n")
+    [pscustomobject]@{ Id = '$nome-1'; Nome = 'Item de $nome'; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = '' }
+}
+"@ | Out-Null
+        }
+        $leituras = { param($n) @(Get-Content -LiteralPath $contador -ErrorAction SilentlyContinue | Where-Object { $_ -eq $n }).Count }.GetNewClosure()
+        $passos = @{ Etapa = 0 }
+        $aoCarregar = {
+            $tela = $args[0]
+            $p = $passos
+            $ler = $leituras
+            $interface = Get-Module Interface
+            $relogio = New-Object System.Windows.Threading.DispatcherTimer
+            $relogio.Interval = [TimeSpan]::FromMilliseconds(100)
+            $relogio.Add_Tick({
+                    $c = $tela.Controles
+                    if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
+                    $antecipando = & $interface { $null -ne $script:Estado.Antecipando -or ($script:Estado.Fila -and $script:Estado.Fila.Count -gt 0) }
+                    if ($antecipando) { return }
+                    switch ($p.Etapa) {
+                        0 { $p.AlfaAoAbrir = & $ler 'alfa'; $p.BetaAntecipada = & $ler 'beta'
+                            $c.ListaModulos.SelectedItem = @($c.ListaModulos.ItemsSource | Where-Object Nome -eq 'beta')[0] }
+                        1 { $p.BetaDepoisDeAbrir = & $ler 'beta'; $p.Itens = @($c.ListaAlvos.ItemsSource).Count
+                            $c.BotaoAtualizar.RaiseEvent((New-Object System.Windows.RoutedEventArgs([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent))) }
+                        2 { $p.BetaDepoisDeF5 = & $ler 'beta'
+                            $c.ListaModulos.SelectedItem = @($c.ListaModulos.ItemsSource | Where-Object Nome -eq 'alfa')[0] }
+                        3 { $p.AlfaNoFim = & $ler 'alfa'; $relogio.Stop(); $tela.Janela.Close() }
+                    }
+                    $p.Etapa++
+                }.GetNewClosure())
+            $relogio.Start()
+        }.GetNewClosure()
+        Start-TmdInterface -Raiz $projeto -Tema 'claro' -AoCarregar $aoCarregar -FecharAposSeg 60
+
+        $passos.Etapa | Should -Be 4 -Because 'a sequência inteira precisa ter rodado'
+        $passos.AlfaAoAbrir | Should -Be 1
+        $passos.BetaAntecipada | Should -Be 1 -Because 'beta foi lida em segundo plano antes do clique'
+        $passos.BetaDepoisDeAbrir | Should -Be 1 -Because 'abrir beta usou o que já tinha sido lido'
+        $passos.Itens | Should -BeGreaterThan 0
+        $passos.BetaDepoisDeF5 | Should -Be 2 -Because 'F5 sempre lê de novo'
+        $passos.AlfaNoFim | Should -Be 1 -Because 'a primeira página também ficou guardada'
+    }
+}
+
 Describe 'Limpar pela janela de verdade' {
     It 'Simular não apaga; Limpar pede confirmação; Confirmar apaga o velho e mantém o recente' {
         $base = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
@@ -561,8 +614,9 @@ Describe 'Limpar pela janela de verdade' {
         $projeto = New-ProjetoFalso -Pai $TestDrive -Catalogo 'limpar' -ComInterface -ModulosReais 'limpar'
 
         # As tarefas da janela rodam neste processo e leem TEMP/LOCALAPPDATA daqui: aponta para a sandbox durante o teste.
+        # TAMANDUA_LIMPAR_RAIZ: as categorias do sistema (Windows\Temp, WER...) também ficam na sandbox.
         $originais = @{ TEMP = $env:TEMP; TMP = $env:TMP; LOCALAPPDATA = $env:LOCALAPPDATA }
-        $env:TEMP = $temp; $env:TMP = $temp; $env:LOCALAPPDATA = Join-Path $base 'Local'
+        $env:TEMP = $temp; $env:TMP = $temp; $env:LOCALAPPDATA = Join-Path $base 'Local'; $env:TAMANDUA_LIMPAR_RAIZ = $base
         $passos = @{ Etapa = 0 }
         try {
             $aoCarregar = {
@@ -590,6 +644,7 @@ Describe 'Limpar pela janela de verdade' {
         }
         finally {
             $env:TEMP = $originais.TEMP; $env:TMP = $originais.TMP; $env:LOCALAPPDATA = $originais.LOCALAPPDATA
+            Remove-Item Env:\TAMANDUA_LIMPAR_RAIZ -ErrorAction SilentlyContinue
         }
 
         $passos.Etapa | Should -Be 4 -Because 'a sequência inteira precisa ter rodado'

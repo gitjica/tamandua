@@ -34,9 +34,10 @@ $script:Recursos = [ordered]@{
         Explicacao = 'Impressora virtual de XPS (formato pouco usado hoje).' }
 }
 
+# Só confere o DISM: ler os recursos de verdade leva ~2 s (Win32_OptionalFeature) e fica para quando a página abrir.
 function Test-Requisitos {
-    try { [void](Get-EstadoRecurso); @{ Ok = $true; Motivo = '' } }
-    catch { @{ Ok = $false; Motivo = "não foi possível ler os recursos do Windows: $($_.Exception.Message)" } }
+    if (Test-Path -LiteralPath (Join-Path $env:SystemRoot 'System32\Dism.exe') -PathType Leaf) { return @{ Ok = $true; Motivo = '' } }
+    @{ Ok = $false; Motivo = 'DISM não encontrado: esta instalação do Windows não permite ligar ou desligar recursos.' }
 }
 
 # Nome do recurso -> 'ligado' | 'desligado'. Recursos que não existem nesta edição não aparecem. Só leitura, sem admin.

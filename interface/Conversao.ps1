@@ -3,9 +3,7 @@
 # Glifos da fonte Segoe Fluent Icons / Segoe MDL2 Assets.
 $script:IconesModulo = @{
     status       = [string][char]0xE9D9
-    analisar     = [string][char]0xEB05
     limpar       = [string][char]0xE74D
-    purgar       = [string][char]0xE8B7
     instaladores = [string][char]0xE896
     desinstalar  = [string][char]0xE738
     programas    = [string][char]0xE7B8

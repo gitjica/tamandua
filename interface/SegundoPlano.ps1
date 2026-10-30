@@ -2,6 +2,46 @@
 # chama Update-TmdTarefa, que entrega o resultado na thread da janela. Assim nada de WPF é tocado de outra thread.
 
 $script:Tarefas = [System.Collections.Generic.List[object]]::new()
+$script:Conjunto = $null
+$script:AberturaConjunto = $null
+$script:Aquecimento = $null
+
+# Runspaces reaproveitados entre tarefas: o núcleo e os módulos carregados numa tarefa continuam lá para a próxima,
+# em vez de cada página abrir um runspace novo e importar tudo de novo. Até 4 tarefas ao mesmo tempo.
+# -Nucleo: cada runspace já nasce com o núcleo importado, e os 2 primeiros são abertos em segundo plano
+# enquanto a janela aparece (a janela chama isso logo ao iniciar).
+function Initialize-TmdConjunto {
+    param([string]$Nucleo)
+    Close-TmdConjunto
+    $sessao = [initialsessionstate]::CreateDefault()
+    if ($Nucleo) { $sessao.ImportPSModule($Nucleo) }
+    $script:Conjunto = [runspacefactory]::CreateRunspacePool($sessao)
+    [void]$script:Conjunto.SetMaxRunspaces(4)
+    [void]$script:Conjunto.SetMinRunspaces(2)
+    $script:Conjunto.ThreadOptions = 'ReuseThread'
+    $script:AberturaConjunto = $script:Conjunto.BeginOpen($null, $null)
+    # Compila os tipos C# do núcleo enquanto a janela é desenhada (a primeira página, o Status, precisa deles).
+    if ($Nucleo) {
+        $aquecer = [powershell]::Create()
+        [void]$aquecer.AddScript({ param($n) Import-Module -Name $n -DisableNameChecking; Initialize-TmdTipos; Remove-Module Tamandua.Nucleo }.ToString()).AddArgument($Nucleo)
+        $script:Aquecimento = @{ PS = $aquecer; Async = $aquecer.BeginInvoke() }
+    }
+}
+
+function Get-TmdConjunto {
+    $estado = if ($script:Conjunto) { $script:Conjunto.RunspacePoolStateInfo.State } else { 'Closed' }
+    if ($estado -notin 'Opened', 'Opening', 'BeforeOpen') { Initialize-TmdConjunto }
+    # Ainda abrindo: a primeira tarefa espera terminar (normalmente já terminou quando a janela aparece).
+    if ($script:Conjunto.RunspacePoolStateInfo.State -ne 'Opened') { $script:Conjunto.EndOpen($script:AberturaConjunto) }
+    $script:Conjunto
+}
+
+function Close-TmdConjunto {
+    if ($script:Aquecimento -and $script:Aquecimento.Async.IsCompleted) { $script:Aquecimento.PS.Dispose(); $script:Aquecimento = $null }
+    if (-not $script:Conjunto) { return }
+    [void]$script:Conjunto.BeginClose($null, $null)
+    $script:Conjunto = $null
+}
 
 function Start-TmdTarefa {
     param(
@@ -16,6 +56,7 @@ function Start-TmdTarefa {
     )
 
     $ps = [powershell]::Create()
+    $ps.RunspacePool = Get-TmdConjunto
     # Passa o texto, não o scriptblock: um scriptblock fica preso ao runspace onde foi criado.
     [void]$ps.AddScript($Script.ToString())
     foreach ($k in $Parametros.Keys) { [void]$ps.AddParameter($k, $Parametros[$k]) }
@@ -84,11 +125,12 @@ function Stop-TmdTodasTarefas {
     foreach ($t in @($script:Tarefas)) { Stop-TmdTarefa -Tarefa $t }
 }
 
-# Scripts que rodam nos runspaces de tarefa. Importam o núcleo do zero e devolvem só dados (sem scriptblocks).
+# Scripts que rodam nos runspaces de tarefa. Importam o núcleo só na primeira vez em cada runspace do conjunto
+# (depois ele já está lá) e devolvem só dados (sem scriptblocks).
 $script:ScriptCarregarModulos = {
     param([string]$Nucleo, [string]$Raiz)
     $ErrorActionPreference = 'Stop'
-    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
     foreach ($m in Get-TmdModulo -Raiz $Raiz) {
         [pscustomobject]@{
             Nome      = $m.Nome
@@ -105,17 +147,30 @@ $script:ScriptCarregarModulos = {
     }
 }
 
+# Lê a primeira página do catálogo ao mesmo tempo que a lista de módulos carrega (ao abrir o programa).
+# Confere os requisitos só desse módulo; se ele não estiver ok, devolve sem alvos e a janela segue o caminho normal.
+$script:ScriptPrimeiraPagina = {
+    param([string]$Nucleo, [string]$Raiz)
+    $ErrorActionPreference = 'Stop'
+    if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
+    $primeiro = @((Get-TmdCatalogo -Raiz $Raiz).Modulos)[0]
+    if (-not $primeiro) { return }
+    $m = Get-TmdModulo -Raiz $Raiz -Nome $primeiro['Nome']
+    $ok = $m -and $m.Estado -eq 'ok'
+    [pscustomobject]@{ Nome = [string]$primeiro['Nome']; Ok = [bool]$ok; Alvos = @(if ($ok) { & $m.Modulo.ExportedFunctions['Find-Alvos'] }) }
+}
+
 $script:ScriptHistorico = {
     param([string]$Nucleo)
     $ErrorActionPreference = 'Stop'
-    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
     Get-TmdHistorico -Ultimos 300
 }
 
 $script:ScriptDesfazer = {
     param([string]$Nucleo, [string]$Raiz, [string[]]$Ids, [bool]$Simular)
     $ErrorActionPreference = 'Stop'
-    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
     if ($Simular) { foreach ($id in $Ids) { Undo-TmdAjuste -Id $id -Simular -Modulo 'historico' } }
     # Ajuste que mexeu em HKLM, serviço ou tarefa precisa de admin para voltar: o núcleo pede o UAC uma vez.
     else { Undo-TmdAjusteComAdmin -Ids $Ids -Raiz $Raiz }
@@ -124,7 +179,7 @@ $script:ScriptDesfazer = {
 $script:ScriptExecutarAcao = {
     param([string]$Nucleo, [string]$Raiz, [string]$Nome, [object[]]$Alvos, [bool]$Simular)
     $ErrorActionPreference = 'Stop'
-    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
+    if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
     $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome
     if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
     # Pelo núcleo: módulo com RequerAdmin roda elevado (um pedido do UAC por lote).
@@ -134,10 +189,11 @@ $script:ScriptExecutarAcao = {
 $script:ScriptBuscarAlvos = {
     param([string]$Nucleo, [string]$Raiz, [string]$Nome, [string]$Caminho)
     $ErrorActionPreference = 'Stop'
-    Import-Module -Name $Nucleo -Force -DisableNameChecking -Global
-    $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome
+    if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
+    # A janela já conferiu os requisitos ao carregar a lista de módulos.
+    $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome -SemRequisitos
     if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
     $buscar = $m.Modulo.ExportedFunctions['Find-Alvos']
-    # Módulos que navegam (ex.: analisar) recebem a pasta aberta.
+    # Módulos que navegam (Find-Alvos com -Caminho) recebem a pasta aberta.
     if ($Caminho -and $buscar.Parameters.ContainsKey('Caminho')) { & $buscar -Caminho $Caminho } else { & $buscar }
 }

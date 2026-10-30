@@ -34,7 +34,7 @@ function Invoke-TmdCli {
         }
     }
     $comandosDoNucleo = 'modulos', 'menu', 'historico', 'protegidos', 'ajuda', 'versao'
-    # Argumento solto só vale para módulo que aceita -Caminho (ex.: tamandua analisar C:\Users).
+    # Argumento solto só vale para módulo que aceita -Caminho (tamandua <módulo> <pasta>).
     if ($Argumentos -and ([string]::IsNullOrWhiteSpace($Comando) -or $Comando -in $comandosDoNucleo)) {
         Write-Host "Opções ainda não suportadas: $($Argumentos -join ' ')" -ForegroundColor Yellow
         return $script:CodigoSaida.Erro

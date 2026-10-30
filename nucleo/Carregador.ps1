@@ -45,7 +45,9 @@ function Get-TmdModulo {
     param(
         [string]$Raiz = $script:RaizPadrao,
         [string]$Nome,
-        [int]$TimeoutRequisitosSeg = 5
+        [int]$TimeoutRequisitosSeg = 5,
+        # Pula o Test-Requisitos: quem chama já sabe que o módulo está ok (a interface, ao abrir uma página).
+        [switch]$SemRequisitos
     )
 
     $catalogo = Get-TmdCatalogo -Raiz $Raiz
@@ -70,7 +72,9 @@ function Get-TmdModulo {
 
     $selecionados = @($infos | Where-Object { -not $Nome -or $_.Nome -eq $Nome })
     foreach ($info in $selecionados) { Resolve-EstadoModulo -Info $info }
-    Test-RequisitosModulo -Infos @($selecionados | Where-Object { $_.Estado -eq 'ok' }) -TimeoutSeg $TimeoutRequisitosSeg
+    if (-not $SemRequisitos) {
+        Test-RequisitosModulo -Infos @($selecionados | Where-Object { $_.Estado -eq 'ok' }) -TimeoutSeg $TimeoutRequisitosSeg
+    }
     $selecionados
 }
 
@@ -126,18 +130,41 @@ function Resolve-EstadoModulo {
     if (-not (Test-Path -LiteralPath $arquivoCodigo -PathType Leaf)) {
         return Set-EstadoModulo $Info 'faltando' "$relativo\$($manifesto['Arquivo']) não encontrado"
     }
+    # Reaproveita o módulo já importado neste runspace se nenhum arquivo da pasta mudou desde então
+    # (a interface abre a mesma página várias vezes no mesmo runspace).
+    $assinatura = Get-AssinaturaModulo -Pasta $Info.Caminho
+    $guardado = $script:ModulosImportados[$arquivoCodigo]
+    if ($guardado -and $guardado.Assinatura -eq $assinatura) {
+        $Info.Modulo = $guardado.Modulo
+        return
+    }
     try {
         $modulo = Import-Module -Name $arquivoCodigo -Force -PassThru -DisableNameChecking -ErrorAction Stop
     }
     catch {
+        [void]$script:ModulosImportados.Remove($arquivoCodigo)
         return Set-EstadoModulo $Info 'quebrado' "erro ao carregar: $($_.Exception.Message)"
     }
     $faltando = @(Get-FuncaoFaltando -Modulo $modulo -Escreve $manifesto['Escreve'])
     if ($faltando.Count -gt 0) {
         Remove-Module -ModuleInfo $modulo -Force
+        [void]$script:ModulosImportados.Remove($arquivoCodigo)
         return Set-EstadoModulo $Info 'quebrado' "falta a função $($faltando -join ', ')"
     }
+    $script:ModulosImportados[$arquivoCodigo] = @{ Modulo = $modulo; Assinatura = $assinatura }
     $Info.Modulo = $modulo
+}
+
+$script:ModulosImportados = @{}
+
+# Nome, tamanho e data de cada arquivo da pasta do módulo (código, manifesto e dados .json).
+function Get-AssinaturaModulo {
+    param([Parameter(Mandatory)][string]$Pasta)
+    $partes = foreach ($f in [IO.Directory]::GetFiles($Pasta)) {
+        $i = [IO.FileInfo]::new($f)
+        "$($i.Name)|$($i.Length)|$($i.LastWriteTimeUtc.Ticks)"
+    }
+    ($partes | Sort-Object) -join ';'
 }
 
 function Get-ErroManifesto {

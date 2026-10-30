@@ -86,6 +86,27 @@ Describe 'Pastas protegidas do sistema' {
         (Test-TmdCaminhoSeguro -Caminho "$windows\SoftwareDistribution\Download\abc" -Raizes $windows -Protecao @()).Ok | Should -BeTrue
     }
 
+    It 'aceita as pastas de descarte do limpar (logs, minidump, Otimização de Entrega, Steam); o resto do Windows continua protegido' {
+        $windows = [Environment]::GetFolderPath('Windows')
+        $do = "$windows\ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache"
+        (Test-TmdCaminhoSeguro -Caminho "$windows\Logs\CBS\x.log" -Raizes "$windows\Logs" -Protecao @()).Ok | Should -BeTrue
+        (Test-TmdCaminhoSeguro -Caminho "$windows\Minidump\x.dmp" -Raizes "$windows\Minidump" -Protecao @()).Ok | Should -BeTrue
+        (Test-TmdCaminhoSeguro -Caminho "$do\abc" -Raizes $do -Protecao @()).Ok | Should -BeTrue
+        $x86 = [Environment]::GetFolderPath('ProgramFilesX86')
+        (Test-TmdCaminhoSeguro -Caminho "$x86\Steam\logs\a.txt" -Raizes "$x86\Steam\logs" -Protecao @()).Ok | Should -BeTrue
+        (Test-TmdCaminhoSeguro -Caminho "$x86\Steam\steamapps\common\Jogo" -Raizes "$x86\Steam" -Protecao @()).Ok | Should -BeFalse
+        (Test-TmdCaminhoSeguro -Caminho "$windows\ServiceProfiles\NetworkService\NTUSER.DAT.LOG1" -Raizes $windows -Protecao @()).Ok | Should -BeFalse
+        (Test-TmdCaminhoSeguro -Caminho "$windows\System32\drivers\x.sys" -Raizes $windows -Protecao @()).Ok | Should -BeFalse
+    }
+
+    It 'recusa arquivos do sistema pelo nome em qualquer lugar (<Nome>)' -ForEach @(
+        @{ Nome = 'pagefile.sys' }, @{ Nome = 'hiberfil.sys' }, @{ Nome = 'swapfile.sys' }, @{ Nome = 'NTUSER.DAT' }, @{ Nome = 'ntuser.dat.LOG1' }, @{ Nome = 'UsrClass.dat' }, @{ Nome = 'BCD' }
+    ) {
+        $r = Test-TmdCaminhoSeguro -Caminho "$TestDrive\sandbox\$Nome" -Raizes "$TestDrive\sandbox" -Protecao @()
+        $r.Ok | Should -BeFalse
+        $r.Motivo | Should -Match 'nunca é apagado'
+    }
+
     It 'aceita conteúdo de Documentos e Downloads (projetos e instaladores)' {
         $docs = [Environment]::GetFolderPath('MyDocuments')
         $down = Join-Path ([Environment]::GetFolderPath('UserProfile')) 'Downloads'

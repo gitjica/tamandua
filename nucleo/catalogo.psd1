@@ -3,9 +3,7 @@
     # A ordem aqui é a ordem em que aparecem na CLI e na interface.
     Modulos = @(
         @{ Nome = 'status';       Titulo = 'Status';        Grupo = 'Sistema';    Descricao = 'Painel do sistema (CPU, memória, disco, rede)' }
-        @{ Nome = 'analisar';     Titulo = 'Analisar';      Grupo = 'Limpeza';    Descricao = 'Mostra o que ocupa espaço no disco' }
-        @{ Nome = 'limpar';       Titulo = 'Limpar';        Grupo = 'Limpeza';    Descricao = 'Remove caches, temporários e logs' }
-        @{ Nome = 'purgar';       Titulo = 'Purgar';        Grupo = 'Limpeza';    Descricao = 'Remove artefatos de projeto (node_modules, target...)' }
+        @{ Nome = 'limpar';       Titulo = 'Limpar';        Grupo = 'Limpeza';    Descricao = 'Temporários, caches de navegadores, apps e jogos, logs e Lixeira' }
         @{ Nome = 'instaladores'; Titulo = 'Instaladores';  Grupo = 'Limpeza';    Descricao = 'Encontra instaladores esquecidos (.exe, .msi, .iso)' }
         @{ Nome = 'desinstalar';  Titulo = 'Desinstalar';   Grupo = 'Programas';  Descricao = 'Desinstala programas e restos' }
         @{ Nome = 'programas';    Titulo = 'Programas';     Grupo = 'Programas';  Descricao = 'Instala e atualiza programas via winget' }

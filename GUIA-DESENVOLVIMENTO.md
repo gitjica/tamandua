@@ -37,7 +37,7 @@ Se algo aqui estiver errado ou faltando, **atualize o guia antes** de escrever o
 
 ### Do Mole
 
-Pegamos: limpeza por categorias, purgar artefatos de projeto, instaladores esquecidos, desinstalar com restos,
+Pegamos: limpeza por categorias, instaladores esquecidos, desinstalar com restos,
 `--dry-run`, lista de proteção, log de operações (`history`), guardas de segurança (nunca seguir link,
 desmarcar o que é recente, reconfirmar antes de apagar).
 
@@ -97,6 +97,12 @@ Melhoramos (problemas conhecidos do WinUtil que o Tamanduá **não** repete):
 - `$x = if (...) { @(...) } else { ... }` desmonta o array (um item vira escalar, nenhum vira `$null`): use `$x = @(if ...)`.
 - `@($param).Count` com um `[string[]]` nulo lança em StrictMode no 5.1: `$lista = @(); if ($param) { $lista = @($param) }`.
 - Loops pesados de arquivo vão para C# (`Add-Type`), como `Tamandua.Medidor` em `nucleo/Remocao.ps1`: mede ~95 mil arquivos em ~3 s.
+  Os tipos C# do núcleo são compilados **só quando alguém precisa** (`Initialize-TmdTipos`, ~0,3 s, uma vez por processo,
+  com trava para dois runspaces não compilarem juntos): importar o núcleo não compila nada.
+- Nada de `Win32_Processor` para uso de CPU (leva ~1 s): `Start-TmdMedidaCpu` / `Get-TmdUsoCpu -Desde` mede pelo
+  `GetSystemTimes` no intervalo em que o resto é lido. Em CIM, peça só os campos usados (`-Property`).
+- Medir antes e depois de mexer em desempenho: `.\ferramentas\medir-tempos.ps1 -Vezes 3` (abre a janela de verdade,
+  passa por todos os módulos e devolve a mediana em ms; `-Esperar` simula quem espera a leitura antecipada).
 - Testes: nada de `<...>` no nome de `It`/`Describe` fora de `-ForEach` — o Pester tenta expandir como variável.
 - Testes: `-Skip:(...)` é avaliado na descoberta; o que ele usa vem de `BeforeDiscovery`, não de `BeforeAll`.
 - `$lista.Propriedade` numa lista vazia lança em StrictMode: use `$lista | ForEach-Object { $_.Propriedade }`.
@@ -144,15 +150,14 @@ Tamandua/
 │  ├─ Conversao.ps1             # funções puras: dados do núcleo -> linhas da tela
 │  └─ SegundoPlano.ps1          # tarefas em runspace + relógio que entrega na thread da janela
 ├─ ferramentas/
-│  └─ capturar-interface.ps1    # salva PNG da janela (revisão visual)
+│  ├─ capturar-interface.ps1    # salva PNG da janela (revisão visual)
+│  └─ medir-tempos.ps1          # tempo de abrir o programa e cada módulo (mediana de N rodadas)
 ├─ modulos/
 │  ├─ status/                   # cada módulo é uma pasta
 │  │  ├─ modulo.psd1            # manifesto
 │  │  ├─ status.psm1            # implementação
 │  │  └─ pagina.xaml            # OPCIONAL: página na interface; sem ela, usa página genérica
-│  ├─ analisar/
 │  ├─ limpar/
-│  ├─ purgar/
 │  ├─ instaladores/
 │  ├─ desinstalar/
 │  ├─ otimizar/
@@ -193,9 +198,7 @@ programa sabe dizer que algo está *faltando* (não dá pra avisar que falta alg
 @{
     Modulos = @(
         @{ Nome = 'status';       Grupo = 'Sistema';    Descricao = 'Painel do sistema (CPU, memória, disco, rede)' }
-        @{ Nome = 'analisar';     Grupo = 'Limpeza';    Descricao = 'Mostra o que ocupa espaço no disco' }
-        @{ Nome = 'limpar';       Grupo = 'Limpeza';    Descricao = 'Remove caches, temporários e logs' }
-        @{ Nome = 'purgar';       Grupo = 'Limpeza';    Descricao = 'Remove artefatos de projeto (node_modules, target...)' }
+        @{ Nome = 'limpar';       Grupo = 'Limpeza';    Descricao = 'Temporários, caches de navegadores, apps e jogos, logs e Lixeira' }
         @{ Nome = 'instaladores'; Grupo = 'Limpeza';    Descricao = 'Encontra instaladores esquecidos (.exe, .msi, .iso)' }
         @{ Nome = 'desinstalar';  Grupo = 'Programas';  Descricao = 'Desinstala programas e restos' }
         @{ Nome = 'programas';    Grupo = 'Programas';  Descricao = 'Instala e atualiza programas via winget' }
@@ -218,7 +221,7 @@ Uma pasta em `modulos/` que **não** está no catálogo também é carregada (m�
     Versao         = '0.1.0'
     Descricao      = 'Remove caches, temporários e logs'
     Arquivo        = 'limpar.psm1'
-    Escreve        = $true      # $false = módulo só leitura (status, analisar)
+    Escreve        = $true      # $false = módulo só leitura (status)
     RequerAdmin    = $false     # $true = o módulo inteiro precisa de admin
     ContratoMinimo = 1          # versão do contrato que ele implementa
     Icone          = 'vassoura' # nome de ícone do tema da interface
@@ -256,7 +259,7 @@ Regras:
 - Alvo pode ter `Selo` (texto do selo, ex.: "instalado"); a cor continua vindo do `Estado`.
 - Módulo que registra operação sem apagar nada (ex.: programas) usa `Write-TmdOperacao`; arquivo temporário próprio usa
   `New-TmdArquivoTemporario` / `Remove-TmdArquivoTemporario` (só `tamandua-*` direto no TEMP).
-- **Módulos que navegam** (ex.: `analisar`): `Find-Alvos -Caminho <pasta>`; sem `-Caminho`, mostram um ponto de partida.
+- **Módulos que navegam** (nenhum hoje; o `analisar` usava): `Find-Alvos -Caminho <pasta>`; sem `-Caminho`, mostram um ponto de partida.
   Alvos com `Navegavel = $true` e `Caminho` abrem com duplo clique/Enter na interface (o subtítulo mostra a pasta,
   Atualizar/F5 continuam nela) e com `tamandua <módulo> <pasta>` na CLI. O núcleo só passa `-Caminho` se a função tiver esse parâmetro.
 - Nenhum módulo usa `Write-Host` nem toca em WPF. Retorna objetos; quem desenha é a CLI (`Saida.ps1`) ou a interface.
@@ -291,7 +294,7 @@ Regras:
 
 Propriedades **obrigatórias em todo alvo** (verificadas pelo teste de contrato): `Id` (único no módulo), `Nome`,
 `Categoria`, `Estado`, `Detalhe`. As demais são obrigatórias só para módulos que escrevem.
-Módulos de leitura (`status`, `analisar`) usam também:
+Módulos de leitura (`status`) usam também:
 
 - `Nivel` — `Normal` | `Atencao` | `Critico`: cor na CLI e na interface.
 - `Valor` — número de 0 a 100 quando faz sentido (uso de CPU, % de disco), para barras na interface.
@@ -344,8 +347,11 @@ Antes de qualquer remoção, o caminho precisa passar por **todas** as checagens
 4. **Não é** um caminho protegido nem pai de um. Dois tipos (`nucleo/Seguranca.ps1`):
    - **Pontos protegidos** — a pasta e seus pais são intocáveis, o conteúdo pode ser limpo: raiz de unidade, `C:\Users`,
      perfil, `AppData\Roaming`, `AppData\Local`, `ProgramData`, `Documentos`, `Área de Trabalho`, `Downloads`, `Temp`, menu Iniciar.
-   - **Árvores protegidas** — nada dentro pode ser removido: `Windows` (exceto `Windows\Temp` e `SoftwareDistribution\Download`),
-     `Arquivos de Programas` (os dois), `Imagens`, `Músicas`, `Vídeos`, `OneDrive` e a própria pasta do Tamanduá.
+   - **Árvores protegidas** — nada dentro pode ser removido: `Windows` (exceto `Temp`, `SoftwareDistribution\Download`, `Logs`,
+     `Minidump` e o cache da Otimização de Entrega), `Arquivos de Programas` (os dois; exceto `Steam\logs`, `Steam\dumps` e
+     `Steam\appcache\httpcache`), `Imagens`, `Músicas`, `Vídeos`, `OneDrive` e a própria pasta do Tamanduá.
+   - **Nomes protegidos** — em qualquer lugar, inclusive dentro de uma pasta sendo apagada: `pagefile.sys`, `hiberfil.sys`,
+     `swapfile.sys`, `ntuser.dat*`, `usrclass.dat*`, `bootmgr`, `BCD` e afins (ideia do swept).
 5. Não bate com nenhum padrão da lista de proteção: `config/protegidos.padrao.txt` (dados de navegador que não são cache,
    chaves, carteiras, `.git`) + `%APPDATA%\Tamandua\protegidos.txt` (`tamandua protegidos` abre). Se a lista do usuário
    existe mas não pode ser lida, nada é removido.
@@ -503,9 +509,7 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
 | Módulo | O que faz no Windows | Escreve | Admin | Origem |
 |---|---|---|---|---|
 | `status` | CPU, memória, disco, rede, bateria, top processos, nota de saúde (CIM) | não | não | Mole |
-| `analisar` | Maiores pastas/arquivos a partir de um caminho, navegável | não* | não | Mole |
-| `limpar` | `%TEMP%`, cache de navegadores (só cache, nunca perfil), `CrashDumps`, WER, cache de miniaturas, caches de dev (npm, pip, NuGet), Lixeira, Limpeza de Disco (`cleanmgr /sagerun`) | sim | parcial | Mole + WinUtil |
-| `purgar` | `node_modules`, `target`, `bin`/`obj`, `dist`, `build`, `__pycache__`, `.venv` | sim | não | Mole |
+| `limpar` | Temporários (usuário e Windows), despejos e relatórios de erro, logs antigos do Windows, downloads do Windows Update, Otimização de Entrega, shaders, cache de navegadores (Chrome, Edge, Brave, Firefox; só cache), Discord, Spotify, Steam, Epic, Battle.net, Ubisoft, Lixeira | sim | parcial | Mole + swept |
 | `instaladores` | `.exe .msi .msix .iso .zip` em Downloads → Lixeira | sim | não | Mole |
 | `desinstalar` | Lista programas (Uninstall HKLM/HKCU/WOW6432 + Appx), roda o desinstalador, oferece restos → Lixeira | sim | depende | Mole |
 | `programas` | Catálogo por categoria (winget), instalar em lote, ver o que já está instalado, atualizar todos (`winget upgrade`) | sim | depende | WinUtil |
@@ -516,19 +520,25 @@ clássico do Windows 11, que depende da existência de uma chave) e remoção de
 | `reparos` | `sfc /scannow`, `DISM /RestoreHealth`, reset de rede (winsock/IP), reset do Windows Update, chkdsk agendado | sim | sim | WinUtil |
 | `historico` (núcleo) | Log de operações, com desfazer por item | — | — | Mole |
 
-\* `analisar` pode enviar para a Lixeira no futuro, sempre via núcleo.
+`analisar` e `purgar` existiram e foram retirados (lentos e pouco usados; para ver o que ocupa o disco, o WizTree faz melhor).
+O suporte do núcleo a módulos que navegam (`Find-Alvos -Caminho`) continua, testado com um módulo falso.
 
 ### Proteções específicas
 
-- **purgar:** só com marcador de projeto ao lado (`package.json`, `Cargo.toml`, `*.csproj`, `pyproject.toml`...). Pula se houver arquivos versionados no Git. Modificado nos últimos 7 dias → **desmarcado**. `bin`/`obj` só com `*.csproj`/`*.fsproj` irmão.
-  Implementado: regras por nome de pasta em `modulos/purgar/purgar.psm1` (com o comando para recriar), `.venv`/`venv` exigem
-  `pyvenv.cfg` dentro, artefato com outro repositório `.git` dentro (até 2 níveis) fica de fora, versionado vira um aviso
-  ("N pastas deixadas de fora"). Sem git instalado: risco médio e desmarcado. Busca em Documentos, Área de Trabalho e
-  `~\source|Projects|Projetos|dev|code|repos|git|GitHub|workspace|src` (ou na pasta de `tamandua purgar <pasta>`), até 6 níveis,
-  sem entrar em links, `.git`, `AppData` nem pastas do Windows. `Invoke-Acao` reconfere tudo pelo caminho do `Id`.
 - **Lista de proteção vale dentro das pastas:** ao apagar uma pasta, o que estiver dentro e bater com a lista (ex.: uma `chave.pem`
   num `target\deploy`) fica, e o resultado vira `Parcial` com "N protegido(s) pela lista de proteção".
-- **limpar (navegadores):** navegador aberto → pula com motivo. Nunca toca em `Cookies`, `Login Data`, `History`, `Bookmarks`, `Local Storage`.
+- **limpar:** categorias são dados em `modulos/limpar/limpar.psm1` (`$script:Categorias`): pastas, idade mínima, `Filtro` de
+  nomes (logs), `Processos` que precisam estar fechados, `RequerAdmin`, `SoSeExistir` (programa não instalado não aparece).
+  Navegadores: só as pastas de cache de cada perfil (`Cache`, `Code Cache`, `GPUCache`, `Media Cache`; Firefox `cache2`,
+  `startupCache`, `thumbnails`) — nunca `Cookies`, `Login Data`, `History`, `Bookmarks`, `Local Storage`. Programa aberto →
+  item desmarcado e travado ("feche o Chrome"), e `Invoke-Acao` reconfere na hora. Spotify: só `Data` (streaming), nunca
+  `Storage` (músicas offline). Steam: `logs`, `dumps`, `appcache\httpcache`; jogos nunca. Prefetch, miniaturas e cache do
+  Office (swept tem) ficaram de fora: limpar o Prefetch deixa o Windows mais lento, miniaturas estão sempre presas pelo
+  Explorador (o `otimizar` cuida dos ícones) e o cache do Office pode ter edições ainda não enviadas ao OneDrive.
+  Categorias do sistema pedem admin num único UAC; sem admin, o Windows esconde algumas pastas e o tamanho só aparece ao limpar.
+  Lixeira: `Get-TmdLixeira`/`Clear-TmdLixeira` no núcleo (SHQueryRecycleBin/SHEmptyRecycleBin), nunca vem marcada.
+  Testes: `TAMANDUA_LIMPAR_RAIZ` (só dentro da pasta temporária real) troca Windows, ProgramData, AppData e Steam por
+  subpastas dela e tira a exigência de admin — nenhum teste do limpar toca no sistema nem abre o UAC.
 - **instaladores:** reconfirma tamanho + data imediatamente antes de remover; se mudou, pula. O caminho sai do `Id` e a
   extensão é conferida de novo (alvo forjado com `.pdf` ou `..\` é ignorado). Só vem marcado `.exe/.msi/.msix/.appx/.iso`
   baixado há 7 dias ou mais; `.zip/.7z/.rar/.img` são risco médio. `.exe` numa subpasta com outros arquivos (ex.: `.dll`)
@@ -587,10 +597,10 @@ Base do WinUtil (abas, busca, seleção em lote), reorganizada:
 │ SISTEMA      │ Ajustes › Privacidade      Preset [▼] │ DETALHES      │
 │  Status      │ ───────────────────────────────────── │               │
 │ LIMPEZA      │ ☑ Desativar telemetria      ● Aplicado│ Desativar     │
-│  Analisar    │ ☐ Histórico de atividades   ○ Não     │ telemetria    │
-│  Limpar      │ ☐ ID de anúncios            ◐ Parcial │ Risco: Baixo  │
-│  Purgar      │ ☐ Bing no Iniciar        🛡 ○ Não      │ 🛡 Requer admin│
-│  Instaladores│                                       │               │
+│  Limpar      │ ☐ Histórico de atividades   ○ Não     │ telemetria    │
+│  Instaladores│ ☐ ID de anúncios            ◐ Parcial │ Risco: Baixo  │
+│              │ ☐ Bing no Iniciar        🛡 ○ Não      │ 🛡 Requer admin│
+│              │                                       │               │
 │ PROGRAMAS    │                                       │ Vai alterar:  │
 │  Programas   │                                       │ HKLM\...\Data │
 │  Desinstalar │                                       │ Collection    │
@@ -629,8 +639,18 @@ Base do WinUtil (abas, busca, seleção em lote), reorganizada:
 - Estado da janela num objeto pequeno e explícito (`$Estado.Selecao`, `$Estado.Pagina`), não um `$sync` global com tudo.
 - Toda chamada ao núcleo passa por `Segundo-Plano.ps1` (runspace); atualizações de tela voltam via `Dispatcher.Invoke`.
 - Lógica de tela testável fora da janela: funções que transformam `Alvo` em linhas da lista, montam o resumo de confirmação etc. são puras e têm teste.
-- Tarefas em segundo plano recebem o **texto** do script e importam o núcleo do zero no próprio runspace;
-  devolvem só dados. Um `DispatcherTimer` (100 ms) entrega o resultado na thread da janela — nada de WPF é tocado de outra thread.
+- Tarefas em segundo plano recebem o **texto** do script e devolvem só dados. Rodam num conjunto de runspaces reaproveitados
+  (`Initialize-TmdConjunto`: 2 a 4, abertos em segundo plano enquanto a janela aparece, já com o núcleo importado); o núcleo só
+  é importado de novo se o caminho for outro. Um `DispatcherTimer` (100 ms) entrega o resultado na thread da janela — nada de
+  WPF é tocado de outra thread.
+- Desempenho da janela (medido com `ferramentas/medir-tempos.ps1`):
+  - a primeira página do catálogo é lida **junto** com a lista de módulos (`ScriptPrimeiraPagina`), não depois;
+  - depois que ela aparece, as outras páginas são lidas em segundo plano, uma por vez (`Start-TmdAntecipacao`); clicar numa
+    página que está sendo lida espera essa mesma leitura;
+  - páginas lidas ficam guardadas por 10 min (`$Estado.Cache`); Atualizar/F5 e o fim de uma ação sempre leem de novo, e
+    qualquer ação (não simulada) apaga o cache inteiro. Status e Histórico nunca são guardados;
+  - abrir uma página não roda o `Test-Requisitos` de novo (`Get-TmdModulo -SemRequisitos`: a lista já conferiu), e o
+    carregador reaproveita o módulo já importado enquanto nenhum arquivo da pasta dele mudar.
 - Todo evento passa por `Invoke-TmdProtegido`: erro vira texto na barra de status, a janela nunca cai.
 - `Start-TmdInterface -AoCarregar {...} -FecharAposSeg N` existe para testes e capturas: os testes abrem a janela de verdade
   e ela fecha sozinha mesmo se algo travar. O relógio de `-FecharAposSeg` é desligado quando a janela fecha (antes, ele
@@ -695,13 +715,13 @@ Cada etapa só começa com a anterior com testes verdes.
 5. **`limpar`** — primeiro módulo que escreve. Começa só com `%TEMP%` do usuário e `CrashDumps`; cada categoria nova = alvo novo + testes novos.
 6. **Motor de ajustes + Estado (snapshots) + Histórico** — com testes na sandbox de registro.
 7. **`ajustes`** — começando com ~10 itens de risco baixo em `HKCU` (sem admin), depois os de `HKLM`.
-8. **`analisar`**, 9. **`programas`**, 10. **`purgar`**, 11. **`instaladores`**, 12. **`desinstalar`**, 13. **`recursos`**, 14. **`otimizar`**, 15. **`reparos`**, 16. **`atualizacoes`**.
+8. **`analisar`** (retirado depois), 9. **`programas`**, 10. **`purgar`** (retirado depois), 11. **`instaladores`**, 12. **`desinstalar`**, 13. **`recursos`**, 14. **`otimizar`**, 15. **`reparos`**, 16. **`atualizacoes`**.
 
 Definição de pronto do MVP: etapas 1–7 entregues, interface e CLI funcionando, `-Simular` em tudo, log de operações, histórico com desfazer.
 
-**Situação:** MVP entregue e todas as etapas 8 a 16 concluídas — os 12 módulos do catálogo existem e estão disponíveis.
-Próximos passos naturais (fora do catálogo atual): barra de progresso para tarefas longas, abrir pasta/arquivo no Explorador
-a partir do `analisar`, mais ajustes (incluindo criar/apagar chaves inteiras no motor), atualização do próprio Tamanduá.
+**Situação:** MVP entregue; os 10 módulos do catálogo existem e estão disponíveis, com barra de progresso nas tarefas longas.
+Próximos passos naturais: mais ajustes (incluindo criar/apagar chaves inteiras no motor), atualização do próprio Tamanduá,
+limpeza agendada (o swept tem).
 
 ---
 
@@ -801,9 +821,7 @@ tamandua                       # abre a interface (ou menu de texto, se a interf
 tamandua menu                  # força o menu de texto
 tamandua modulos               # estado de cada módulo
 tamandua status
-tamandua analisar [caminho]
-tamandua limpar [-Simular] [-Sim]
-tamandua purgar [caminho] [-Simular] [-Sim]
+tamandua limpar [-Simular] [-Sim] [-Itens chrome,lixeira]
 tamandua instaladores [-Simular] [-Sim]
 tamandua desinstalar [-Lista]
 tamandua programas [-Lista] [-Instalar id,id] [-Atualizar]
@@ -823,5 +841,5 @@ Códigos de saída: `0` ok · `1` erro · `2` módulo não disponível · `3` ca
 
 ## 15. Fora do escopo do MVP
 
-MicroWin/criação de ISO, atualização automática, instalador, agendamento, TUI navegável no `analisar`,
+MicroWin/criação de ISO, atualização automática, instalador, agendamento, análise de disco (use o WizTree),
 integração com menu de contexto do Explorer, Chocolatey. Tudo isso pode virar módulo depois.

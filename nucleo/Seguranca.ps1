@@ -33,14 +33,29 @@ function Get-TmdArvoreProtegida {
         $env:OneDrive, $env:OneDriveConsumer, $env:OneDriveCommercial
         $script:RaizPadrao
     )
+    # Só pastas de descarte conhecidas, cada uma usada por uma categoria do limpar.
     $excecoes = @(
         (Join-Path $windows 'Temp')
         (Join-Path $windows 'SoftwareDistribution\Download')
+        (Join-Path $windows 'Logs')
+        (Join-Path $windows 'Minidump')
+        (Join-Path $windows 'ServiceProfiles\NetworkService\AppData\Local\Microsoft\Windows\DeliveryOptimization\Cache')
     )
+    $x86 = [Environment]::GetFolderPath('ProgramFilesX86')
+    if ($x86) { foreach ($s in 'logs', 'dumps', 'appcache\httpcache') { $excecoes += Join-Path $x86 "Steam\$s" } }
     [pscustomobject]@{
         Arvores  = @($arvores | Where-Object { $_ } | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Select-Object -Unique)
         Excecoes = @($excecoes | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') })
     }
+}
+
+# Arquivos do sistema que nunca são apagados, estejam onde estiverem.
+$script:NomesProtegidos = @('pagefile.sys', 'hiberfil.sys', 'swapfile.sys', 'bootmgr', 'bootnxt', 'ntldr', 'boot.ini', 'bcd', 'bcd.log', 'ntuser.dat', 'usrclass.dat')
+
+function Test-TmdNomeProtegido {
+    param([string]$Caminho)
+    $nome = [IO.Path]::GetFileName($Caminho).ToLowerInvariant()
+    $nome -in $script:NomesProtegidos -or $nome -like 'ntuser.dat*' -or $nome -like 'usrclass.dat*'
 }
 
 function Test-TmdDentroDe {
@@ -69,6 +84,7 @@ function Test-TmdCaminhoSeguro {
     $recusa = { param($m) [pscustomobject]@{ Ok = $false; Motivo = $m; Caminho = $completo } }
 
     if ($completo.Length -le 2) { return & $recusa 'raiz de unidade' }
+    if (Test-TmdNomeProtegido $completo) { return & $recusa 'arquivo do sistema que nunca é apagado' }
 
     # 1. Dentro de uma raiz permitida (e nunca a própria raiz).
     $raiz = $null

@@ -19,8 +19,17 @@ function Initialize-TmdTela {
         Confirmando   = $false
         AoCarregar    = $AoCarregar
         JaAvisouCarga = $false
+        # Páginas já lidas (nome -> Alvos e Quando) e a leitura antecipada em andamento. Ver Start-TmdAntecipacao.
+        Cache         = @{}
+        Geracao       = 0
+        Fila          = $null
+        Antecipando   = $null
+        Esperando     = $null
+        # Primeira página lida junto com a lista de módulos (ver Start-TmdCargaModulos).
+        Inicial       = $null
     }
     $c = $Tela.Controles
+    Initialize-TmdConjunto -Nucleo $script:Estado.Nucleo
 
     $admin = Test-TmdAdmin
     $c.IconeAdmin.ToolTip = if ($admin) { 'Rodando como administrador' } else { 'Rodando sem permissão de administrador' }
@@ -28,7 +37,7 @@ function Initialize-TmdTela {
     $c.ListaModulos.Add_SelectionChanged({ Invoke-TmdProtegido { Open-TmdPaginaSelecionada } })
     $c.ListaAlvos.Add_SelectionChanged({ Invoke-TmdProtegido { Show-TmdDetalhe } })
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
-    $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho $script:Estado.Caminho } })
+    $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho $script:Estado.Caminho -Forcar } })
     # Duplo clique (ou Enter) num item navegável abre a pasta dele na mesma página.
     $c.ListaAlvos.Add_MouseDoubleClick({ Invoke-TmdProtegido { Open-TmdItemSelecionado } })
     $c.ListaAlvos.Add_KeyDown({
@@ -73,7 +82,7 @@ function Initialize-TmdTela {
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'F5') {
-                Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho $script:Estado.Caminho }
+                Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Caminho $script:Estado.Caminho -Forcar }
                 $e.Handled = $true
             }
         })
@@ -85,7 +94,7 @@ function Initialize-TmdTela {
     $script:Relogio.Interval = [TimeSpan]::FromMilliseconds(100)
     $script:Relogio.Add_Tick({ Invoke-TmdProtegido { Update-TmdTarefa } })
     $script:Relogio.Start()
-    $Tela.Janela.Add_Closed({ $script:Relogio.Stop() })
+    $Tela.Janela.Add_Closed({ $script:Relogio.Stop(); Close-TmdConjunto })
 }
 
 # Erro num evento nunca derruba a janela: vira texto na barra de status.
@@ -121,6 +130,24 @@ function Start-TmdCargaModulos {
     Set-TmdStatus 'Carregando módulos…'
     Set-TmdOcupado $true
     Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo 'Carregando módulos' -Texto 'Verificando o que está disponível nesta máquina.'
+    # Ao mesmo tempo, já lê a primeira página: quando a lista chegar, ela abre sem esperar mais.
+    $script:Estado.Inicial = @{ Pronto = $false; Nome = $null; Alvos = $null; Erro = $null }
+    [void](Start-TmdTarefa -Script $script:ScriptPrimeiraPagina -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz } `
+            -AoTerminar {
+            param($saida, $erro)
+            $inicial = $script:Estado.Inicial
+            if (-not $inicial) { return }
+            $r = @($saida)[0]
+            $inicial.Pronto = $true
+            $inicial.Erro = $erro
+            if ($r -and $r.Ok) { $inicial.Nome = $r.Nome; $inicial.Alvos = @($r.Alvos) }
+            $espera = $script:Estado.Esperando
+            if ($espera -and $espera.Inicial) {
+                $script:Estado.Esperando = $null
+                Set-TmdOcupado $false
+                Open-TmdPagina -Nome $script:Estado.ModuloAtual -StatusDepois $espera.StatusDepois
+            }
+        })
     [void](Start-TmdTarefa -Script $script:ScriptCarregarModulos `
             -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz } `
             -AoTerminar {
@@ -175,9 +202,10 @@ function Open-TmdItemSelecionado {
 }
 
 # -StatusDepois: texto (e cor) para a barra de status quando a página terminar de carregar, no lugar do padrão.
-# -Caminho: pasta aberta, em módulos que navegam (analisar). Trocar de módulo volta ao início dele.
+# -Caminho: pasta aberta, em módulos que navegam (Find-Alvos com -Caminho). Trocar de módulo volta ao início dele.
+# -Forcar: lê de novo mesmo que a página esteja no cache (Atualizar, F5, depois de uma ação).
 function Open-TmdPagina {
-    param([string]$Nome, $StatusDepois, [string]$Caminho = '')
+    param([string]$Nome, $StatusDepois, [string]$Caminho = '', [switch]$Forcar)
     if (-not $Nome) { return }
 
     $modulo = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $Nome })[0]
@@ -209,44 +237,145 @@ function Open-TmdPagina {
     }
 
     $c.BotaoAtualizar.IsEnabled = $true
+    $especial = (Get-ValorPropriedade $modulo 'Especial') -eq $true
+    $guardavel = -not $Caminho -and (Test-TmdPaginaGuardavel -Modulo $modulo)
+    # A primeira página, lida enquanto a lista de módulos carregava: usa uma vez e descarta.
+    $inicial = $script:Estado.Inicial
+    # Ela é sempre a primeira do catálogo; abrir outra página antes disso descarta a leitura inicial.
+    if ($inicial -and -not $inicial.Pronto -and $Nome -ne @($script:Estado.Modulos)[0].Nome) { $script:Estado.Inicial = $inicial = $null }
+    if ($inicial -and -not $Forcar -and -not $Caminho) {
+        if (-not $inicial.Pronto) {
+            Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Carregando $($modulo.Titulo)" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
+            Set-TmdStatus 'Lendo…'
+            Set-TmdOcupado $true
+            $script:Estado.Esperando = @{ Nome = $Nome; Inicial = $true; StatusDepois = $StatusDepois }
+            return
+        }
+        $script:Estado.Inicial = $null
+        if ($inicial.Nome -eq $Nome -and -not $inicial.Erro) {
+            $agora = Get-Date
+            if ($guardavel) { $script:Estado.Cache[$Nome] = @{ Alvos = $inicial.Alvos; Quando = $agora } }
+            Show-TmdPaginaLida -Saida $inicial.Alvos -StatusDepois $StatusDepois -Quando $agora
+            Complete-TmdCargaInicial
+            Start-TmdAntecipacao
+            return
+        }
+    }
+    if ($guardavel -and -not $Forcar) {
+        $guardado = $script:Estado.Cache[$Nome]
+        if ($guardado -and ((Get-Date) - $guardado.Quando) -lt $script:ValidadeCache) {
+            Show-TmdPaginaLida -Saida $guardado.Alvos -StatusDepois $StatusDepois -Quando $guardado.Quando
+            Complete-TmdCargaInicial
+            return
+        }
+    }
     Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Carregando $($modulo.Titulo)" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
     Set-TmdStatus 'Lendo…'
     Set-TmdOcupado $true
-    $especial = (Get-ValorPropriedade $modulo 'Especial') -eq $true
+    # Já está sendo lida em segundo plano: espera essa mesma leitura em vez de começar outra.
+    if ($guardavel -and -not $Forcar -and $script:Estado.Antecipando -and $script:Estado.Antecipando.Nome -eq $Nome) {
+        $script:Estado.Esperando = @{ Nome = $Nome; StatusDepois = $StatusDepois }
+        return
+    }
     $codigo = if ($especial) { $script:ScriptHistorico } else { $script:ScriptBuscarAlvos }
     $parametros = if ($especial) { @{ Nucleo = $script:Estado.Nucleo } } else { @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $Nome; Caminho = $Caminho } }
     $script:Estado.TarefaPagina = Start-TmdTarefa -Script $codigo -Parametros $parametros `
-        -Contexto @{ StatusDepois = $StatusDepois; Especial = $especial } `
+        -Contexto @{ Nome = $Nome; StatusDepois = $StatusDepois; Especial = $especial; Guardavel = $guardavel; Geracao = $script:Estado.Geracao } `
         -AoTerminar {
         param($saida, $erro)
         $contexto = $args[1]   # 3º argumento (avisos) não é usado aqui; o 4º é o contexto
-        $c = $script:Tela.Controles
         $script:Estado.TarefaPagina = $null
         Set-TmdOcupado $false
         if ($erro) {
-            Show-TmdMensagem -Icone $script:MarcadorEstado.quebrado -Titulo 'O módulo falhou' -Texto (Format-Frase $erro) -Tom 'Perigo'
-            Set-TmdStatus "Erro: $erro" 'Perigo'
+            Show-TmdErroPagina -Erro $erro
         }
         else {
             # @( ) por fora: "$x = if (...) { @(...) }" desmonta o array e um item só vira escalar.
-            $script:Estado.Alvos = @(if ($contexto.Especial) { ConvertTo-AlvoHistorico -Operacoes @($saida) } else { $saida })
-            Update-TmdBusca
-            $m = Get-TmdModuloAtual
-            if ($contexto.StatusDepois) { Set-TmdStatus $contexto.StatusDepois.Texto $contexto.StatusDepois.Cor }
-            elseif ($m.Escreve) { Update-TmdBarraAcao }
-            else { Set-TmdStatus (Get-TextoStatusPagina -Quantidade $script:Estado.Alvos.Count -Escreve $false -Quando (Get-Date)) }
-            if ($m.Escreve) {
-                $c.BotaoSimular.IsEnabled = $true
-                $c.BotaoAplicar.IsEnabled = $true
-                $presets = Get-PresetAlvo -Alvos $script:Estado.Alvos
-                if ($presets.Count -gt 0) {
-                    $c.ListaPresets.ItemsSource = $presets
-                    $c.PainelPresets.Visibility = 'Visible'
-                }
-            }
+            $alvos = @(if ($contexto.Especial) { ConvertTo-AlvoHistorico -Operacoes @($saida) } else { $saida })
+            $agora = Get-Date
+            if ($contexto.Guardavel -and $contexto.Geracao -eq $script:Estado.Geracao) { $script:Estado.Cache[$contexto.Nome] = @{ Alvos = $alvos; Quando = $agora } }
+            Show-TmdPaginaLida -Saida $alvos -StatusDepois $contexto.StatusDepois -Quando $agora
         }
         Complete-TmdCargaInicial
+        Start-TmdAntecipacao
     }
+}
+
+# Quanto tempo uma página lida continua valendo ao voltar nela. Atualizar (F5) sempre lê de novo.
+$script:ValidadeCache = [TimeSpan]::FromMinutes(10)
+
+# Status muda a cada segundo e o Histórico a cada ação: esses sempre são lidos na hora.
+function Test-TmdPaginaGuardavel {
+    param($Modulo)
+    $Modulo -and $Modulo.Estado -eq 'ok' -and $Modulo.Nome -ne 'status' -and (Get-ValorPropriedade $Modulo 'Especial') -ne $true
+}
+
+function Show-TmdErroPagina {
+    param([string]$Erro)
+    Show-TmdMensagem -Icone $script:MarcadorEstado.quebrado -Titulo 'O módulo falhou' -Texto (Format-Frase $Erro) -Tom 'Perigo'
+    Set-TmdStatus "Erro: $Erro" 'Perigo'
+}
+
+# Mostra os alvos lidos na página atual (da tarefa que acabou de ler ou do cache).
+function Show-TmdPaginaLida {
+    param([object[]]$Saida, $StatusDepois, [datetime]$Quando)
+    $c = $script:Tela.Controles
+    $script:Estado.Alvos = @($Saida)
+    Update-TmdBusca
+    $m = Get-TmdModuloAtual
+    if ($StatusDepois) { Set-TmdStatus $StatusDepois.Texto $StatusDepois.Cor }
+    elseif ($m.Escreve) { Update-TmdBarraAcao }
+    else { Set-TmdStatus (Get-TextoStatusPagina -Quantidade $script:Estado.Alvos.Count -Escreve $false -Quando $Quando) }
+    if ($m.Escreve) {
+        $c.BotaoSimular.IsEnabled = $true
+        $c.BotaoAplicar.IsEnabled = $true
+        $presets = Get-PresetAlvo -Alvos $script:Estado.Alvos
+        if ($presets.Count -gt 0) {
+            $c.ListaPresets.ItemsSource = $presets
+            $c.PainelPresets.Visibility = 'Visible'
+        }
+    }
+}
+
+# Depois que a primeira página aparece, lê as outras em segundo plano, uma por vez, na ordem da barra lateral:
+# quando o usuário clicar, a página abre na hora. Só leitura (Find-Alvos); nada é alterado.
+function Start-TmdAntecipacao {
+    if ($null -eq $script:Estado.Fila) {
+        $script:Estado.Fila = [System.Collections.Generic.Queue[string]]::new()
+        foreach ($m in $script:Estado.Modulos) { if (Test-TmdPaginaGuardavel -Modulo $m) { $script:Estado.Fila.Enqueue($m.Nome) } }
+    }
+    if ($script:Estado.Antecipando) { return }
+    while ($script:Estado.Fila.Count -gt 0) {
+        $nome = $script:Estado.Fila.Dequeue()
+        if ($script:Estado.Cache.ContainsKey($nome)) { continue }
+        if ($nome -eq $script:Estado.ModuloAtual -and $script:Estado.TarefaPagina) { continue }
+        $tarefa = Start-TmdTarefa -Script $script:ScriptBuscarAlvos `
+            -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Nome = $nome; Caminho = '' } `
+            -Contexto @{ Nome = $nome; Geracao = $script:Estado.Geracao } `
+            -AoTerminar {
+            param($saida, $erro)
+            $contexto = $args[1]
+            $script:Estado.Antecipando = $null
+            $alvos = @($saida)
+            $agora = Get-Date
+            if (-not $erro -and $contexto.Geracao -eq $script:Estado.Geracao) { $script:Estado.Cache[$contexto.Nome] = @{ Alvos = $alvos; Quando = $agora } }
+            $espera = $script:Estado.Esperando
+            if ($espera -and $espera.Nome -eq $contexto.Nome -and $script:Estado.ModuloAtual -eq $contexto.Nome) {
+                $script:Estado.Esperando = $null
+                Set-TmdOcupado $false
+                if ($erro) { Show-TmdErroPagina -Erro $erro } else { Show-TmdPaginaLida -Saida $alvos -StatusDepois $espera.StatusDepois -Quando $agora }
+            }
+            Start-TmdAntecipacao
+        }
+        $script:Estado.Antecipando = @{ Nome = $nome; Tarefa = $tarefa }
+        return
+    }
+}
+
+# Depois de alterar o sistema, nada do que foi lido antes vale mais.
+function Clear-TmdCache {
+    $script:Estado.Cache = @{}
+    $script:Estado.Geracao++
 }
 
 # Marca ou desmarca um alvo. A marca fica no próprio alvo, então sobrevive à busca.
@@ -374,10 +503,13 @@ function Start-TmdAcao {
         $texto = Get-TextoResultado -Resultados @($saida) -Simulado $contexto.Simular -Acao $contexto.Acao -DaParaDesfazer $contexto.DaParaDesfazer
         if ($contexto.Simular) {
             Set-TmdStatus $texto.Texto $texto.Cor
+            return
         }
-        elseif ($script:Estado.ModuloAtual -eq $contexto.Nome) {
+        # Uma ação pode mudar o que outras páginas mostram (ajustes e atualizações, programas e desinstalar...).
+        Clear-TmdCache
+        if ($script:Estado.ModuloAtual -eq $contexto.Nome) {
             # Relê a página para mostrar o que sobrou, mantendo o resultado na barra de status.
-            Open-TmdPagina -Nome $contexto.Nome -StatusDepois $texto
+            Open-TmdPagina -Nome $contexto.Nome -StatusDepois $texto -Forcar
         }
         else {
             Set-TmdStatus $texto.Texto $texto.Cor
@@ -388,8 +520,10 @@ function Start-TmdAcao {
 function Stop-TmdCargaPagina {
     param([switch]$Silencioso)
     $t = $script:Estado.TarefaPagina
-    if ($null -eq $t) { return }
-    Stop-TmdTarefa -Tarefa $t
+    # Esperando uma leitura antecipada: só deixa de esperar; ela termina sozinha e vai para o cache.
+    if ($null -eq $t -and -not $script:Estado.Esperando) { return }
+    $script:Estado.Esperando = $null
+    if ($t) { Stop-TmdTarefa -Tarefa $t }
     $script:Estado.TarefaPagina = $null
     Set-TmdOcupado $false
     if (-not $Silencioso) {
@@ -402,7 +536,7 @@ function Update-TmdBusca {
     $c = $script:Tela.Controles
     $busca = $c.CampoBusca.Text
     $c.DicaBusca.Visibility = if ($busca) { 'Collapsed' } else { 'Visible' }
-    if ($null -ne $script:Estado.TarefaPagina -or -not $script:Estado.ModuloAtual) { return }
+    if ($null -ne $script:Estado.TarefaPagina -or $script:Estado.Esperando -or -not $script:Estado.ModuloAtual) { return }
     $modulo = @($script:Estado.Modulos | Where-Object { $_.Nome -eq $script:Estado.ModuloAtual })[0]
     if ($modulo.Estado -ne 'ok') { return }
 

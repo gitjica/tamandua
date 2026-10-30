@@ -145,7 +145,7 @@ function Remove-TmdConteudo {
             $Totais.Links++
             continue
         }
-        if (Test-TmdProtegidoPorPadrao -Caminho $item.FullName -Protecao $Protecao) {
+        if ((Test-TmdNomeProtegido $item.FullName) -or (Test-TmdProtegidoPorPadrao -Caminho $item.FullName -Protecao $Protecao)) {
             $Totais.Protegidos++
             continue
         }
@@ -216,6 +216,7 @@ function Measure-TmdTamanho {
     if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { return $total }
 
     # Em C#: um loop em PowerShell leva dezenas de segundos numa pasta com centenas de milhares de arquivos.
+    Initialize-TmdTipos
     $medida = [Tamandua.Medidor]::Medir($item.FullName)
     $total.Bytes = $medida[0]
     $total.Arquivos = [int]$medida[1]
@@ -223,10 +224,55 @@ function Measure-TmdTamanho {
     $total
 }
 
-# Soma recursiva sem entrar em links; pasta que não dá para listar conta em [2] e segue.
-if (-not ('Tamandua.Medidor' -as [type])) {
+# Tipos em C# do núcleo, compilados uma vez por processo e só quando alguém precisa (compilar custa ~0,3 s,
+# e a maioria das páginas não precisa). Medidor: soma recursiva sem entrar em links; pasta que não dá para
+# listar conta em [2] e segue. Cpu: tempos do processador, para o uso de CPU sem o Win32_Processor (que leva 1 s).
+# A interface aquece isso em segundo plano ao abrir; a trava evita dois runspaces compilando ao mesmo tempo.
+function Initialize-TmdTipos {
+    if ('Tamandua.Cpu' -as [type]) { return }
+    $trava = [Threading.Mutex]::new($false, "Local\TamanduaTipos$PID")
+    [void]$trava.WaitOne()
+    try {
+        if ('Tamandua.Cpu' -as [type]) { return }
+        Add-TmdTipos
+    }
+    finally {
+        $trava.ReleaseMutex()
+        $trava.Dispose()
+    }
+}
+
+function Add-TmdTipos {
     Add-Type -TypeDefinition @'
 namespace Tamandua {
+    public static class Cpu {
+        [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+        private static extern bool GetSystemTimes(out long ocioso, out long nucleo, out long usuario);
+        // [0] = ocioso, [1] = total (núcleo já inclui o ocioso)
+        public static long[] Tempos() {
+            long o, n, u;
+            if (!GetSystemTimes(out o, out n, out u)) throw new System.ComponentModel.Win32Exception();
+            return new long[] { o, n + u };
+        }
+    }
+    public static class LixeiraApi {
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct Consulta { public int cbSize; public long i64Size; public long i64NumItems; }
+        [System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern int SHQueryRecycleBin(string raiz, ref Consulta info);
+        [System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern int SHEmptyRecycleBin(System.IntPtr janela, string raiz, uint opcoes);
+        // [0] = bytes, [1] = itens, de todas as unidades
+        public static long[] Medir() {
+            var c = new Consulta();
+            c.cbSize = System.Runtime.InteropServices.Marshal.SizeOf(typeof(Consulta));
+            int r = SHQueryRecycleBin(null, ref c);
+            if (r != 0) throw new System.ComponentModel.Win32Exception(r);
+            return new long[] { c.i64Size, c.i64NumItems };
+        }
+        // Sem perguntar, sem barra de progresso, sem som.
+        public static int Esvaziar() { return SHEmptyRecycleBin(System.IntPtr.Zero, null, 0x1 | 0x2 | 0x4); }
+    }
     public static class Medidor {
         // [0] = bytes, [1] = arquivos, [2] = pastas sem acesso
         public static long[] Medir(string caminho) {
@@ -252,16 +298,34 @@ namespace Tamandua {
 '@
 }
 
+# Uso do processador (0 a 100) num intervalo, como o Gerenciador de Tarefas mostra.
+# Para não ficar parado esperando: $m = Start-TmdMedidaCpu; (lê outras coisas); Get-TmdUsoCpu -Desde $m
+# (só espera o que faltar para completar -IntervaloMs).
+function Start-TmdMedidaCpu {
+    Initialize-TmdTipos
+    [pscustomobject]@{ Tempos = [Tamandua.Cpu]::Tempos(); Relogio = [Diagnostics.Stopwatch]::StartNew() }
+}
+
+function Get-TmdUsoCpu {
+    [CmdletBinding()]
+    param([int]$IntervaloMs = 250, $Desde)
+    if (-not $Desde) { $Desde = Start-TmdMedidaCpu }
+    $falta = $IntervaloMs - [int]$Desde.Relogio.ElapsedMilliseconds
+    if ($falta -gt 0) { Start-Sleep -Milliseconds $falta }
+    $a = $Desde.Tempos
+    $b = [Tamandua.Cpu]::Tempos()
+    $total = $b[1] - $a[1]
+    if ($total -le 0) { return 0 }
+    [int][Math]::Round(100 * ($total - ($b[0] - $a[0])) / $total)
+}
+
 # Lixeira pela API do Explorer (SHFileOperation), sem nenhuma janela ou pergunta.
 # Testes: TAMANDUA_LIXEIRA_TESTE (uma pasta dentro do TEMP) recebe os itens no lugar da Lixeira real.
 function Move-TmdParaLixeira {
     param([Parameter(Mandatory)][string]$Caminho)
 
-    $falsa = $env:TAMANDUA_LIXEIRA_TESTE
+    $falsa = Get-TmdLixeiraFalsa
     if ($falsa) {
-        $temp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
-        $falsa = [IO.Path]::GetFullPath($falsa).TrimEnd('\')
-        if (-not $falsa.StartsWith($temp + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'TAMANDUA_LIXEIRA_TESTE precisa estar dentro da pasta temporária' }
         [void][IO.Directory]::CreateDirectory($falsa)
         $destino = Join-Path $falsa ("{0}-{1}" -f [guid]::NewGuid().ToString('N').Substring(0, 8), (Split-Path -Leaf $Caminho))
         if (Test-Path -LiteralPath $Caminho -PathType Container) { [IO.Directory]::Move($Caminho, $destino) } else { [IO.File]::Move($Caminho, $destino) }
@@ -289,4 +353,61 @@ public static int Enviar(string caminho) {
     }
     $codigo = [Tamandua.Lixeira]::Enviar($Caminho)
     if ($codigo -ne 0) { throw "a Lixeira recusou (código $codigo)" }
+}
+
+# Lixeira falsa dos testes (TAMANDUA_LIXEIRA_TESTE), só se estiver dentro da pasta temporária; senão $null.
+function Get-TmdLixeiraFalsa {
+    $falsa = $env:TAMANDUA_LIXEIRA_TESTE
+    if (-not $falsa) { return $null }
+    $temp = [IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\')
+    $falsa = [IO.Path]::GetFullPath($falsa).TrimEnd('\')
+    if (-not $falsa.StartsWith($temp + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'TAMANDUA_LIXEIRA_TESTE precisa estar dentro da pasta temporária' }
+    $falsa
+}
+
+# Quanto há na Lixeira (todas as unidades). Só leitura.
+function Get-TmdLixeira {
+    [CmdletBinding()]
+    param()
+    $falsa = Get-TmdLixeiraFalsa
+    if ($falsa) {
+        $itens = @(if (Test-Path -LiteralPath $falsa) { [IO.Directory]::GetFileSystemEntries($falsa) })
+        $bytes = [int64]0
+        foreach ($i in $itens) { $bytes += (Measure-TmdTamanho -Caminho $i).Bytes }
+        return [pscustomobject]@{ Bytes = $bytes; Itens = [int64]$itens.Count }
+    }
+    Initialize-TmdTipos
+    $m = [Tamandua.LixeiraApi]::Medir()
+    [pscustomobject]@{ Bytes = [int64]$m[0]; Itens = [int64]$m[1] }
+}
+
+# Esvazia a Lixeira de vez (não tem volta). Devolve um Resultado e registra no log como as outras remoções.
+function Clear-TmdLixeira {
+    [CmdletBinding()]
+    param([switch]$Simular, [string]$Modulo = '', [string]$Id = '')
+    $antes = Get-TmdLixeira
+    $resultado = [pscustomobject]@{ Id = $Id; Caminho = 'Lixeira'; Status = 'Simulado'; Liberado = $antes.Bytes; Motivo = '' }
+    if (-not $Simular) {
+        $resultado.Status = 'Feito'
+        if ($antes.Itens -gt 0) {
+            try {
+                $falsa = Get-TmdLixeiraFalsa
+                if ($falsa) {
+                    foreach ($i in [IO.Directory]::GetFileSystemEntries($falsa)) { [void](Remove-TmdItem -Caminho $i -Raizes $falsa -Modulo $Modulo -Id $Id) }
+                }
+                else {
+                    Initialize-TmdTipos
+                    $codigo = [Tamandua.LixeiraApi]::Esvaziar()
+                    if ($codigo -ne 0) { throw "o Windows recusou (código $codigo)" }
+                }
+            }
+            catch { $resultado.Status = 'Erro'; $resultado.Motivo = (Get-TmdExcecaoInterna $_.Exception).Message }
+            $depois = Get-TmdLixeira
+            $resultado.Liberado = [Math]::Max([int64]0, $antes.Bytes - $depois.Bytes)
+            if ($resultado.Status -eq 'Feito' -and $depois.Itens -gt 0) { $resultado.Status = 'Parcial'; $resultado.Motivo = "$($depois.Itens) item(ns) continuaram na Lixeira" }
+        }
+    }
+    Write-TmdOperacao -Modulo $Modulo -Id $Id -Acao 'remover' -Caminho 'Lixeira' -Destino 'Permanente' -Status $resultado.Status `
+        -Liberado $resultado.Liberado -Motivo $resultado.Motivo -Simulado ([bool]$Simular)
+    $resultado
 }

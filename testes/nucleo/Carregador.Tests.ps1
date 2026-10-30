@@ -4,12 +4,12 @@
 }
 
 Describe 'Catálogo real' {
-    It 'lista os 12 módulos do guia, sem nomes repetidos' {
+    It 'lista os 10 módulos do guia, sem nomes repetidos' {
         $catalogo = Get-TmdCatalogo -Raiz $script:RaizProjeto
         $catalogo.Erro | Should -BeNullOrEmpty
         $nomes = @($catalogo.Modulos | ForEach-Object { $_['Nome'] })
-        $nomes.Count | Should -Be 12
-        @($nomes | Select-Object -Unique).Count | Should -Be 12
+        $nomes.Count | Should -Be 10
+        @($nomes | Select-Object -Unique).Count | Should -Be 10
     }
 
     It 'toda entrada tem Titulo, Grupo e Descricao' {
@@ -24,6 +24,24 @@ Describe 'Catálogo real' {
 Describe 'Get-TmdModulo' {
     BeforeEach {
         $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'alfa', 'beta'
+    }
+
+    It 'reaproveita o módulo já importado; importa de novo quando um arquivo da pasta muda' {
+        $pasta = New-ModuloFalso -Raiz $raiz -Nome 'alfa'
+        $primeiro = (Get-TmdModulo -Raiz $raiz -Nome 'alfa').Modulo
+        (Get-TmdModulo -Raiz $raiz -Nome 'alfa').Modulo | Should -Be $primeiro
+        $codigo = Get-ChildItem -LiteralPath $pasta -Filter '*.psm1' | Select-Object -First 1
+        Add-Content -LiteralPath $codigo.FullName -Value '# mudou'
+        (Get-TmdModulo -Raiz $raiz -Nome 'alfa').Modulo | Should -Not -Be $primeiro
+    }
+
+    It '-SemRequisitos pula o Test-Requisitos (a janela já conferiu)' {
+        New-ModuloFalso -Raiz $raiz -Nome 'alfa' -Codigo @'
+function Test-Requisitos { @{ Ok = $false; Motivo = 'não dá' } }
+function Find-Alvos { }
+'@ | Out-Null
+        (Get-TmdModulo -Raiz $raiz -Nome 'alfa').Estado | Should -Be 'indisponivel'
+        (Get-TmdModulo -Raiz $raiz -Nome 'alfa' -SemRequisitos).Estado | Should -Be 'ok'
     }
 
     It 'marca como faltando o módulo do catálogo sem pasta' {
