@@ -728,6 +728,19 @@ do nome do módulo na CLI é erro.
   é decidido pelo estado lido na hora, não pelo alvo); mudança por `dism /Enable-Feature ... /All` ou `/Disable-Feature`
   com `/NoRestart`, via `Invoke-TmdPrograma` no processo elevado. 3010 = feito, pede reinício. Recurso que não existe na
   edição aparece com o selo "não existe nesta edição", sem caixa. SMB 1.0 é risco alto, com a explicação do porquê.
+- **fonte:** troca a Segoe UI por qualquer família instalada (veio do `Set-SystemFont.ps1` da pasta Fonte; o FontKit.cs
+  está em `nucleo\`, compilado por `Initialize-TmdFontKit` só quando a página precisa). Famílias: nomes do registro de
+  fontes (máquina e usuário), sem o estilo do fim ("Rubik-BoldItalic" -> Rubik); `.ttc`, símbolos, a Segoe e família sem
+  estilo normal ficam de fora. Ao aplicar, o peso de cada arquivo vem de dentro dele (OS/2) e cada uma das 13 vagas da
+  Segoe UI (12 pesos + Segoe UI Variable) fica com o mais parecido (largura normal, itálico certo, peso mais perto).
+  As cópias (`<original>_tmd<data>.ttf`, sufixo novo a cada troca porque fonte carregada não se sobrescreve) levam a
+  tabela `name`, o peso/estilo e a altura de linha da Segoe (a conta do Set-SystemFont); o núcleo copia para
+  `Windows\Fonts` (`Install-TmdArquivoFonte`, só nomes de cópia, nunca sobrescreve) e o registro muda por um ajuste
+  comum, `fonte-sistema` (snapshot, `.reg` e desfazer pelo Histórico). "Segoe UI original" é o ajuste `fonte-original`.
+  Tamanho: muda o `unitsPerEm`; automático = metade do caminho entre 100% e a mesma altura de "x"/"H" da Segoe UI
+  (a OpenDyslexic dá 97%, que é o que tinha sido escolhido a olho). "Apagar cópias" só apaga cópias que o registro não
+  usa (`Remove-TmdCopiaFonte`; carregada pelo Windows = `MoveFileEx` para apagar no boot) e pastas de trabalho velhas.
+  Testes: registro (`TAMANDUA_REGISTRO_TESTE`) e pasta de fontes (`TAMANDUA_FONTES_TESTE`) falsos, com a Arial de modelo.
 - **atualizacoes:** políticas do Windows Update como ajustes do motor (`modulos/atualizacoes/atualizacoes.json`, chaves em
   `HKLM:\SOFTWARE\Policies`): adiar versões grandes por 365 dias, esperar 4 dias pelas mensais, não reiniciar sozinho com
   alguém conectado, não instalar drivers, não compartilhar atualizações (`DODownloadMode = 0`). Presets "Equilibrado" e

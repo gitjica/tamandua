@@ -9,7 +9,8 @@
         @{ Nome = 'programas';    Titulo = 'Programas';     Grupo = 'Programas';  Descricao = 'Instala e atualiza programas via winget' }
         @{ Nome = 'ajustes';      Titulo = 'Ajustes';       Grupo = 'Ajustes';    Descricao = 'Todos os tweaks do WinUtil: privacidade, desempenho, apps e preferências' }
         @{ Nome = 'menu-contexto'; Titulo = 'Menu de contexto'; Grupo = 'Ajustes';    Descricao = 'Menu clássico no Windows 11 e sem os itens que você não usa' }
-        @{ Nome = 'recursos';     Titulo = 'Recursos';      Grupo = 'Ajustes';    Descricao = 'Recursos opcionais do Windows (WSL, Hyper-V, .NET 3.5...)' }
+        @{ Nome = 'fonte';        Titulo = 'Fonte';         Grupo = 'Ajustes';    Descricao = 'Troca a fonte do Windows (Segoe UI) por qualquer fonte instalada, com volta' }
+        @{ Nome = 'recursos';    Titulo = 'Recursos';      Grupo = 'Ajustes';    Descricao = 'Recursos opcionais do Windows (WSL, Hyper-V, .NET 3.5...)' }
         @{ Nome = 'atualizacoes'; Titulo = 'Atualizações';  Grupo = 'Ajustes';    Descricao = 'Política do Windows Update' }
         @{ Nome = 'otimizar';     Titulo = 'Otimizar';      Grupo = 'Manutenção'; Descricao = 'Tarefas de manutenção do Windows' }
         @{ Nome = 'reparos';      Titulo = 'Reparos';       Grupo = 'Manutenção'; Descricao = 'SFC, DISM, reset de rede e do Windows Update' }

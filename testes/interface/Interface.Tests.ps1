@@ -180,7 +180,7 @@ Describe 'Tarefas em segundo plano' {
         }
         Wait-Tarefas
         $r.Erro | Should -BeNullOrEmpty
-        $r.Saida.Count | Should -Be 11
+        $r.Saida.Count | Should -Be 12
         ($r.Saida | Where-Object Nome -eq 'status').Estado | Should -Be 'ok'
         ($r.Saida | Where-Object Nome -eq 'atualizacoes').Titulo | Should -Be 'Atualizações'
     }
@@ -239,7 +239,7 @@ Describe 'Janela de verdade' {
     It 'abre no projeto real, mostra os módulos e carrega o status' {
         $r = Invoke-InterfaceTeste -Raiz $script:RaizProjeto
         $r.Carregou | Should -BeTrue
-        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 12 -Because '11 do catálogo + a página Histórico'
+        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 13 -Because '12 do catálogo + a página Histórico'
         @($r.Modulos | Where-Object Tipo -eq 'Modulo')[-1].Nome | Should -Be 'historico'
         $r.Titulo | Should -Be 'Status'
         $r.Mensagem | Should -BeNullOrEmpty

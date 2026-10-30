@@ -4,12 +4,12 @@
 }
 
 Describe 'Catálogo real' {
-    It 'lista os 11 módulos do guia, sem nomes repetidos' {
+    It 'lista os 12 módulos do guia, sem nomes repetidos' {
         $catalogo = Get-TmdCatalogo -Raiz $script:RaizProjeto
         $catalogo.Erro | Should -BeNullOrEmpty
         $nomes = @($catalogo.Modulos | ForEach-Object { $_['Nome'] })
-        $nomes.Count | Should -Be 11
-        @($nomes | Select-Object -Unique).Count | Should -Be 11
+        $nomes.Count | Should -Be 12
+        @($nomes | Select-Object -Unique).Count | Should -Be 12
     }
 
     It 'toda entrada tem Titulo, Grupo e Descricao' {

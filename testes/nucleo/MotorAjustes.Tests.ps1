@@ -392,3 +392,15 @@ Describe 'Histórico e linha de comando' {
         @(Get-ChildItem -LiteralPath (Join-Path $env:TAMANDUA_DADOS 'backup') -Filter '*cli-teste*.reg').Count | Should -Be 1
     }
 }
+
+Describe 'Snapshot' {
+    It 'grava de novo por cima de um snapshot que já existe (ajuste aplicado de novo com outra mudança)' {
+        $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
+        InModuleScope Tamandua.Nucleo {
+            Save-TmdSnapshot -Id 'teste-regravar' -Entradas @([pscustomobject]@{ Chave = 'a' })
+            Save-TmdSnapshot -Id 'teste-regravar' -Entradas @([pscustomobject]@{ Chave = 'a' }, [pscustomobject]@{ Chave = 'b' })
+            $e = Read-TmdSnapshot -Id 'teste-regravar'
+            ($e | ForEach-Object Chave) -join ',' | Should -Be 'a,b'
+        }
+    }
+}

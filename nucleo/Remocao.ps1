@@ -108,6 +108,28 @@ function Remove-TmdArquivoTemporario {
     if (Test-Path -LiteralPath $completo -PathType Leaf) { [IO.File]::Delete($completo) }
 }
 
+# Cópia velha da Segoe UI de uma troca de fonte (Fonte.ps1: "<original>_<sufixo>.ttf" na pasta de fontes). Quem chama
+# garante que o registro não aponta mais para ela. Carregada pelo Windows (só sai no boot): fica para apagar ao reiniciar.
+function Remove-TmdCopiaFonte {
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Caminho, [switch]$Simular, [string]$Modulo = 'fonte', [string]$Id = '')
+    $resultado = [pscustomobject]@{ Id = $Id; Caminho = $Caminho; Status = 'Ignorado'; Liberado = [int64]0; Motivo = '' }
+    $arquivo = [IO.FileInfo]::new($Caminho)
+    if (-not (Test-TmdNomeCopiaFonte -Nome $arquivo.Name)) { $resultado.Motivo = 'não é uma cópia de fonte do sistema' }
+    elseif (-not $arquivo.Exists) { $resultado.Motivo = 'não existe mais' }
+    elseif ($Simular) { $resultado.Status = 'Simulado'; $resultado.Liberado = $arquivo.Length }
+    else {
+        $tamanho = $arquivo.Length
+        try { Remove-TmdArquivo -Arquivo $arquivo; $resultado.Status = 'Feito'; $resultado.Liberado = $tamanho }
+        catch {
+            Initialize-TmdTipos
+            if ([Tamandua.ApagarAoReiniciar]::Agendar($arquivo.FullName)) { $resultado.Status = 'Feito'; $resultado.Liberado = $tamanho; $resultado.Motivo = 'em uso: o Windows apaga ao reiniciar' }
+            else { $resultado.Motivo = "em uso: $((Get-TmdExcecaoInterna $_.Exception).Message)" }
+        }
+    }
+    Complete-TmdRemocao $resultado $Modulo 'Permanente' ([bool]$Simular)
+}
+
 function Test-TmdProtegidoPorPadrao {
     param([string]$Caminho, [string[]]$Protecao)
     foreach ($p in $Protecao) { if ($Caminho -like $p) { return $true } }
@@ -302,6 +324,12 @@ namespace Tamandua {
             var sb = new System.Text.StringBuilder(1024);
             return SHLoadIndirectString(fonte, sb, sb.Capacity, System.IntPtr.Zero) == 0 ? sb.ToString() : fonte;
         }
+    }
+    public static class ApagarAoReiniciar {
+        [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode, SetLastError = true)]
+        private static extern bool MoveFileEx(string existente, string novo, int opcoes);
+        // MOVEFILE_DELAY_UNTIL_REBOOT: o Windows apaga no boot, antes de carregar as fontes (precisa de admin).
+        public static bool Agendar(string caminho) { return MoveFileEx(caminho, null, 4); }
     }
     public static class Medidor {
         // [0] = bytes, [1] = arquivos, [2] = pastas sem acesso

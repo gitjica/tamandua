@@ -5,7 +5,7 @@ $script:Versao = '0.1.0'
 $script:ContratoAtual = 1
 $script:RaizPadrao = Split-Path -Parent $PSScriptRoot
 
-foreach ($parte in 'Config', 'Elevacao', 'Seguranca', 'Remocao', 'Estado', 'MotorAjustes', 'Registro', 'Carregador', 'Saida', 'Winget', 'Cli') {
+foreach ($parte in 'Config', 'Elevacao', 'Seguranca', 'Remocao', 'Estado', 'MotorAjustes', 'Registro', 'Carregador', 'Saida', 'Winget', 'Fonte', 'Cli') {
     . (Join-Path $PSScriptRoot "$parte.ps1")
 }
 
@@ -64,4 +64,9 @@ Export-ModuleMember -Function @(
     'Get-TmdCaminhoWinget'
     'Test-TmdWinget'
     'Install-TmdWinget'
+    'Initialize-TmdFontKit'
+    'Get-TmdDpiSistema'
+    'Test-TmdNomeCopiaFonte'
+    'Install-TmdArquivoFonte'
+    'Remove-TmdCopiaFonte'
 )

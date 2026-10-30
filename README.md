@@ -1,6 +1,6 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. 10 módulos: status, limpar, instaladores, desinstalar, programas, ajustes, recursos, atualizações, otimizar e reparos.
+Limpeza, ajustes e manutenção profunda para Windows. 12 módulos: status, limpar, instaladores, desinstalar, programas, ajustes, menu de contexto, fonte, recursos, atualizações, otimizar e reparos.
 
 ## Como abrir
 
@@ -43,6 +43,7 @@ Ele pede permissão de administrador uma vez (dá para recusar: abre assim mesmo
 .\tamandua.ps1 reparos -Itens sfc,dism   # pede admin uma vez e roda os reparos escolhidos
 .\tamandua.ps1 otimizar -Itens dns,icones   # cache de DNS e de ícones (sem admin)
 .\tamandua.ps1 recursos -Itens wsl,plataforma-vm   # liga (ou desliga) recursos do Windows; pede admin e reinício
+.\tamandua.ps1 fonte -Itens fam-arial,tam-95   # Arial no lugar da Segoe UI, a 95%; vale depois de reiniciar (volta: -Itens segoe-original)
 .\tamandua.ps1 atualizacoes -Preset Equilibrado -Simular   # política do Windows Update (nunca desliga as atualizações)
 .\tamandua.ps1 limpar -Simular   # quanto liberaria: temporários, relatórios de erro, logs, caches do Windows, navegadores, Discord, Spotify, Steam...
 .\tamandua.ps1 limpar            # mostra, pergunta e limpa (o que pede admin vai num único UAC)

@@ -30,7 +30,8 @@ function Save-TmdSnapshot {
     $json = [pscustomobject]@{ Id = $Id; Salvo = (Get-Date).ToString('o'); Entradas = $Entradas } | ConvertTo-Json -Depth 6
     $temporario = "$arquivo.tmp"
     [IO.File]::WriteAllText($temporario, $json, (New-Object Text.UTF8Encoding $false))
-    if (Test-Path -LiteralPath $arquivo) { [IO.File]::Replace($temporario, $arquivo, $null) }
+    # [NullString]: no 5.1, $null passado para um parâmetro string do .NET vira "" (e o Replace recusa como caminho inválido).
+    if (Test-Path -LiteralPath $arquivo) { [IO.File]::Replace($temporario, $arquivo, [NullString]::Value) }
     else { [IO.File]::Move($temporario, $arquivo) }
 }
 

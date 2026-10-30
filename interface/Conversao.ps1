@@ -9,6 +9,7 @@ $script:IconesModulo = @{
     programas    = [string][char]0xE7B8
     ajustes      = [string][char]0xE9E9
     'menu-contexto' = [string][char]0xE8FD
+    fonte        = [string][char]0xE8D2
     recursos     = [string][char]0xE8F1
     atualizacoes = [string][char]0xE895
     otimizar     = [string][char]0xEC4A
