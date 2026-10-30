@@ -34,7 +34,7 @@ $script:Pagos = '1password', 'winrar', 'startallback', 'totalcommander', 'sublim
 $script:NomesFmhy = @{
     'cloudflarewarp' = @('Cloudflare One'); 'pdf24creator' = @('PDF24'); 'kodi' = @('Kodi'); 'jellyfinmediaplayer' = @('Jellyfin')
     'jellyfinserver' = @('Jellyfin'); 'treesize' = @('TreeSize'); 'sdio' = @('SDIO'); 'nextclouddesktop' = @('NextCloud')
-    'lively' = @('Lively'); 'testdisk' = @('TestDisk'); 'koodoreader' = @('Koodo'); 'sysinternals' = @('Sysinternals')
+    'vcredistaio' = @('VCRedist'); 'lively' = @('Lively'); 'testdisk' = @('TestDisk'); 'koodoreader' = @('Koodo'); 'sysinternals' = @('Sysinternals')
 }
 
 # Alternativas (programas que fazem a mesma coisa): viram uma pasta na grade, como as pastas do menu Iniciar do
@@ -75,7 +75,7 @@ $script:Grupos = [ordered]@{
     'Jellyfin'                 = 'jellyfinserver', 'jellyfinmediaplayer'
     'Plex'                     = 'plex', 'plexdesktop'
     'Jogos por streaming'      = 'sunshine', 'moonlight'
-    'Componentes do Windows'   = 'dotnet6', 'dotnet8', 'dotnet9', 'dotnet10', 'vc2015-32', 'vc2015-64'
+    'Componentes do Windows'   = 'vcredistaio', 'dotnet6', 'dotnet8', 'dotnet9', 'dotnet10', 'vc2015-32', 'vc2015-64'
 }
 
 # Estrela do FMHY que é de outra coisa com o mesmo nome e site (o "Plex" com ⭐ é o site de filmes, não o app).
@@ -124,7 +124,8 @@ $script:DoFmhy = @(
     , @('koodoreader', 'Koodo Reader', 'Documentos', 'AppByTroye.KoodoReader', 'https://koodoreader.com/', 'koodo-reader', 'Leitor de e-books (EPUB, PDF, MOBI).')
     , @('mailspring', 'Mailspring', 'Comunicação', 'Foundry376.Mailspring', 'https://getmailspring.com/', 'mailspring', 'Cliente de e-mail moderno para várias contas.')
     , @('ludusavi', 'Ludusavi', 'Jogos', 'mtkennerly.ludusavi', 'https://github.com/mtkennerly/ludusavi', 'ludusavi', 'Faz backup dos saves dos seus jogos.')
-    , @('sysinternals', 'Sysinternals Suite', 'Ferramentas da Microsoft', 'Microsoft.Sysinternals.Suite', 'https://learn.microsoft.com/sysinternals/', 'sysinternals', 'As ferramentas avançadas da Microsoft: Autoruns, Process Explorer, Process Monitor, TCPView e outras.')
+    , @('vcredistaio', 'Visual C++ (todas as versões)', 'Ferramentas da Microsoft', 'abbodi1406.vcredist', 'https://github.com/abbodi1406/vcredist', 'vcredist-all', 'Todos os Visual C++ (2005 a 2026) de uma vez, num instalador só: o que jogos e programas antigos pedem para abrir.')
+    , @('sysinternals','Sysinternals Suite', 'Ferramentas da Microsoft', 'Microsoft.Sysinternals.Suite', 'https://learn.microsoft.com/sysinternals/', 'sysinternals', 'As ferramentas avançadas da Microsoft: Autoruns, Process Explorer, Process Monitor, TCPView e outras.')
 )
 
 # Desenvolvimento: só o que alguém que está começando usaria.

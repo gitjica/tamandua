@@ -734,5 +734,9 @@
     "ludusavi":  {
                      "url":  "https://raw.githubusercontent.com/mtkennerly/ludusavi/master/assets/icon.png",
                      "tamanhoOriginal":  "64x64"
-                 }
+                 },
+    "vcredistaio":  {
+                        "url":  "https://cdn.rawgit.com/jberezanski/ChocolateyPackages/17d25f2fb8a31d40b93a696e345c22a77913418f/icons/vs2017.png",
+                        "tamanhoOriginal":  "256x256"
+                    }
 }

@@ -2107,6 +2107,20 @@
         "fmhy":  "system-tools"
     },
     {
+        "id":  "vcredistaio",
+        "nome":  "Visual C++ (todas as versões)",
+        "descricao":  "Todos os Visual C++ (2005 a 2026) de uma vez, num instalador só: o que jogos e programas antigos pedem para abrir.",
+        "categoria":  "Ferramentas da Microsoft",
+        "wingetId":  "abbodi1406.vcredist",
+        "livre":  false,
+        "site":  "https://github.com/abbodi1406/vcredist",
+        "choco":  "vcredist-all",
+        "winutil":  "",
+        "estrela":  false,
+        "fmhy":  "system-tools / Windows Updates",
+        "grupo":  "Componentes do Windows"
+    },
+    {
         "id":  "vc2015-32",
         "nome":  "Visual C++ 2015-2022 (32 bits)",
         "descricao":  "O que muitos programas e jogos precisam para abrir (32 bits).",
