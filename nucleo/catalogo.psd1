@@ -8,6 +8,7 @@
         @{ Nome = 'desinstalar';  Titulo = 'Desinstalar';   Grupo = 'Programas';  Descricao = 'Desinstala programas e restos' }
         @{ Nome = 'programas';    Titulo = 'Programas';     Grupo = 'Programas';  Descricao = 'Instala e atualiza programas via winget' }
         @{ Nome = 'ajustes';      Titulo = 'Ajustes';       Grupo = 'Ajustes';    Descricao = 'Todos os tweaks do WinUtil: privacidade, desempenho, apps e preferências' }
+        @{ Nome = 'menu-contexto'; Titulo = 'Menu de contexto'; Grupo = 'Ajustes';    Descricao = 'Menu clássico no Windows 11 e sem os itens que você não usa' }
         @{ Nome = 'recursos';     Titulo = 'Recursos';      Grupo = 'Ajustes';    Descricao = 'Recursos opcionais do Windows (WSL, Hyper-V, .NET 3.5...)' }
         @{ Nome = 'atualizacoes'; Titulo = 'Atualizações';  Grupo = 'Ajustes';    Descricao = 'Política do Windows Update' }
         @{ Nome = 'otimizar';     Titulo = 'Otimizar';      Grupo = 'Manutenção'; Descricao = 'Tarefas de manutenção do Windows' }

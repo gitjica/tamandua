@@ -179,7 +179,7 @@ Describe 'Tarefas em segundo plano' {
         }
         Wait-Tarefas
         $r.Erro | Should -BeNullOrEmpty
-        $r.Saida.Count | Should -Be 10
+        $r.Saida.Count | Should -Be 11
         ($r.Saida | Where-Object Nome -eq 'status').Estado | Should -Be 'ok'
         ($r.Saida | Where-Object Nome -eq 'atualizacoes').Titulo | Should -Be 'Atualizações'
     }
@@ -238,7 +238,7 @@ Describe 'Janela de verdade' {
     It 'abre no projeto real, mostra os módulos e carrega o status' {
         $r = Invoke-InterfaceTeste -Raiz $script:RaizProjeto
         $r.Carregou | Should -BeTrue
-        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 11 -Because '10 do catálogo + a página Histórico'
+        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 12 -Because '11 do catálogo + a página Histórico'
         @($r.Modulos | Where-Object Tipo -eq 'Modulo')[-1].Nome | Should -Be 'historico'
         $r.Titulo | Should -Be 'Status'
         $r.Mensagem | Should -BeNullOrEmpty
@@ -406,6 +406,8 @@ Describe 'Ajustes pela janela de verdade' {
                                 $p.Marcados = $c.TextoStatus.Text
                                 # Marca mais um item clicando na caixa de verdade (fora do preset).
                                 $linha = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Id -eq 'priv-outlook-classico' })[0]
+                                # A lista só cria as linhas que estão na tela: rola até ela antes de procurar a caixa.
+                                $c.ListaAlvos.ScrollIntoView($linha); $c.ListaAlvos.UpdateLayout()
                                 $fila = [System.Collections.Generic.Queue[object]]::new()
                                 $fila.Enqueue($c.ListaAlvos.ItemContainerGenerator.ContainerFromItem($linha))
                                 $caixa = $null

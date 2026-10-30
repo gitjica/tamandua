@@ -273,6 +273,16 @@ namespace Tamandua {
         // Sem perguntar, sem barra de progresso, sem som.
         public static int Esvaziar() { return SHEmptyRecycleBin(System.IntPtr.Zero, null, 0x1 | 0x2 | 0x4); }
     }
+    public static class Texto {
+        [System.Runtime.InteropServices.DllImport("shlwapi.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern int SHLoadIndirectString(string fonte, System.Text.StringBuilder saida, int tamanho, System.IntPtr reservado);
+        // "@shell32.dll,-8506" e afins -> texto no idioma do Windows; se não der, devolve a entrada.
+        public static string Indireto(string fonte) {
+            if (string.IsNullOrEmpty(fonte) || fonte[0] != '@') return fonte;
+            var sb = new System.Text.StringBuilder(1024);
+            return SHLoadIndirectString(fonte, sb, sb.Capacity, System.IntPtr.Zero) == 0 ? sb.ToString() : fonte;
+        }
+    }
     public static class Medidor {
         // [0] = bytes, [1] = arquivos, [2] = pastas sem acesso
         public static long[] Medir(string caminho) {
@@ -301,6 +311,15 @@ namespace Tamandua {
 # Uso do processador (0 a 100) num intervalo, como o Gerenciador de Tarefas mostra.
 # Para não ficar parado esperando: $m = Start-TmdMedidaCpu; (lê outras coisas); Get-TmdUsoCpu -Desde $m
 # (só espera o que faltar para completar -IntervaloMs).
+# Nome legível de um texto do registro como "@shell32.dll,-8506" (no idioma do Windows).
+function Get-TmdTextoIndireto {
+    [CmdletBinding()]
+    param([AllowEmptyString()][string]$Texto)
+    if (-not $Texto -or -not $Texto.StartsWith('@')) { return $Texto }
+    Initialize-TmdTipos
+    [Tamandua.Texto]::Indireto($Texto)
+}
+
 function Start-TmdMedidaCpu {
     Initialize-TmdTipos
     [pscustomobject]@{ Tempos = [Tamandua.Cpu]::Tempos(); Relogio = [Diagnostics.Stopwatch]::StartNew() }

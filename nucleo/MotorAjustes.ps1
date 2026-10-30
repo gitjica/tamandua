@@ -298,6 +298,68 @@ function Test-TmdPastaBloqueada {
         }).Count -gt 0
 }
 
+# Chave inteira fora, com volta: antes de apagar, "reg export" para estado\chaves\<Id>.reg; Restore- importa de volta.
+# (O motor guarda valores; uma chave como ".bmp\ShellNew" só some do menu "Novo" se a chave sumir.)
+function Get-TmdArquivoChaveGuardada {
+    param([Parameter(Mandatory)][string]$Id)
+    if ($Id -notmatch '^[a-z0-9-]+$') { throw "id inválido para guardar chave: $Id" }
+    Join-Path (Join-Path (Get-TmdPastaDados) 'estado\chaves') "$Id.reg"
+}
+
+function Remove-TmdChaveComCopia {
+    param([Parameter(Mandatory)][string]$Caminho, [Parameter(Mandatory)][string]$Id)
+    $c = Split-TmdCaminhoRegistro -Caminho $Caminho
+    $base = Open-TmdBaseRegistro $c.Hive
+    try {
+        $chave = $base.OpenSubKey($c.Sub, $false)
+        if (-not $chave) { return }
+        $chave.Close()
+        $arquivo = Get-TmdArquivoChaveGuardada -Id $Id
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $arquivo))
+        # O reg.exe escreve "concluída com êxito" no stderr; no 5.1, com Stop, isso viraria exceção.
+        $ErrorActionPreference = 'Continue'
+        $s = & reg.exe export $c.Texto $arquivo /y /reg:64 2>&1
+        $ErrorActionPreference = 'Stop'
+        if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $arquivo)) { throw "não deu para guardar a cópia de $($c.Texto): $(@($s) -join ' ')" }
+        $base.DeleteSubKeyTree($c.Sub, $false)
+    }
+    finally { $base.Close() }
+}
+
+function Restore-TmdChaveComCopia {
+    param([Parameter(Mandatory)][string]$Id)
+    $arquivo = Get-TmdArquivoChaveGuardada -Id $Id
+    if (-not (Test-Path -LiteralPath $arquivo)) { throw "não há cópia guardada para $Id" }
+    $ErrorActionPreference = 'Continue'
+    $s = & reg.exe import $arquivo /reg:64 2>&1
+    $ErrorActionPreference = 'Stop'
+    if ($LASTEXITCODE -ne 0) { throw "reg import falhou: $(@($s) -join ' ')" }
+    [IO.File]::Delete($arquivo)
+}
+
+function Test-TmdChaveExiste {
+    param([Parameter(Mandatory)][string]$Caminho)
+    $c = Split-TmdCaminhoRegistro -Caminho $Caminho
+    $base = Open-TmdBaseRegistro $c.Hive
+    try { $k = $base.OpenSubKey($c.Sub, $false); if ($k) { $k.Close(); return $true }; $false }
+    finally { $base.Close() }
+}
+
+# Esconde (ou mostra) um arquivo: o "Enviar para" só lista o que não está oculto. Nada é apagado.
+function Set-TmdArquivoOculto {
+    param([Parameter(Mandatory)][string]$Caminho, [bool]$Oculto = $true)
+    if (-not [IO.File]::Exists($Caminho)) { return }
+    $a = [IO.File]::GetAttributes($Caminho)
+    $novo = if ($Oculto) { $a -bor [IO.FileAttributes]::Hidden } else { $a -band (-bnot [IO.FileAttributes]::Hidden) }
+    [IO.File]::SetAttributes($Caminho, $novo)
+}
+
+# Fecha o Explorador para ele reler o menu de contexto; o Windows o abre de novo sozinho, como o usuário
+# (abrir explorer.exe daqui, com admin, deixaria a área de trabalho rodando como administrador).
+function Restart-TmdExplorador {
+    Get-Process -Name explorer -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+}
+
 # Apaga o conteúdo de uma pasta item por item pelo núcleo (Remove-TmdItem, com a própria pasta como única raiz).
 # Os temporários do próprio Tamanduá (tamandua-*: pedido, resposta e progresso do processo elevado) ficam.
 function Clear-TmdConteudoPasta {

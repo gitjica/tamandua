@@ -48,6 +48,8 @@ Export-ModuleMember -Function @(
     'Invoke-TmdPrograma'
     'Set-TmdAjuste'
     'Invoke-TmdAcaoAjuste'
+    'Get-TmdTextoIndireto'
+    'Restart-TmdExplorador'
     'Undo-TmdAjuste'
     'Get-TmdEstadoAjuste'
     'Test-TmdAjusteReversivel'

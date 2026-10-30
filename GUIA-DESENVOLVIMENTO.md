@@ -561,6 +561,7 @@ o módulo só mostra ajustes de registro sem admin, e o motor recusa serviço e 
 | `desinstalar` | Lista programas (Uninstall HKLM/HKCU/WOW6432 + Appx), roda o desinstalador, oferece restos → Lixeira | sim | depende | Mole |
 | `programas` | Catálogo por categoria (winget), instalar em lote, ver o que já está instalado, atualizar todos (`winget upgrade`) | sim | depende | WinUtil |
 | `ajustes` | Seção 8 | sim | parcial | WinUtil (melhorado) |
+| `menu-contexto` | Menu clássico no Windows 11; tira itens do Windows (Compartilhar, Biblioteca, Paint 3D, "Novo", "Enviar para"...) e de programas (achados na hora) | sim | parcial | Atlas + próprio |
 | `recursos` | Liga/desliga recursos opcionais (WSL, Hyper-V, Sandbox, .NET 3.5, NFS) com estado atual | sim | sim | WinUtil |
 | `atualizacoes` | Política do Windows Update: padrão / só segurança (adiar recursos) / pausar. **Desativar totalmente não é oferecido** | sim | sim | WinUtil (restrito) |
 | `otimizar` | Flush DNS, reconstruir cache de ícones, retrim SSD (`defrag /O`), limpeza de componentes DISM | sim | sim | Mole + WinUtil |
@@ -572,6 +573,8 @@ A navegação por pastas que só eles usavam (`Find-Alvos -Caminho`, duplo cliqu
 do nome do módulo na CLI é erro.
 
 ### Proteções específicas
+
+- **menu-contexto:** tudo reversível pelo motor. Extensões (do Windows e de programas) são bloqueadas pelo CLSID em `HKLM\...\Shell Extensions\Blocked` (64 e 32 bits); comandos sem extensão ganham `ProgrammaticAccessOnly` na chave onde estão de verdade (HKCU ou HKLM\SOFTWARE\Classes); itens do "Novo" saem com `Remove-TmdChaveComCopia` (`reg export` em `estado\chaves\<id>.reg` antes, `Restore-` importa de volta); "Enviar para" só oculta os atalhos. Programa de terceiros = DLL/comando fora da pasta do Windows (ou em `DriverStore`); nome bare (`cmd.exe`) é do Windows. Itens que não existem na máquina não aparecem. No fim, `Restart-TmdExplorador` fecha o Explorador e o Windows o reabre como o usuário (nunca `explorer.exe` a partir do processo admin). Presets: Só o menu clássico, Recomendado, Limpo ao máximo. Testes: um "HKCR" falso dentro da chave de teste (`-RaizRegistro`); menu clássico, "Novo" e "Enviar para" não rodam lá.
 
 - **Lista de proteção vale dentro das pastas:** ao apagar uma pasta, o que estiver dentro e bater com a lista (ex.: uma `chave.pem`
   num `target\deploy`) fica, e o resultado vira `Parcial` com "N protegido(s) pela lista de proteção".
