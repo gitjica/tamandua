@@ -21,8 +21,9 @@ function Initialize-TmdTela {
         JaAvisouCarga = $false
         # Módulo -> 'Lista' quando o usuário trocou a grade por lista nele.
         Visao         = @{}
-        # Pasta de alternativas aberta na grade (nome do grupo), ou vazio.
+        # Pasta de alternativas aberta na grade (nome do grupo), ou vazio; e o quadro onde o botão do mouse desceu.
         PastaAberta   = ''
+        PastaApertada = $null
         # Páginas já lidas (nome -> Alvos e Quando) e a leitura antecipada em andamento. Ver Start-TmdAntecipacao.
         Cache         = @{}
         Geracao       = 0
@@ -56,6 +57,24 @@ function Initialize-TmdTela {
                 if ($nome) { Select-TmdPreset -Preset $nome }
             }
         })
+    # Pastas da grade abrem (e "Voltar" fecha) no CLIQUE: botão apertado e solto no mesmo quadro. Não pela seleção:
+    # o ListBox muda a seleção quando o mouse passa com o botão apertado, e depois de trocar a lista caía outra
+    # pasta embaixo do mouse, que abria sozinha.
+    $c.ListaAlvos.AddHandler([System.Windows.UIElement]::PreviewMouseLeftButtonDownEvent, [System.Windows.Input.MouseButtonEventHandler] {
+            $script:Estado.PastaApertada = Get-TmdLinhaDoEvento -Origem $args[1].OriginalSource
+        })
+    $c.ListaAlvos.AddHandler([System.Windows.UIElement]::PreviewMouseLeftButtonUpEvent, [System.Windows.Input.MouseButtonEventHandler] {
+            $evento = $args[1]
+            Invoke-TmdProtegido {
+                $linha = Get-TmdLinhaDoEvento -Origem $evento.OriginalSource
+                $apertada = $script:Estado.PastaApertada
+                $script:Estado.PastaApertada = $null
+                if ($linha -and $linha -eq $apertada -and $linha.Tipo -in 'Pasta', 'Voltar') {
+                    Open-TmdPasta -Nome $(if ($linha.Tipo -eq 'Pasta') { $linha.Nome } else { '' })
+                    $evento.Handled = $true
+                }
+            }
+        })
     # Caixas de seleção dentro das linhas: um único ouvinte na lista para todos os cliques.
     $c.ListaAlvos.AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler] {
             $evento = $args[1]
@@ -76,6 +95,12 @@ function Initialize-TmdTela {
             $e = $args[1]
             if ($e.Key -eq 'F' -and [System.Windows.Input.Keyboard]::Modifiers -eq 'Control') {
                 [void]$script:Tela.Controles.CampoBusca.Focus()
+                $e.Handled = $true
+            }
+            elseif ($e.Key -eq 'Enter' -and $script:Tela.Controles.ListaAlvos.IsKeyboardFocusWithin -and
+                $script:Tela.Controles.ListaAlvos.SelectedItem -and $script:Tela.Controles.ListaAlvos.SelectedItem.Tipo -in 'Pasta', 'Voltar') {
+                $sel = $script:Tela.Controles.ListaAlvos.SelectedItem
+                Invoke-TmdProtegido { Open-TmdPasta -Nome $(if ($sel.Tipo -eq 'Pasta') { $sel.Nome } else { '' }) }
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'Escape' -and $script:Estado.PastaAberta -and -not $script:Tela.Controles.CampoBusca.IsKeyboardFocused) {
@@ -640,9 +665,15 @@ function Show-TmdMensagem {
 function Show-TmdDetalhe {
     $c = $script:Tela.Controles
     $linha = $c.ListaAlvos.SelectedItem
-    # Clique numa pasta abre; no "Voltar", fecha. Depois do evento de seleção, para não trocar a lista no meio dele.
+    # Pasta selecionada (teclado) só mostra o que tem dentro; abrir é com clique ou Enter.
     if ($linha -and $linha.Tipo -in 'Pasta', 'Voltar') {
-        Open-TmdPasta -Nome $(if ($linha.Tipo -eq 'Pasta') { $linha.Nome } else { '' })
+        $c.PainelSemSelecao.Visibility = 'Collapsed'
+        $c.PainelDetalhe.Visibility = 'Visible'
+        $c.DetalheNome.Text = $linha.Nome
+        $c.DetalheCategoria.Text = $linha.Categoria
+        $c.DetalheTexto.Text = $linha.Detalhe
+        $c.DetalheEstado.Text = if ($linha.Tipo -eq 'Pasta') { "$($linha.Selo) · clique ou Enter para abrir" } else { 'clique, Enter ou Esc para voltar' }
+        $c.DetalheId.Text = ''
         return
     }
     if ($null -eq $linha -or $linha.Tipo -ne 'Alvo') {
@@ -659,10 +690,28 @@ function Show-TmdDetalhe {
     $c.DetalheId.Text = "id: $($linha.Id)"
 }
 
+# Abre a pasta (-Nome) ou fecha (vazio). Ao fechar, a lista volta no lugar da pasta, não no topo.
 function Open-TmdPasta {
     param([string]$Nome)
+    $c = $script:Tela.Controles
+    $anterior = $script:Estado.PastaAberta
     $script:Estado.PastaAberta = $Nome
-    [void]$script:Tela.Janela.Dispatcher.BeginInvoke([Action] { Invoke-TmdProtegido { Update-TmdBusca; Show-TmdDetalhe } })
+    Update-TmdBusca
+    $c.ListaAlvos.SelectedItem = $null
+    $linhas = @($c.ListaAlvos.ItemsSource)
+    $alvo = if (-not $Nome -and $anterior) { @($linhas | Where-Object { $_.Tipo -eq 'Pasta' -and $_.Nome -eq $anterior })[0] } else { $linhas[0] }
+    if ($alvo) { $c.ListaAlvos.ScrollIntoView($alvo) }
+    Show-TmdDetalhe
+}
+
+# Linha (DataContext) do quadro onde o evento do mouse aconteceu, ou $null.
+function Get-TmdLinhaDoEvento {
+    param($Origem)
+    $e = $Origem
+    while ($e -and -not ($e -is [System.Windows.Controls.ListBoxItem])) {
+        $e = if ($e -is [System.Windows.Media.Visual] -or $e -is [System.Windows.Media.Media3D.Visual3D]) { [System.Windows.Media.VisualTreeHelper]::GetParent($e) } else { $null }
+    }
+    if ($e) { $e.DataContext } else { $null }
 }
 
 # Avisa quem abriu a janela (testes, captura de tela) uma única vez, quando a primeira página terminou.

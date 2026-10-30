@@ -309,6 +309,55 @@ function Find-Alvos {
         $resultado.ModeloVolta | Should -BeTrue
     }
 
+    It 'pasta da grade: selecionar não abre; clique abre; Voltar mostra a lista inteira e nada abre sozinho depois' {
+        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'pastas' -ComInterface
+        New-ModuloFalso -Raiz $raiz -Nome 'pastas' -Manifesto @{ Visualizacao = 'Grade'; Escreve = $true } -Codigo @'
+function Test-Requisitos { @{ Ok = $true } }
+function Find-Alvos {
+    foreach ($g in 'A', 'B', 'C') { foreach ($n in 1, 2) { [pscustomobject]@{ Id = "$g$n"; Nome = "Prog $g$n"; Categoria = 'C'; Estado = 'NaoAplicado'; Detalhe = 'd'; Selecionado = $false; Grupo = "Grupo $g" } } }
+}
+function Invoke-Acao { param($Alvos, [switch]$Simular) }
+'@ | Out-Null
+        $global:TmdTestePastas = @{}
+        $aoCarregar = {
+            param($tela)
+            $r = $global:TmdTestePastas
+            $c = $tela.Controles
+            $lista = $c.ListaAlvos
+            $clicar = {
+                param($linha)
+                $lista.UpdateLayout(); $lista.ScrollIntoView($linha); $lista.UpdateLayout()
+                $item = $lista.ItemContainerGenerator.ContainerFromItem($linha)
+                # Como um clique de verdade: o WPF tira o "botão esquerdo" do PreviewMouseDown/Up em todo o caminho.
+                foreach ($ev in [Windows.Input.Mouse]::PreviewMouseDownEvent, [Windows.Input.Mouse]::PreviewMouseUpEvent) {
+                    $a = New-Object Windows.Input.MouseButtonEventArgs([Windows.Input.Mouse]::PrimaryDevice, 0, [Windows.Input.MouseButton]::Left)
+                    $a.RoutedEvent = $ev
+                    $item.RaiseEvent($a)
+                }
+            }
+            $pastas = @($lista.ItemsSource | Where-Object Tipo -eq 'Pasta')
+            $r.PastasNoInicio = $pastas.Count
+            $lista.SelectedItem = $pastas[1]
+            $r.AbriuPorSelecao = [bool]@($lista.ItemsSource | Where-Object Tipo -eq 'Voltar')
+            & $clicar $pastas[1]
+            $r.Dentro = @($lista.ItemsSource | ForEach-Object { "$($_.Tipo):$($_.Nome)" }) -join ','
+            & $clicar @($lista.ItemsSource | Where-Object Tipo -eq 'Voltar')[0]
+            $r.PastasDepois = @($lista.ItemsSource | Where-Object Tipo -eq 'Pasta').Count
+            # O que travava: logo depois de voltar, uma pasta cai embaixo do mouse e é selecionada.
+            $lista.SelectedItem = @($lista.ItemsSource | Where-Object Tipo -eq 'Pasta')[0]
+            $r.AbriuDepois = [bool]@($lista.ItemsSource | Where-Object Tipo -eq 'Voltar')
+            $tela.Janela.Close()
+        }
+        Start-TmdInterface -Raiz $raiz -AoCarregar $aoCarregar -FecharAposSeg 30
+        $r = $global:TmdTestePastas
+        Remove-Variable -Name TmdTestePastas -Scope Global
+        $r.PastasNoInicio | Should -Be 3
+        $r.AbriuPorSelecao | Should -BeFalse
+        $r.Dentro | Should -Be 'Categoria:Grupo B,Voltar:Voltar,Alvo:Prog B1,Alvo:Prog B2'
+        $r.PastasDepois | Should -Be 3
+        $r.AbriuDepois | Should -BeFalse
+    }
+
     It 'módulo que falha ao buscar: a janela continua de pé e mostra o erro' {
         $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'ruim' -ComInterface
         New-ModuloFalso -Raiz $raiz -Nome 'ruim' -Codigo @'
