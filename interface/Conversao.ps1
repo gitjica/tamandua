@@ -103,7 +103,8 @@ function ConvertTo-LinhaAlvo {
                     -TemCaixa ($Escreve -and (Get-ValorPropriedade $a 'Selecionavel') -ne $false) `
                     -Selecionado ($Escreve -and (Get-ValorPropriedade $a 'Selecionado') -eq $true) `
                     -Tamanho $(if ($tamanho -gt 0) { [int64]$tamanho } else { 0 }) `
-                    -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent))
+                    -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent `
+                    -IconePng (Get-ValorPropriedade $a 'IconePng')))
     }
     , $linhas.ToArray()
 }
@@ -115,12 +116,16 @@ function New-LinhaAlvo {
         [string]$Nivel = 'Normal', [double]$Valor = 0, [bool]$TemValor = $false, [string]$Selo = '', [string]$Id = '', $Alvo = $null,
         [bool]$TemCaixa = $false, [bool]$Selecionado = $false, [int64]$Tamanho = 0, [bool]$RequerAdmin = $false,
         # Em página de módulo que escreve, item sem caixa ainda guarda o espaço dela (as colunas não desalinham).
-        [bool]$ReservaCaixa = $false
+        [bool]$ReservaCaixa = $false,
+        # Grade: ícone em PNG (vira imagem na janela, em Set-TmdImagensLinha); sem ícone, o quadro mostra a inicial do nome.
+        [byte[]]$IconePng = $null
     )
+    $inicial = if ($Nome) { $Nome.Trim().Substring(0, 1).ToUpperInvariant() } else { '' }
     [pscustomobject]@{
         Tipo = $Tipo; Id = $Id; Nome = $Nome; Categoria = $Categoria; Detalhe = $Detalhe; Estado = $Estado; Nivel = $Nivel
         Valor = $Valor; TemValor = $TemValor; Selo = $Selo; TemSelo = [bool]$Selo; Alvo = $Alvo
         TemCaixa = $TemCaixa; Selecionado = $Selecionado; Tamanho = $Tamanho; RequerAdmin = $RequerAdmin; ReservaCaixa = $ReservaCaixa
+        IconePng = $IconePng; Inicial = $inicial; Imagem = $null; TemImagem = $false
     }
 }
 

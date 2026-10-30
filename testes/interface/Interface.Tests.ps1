@@ -270,6 +270,45 @@ function Find-Alvos { [pscustomobject]@{ Id = 'so'; Nome = 'Único'; Categoria =
         $r.Mensagem | Should -Be 'Nada a fazer aqui'
     }
 
+    It 'módulo em grade: ícone do programa ou inicial, e o botão troca para lista e volta' {
+        $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'grade' -ComInterface
+        New-ModuloFalso -Raiz $raiz -Nome 'grade' -Manifesto @{ Visualizacao = 'Grade' } -Codigo @'
+function Test-Requisitos { @{ Ok = $true } }
+function Find-Alvos {
+    [pscustomobject]@{ Id = 'com'; Nome = 'Com ícone'; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = 'd'; Icone = '%SystemRoot%\System32\shell32.dll,3' }
+    [pscustomobject]@{ Id = 'sem'; Nome = 'sem ícone'; Categoria = 'C'; Estado = 'NaoSeAplica'; Detalhe = 'd'; Icone = 'C:\nao\existe.exe' }
+}
+'@ | Out-Null
+        $resultado = @{}
+        $aoCarregar = {
+            param($tela)
+            $c = $tela.Controles
+            $janela = $tela.Janela
+            $linhas = @($c.ListaAlvos.ItemsSource | Where-Object Tipo -eq 'Alvo')
+            $resultado.Botao = [string]$c.BotaoVisao.Visibility
+            $resultado.Modelo = $c.ListaAlvos.ItemTemplate -eq $janela.FindResource('ModeloGrade')
+            $resultado.Com = $linhas | Where-Object Id -eq 'com'
+            $resultado.Sem = $linhas | Where-Object Id -eq 'sem'
+            $c.BotaoVisao.RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
+            $resultado.ModeloDepois = $c.ListaAlvos.ItemTemplate -eq $janela.FindResource('ModeloGrade')
+            $resultado.LinhasDepois = @($c.ListaAlvos.ItemsSource | Where-Object Tipo -eq 'Alvo').Count
+            $c.BotaoVisao.RaiseEvent((New-Object Windows.RoutedEventArgs([Windows.Controls.Button]::ClickEvent)))
+            $resultado.ModeloVolta = $c.ListaAlvos.ItemTemplate -eq $janela.FindResource('ModeloGrade')
+            $janela.Close()
+        }.GetNewClosure()
+        Start-TmdInterface -Raiz $raiz -AoCarregar $aoCarregar -FecharAposSeg 30
+
+        $resultado.Botao | Should -Be 'Visible'
+        $resultado.Modelo | Should -BeTrue
+        $resultado.Com.TemImagem | Should -BeTrue
+        $resultado.Com.Imagem | Should -BeOfType [Windows.Media.Imaging.BitmapSource] -Because 'o Binding do WPF não converte um PSObject em imagem'
+        $resultado.Sem.TemImagem | Should -BeFalse
+        $resultado.Sem.Inicial | Should -Be 'S'
+        $resultado.ModeloDepois | Should -BeFalse -Because 'o botão troca para lista'
+        $resultado.LinhasDepois | Should -Be 2
+        $resultado.ModeloVolta | Should -BeTrue
+    }
+
     It 'módulo que falha ao buscar: a janela continua de pé e mostra o erro' {
         $raiz = New-ProjetoFalso -Pai $TestDrive -Catalogo 'ruim' -ComInterface
         New-ModuloFalso -Raiz $raiz -Nome 'ruim' -Codigo @'

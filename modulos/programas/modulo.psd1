@@ -6,6 +6,8 @@
     Escreve           = $true
     RequerAdmin       = $false
     ContratoMinimo    = 1
+    # A janela mostra em grade, com o ícone de cada programa (dá para trocar para lista).
+    Visualizacao      = 'Grade'
     Icone             = 'pacote'
     RotuloAcao        = 'Instalar ou atualizar'
     Resultado         = 'Mudancas'

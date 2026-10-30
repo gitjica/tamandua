@@ -8,7 +8,7 @@ BeforeAll {
     InModuleScope desinstalar { $script:EsperaMaximaSeg = 0 }
 
     function New-ProgramaFalso([string]$Id, [string]$Nome, [string]$Desinstalador, [string]$Editor = 'Acme', [bool]$ParaTodos = $true) {
-        [pscustomobject]@{ Id = $Id; Nome = $Nome; Editor = $Editor; Versao = '1.2.3'; TamanhoKB = 2048; Instalado = '20260115'; Desinstalador = $Desinstalador; ParaTodos = $ParaTodos }
+        [pscustomobject]@{ Id = $Id; Nome = $Nome; Editor = $Editor; Versao = '1.2.3'; TamanhoKB = 2048; Instalado = '20260115'; Desinstalador = $Desinstalador; ParaTodos = $ParaTodos; Icone = 'C:\Apps\icone.exe,0' }
     }
 
     function Set-SistemaFalso {
@@ -83,6 +83,8 @@ Describe 'Find-Alvos' {
         ($alvos | Where-Object Id -eq 'prog:HKLM64:Acme').Risco | Should -Be 'Medio'
         ($alvos | Where-Object Id -eq 'prog:HKLM64:Acme').Detalhe | Should -Match 'Acme · versão 1.2.3 · 2[,.]0 MB · instalado em 15/01/2026'
         ($alvos | Where-Object Id -eq 'prog:HKLM64:Acme').Reversivel | Should -BeFalse
+        # O ícone (DisplayIcon) vai junto para a grade.
+        ($alvos | Where-Object Id -eq 'prog:HKLM64:Acme').Icone | Should -Be 'C:\Apps\icone.exe,0'
     }
 
     It 'agrupa "para todos" antes de "só seu usuário" e ignora data de instalação inválida' {

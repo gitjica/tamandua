@@ -234,4 +234,104 @@
         <Setter Property="Background" Value="{DynamicResource SuperficieLateral}"/>
         <Setter Property="BorderThickness" Value="0"/>
     </Style>
+
+    <!-- ===== Grade (módulos com Visualizacao = 'Grade'): quadros com ícone, nome e selo. ===== -->
+    <ItemsPanelTemplate x:Key="PainelGrade">
+        <WrapPanel Orientation="Horizontal" Margin="8,4,8,8"/>
+    </ItemsPanelTemplate>
+
+    <!-- Quadro; o cabeçalho de categoria ocupa a linha inteira (largura da área visível da lista). -->
+    <Style x:Key="ItemAlvoGrade" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource Texto}"/>
+        <Setter Property="Margin" Value="4"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Caixa" Background="{DynamicResource Superficie}" BorderBrush="{DynamicResource Borda}"
+                            BorderThickness="1" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource Fundo}"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Caixa" Property="Background" Value="{DynamicResource AcentoFundo}"/>
+                            <Setter TargetName="Caixa" Property="BorderBrush" Value="{DynamicResource Acento}"/>
+                        </Trigger>
+                        <DataTrigger Binding="{Binding Tipo}" Value="Categoria">
+                            <Setter TargetName="Caixa" Property="Background" Value="Transparent"/>
+                            <Setter TargetName="Caixa" Property="BorderThickness" Value="0"/>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <DataTrigger Binding="{Binding Tipo}" Value="Categoria">
+                <Setter Property="IsHitTestVisible" Value="False"/>
+                <Setter Property="Focusable" Value="False"/>
+                <Setter Property="Margin" Value="4,14,4,0"/>
+                <Setter Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=ScrollContentPresenter}}"/>
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <DataTemplate x:Key="ModeloGrade">
+        <Grid>
+            <TextBlock x:Name="RotuloCategoria" Text="{Binding Nome}" FontSize="11" Foreground="{DynamicResource TextoSutil}" Visibility="Collapsed"/>
+            <Grid x:Name="Quadro" Width="150" Height="132" ToolTip="{Binding Detalhe}">
+                <CheckBox x:Name="Caixa" Style="{DynamicResource Caixa}" IsChecked="{Binding Selecionado, Mode=OneWay}"
+                          HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Visibility="Collapsed"
+                          AutomationProperties.Name="{Binding Nome}"/>
+                <TextBlock x:Name="Escudo" Style="{DynamicResource Icone}" Text="&#xE83D;" FontSize="12" HorizontalAlignment="Right"
+                           VerticalAlignment="Top" Margin="8" Visibility="Collapsed" ToolTip="Pede permissão de administrador"/>
+                <StackPanel VerticalAlignment="Center" Margin="8,18,8,6">
+                    <Grid Width="40" Height="40" HorizontalAlignment="Center">
+                        <Border x:Name="FundoInicial" CornerRadius="20" Background="{DynamicResource AcentoFundo}">
+                            <TextBlock Text="{Binding Inicial}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource Acento}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <Image x:Name="Imagem" Source="{Binding Imagem}" Width="32" Height="32" Visibility="Collapsed"
+                               RenderOptions.BitmapScalingMode="HighQuality"/>
+                    </Grid>
+                    <TextBlock Text="{Binding Nome}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
+                               MaxHeight="34" Margin="0,8,0,4"/>
+                    <Border x:Name="Selo" CornerRadius="4" Padding="6,1" HorizontalAlignment="Center"
+                            Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
+                        <TextBlock x:Name="TextoSelo" Text="{Binding Selo}" FontSize="10" Foreground="{DynamicResource TextoSecundario}"
+                                   TextTrimming="CharacterEllipsis" MaxWidth="130"/>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding Tipo}" Value="Categoria">
+                <Setter TargetName="RotuloCategoria" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Quadro" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemImagem}" Value="True">
+                <Setter TargetName="Imagem" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="FundoInicial" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemCaixa}" Value="True">
+                <Setter TargetName="Caixa" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RequerAdmin}" Value="True">
+                <Setter TargetName="Escudo" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemSelo}" Value="True">
+                <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Estado}" Value="Aplicado">
+                <Setter TargetName="Selo" Property="Background" Value="{DynamicResource SucessoFundo}"/>
+                <Setter TargetName="TextoSelo" Property="Foreground" Value="{DynamicResource Sucesso}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Estado}" Value="Parcial">
+                <Setter TargetName="Selo" Property="Background" Value="{DynamicResource AvisoFundo}"/>
+                <Setter TargetName="TextoSelo" Property="Foreground" Value="{DynamicResource Aviso}"/>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
 </ResourceDictionary>

@@ -279,3 +279,21 @@ Describe 'Lixeira de verdade' -Skip:($env:TAMANDUA_TESTE_LIXEIRA -ne '1') {
         Test-Path -LiteralPath $arquivo | Should -BeFalse
     }
 }
+
+Describe 'Ícones para a grade (só leitura)' {
+    It 'tira o PNG de um ícone do Windows, com ou sem índice e aspas' {
+        $png = Get-TmdIconePng -Caminho '"%SystemRoot%\System32\shell32.dll",3'
+        $png | Should -BeOfType [byte]
+        # Assinatura do PNG: 89 50 4E 47.
+        $png[0..3] | Should -Be @(0x89, 0x50, 0x4E, 0x47)
+    }
+
+    It 'arquivo que não existe ou caminho vazio: nada, sem erro' {
+        Get-TmdIconePng -Caminho 'C:\nao\existe\app.exe,0' | Should -BeNullOrEmpty
+        Get-TmdIconePng -Caminho '' | Should -BeNullOrEmpty
+    }
+
+    It 'nome simples para comparar programas' {
+        ConvertTo-TmdNomeSimples 'Mozilla Firefox (x64 pt-BR)' | Should -Be 'mozillafirefoxx64ptbr'
+    }
+}

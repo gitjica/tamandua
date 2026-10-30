@@ -143,6 +143,7 @@ $script:ScriptCarregarModulos = {
             RotuloAcao = if ($m.Manifesto -and $m.Manifesto['RotuloAcao']) { [string]$m.Manifesto['RotuloAcao'] } else { 'Aplicar' }
             Resultado = if ($m.Manifesto -and $m.Manifesto['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
             AvisoConfirmacao = if ($m.Manifesto -and $m.Manifesto['AvisoConfirmacao']) { [string]$m.Manifesto['AvisoConfirmacao'] } else { '' }
+            Visualizacao = if ($m.Manifesto -and $m.Manifesto['Visualizacao'] -eq 'Grade') { 'Grade' } else { 'Lista' }
         }
     }
 }
@@ -157,7 +158,7 @@ $script:ScriptPrimeiraPagina = {
     if (-not $primeiro) { return }
     $m = Get-TmdModulo -Raiz $Raiz -Nome $primeiro['Nome']
     $ok = $m -and $m.Estado -eq 'ok'
-    [pscustomobject]@{ Nome = [string]$primeiro['Nome']; Ok = [bool]$ok; Alvos = @(if ($ok) { & $m.Modulo.ExportedFunctions['Find-Alvos'] }) }
+    [pscustomobject]@{ Nome = [string]$primeiro['Nome']; Ok = [bool]$ok; Alvos = @(if ($ok) { Get-TmdAlvosParaTela -Info $m }) }
 }
 
 $script:ScriptHistorico = {
@@ -193,5 +194,5 @@ $script:ScriptBuscarAlvos = {
     # A janela já conferiu os requisitos ao carregar a lista de módulos.
     $m = Get-TmdModulo -Raiz $Raiz -Nome $Nome -SemRequisitos
     if (-not $m -or $m.Estado -ne 'ok') { throw "o módulo $Nome não está disponível" }
-    & $m.Modulo.ExportedFunctions['Find-Alvos']
+    Get-TmdAlvosParaTela -Info $m
 }

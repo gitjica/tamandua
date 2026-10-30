@@ -73,6 +73,7 @@ function Find-Alvos {
 
     $instalados = Get-WingetInstalado
     $atualizacoes = Get-WingetAtualizacao
+    $icones = Get-TmdIconesInstalados
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) {
         $instalado = $instalados.ContainsKey($p.wingetId)
         $nova = if ($atualizacoes.ContainsKey($p.wingetId)) { $atualizacoes[$p.wingetId] } else { $null }
@@ -80,7 +81,7 @@ function Find-Alvos {
         $selo = if (-not $instalado) { 'não instalado' } elseif ($nova) { "atualizar para $nova" } else { 'instalado' }
         $acao = if (-not $instalado) { 'install' } elseif ($nova) { 'upgrade' } else { $null }
         $livre = if ($p.livre) { ' Software livre.' } else { '' }
-        New-AlvoPrograma -Id $p.id -Nome $p.nome -Categoria $p.categoria -Estado $estado -Selo $selo `
+        New-AlvoPrograma -Id $p.id -Nome $p.nome -Categoria $p.categoria -Estado $estado -Selo $selo -Icone (Find-IconePrograma -Icones $icones -Nome $p.nome -Instalado $instalado) `
             -Detalhe "$($p.descricao)$livre" -Mudancas @(
             $(if ($acao) { "winget $acao --id $($p.wingetId) --exact --source winget" } else { 'Já instalado e atualizado: nada a fazer.' })
         )
@@ -92,12 +93,22 @@ function Find-Alvos {
     }
 }
 
+# Ícone do programa instalado com esse nome ("7-Zip" acha "7-Zip 24.08 (x64)"). Não instalado: sem ícone (a tela mostra a inicial).
+function Find-IconePrograma {
+    param([hashtable]$Icones, [string]$Nome, [bool]$Instalado)
+    if (-not $Instalado -or -not $Icones) { return '' }
+    $simples = ConvertTo-TmdNomeSimples $Nome
+    if (-not $simples) { return '' }
+    foreach ($k in $Icones.Keys) { if ($k.StartsWith($simples)) { return [string]$Icones[$k] } }
+    ''
+}
+
 function New-AlvoPrograma {
-    param([string]$Id, [string]$Nome, [string]$Categoria, [string]$Estado, [string]$Selo, [string]$Detalhe, [string[]]$Mudancas)
+    param([string]$Id, [string]$Nome, [string]$Categoria, [string]$Estado, [string]$Selo, [string]$Detalhe, [string[]]$Mudancas, [string]$Icone = '')
     [pscustomobject]@{
         Id = $Id; Nome = $Nome; Categoria = $Categoria; Caminho = ''; Tamanho = [int64]0; Estado = $Estado; Selo = $Selo
         Detalhe = $Detalhe; Nivel = 'Normal'; Valor = $null; Risco = 'Baixo'; Selecionado = $false; Destino = 'NaoSeAplica'
-        RequerAdmin = $false; Reversivel = $null; Mudancas = $Mudancas
+        RequerAdmin = $false; Reversivel = $null; Mudancas = $Mudancas; Icone = $Icone
     }
 }
 

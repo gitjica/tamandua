@@ -19,6 +19,8 @@ function Initialize-TmdTela {
         Confirmando   = $false
         AoCarregar    = $AoCarregar
         JaAvisouCarga = $false
+        # Módulo -> 'Lista' quando o usuário trocou a grade por lista nele.
+        Visao         = @{}
         # Páginas já lidas (nome -> Alvos e Quando) e a leitura antecipada em andamento. Ver Start-TmdAntecipacao.
         Cache         = @{}
         Geracao       = 0
@@ -38,6 +40,9 @@ function Initialize-TmdTela {
     $c.ListaAlvos.Add_SelectionChanged({ Invoke-TmdProtegido { Show-TmdDetalhe } })
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
     $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Forcar } })
+    $c.BotaoVisao.Add_Click({ Invoke-TmdProtegido { Switch-TmdVisao } })
+    # O jeito "lista" é o que está no janela.xaml; a grade vem de estilos.xaml (Set-TmdVisao troca entre os dois).
+    $script:VisaoLista = @{ Modelo = $c.ListaAlvos.ItemTemplate; Painel = $c.ListaAlvos.ItemsPanel }
     $c.BotaoCancelar.Add_Click({ Invoke-TmdProtegido { Stop-TmdCargaPagina } })
     $c.BotaoSimular.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoSimular } })
     $c.BotaoAplicar.Add_Click({ Invoke-TmdProtegido { Invoke-TmdBotaoAplicar } })
@@ -208,6 +213,7 @@ function Open-TmdPagina {
     $c.BotaoSimular.IsEnabled = $false
     $c.BotaoAplicar.IsEnabled = $false
     $c.PainelPresets.Visibility = 'Collapsed'
+    Set-TmdVisao
     $c.ListaPresets.ItemsSource = $null
     Show-TmdDetalhe
 
@@ -525,6 +531,7 @@ function Update-TmdBusca {
     if ($modulo.Estado -ne 'ok') { return }
 
     $linhas = ConvertTo-LinhaAlvo -Alvos $script:Estado.Alvos -Busca $busca -Escreve:$modulo.Escreve
+    if (Test-TmdEmGrade) { Set-TmdImagensLinha -Linhas $linhas }
     if ($linhas.Count -eq 0) {
         if ($busca) {
             Show-TmdMensagem -Icone ([string][char]0xE721) -Titulo 'Nada encontrado' -Texto "Nenhum item desta página corresponde a “$busca”."
@@ -537,6 +544,70 @@ function Update-TmdBusca {
     $c.ListaAlvos.ItemsSource = $linhas
     $c.PainelMensagem.Visibility = 'Collapsed'
     $c.ListaAlvos.Visibility = 'Visible'
+}
+
+# ---------- Grade ou lista ----------
+
+# A página atual está em grade? (módulo pede grade e o usuário não trocou para lista nele)
+function Test-TmdEmGrade {
+    $m = Get-TmdModuloAtual
+    $m -and (Get-ValorPropriedade $m 'Visualizacao') -eq 'Grade' -and $script:Estado.Visao[$m.Nome] -ne 'Lista'
+}
+
+# Troca o jeito de mostrar a lista (modelo, painel e estilo de item) e o botão de grade/lista.
+function Set-TmdVisao {
+    $c = $script:Tela.Controles
+    $m = Get-TmdModuloAtual
+    $podeGrade = $m -and (Get-ValorPropriedade $m 'Visualizacao') -eq 'Grade'
+    $c.BotaoVisao.Visibility = if ($podeGrade) { 'Visible' } else { 'Collapsed' }
+    if (Test-TmdEmGrade) {
+        $c.ListaAlvos.ItemTemplate = $script:Tela.Janela.FindResource('ModeloGrade')
+        $c.ListaAlvos.ItemsPanel = $script:Tela.Janela.FindResource('PainelGrade')
+        $c.ListaAlvos.SetResourceReference([Windows.Controls.ItemsControl]::ItemContainerStyleProperty, 'ItemAlvoGrade')
+        $c.IconeVisao.Text = [string][char]0xE8FD
+        $c.BotaoVisao.ToolTip = 'Ver em lista'
+    }
+    else {
+        $c.ListaAlvos.ItemTemplate = $script:VisaoLista.Modelo
+        $c.ListaAlvos.ItemsPanel = $script:VisaoLista.Painel
+        $c.ListaAlvos.SetResourceReference([Windows.Controls.ItemsControl]::ItemContainerStyleProperty, 'ItemAlvo')
+        $c.IconeVisao.Text = [string][char]0xE80A
+        $c.BotaoVisao.ToolTip = 'Ver em grade'
+    }
+}
+
+function Switch-TmdVisao {
+    $m = Get-TmdModuloAtual
+    if (-not $m) { return }
+    $script:Estado.Visao[$m.Nome] = if (Test-TmdEmGrade) { 'Lista' } else { 'Grade' }
+    Set-TmdVisao
+    Update-TmdBusca
+}
+
+# PNG do ícone -> imagem do WPF. Guardada por módulo e item: a busca refaz as linhas a cada tecla.
+$script:CacheImagens = @{}
+function Set-TmdImagensLinha {
+    param([object[]]$Linhas)
+    foreach ($l in $Linhas) {
+        if (-not $l.IconePng -or $l.IconePng.Length -lt 8) { continue }
+        $chave = "$($script:Estado.ModuloAtual)|$($l.Id)"
+        $imagem = $script:CacheImagens[$chave]
+        if (-not $imagem) {
+            try {
+                # ::new e não New-Object: este embrulha num PSObject, e o Binding do WPF não converte isso em imagem.
+                $imagem = [Windows.Media.Imaging.BitmapImage]::new()
+                $imagem.BeginInit()
+                $imagem.CacheOption = [Windows.Media.Imaging.BitmapCacheOption]::OnLoad
+                $imagem.StreamSource = New-Object IO.MemoryStream(, $l.IconePng)
+                $imagem.EndInit()
+                $imagem.Freeze()
+                $script:CacheImagens[$chave] = $imagem
+            }
+            catch { continue }
+        }
+        $l.Imagem = $imagem.PSObject.BaseObject
+        $l.TemImagem = $true
+    }
 }
 
 function Show-TmdMensagem {

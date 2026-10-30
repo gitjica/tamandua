@@ -46,6 +46,7 @@ function Get-RegistroPrograma {
                             Instalado     = [string]$k.GetValue('InstallDate')
                             Desinstalador = $desinstalar
                             ParaTodos     = $fonte.Hive -eq 'LocalMachine'
+                            Icone         = [string]$k.GetValue('DisplayIcon')
                         }
                     }
                     finally { $k.Close() }
@@ -111,6 +112,7 @@ function Find-Alvos {
             Destino     = 'NaoSeAplica'
             RequerAdmin = $p.ParaTodos
             Reversivel  = $false
+            Icone       = $p.Icone
             Mudancas    = @("Roda o desinstalador do programa: $($p.Desinstalador)", 'Depois, pastas com o nome dele em AppData/ProgramData aparecem em "Restos" para você decidir.')
         }
     }

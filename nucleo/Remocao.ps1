@@ -273,6 +273,26 @@ namespace Tamandua {
         // Sem perguntar, sem barra de progresso, sem som.
         public static int Esvaziar() { return SHEmptyRecycleBin(System.IntPtr.Zero, null, 0x1 | 0x2 | 0x4); }
     }
+    public static class Icones {
+        [System.Runtime.InteropServices.DllImport("shell32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern uint ExtractIconEx(string arquivo, int indice, System.IntPtr[] grandes, System.IntPtr[] pequenos, uint quantos);
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool DestroyIcon(System.IntPtr icone);
+        // Ícone grande (32x32) do arquivo (exe, dll ou ico) como PNG; null se não tiver.
+        public static byte[] Png(string arquivo, int indice) {
+            var grandes = new System.IntPtr[1];
+            if (ExtractIconEx(arquivo, indice, grandes, null, 1) == 0 || grandes[0] == System.IntPtr.Zero) return null;
+            try {
+                using (var icone = System.Drawing.Icon.FromHandle(grandes[0]))
+                using (var imagem = icone.ToBitmap())
+                using (var saida = new System.IO.MemoryStream()) {
+                    imagem.Save(saida, System.Drawing.Imaging.ImageFormat.Png);
+                    return saida.ToArray();
+                }
+            }
+            finally { DestroyIcon(grandes[0]); }
+        }
+    }
     public static class Texto {
         [System.Runtime.InteropServices.DllImport("shlwapi.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
         private static extern int SHLoadIndirectString(string fonte, System.Text.StringBuilder saida, int tamanho, System.IntPtr reservado);
@@ -305,12 +325,9 @@ namespace Tamandua {
         }
     }
 }
-'@
+'@ -ReferencedAssemblies System.Drawing
 }
 
-# Uso do processador (0 a 100) num intervalo, como o Gerenciador de Tarefas mostra.
-# Para não ficar parado esperando: $m = Start-TmdMedidaCpu; (lê outras coisas); Get-TmdUsoCpu -Desde $m
-# (só espera o que faltar para completar -IntervaloMs).
 # Nome legível de um texto do registro como "@shell32.dll,-8506" (no idioma do Windows).
 function Get-TmdTextoIndireto {
     [CmdletBinding()]
@@ -319,6 +336,84 @@ function Get-TmdTextoIndireto {
     Initialize-TmdTipos
     [Tamandua.Texto]::Indireto($Texto)
 }
+
+$script:CacheIcones = @{}
+
+# Ícone de "arquivo.exe", "arquivo.dll,3" ou '"C:\x\a.exe",0' (o formato do DisplayIcon) como PNG 32x32; $null se não der.
+# Guardado por caminho: a página de programas pede os mesmos ícones toda vez que abre.
+function Get-TmdIconePng {
+    [CmdletBinding()]
+    param([AllowEmptyString()][string]$Caminho)
+    if (-not $Caminho) { return $null }
+    # Vírgula só com ícone: ", $null" viraria uma lista com um item vazio.
+    if ($script:CacheIcones.ContainsKey($Caminho)) { $g = $script:CacheIcones[$Caminho]; if ($null -eq $g) { return $null }; return , $g }
+    $arquivo = $Caminho.Trim()
+    $indice = 0
+    if ($arquivo -match '^(.*?),\s*(-?\d+)$') { $arquivo = $Matches[1]; $indice = [int]$Matches[2] }
+    $arquivo = [Environment]::ExpandEnvironmentVariables($arquivo.Trim().Trim('"'))
+    $png = $null
+    try {
+        if ([IO.File]::Exists($arquivo)) {
+            Initialize-TmdTipos
+            $png = [Tamandua.Icones]::Png($arquivo, $indice)
+        }
+    }
+    catch { Write-Verbose "sem ícone em $Caminho`: $($_.Exception.Message)" }
+    $script:CacheIcones[$Caminho] = $png
+    if ($null -eq $png) { return $null }
+    , $png
+}
+
+# Programas instalados (chaves Uninstall de 64 e 32 bits e do usuário): nome simplificado -> DisplayIcon.
+function Get-TmdIconesInstalados {
+    [CmdletBinding()]
+    param()
+    $mapa = @{}
+    foreach ($f in @(@('LocalMachine', 'Registry64'), @('LocalMachine', 'Registry32'), @('CurrentUser', 'Registry64'))) {
+        $base = [Microsoft.Win32.RegistryKey]::OpenBaseKey($f[0], $f[1])
+        try {
+            $raiz = $base.OpenSubKey('SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', $false)
+            if (-not $raiz) { continue }
+            try {
+                foreach ($n in $raiz.GetSubKeyNames()) {
+                    $k = $raiz.OpenSubKey($n, $false)
+                    if (-not $k) { continue }
+                    try {
+                        $nome = [string]$k.GetValue('DisplayName'); $icone = [string]$k.GetValue('DisplayIcon')
+                        if ($nome -and $icone) { $mapa[(ConvertTo-TmdNomeSimples $nome)] = $icone }
+                    }
+                    finally { $k.Close() }
+                }
+            }
+            finally { $raiz.Close() }
+        }
+        finally { $base.Close() }
+    }
+    $mapa
+}
+
+# "7-Zip 24.08 (x64)" -> "7zip2408x64": para comparar nomes de programa sem espaço, pontuação e maiúsculas.
+# Find-Alvos do módulo para a janela. Em módulo com Visualizacao = 'Grade', cada alvo com Icone ganha
+# IconePng: extrair aqui (em segundo plano) não trava a tela.
+function Get-TmdAlvosParaTela {
+    param([Parameter(Mandatory)]$Info)
+    $grade = $Info.Manifesto -and $Info.Manifesto['Visualizacao'] -eq 'Grade'
+    foreach ($a in & $Info.Modulo.ExportedFunctions['Find-Alvos']) {
+        if ($grade -and $a.PSObject.Properties['Icone'] -and $a.Icone) {
+            $a | Add-Member -NotePropertyName IconePng -NotePropertyValue (Get-TmdIconePng -Caminho $a.Icone) -Force
+        }
+        $a
+    }
+}
+
+function ConvertTo-TmdNomeSimples {
+    param([string]$Nome)
+    ($Nome.ToLowerInvariant() -replace '[^a-z0-9]', '')
+}
+
+# Uso do processador (0 a 100) num intervalo, como o Gerenciador de Tarefas mostra.
+# Para não ficar parado esperando: $m = Start-TmdMedidaCpu; (lê outras coisas); Get-TmdUsoCpu -Desde $m
+# (só espera o que faltar para completar -IntervaloMs).
 
 function Start-TmdMedidaCpu {
     Initialize-TmdTipos

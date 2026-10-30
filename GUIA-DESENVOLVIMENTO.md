@@ -256,6 +256,13 @@ Regras:
 - Manifesto pode ter `RotuloAcao` (ex.: `'Limpar'`): vira o texto do botão principal e da pergunta de confirmação,
   `Resultado = 'Mudancas'` quando o resultado fala de mudanças (ajustes, programas) em vez de espaço liberado, e
   `AvisoConfirmacao` (texto que vai junto da pergunta de confirmação, na CLI e na interface).
+- Manifesto com `Visualizacao = 'Grade'` (desinstalar, programas) mostra a página em quadros com ícone; o botão no
+  cabeçalho da página troca para lista e volta (a escolha vale por módulo enquanto a janela está aberta). Alvo com
+  `Icone` (caminho no formato do `DisplayIcon`: `arquivo` ou `arquivo,índice`, com aspas e variáveis de ambiente)
+  ganha o ícone; sem ícone, o quadro mostra a inicial do nome. O PNG é extraído em segundo plano por
+  `Get-TmdAlvosParaTela` (núcleo, que as duas leituras da janela usam) e vira imagem na janela em `Set-TmdImagensLinha`.
+  A imagem tem que ir para a linha como objeto .NET puro (`::new()` e `.PSObject.BaseObject`): embrulhada num
+  PSObject, o Binding do WPF não mostra nada e não dá erro.
 - Alvo pode ter `Selo` (texto do selo, ex.: "instalado"); a cor continua vindo do `Estado`.
 - Módulo que registra operação sem apagar nada (ex.: programas) usa `Write-TmdOperacao`; arquivo temporário próprio usa
   `New-TmdArquivoTemporario` / `Remove-TmdArquivoTemporario` (só `tamandua-*` direto no TEMP).

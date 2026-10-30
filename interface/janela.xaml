@@ -120,6 +120,11 @@
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
                         </DockPanel>
+                        <!-- Grade/lista: só nos módulos que pedem grade (Visualizacao = 'Grade' no manifesto). -->
+                        <Button x:Name="BotaoVisao" DockPanel.Dock="Right" Style="{DynamicResource BotaoIcone}" VerticalAlignment="Top"
+                                Visibility="Collapsed" ToolTip="Ver em lista" AutomationProperties.Name="Trocar entre grade e lista">
+                            <TextBlock x:Name="IconeVisao" Style="{DynamicResource Icone}" Text="&#xE8FD;"/>
+                        </Button>
                         <StackPanel>
                             <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
                             <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>
