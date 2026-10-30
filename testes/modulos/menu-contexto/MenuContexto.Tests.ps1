@@ -152,6 +152,39 @@ Describe 'Ajudantes do núcleo para o menu' {
         Test-Path -LiteralPath $f | Should -BeTrue
     }
 
+    It 'reiniciar o Explorador: se o Windows não reabrir, o Tamanduá abre; só mexe na sessão de quem usa' {
+        $sessao = [Diagnostics.Process]::GetCurrentProcess().SessionId
+        $global:TmdTesteExplorer = @{ Vivos = @([pscustomobject]@{ Id = 101; SessionId = $sessao }, [pscustomobject]@{ Id = 202; SessionId = $sessao + 1 }); Fechados = @(); Aberto = 0; Volta = $false }
+        Mock Get-Process -ModuleName Tamandua.Nucleo -ParameterFilter { $Name -eq 'explorer' } { $global:TmdTesteExplorer.Vivos }
+        Mock Stop-Process -ModuleName Tamandua.Nucleo {
+            $ids = @($Id)
+            $global:TmdTesteExplorer.Fechados += $ids
+            $global:TmdTesteExplorer.Vivos = @($global:TmdTesteExplorer.Vivos | Where-Object { $ids -notcontains $_.Id })
+            # Com "Volta", o Windows reabre sozinho (um processo novo na mesma sessão).
+            if ($global:TmdTesteExplorer.Volta) { $global:TmdTesteExplorer.Vivos += [pscustomobject]@{ Id = 303; SessionId = [Diagnostics.Process]::GetCurrentProcess().SessionId } }
+        }
+        Mock Start-Process -ModuleName Tamandua.Nucleo { $global:TmdTesteExplorer.Aberto++ }
+        try {
+            # Não voltou: abre.
+            InModuleScope Tamandua.Nucleo { Restart-TmdExplorador -EsperaMs 600 }
+            $global:TmdTesteExplorer.Fechados | Should -Be @(101) -Because 'o Explorador de outra sessão (outro usuário) não é tocado'
+            $global:TmdTesteExplorer.Aberto | Should -Be 1
+            Should -Invoke Start-Process -ModuleName Tamandua.Nucleo -ParameterFilter { $FilePath -like '*\explorer.exe' } -Times 1 -Exactly
+            # Voltou sozinho: não abre outro (senão sobraria uma janela do Explorador aberta à toa).
+            $global:TmdTesteExplorer = @{ Vivos = @([pscustomobject]@{ Id = 101; SessionId = $sessao }); Fechados = @(); Aberto = 0; Volta = $true }
+            InModuleScope Tamandua.Nucleo { Restart-TmdExplorador -EsperaMs 2000 }
+            $global:TmdTesteExplorer.Aberto | Should -Be 0
+        }
+        finally { Remove-Variable -Name TmdTesteExplorer -Scope Global -ErrorAction SilentlyContinue }
+    }
+
+    It 'o ajuste do menu clássico (página Ajustes) também reinicia o Explorador garantindo que ele volte' {
+        $a = @([IO.File]::ReadAllText((Join-Path $script:RaizProjeto 'modulos\ajustes\ajustes.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json | ForEach-Object { $_ })
+        $todos = ($a | ConvertTo-Json -Depth 8)
+        $todos | Should -Not -Match 'Stop-Process -Name explorer' -Because 'fechar sem garantir a volta deixava a pessoa sem barra de tarefas'
+        ($a | Where-Object id -eq 'expl-menu-classico').mudancas[0].aplicar | Should -Match 'Restart-TmdExplorador'
+    }
+
     It 'texto indireto do Windows vira nome legível' {
         $t = Get-TmdTextoIndireto '@shell32.dll,-8506'
         $t | Should -Not -BeNullOrEmpty

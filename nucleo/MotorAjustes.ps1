@@ -423,10 +423,23 @@ function Set-TmdArquivoOculto {
     [IO.File]::SetAttributes($Caminho, $novo)
 }
 
-# Fecha o Explorador para ele reler o menu de contexto; o Windows o abre de novo sozinho, como o usuário
-# (abrir explorer.exe daqui, com admin, deixaria a área de trabalho rodando como administrador).
+# Fecha o Explorador para ele reler o menu de contexto e garante que ele volte. O Windows só reabre sozinho quando o
+# Explorador cai por conta própria, não quando outro programa o fecha: espera um pouco e, se não voltou, abre.
+# Aberto daqui mesmo com admin, o explorer.exe se reabre como usuário comum (o /NOUACCHECK existe para o contrário),
+# então a área de trabalho não fica rodando como administrador. Só mexe no Explorador da sessão de quem usa.
 function Restart-TmdExplorador {
-    Get-Process -Name explorer -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    [CmdletBinding()]
+    param([int]$EsperaMs = 4000)
+    $sessao = [Diagnostics.Process]::GetCurrentProcess().SessionId
+    $daSessao = { @(Get-Process -Name explorer -ErrorAction SilentlyContinue | Where-Object { $_.SessionId -eq $sessao }) }
+    $idsAntes = @(& $daSessao | ForEach-Object Id)
+    if ($idsAntes.Count -gt 0) { Stop-Process -Id $idsAntes -Force -ErrorAction SilentlyContinue }
+    $relogio = [Diagnostics.Stopwatch]::StartNew()
+    while ($relogio.ElapsedMilliseconds -lt $EsperaMs) {
+        Start-Sleep -Milliseconds 250
+        if (@(& $daSessao | Where-Object { $idsAntes -notcontains $_.Id }).Count -gt 0) { return }
+    }
+    Start-Process -FilePath (Join-Path $env:SystemRoot 'explorer.exe')
 }
 
 # Apaga o conteúdo de uma pasta item por item pelo núcleo (Remove-TmdItem, com a própria pasta como única raiz).
