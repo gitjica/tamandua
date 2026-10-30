@@ -29,8 +29,9 @@ function Invoke-TmdAcaoModulo {
     $elevar = @($Alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'RequerAdmin') -eq $true })
     $aqui = @($Alvos | Where-Object { (Get-Propriedade -Objeto $_ -Nome 'RequerAdmin') -ne $true })
     $porId = @{}
-    if ($aqui.Count -gt 0) { foreach ($r in @(Invoke-TmdAcaoPorItem -Acao $acao -Alvos $aqui)) { $porId[[string]$r.Id] = $r } }
+    # O lote elevado vai primeiro: é nele que estão as ações de sistema que precisam vir antes (ex.: ponto de restauração).
     if ($elevar.Count -gt 0) { foreach ($r in @(Invoke-TmdAcaoElevada -Raiz $Raiz -Modulo $Info.Nome -Alvos $elevar)) { $porId[[string]$r.Id] = $r } }
+    if ($aqui.Count -gt 0) { foreach ($r in @(Invoke-TmdAcaoPorItem -Acao $acao -Alvos $aqui)) { $porId[[string]$r.Id] = $r } }
     foreach ($a in $Alvos) { if ($porId.ContainsKey([string]$a.Id)) { $porId[[string]$a.Id] } }
 }
 

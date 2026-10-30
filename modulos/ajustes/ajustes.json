@@ -1,6 +1,44 @@
 [
   {
+    "id": "seg-ponto-restauracao",
+    "winutil": ["WPFTweaksRestorePoint"],
+    "acao": true,
+    "primeiro": true,
+    "nome": "Criar ponto de restauração antes",
+    "descricao": "Cria um ponto de restauração do Windows antes dos outros ajustes marcados: se algo der errado, dá para voltar o sistema inteiro. Liga a Proteção do Sistema no disco do Windows se estiver desligada. (WinUtil: Restore Point - Create)",
+    "categoria": "Segurança",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
+    "executar": "Invoke-TmdCriarPontoRestauracao -Descricao 'Tamanduá'"
+  },
+  {
+    "id": "acao-limpar-temporarios",
+    "winutil": ["WPFTweaksDeleteTempFiles"],
+    "acao": true,
+    "nome": "Apagar os temporários agora",
+    "descricao": "Apaga tudo da pasta temporária do usuário e da do Windows (o que estiver em uso fica). Diferente do módulo Limpar, não guarda o que foi mexido nas últimas 24 horas. (WinUtil: Temporary Files - Remove)",
+    "categoria": "Limpeza (uma vez)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "executar": "Clear-TmdConteudoPasta -Pasta ([IO.Path]::GetTempPath()) -Id 'acao-limpar-temporarios'; Clear-TmdConteudoPasta -Pasta (Join-Path $env:SystemRoot 'Temp') -Id 'acao-limpar-temporarios'"
+  },
+  {
+    "id": "acao-limpeza-disco",
+    "winutil": ["WPFTweaksDiskCleanup"],
+    "acao": true,
+    "nome": "Limpeza de Disco e de atualizações antigas",
+    "descricao": "Roda a Limpeza de Disco do Windows em tudo (no fim ela mostra quanto liberou) e o DISM com /ResetBase: libera GBs de atualizações antigas, mas as atualizações já instaladas deixam de poder ser desinstaladas. Pode levar vários minutos. (WinUtil: Disk Cleanup - Run)",
+    "categoria": "Limpeza (uma vez)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Essencial"],
+    "executar": "[void](Invoke-TmdPrograma -Arquivo 'cleanmgr.exe' -Argumentos ('/d ' + $env:SystemDrive + ' /VERYLOWDISK') -Modulo 'ajustes' -Id 'acao-limpeza-disco'); $r = Invoke-TmdPrograma -Arquivo 'dism.exe' -Argumentos '/Online /Cleanup-Image /StartComponentCleanup /ResetBase' -Modulo 'ajustes' -Id 'acao-limpeza-disco'; if ($r.Codigo -ne 0) { throw ('o DISM terminou com código ' + $r.Codigo) }"
+  },
+  {
     "id": "priv-telemetria",
+    "winutil": ["WPFTweaksTelemetry"],
     "nome": "Desativar a telemetria",
     "descricao": "Para o envio de dados de diagnóstico e uso para a Microsoft: serviço de telemetria, relatório de erros, coleta de digitação e tinta, pesquisas de opinião e a telemetria do PowerShell. (WinUtil: Telemetry)",
     "categoria": "Privacidade",
@@ -24,6 +62,7 @@
   },
   {
     "id": "priv-historico-atividades",
+    "winutil": ["WPFTweaksActivity"],
     "nome": "Desativar o histórico de atividades",
     "descricao": "O Windows deixa de registrar e enviar os apps e arquivos que você abre (linha do tempo). (WinUtil: Activity History)",
     "categoria": "Privacidade",
@@ -38,6 +77,7 @@
   },
   {
     "id": "priv-recursos-consumidor",
+    "winutil": ["WPFTweaksConsumerFeatures"],
     "nome": "Não instalar jogos e apps de propaganda",
     "descricao": "Desliga os \"recursos de consumidor\": o Windows para de instalar sozinho Candy Crush, TikTok e afins depois de atualizações. (WinUtil: ConsumerFeatures)",
     "categoria": "Privacidade",
@@ -49,7 +89,21 @@
     ]
   },
   {
+    "id": "priv-sem-otimizacao-entrega",
+    "winutil": ["WPFTweaksDeliveryOptimization"],
+    "nome": "Não compartilhar atualizações com outros PCs",
+    "descricao": "O Windows para de usar a sua internet para mandar pedaços de atualizações para outros computadores. É o mesmo valor do item do módulo Atualizações: aplicar num aparece aplicado no outro. (WinUtil: Delivery Optimization - Disable)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeliveryOptimization", "nome": "DODownloadMode", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
     "id": "priv-localizacao",
+    "winutil": ["WPFTweaksLocation"],
     "nome": "Desativar a localização",
     "descricao": "Desliga o serviço de localização e a atualização automática de mapas. Apps de clima e mapas e o fuso horário automático deixam de saber onde você está. (WinUtil: Location Tracking)",
     "categoria": "Privacidade",
@@ -125,6 +179,7 @@
   },
   {
     "id": "priv-bing-iniciar",
+    "winutil": ["WPFToggleBingSearch"],
     "nome": "Sem Bing na busca do Iniciar",
     "descricao": "A busca do menu Iniciar procura só no computador, sem mandar o que você digita para o Bing.",
     "categoria": "Privacidade",
@@ -137,6 +192,7 @@
   },
   {
     "id": "priv-apps-dispositivos",
+    "winutil": ["WPFTweaksPreventDeviceMetadataFromNetwork"],
     "nome": "Não baixar apps de dispositivos",
     "descricao": "O Windows não baixa sozinho apps \"companheiros\" e ícones de fabricantes quando você conecta um aparelho. (WinUtil: Prevent Device Companion Apps)",
     "categoria": "Privacidade",
@@ -149,6 +205,7 @@
   },
   {
     "id": "priv-busca-loja",
+    "winutil": ["WPFTweaksDisableStoreSearch"],
     "nome": "Sem resultados da Microsoft Store na busca",
     "descricao": "A busca do Iniciar deixa de sugerir apps da Store, bloqueando o acesso ao arquivo de recomendações dela. (WinUtil: Microsoft Store Recommended Search Results)",
     "categoria": "Privacidade",
@@ -166,6 +223,7 @@
   },
   {
     "id": "priv-outlook-classico",
+    "winutil": ["WPFToggleNewOutlook"],
     "nome": "Ficar no Outlook clássico",
     "descricao": "Impede a troca automática para o \"novo Outlook\" e desliga a chavinha que tenta migrar. (WinUtil: Microsoft Outlook New Version)",
     "categoria": "Programas",
@@ -180,6 +238,7 @@
   },
   {
     "id": "sis-servicos-manual",
+    "winutil": ["WPFTweaksServices"],
     "nome": "Serviços pouco usados em manual",
     "descricao": "Arquivos Offline desligado; Mapas, Armazenamento e Compartilhamento de Internet só ligam quando alguém precisar. (WinUtil: Services - Set to Manual; aqui o Compartilhamento fica em manual, não desligado, para o Hotspot móvel continuar funcionando)",
     "categoria": "Sistema",
@@ -195,6 +254,7 @@
   },
   {
     "id": "sis-wpbt",
+    "winutil": ["WPFTweaksWPBT"],
     "nome": "Bloquear programas embutidos no firmware (WPBT)",
     "descricao": "O Windows deixa de rodar programas que o fabricante grava na BIOS/UEFI (ex.: utilitários que voltam sozinhos depois de formatar). Rastreadores antifurto de fabricante deixam de funcionar. (WinUtil: WPBT)",
     "categoria": "Sistema",
@@ -207,6 +267,7 @@
   },
   {
     "id": "sis-storage-sense",
+    "winutil": ["WPFTweaksStorage"],
     "nome": "Desligar o Sensor de Armazenamento",
     "descricao": "O Windows para de apagar sozinho arquivos da Lixeira e de Downloads para liberar espaço. (WinUtil: Storage Sense)",
     "categoria": "Sistema",
@@ -219,6 +280,7 @@
   },
   {
     "id": "sis-caminhos-longos",
+    "winutil": ["WPFToggleLongPaths"],
     "nome": "Permitir caminhos longos",
     "descricao": "Programas compatíveis passam a aceitar caminhos com mais de 260 caracteres (útil para quem programa: node_modules, git). (WinUtil: Enable Long Paths)",
     "categoria": "Sistema",
@@ -231,6 +293,7 @@
   },
   {
     "id": "sis-tela-azul-detalhada",
+    "winutil": ["WPFToggleDetailedBSoD"],
     "nome": "Tela azul com detalhes",
     "descricao": "A tela azul mostra o código e o driver que causou o erro, em vez do rostinho triste. (WinUtil: BSoD Verbose Mode)",
     "categoria": "Sistema",
@@ -244,6 +307,7 @@
   },
   {
     "id": "sis-login-detalhado",
+    "winutil": ["WPFToggleVerboseLogon"],
     "nome": "Mostrar o que o Windows faz ao entrar e desligar",
     "descricao": "Em vez de \"Bem-vindo\", mostra cada etapa (ajuda a ver onde trava). (WinUtil: Logon Verbose Mode)",
     "categoria": "Sistema",
@@ -256,6 +320,7 @@
   },
   {
     "id": "sis-sem-tela-bloqueio",
+    "winutil": ["WPFToggleDisableLockscreen"],
     "nome": "Sem tela de bloqueio",
     "descricao": "Pula a imagem da tela de bloqueio e vai direto para a senha. (WinUtil: Lock Screen - Disable)",
     "categoria": "Sistema",
@@ -268,6 +333,7 @@
   },
   {
     "id": "sis-config-sem-inicio",
+    "winutil": ["WPFToggleHideSettingsHome"],
     "nome": "Configurações sem a página Início",
     "descricao": "O app Configurações abre direto em Sistema, sem a página Início com propaganda de serviços. (WinUtil: Settings Home Page)",
     "categoria": "Sistema",
@@ -280,6 +346,7 @@
   },
   {
     "id": "sis-apps-segundo-plano",
+    "winutil": ["WPFTweaksDisableBGapps"],
     "nome": "Apps da Store sem rodar em segundo plano",
     "descricao": "Apps da Microsoft Store só rodam quando abertos: economiza bateria e memória, mas alguns (ex.: Vincular ao Celular) param de avisar. (WinUtil: Background Apps)",
     "categoria": "Sistema",
@@ -292,6 +359,7 @@
   },
   {
     "id": "sis-sem-notificacoes",
+    "winutil": ["WPFTweaksDisableNotifications"],
     "nome": "Sem central de notificações",
     "descricao": "Esconde a central de notificações e o calendário da bandeja e desliga os avisos dos apps. Você deixa de ver lembretes e alertas. (WinUtil: System Tray Notifications & Calendar)",
     "categoria": "Sistema",
@@ -305,6 +373,7 @@
   },
   {
     "id": "expl-extensoes",
+    "winutil": ["WPFToggleShowExt"],
     "nome": "Mostrar extensões de arquivo",
     "descricao": "Mostra o .exe, .pdf, .jpg no nome dos arquivos. Ajuda a não cair em \"foto.jpg.exe\". (WinUtil: File Explorer File Extensions)",
     "categoria": "Explorador de Arquivos",
@@ -317,6 +386,7 @@
   },
   {
     "id": "expl-ocultos",
+    "winutil": ["WPFToggleHiddenFiles"],
     "nome": "Mostrar arquivos ocultos",
     "descricao": "Mostra pastas como AppData. Arquivos protegidos do sistema continuam escondidos. (WinUtil: File Explorer Hidden Files)",
     "categoria": "Explorador de Arquivos",
@@ -341,6 +411,7 @@
   },
   {
     "id": "expl-sem-inicio-galeria",
+    "winutil": ["WPFTweaksRemoveHomeAndGallery"],
     "nome": "Tirar Início e Galeria do Explorador",
     "descricao": "Some com \"Início\" e \"Galeria\" do painel da esquerda do Explorador (Windows 11). (WinUtil: File Explorer Home and Gallery)",
     "categoria": "Explorador de Arquivos",
@@ -354,6 +425,7 @@
   },
   {
     "id": "expl-sem-autodescoberta",
+    "winutil": ["WPFTweaksDisableExplorerAutoDiscovery"],
     "nome": "Explorador sem adivinhar o tipo de pasta",
     "descricao": "O Explorador para de decidir sozinho que uma pasta é \"de fotos\" ou \"de músicas\" (o que deixa pastas grandes lentas). Volta o modo de exibição salvo das pastas para o padrão. (WinUtil: File Explorer Automatic Folder Discovery)",
     "categoria": "Explorador de Arquivos",
@@ -371,6 +443,7 @@
   },
   {
     "id": "expl-menu-classico",
+    "winutil": ["WPFTweaksRightClickMenu"],
     "nome": "Menu do botão direito clássico",
     "descricao": "Volta o menu completo do botão direito do Windows 10, sem precisar clicar em \"Mostrar mais opções\". Reinicia o Explorador. (WinUtil: Right-Click Menu Previous Layout)",
     "categoria": "Explorador de Arquivos",
@@ -388,6 +461,7 @@
   },
   {
     "id": "expl-finalizar-tarefa",
+    "winutil": ["WPFTweaksEndTaskOnTaskbar"],
     "nome": "\"Finalizar tarefa\" no botão direito da barra de tarefas",
     "descricao": "Fecha um programa travado direto pela barra de tarefas (Windows 11 23H2 ou mais novo). (WinUtil: End Task With Right Click)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -400,6 +474,7 @@
   },
   {
     "id": "barra-icones-esquerda",
+    "winutil": ["WPFToggleTaskbarAlignment"],
     "nome": "Ícones da barra de tarefas à esquerda",
     "descricao": "Volta o botão Iniciar e os ícones para o canto esquerdo (Windows 11). (WinUtil: Taskbar Centered Icons)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -412,6 +487,7 @@
   },
   {
     "id": "barra-sem-busca",
+    "winutil": ["WPFToggleTaskbarSearch"],
     "nome": "Esconder a busca da barra de tarefas",
     "descricao": "Tira a caixa/ícone de pesquisa da barra. Apertar a tecla Windows e digitar continua pesquisando. (WinUtil: Taskbar Search Icon)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -424,6 +500,7 @@
   },
   {
     "id": "barra-sem-visao-tarefas",
+    "winutil": ["WPFToggleTaskView"],
     "nome": "Esconder o botão Visão de Tarefas",
     "descricao": "Tira o botão das áreas de trabalho virtuais da barra (Win+Tab continua funcionando). (WinUtil: Taskbar Task View Icon)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -436,6 +513,7 @@
   },
   {
     "id": "barra-sem-recomendados",
+    "winutil": ["WPFToggleStartMenuRecommendations"],
     "nome": "Iniciar sem a seção \"Recomendados\"",
     "descricao": "Some com arquivos recentes e sugestões do menu Iniciar. Usa a mesma política das edições Education, por isso vale também no Home e no Pro. (WinUtil: Start Menu Recommendations)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -450,6 +528,7 @@
   },
   {
     "id": "barra-porcentagem-bateria",
+    "winutil": ["WPFToggleBatteryPercentage"],
     "nome": "Porcentagem da bateria na barra",
     "descricao": "Mostra o número da bateria ao lado do ícone (notebooks). (WinUtil: System Tray Battery Percentage)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -462,6 +541,7 @@
   },
   {
     "id": "barra-iniciar-antigo",
+    "winutil": ["WPFTweaksRevertStartMenu"],
     "nome": "Menu Iniciar no layout anterior",
     "descricao": "Volta o menu Iniciar do Windows 11 de antes da reformulação de 2025. Pode não funcionar nas versões mais novas. (WinUtil: Start Menu Previous Layout)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -474,6 +554,7 @@
   },
   {
     "id": "barra-sem-widgets",
+    "winutil": ["WPFTweaksWidget"],
     "nome": "Remover os Widgets",
     "descricao": "Desinstala os Widgets (notícias e clima da barra) para todos os usuários. Desfazer reinstala pela Microsoft Store. (WinUtil: Widgets - Remove)",
     "categoria": "Barra de tarefas e Iniciar",
@@ -491,6 +572,7 @@
   },
   {
     "id": "aparencia-tema-escuro",
+    "winutil": ["WPFToggleDarkMode"],
     "nome": "Tema escuro",
     "descricao": "Windows e apps no modo escuro. (WinUtil: Dark Theme for Windows)",
     "categoria": "Aparência",
@@ -504,6 +586,7 @@
   },
   {
     "id": "aparencia-efeitos-desempenho",
+    "winutil": ["WPFTweaksDisplay"],
     "nome": "Efeitos visuais no modo desempenho",
     "descricao": "Desliga animações, sombras e transparência das janelas e menus, e abre menus mais rápido. O Windows fica com cara de mais simples e responde mais rápido em PCs fracos. Vale no próximo login. (WinUtil: Visual Effects - Set to Best Performance)",
     "categoria": "Aparência",
@@ -525,6 +608,7 @@
   },
   {
     "id": "aparencia-barras-rolagem",
+    "winutil": ["WPFToggleScrollbars"],
     "nome": "Barras de rolagem sempre visíveis",
     "descricao": "As barras de rolagem não somem quando o mouse sai de cima. (WinUtil: Scrollbars Always Visible)",
     "categoria": "Aparência",
@@ -537,6 +621,7 @@
   },
   {
     "id": "aparencia-sem-desfoque-login",
+    "winutil": ["WPFToggleLoginBlur"],
     "nome": "Tela de login sem desfoque",
     "descricao": "Mostra a imagem de fundo da tela de login nítida, sem o efeito de vidro fosco. (WinUtil: Logon Screen Acrylic Blur)",
     "categoria": "Aparência",
@@ -549,6 +634,7 @@
   },
   {
     "id": "janela-sem-encaixe",
+    "winutil": ["WPFToggleWindowSnapping"],
     "nome": "Sem encaixe automático de janelas",
     "descricao": "Arrastar uma janela até a borda da tela não a encaixa nem maximiza mais. (WinUtil: Window Snapping)",
     "categoria": "Aparência",
@@ -561,6 +647,7 @@
   },
   {
     "id": "mouse-sem-aceleracao",
+    "winutil": ["WPFToggleMouseAcceleration"],
     "nome": "Mouse sem aceleração",
     "descricao": "O ponteiro anda sempre a mesma distância para o mesmo movimento (\"Aumentar precisão do ponteiro\" desligado). Vale no próximo login. (WinUtil: Mouse Acceleration)",
     "categoria": "Mouse e teclado",
@@ -575,6 +662,7 @@
   },
   {
     "id": "acess-teclas-aderentes",
+    "winutil": ["WPFToggleStickyKeys"],
     "nome": "Shift 5 vezes não liga as Teclas de Aderência",
     "descricao": "Desliga o atalho que abre as Teclas de Aderência ao apertar Shift cinco vezes (comum em jogos). (WinUtil: Sticky Keys)",
     "categoria": "Mouse e teclado",
@@ -587,6 +675,7 @@
   },
   {
     "id": "teclado-numlock",
+    "winutil": ["WPFToggleNumLock"],
     "nome": "Num Lock ligado ao iniciar",
     "descricao": "O teclado numérico já começa ligado, na tela de login e depois de entrar. (WinUtil: Num Lock on Startup)",
     "categoria": "Mouse e teclado",
@@ -600,6 +689,7 @@
   },
   {
     "id": "jogos-modo-jogo",
+    "winutil": ["WPFToggleGameMode"],
     "nome": "Modo de Jogo ligado",
     "descricao": "O Windows prioriza o jogo aberto e segura atualizações e notificações enquanto você joga. (WinUtil: Game Mode)",
     "categoria": "Desempenho e jogos",
@@ -613,6 +703,7 @@
   },
   {
     "id": "energia-sem-hibernacao",
+    "winutil": ["WPFTweaksHiber"],
     "nome": "Desativar a hibernação",
     "descricao": "Apaga o hiberfil.sys (alguns GB no disco C:) e desliga a Inicialização Rápida. Em notebook, sem hibernar, a bateria acaba se ele ficar dias suspenso. (WinUtil: Hibernation - Disable)",
     "categoria": "Energia",
@@ -631,6 +722,7 @@
   },
   {
     "id": "energia-desempenho-maximo",
+    "winutil": ["WPFAddUltPerf", "WPFRemoveUltPerf"],
     "nome": "Plano de energia Desempenho Máximo",
     "descricao": "Cria e ativa o plano \"Desempenho Máximo\": o processador não economiza energia. Só para PC de mesa: em notebook gasta bateria e esquenta. Desfazer volta para o plano Equilibrado. (WinUtil: Ultimate Performance Profile)",
     "categoria": "Energia",
@@ -648,6 +740,7 @@
   },
   {
     "id": "energia-rede-espera",
+    "winutil": ["WPFToggleStandbyFix"],
     "nome": "Sem internet no modo de espera (na bateria)",
     "descricao": "No modo de espera moderno, o notebook desliga o Wi-Fi quando está na bateria: gasta menos e não esquenta na mochila. (WinUtil: S0 Sleep Network Connectivity)",
     "categoria": "Energia",
@@ -659,7 +752,125 @@
     ]
   },
   {
+    "id": "rede-dns-google",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: Google",
+    "descricao": "DNS do Google. Troca o DNS de todas as placas de rede conectadas (8.8.8.8 e 8.8.4.4). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Google)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '8.8.8.8', '8.8.4.4' -Ipv6 '2001:4860:4860::8888', '2001:4860:4860::8844'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '8.8.8.8' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-cloudflare",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: Cloudflare",
+    "descricao": "DNS da Cloudflare, costuma ser o mais rápido no Brasil. Troca o DNS de todas as placas de rede conectadas (1.1.1.1 e 1.0.0.1). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Cloudflare)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '1.1.1.1', '1.0.0.1' -Ipv6 '2606:4700:4700::1111', '2606:4700:4700::1001'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '1.1.1.1' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-cloudflare-malware",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: Cloudflare sem malware",
+    "descricao": "Cloudflare bloqueando sites de vírus e golpes. Troca o DNS de todas as placas de rede conectadas (1.1.1.2 e 1.0.0.2). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Cloudflare_Malware)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '1.1.1.2', '1.0.0.2' -Ipv6 '2606:4700:4700::1112', '2606:4700:4700::1002'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '1.1.1.2' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-cloudflare-familia",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: Cloudflare família",
+    "descricao": "Cloudflare bloqueando vírus, golpes e conteúdo adulto. Troca o DNS de todas as placas de rede conectadas (1.1.1.3 e 1.0.0.3). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Cloudflare_Malware_Adult)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '1.1.1.3', '1.0.0.3' -Ipv6 '2606:4700:4700::1113', '2606:4700:4700::1003'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '1.1.1.3' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-opendns",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: OpenDNS",
+    "descricao": "DNS da Cisco (OpenDNS). Troca o DNS de todas as placas de rede conectadas (208.67.222.222 e 208.67.220.220). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Open_DNS)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '208.67.222.222', '208.67.220.220' -Ipv6 '2620:119:35::35', '2620:119:53::53'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '208.67.222.222' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-quad9",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: Quad9",
+    "descricao": "DNS sem fins lucrativos que bloqueia sites de vírus e golpes. Troca o DNS de todas as placas de rede conectadas (9.9.9.9 e 149.112.112.112). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Quad9)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '9.9.9.9', '149.112.112.112' -Ipv6 '2620:fe::fe', '2620:fe::9'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '9.9.9.9' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-adguard",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: AdGuard",
+    "descricao": "AdGuard bloqueando propaganda e rastreadores em todo o PC. Troca o DNS de todas as placas de rede conectadas (94.140.14.14 e 94.140.15.15). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - AdGuard_Ads_Trackers)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '94.140.14.14', '94.140.15.15' -Ipv6 '2a10:50c0::ad1:ff', '2a10:50c0::ad2:ff'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '94.140.14.14' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-adguard-familia",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: AdGuard família",
+    "descricao": "AdGuard bloqueando propaganda, rastreadores, vírus e conteúdo adulto. Troca o DNS de todas as placas de rede conectadas (94.140.14.15 e 94.140.15.16). Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - AdGuard_Ads_Trackers_Malware_Adult)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '94.140.14.15', '94.140.15.16' -Ipv6 '2a10:50c0::bad1:ff', '2a10:50c0::bad2:ff'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '94.140.14.15' }).Count -eq 0" }
+    ]
+  },
+  {
+    "id": "rede-dns-mais-rapido",
+    "winutil": ["WPFchangedns"],
+    "nome": "DNS: o mais rápido (Google ou Cloudflare)",
+    "descricao": "Mede o tempo de resposta do Google e da Cloudflare daqui e usa o que respondeu mais rápido. Escolha só um DNS; desfazer volta para o automático da rede (DHCP). (WinUtil: DNS - Fastest)",
+    "categoria": "Rede (DNS)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "$c = @(@{ V4 = @('8.8.8.8', '8.8.4.4'); V6 = @('2001:4860:4860::8888', '2001:4860:4860::8844') }, @{ V4 = @('1.1.1.1', '1.0.0.1'); V6 = @('2606:4700:4700::1111', '2606:4700:4700::1001') }); $melhor = $null; $tempo = [double]::MaxValue; foreach ($x in $c) { $p = @(Test-Connection -ComputerName $x.V4[0] -Count 3 -ErrorAction SilentlyContinue); if ($p.Count -gt 0) { $m = ($p | Measure-Object -Property ResponseTime -Average).Average; if ($m -lt $tempo) { $tempo = $m; $melhor = $x } } }; if (-not $melhor) { throw 'nem o Google nem a Cloudflare responderam' }; Set-TmdDns -Ipv4 $melhor.V4 -Ipv6 $melhor.V6", "desfazer": "Set-TmdDns", "verificar": "@(Get-TmdDnsAtual | Where-Object { $_ -notin '8.8.8.8', '1.1.1.1' }).Count -eq 0 -and @(Get-TmdDnsAtual).Count -gt 0" }
+    ]
+  },
+  {
     "id": "nav-edge-limpo",
+    "winutil": ["WPFTweaksEdgeDebloat"],
     "nome": "Edge sem propaganda e coleta",
     "descricao": "Políticas do Edge: sem atalho novo na área de trabalho, sem compras, Rewards, coleções, recomendações, primeira execução e envio de dados. O Edge passa a dizer \"gerenciado pela sua organização\". (WinUtil: Microsoft Edge - Debloat)",
     "categoria": "Navegadores",
@@ -688,6 +899,7 @@
   },
   {
     "id": "nav-brave-limpo",
+    "winutil": ["WPFTweaksBraveDebloat"],
     "nome": "Brave sem os extras",
     "descricao": "Políticas do Brave: sem Rewards, carteira, VPN, IA (Leo), notícias, Talk, Tor e envio de estatísticas. (WinUtil: Brave Browser - Debloat)",
     "categoria": "Navegadores",
@@ -711,6 +923,7 @@
   },
   {
     "id": "avanc-sem-ia",
+    "winutil": ["WPFTweaksWindowsAI"],
     "nome": "Desativar a IA do Windows (Copilot e Recall)",
     "descricao": "Desliga o Copilot, as capturas do Recall, a IA do Bloco de Notas e o serviço de IA, e desinstala o app Copilot. Desfazer reinstala o Copilot pela Store. (WinUtil: Windows AI - Disable And Remove)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -720,6 +933,7 @@
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot", "nome": "TurnOffWindowsCopilot", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI", "nome": "DisableAIDataAnalysis", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "SettingsPageVisibility", "valor": "hide:aicomponents", "tipoValor": "String", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\WindowsNotepad", "nome": "DisableAIFeatures", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Servico", "nome": "WSAIFabricSvc", "inicializacao": "Disabled", "padraoWindows": "Manual" },
       {
@@ -732,6 +946,7 @@
   },
   {
     "id": "avanc-remover-onedrive",
+    "winutil": ["WPFTweaksRemoveOneDrive"],
     "nome": "Remover o OneDrive",
     "descricao": "Desinstala o OneDrive. Seus arquivos que já estão no PC ficam onde estão; os que estão só na nuvem deixam de aparecer (baixe antes o que precisar). Desfazer reinstala pelo winget. (WinUtil: Microsoft OneDrive - Remove)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -749,6 +964,7 @@
   },
   {
     "id": "avanc-remover-edge",
+    "winutil": ["WPFTweaksRemoveEdge"],
     "nome": "Remover o Microsoft Edge",
     "descricao": "Desinstala o Edge (o WebView2, usado por outros programas, fica). Diferente do WinUtil, não apaga o seu perfil do Edge (favoritos e senhas). Links de alguns lugares do Windows podem não abrir. Desfazer reinstala pelo winget. (WinUtil: Microsoft Edge - Remove)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -766,6 +982,7 @@
   },
   {
     "id": "avanc-armazenamento-reservado",
+    "winutil": ["WPFTweaksReservedStorage"],
     "nome": "Desativar o armazenamento reservado",
     "descricao": "Libera os ~7 GB que o Windows guarda para atualizações. Com o disco cheio, uma atualização grande pode falhar. (WinUtil: Disable Reserved Storage)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -783,6 +1000,7 @@
   },
   {
     "id": "avanc-svchost-agrupado",
+    "winutil": ["WPFTweaksSvcHostSplitting"],
     "nome": "Agrupar os serviços do svchost",
     "descricao": "Junta os serviços do Windows em menos processos svchost.exe (o Gerenciador de Tarefas fica mais limpo; usa um pouco menos de memória). Se um serviço travar, leva junto os do mesmo grupo. (WinUtil: svchost.exe Splitting - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -800,6 +1018,7 @@
   },
   {
     "id": "avanc-hora-utc",
+    "winutil": ["WPFTweaksUTC"],
     "nome": "Relógio do hardware em UTC",
     "descricao": "Só para quem usa Windows e Linux no mesmo PC: acaba com a hora errada ao trocar de sistema. Sem Linux, o relógio fica errado. (WinUtil: Set Time to UTC)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -812,6 +1031,7 @@
   },
   {
     "id": "avanc-sem-mpo",
+    "winutil": ["WPFMultiplaneOverlay"],
     "nome": "Desativar o Multiplane Overlay (MPO)",
     "descricao": "Resolve tela piscando ou travadinhas em alguns PCs com placas NVIDIA/AMD e vários monitores. Sem esse problema, deixe como está. (WinUtil: Multiplane Overlay - Disabled)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -823,7 +1043,90 @@
     ]
   },
   {
+    "id": "avanc-sem-recall",
+    "winutil": ["WPFTweaksWindowsAI"],
+    "nome": "Desligar o recurso Recall",
+    "descricao": "Desliga o recurso opcional Recall (as capturas de tela da IA), nos PCs que têm. Vale depois de reiniciar. (WinUtil: parte do Windows AI - Disable And Remove)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "$f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction SilentlyContinue; if ($f -and [string]$f.State -eq 'Enabled') { Disable-WindowsOptionalFeature -Online -FeatureName Recall -NoRestart -ErrorAction Stop | Out-Null }",
+        "desfazer": "$f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction SilentlyContinue; if ($f) { Enable-WindowsOptionalFeature -Online -FeatureName Recall -NoRestart -ErrorAction Stop | Out-Null }",
+        "verificar": "$f = Get-WindowsOptionalFeature -Online -FeatureName Recall -ErrorAction Stop; -not $f -or [string]$f.State -ne 'Enabled'"
+      }
+    ]
+  },
+  {
+    "id": "avanc-sem-mpo-total",
+    "winutil": ["WPFMultiplaneOverlay"],
+    "nome": "Desativar o Multiplane Overlay (MPO) por completo",
+    "descricao": "Como o anterior, e também desliga as sobreposições no driver de vídeo. Só se o modo de compatibilidade não resolveu. Escolha só um dos dois. (WinUtil: Multiplane Overlay - Fully Disabled)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm", "nome": "OverlayTestMode", "valor": 5, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\GraphicsDrivers", "nome": "DisableOverlays", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "avanc-bloquear-razer",
+    "winutil": ["WPFTweaksRazerBlock"],
+    "nome": "Não instalar o software da Razer sozinho",
+    "descricao": "Impede o Windows de instalar o Razer Synapse e afins quando você conecta um periférico Razer (o hardware funciona sem). Também para o Windows Update de buscar drivers e apps de fabricante para aparelhos novos. (WinUtil: Razer Software Auto-Install - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\DriverSearching", "nome": "SearchOrderConfig", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Device Installer", "nome": "DisableCoInstallers", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 },
+      {
+        "tipo": "Script",
+        "aplicar": "$p = Join-Path $env:SystemRoot 'Installer\\Razer'; Clear-TmdConteudoPasta -Pasta $p -Id 'avanc-bloquear-razer' | Out-Null; Set-TmdPastaBloqueada -Pasta $p",
+        "desfazer": "Set-TmdPastaBloqueada -Pasta (Join-Path $env:SystemRoot 'Installer\\Razer') -Liberar",
+        "verificar": "Test-TmdPastaBloqueada -Pasta (Join-Path $env:SystemRoot 'Installer\\Razer')"
+      }
+    ]
+  },
+  {
+    "id": "avanc-bloquear-logitech",
+    "winutil": ["WPFTweaksLogiBlock"],
+    "nome": "Não instalar o Logi Download Assistant",
+    "descricao": "Impede o Windows Update de reinstalar o assistente de download da Logitech que vem junto com os drivers. Mouse e teclado continuam funcionando. (WinUtil: Logitech Download Assistant Auto-Install - Disable)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      {
+        "tipo": "Script",
+        "aplicar": "Stop-Process -Name 'logi_download_assistant' -Force -ErrorAction SilentlyContinue; $pf = if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles }; $p = Join-Path $pf 'LogiDownloadAssistant'; Clear-TmdConteudoPasta -Pasta $p -Id 'avanc-bloquear-logitech' | Out-Null; Set-TmdPastaBloqueada -Pasta $p",
+        "desfazer": "$pf = if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles }; Set-TmdPastaBloqueada -Pasta (Join-Path $pf 'LogiDownloadAssistant') -Liberar",
+        "verificar": "$pf = if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles }; Test-TmdPastaBloqueada -Pasta (Join-Path $pf 'LogiDownloadAssistant')"
+      }
+    ]
+  },
+  {
+    "id": "acao-oo-shutup",
+    "winutil": ["WPFOOSUbutton"],
+    "acao": true,
+    "nome": "Abrir o O&O ShutUp10++",
+    "descricao": "Baixa o O&O ShutUp10++ (cerca de 82 MB) do site da O&O, confere a assinatura digital e abre. Nada é instalado; ele fica em %LOCALAPPDATA%\\Tamandua\\ooshutup. O que você mudar nele é por conta dele, não do Tamanduá. (WinUtil: O&O ShutUp10++ - Run)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": false,
+    "presets": [],
+    "executar": "$pasta = Join-Path (Get-TmdPastaDados) 'ooshutup'; [void][IO.Directory]::CreateDirectory($pasta); $exe = Join-Path $pasta 'OOSU10.exe'; [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -UseBasicParsing -TimeoutSec 180 -Uri 'https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe' -OutFile $exe; $a = Get-AuthenticodeSignature -FilePath $exe; if ([string]$a.Status -ne 'Valid' -or [string]$a.SignerCertificate.Subject -notmatch 'O&O Software') { [IO.File]::Delete($exe); throw ('o arquivo baixado não tem a assinatura da O&O (' + $a.Status + '); foi apagado') }; Start-Process -FilePath $exe"
+  },
+  {
     "id": "avanc-rdp-sem-aviso",
+    "winutil": ["WPFTweaksDisableWarningForUnsignedRdp"],
     "nome": "Área de Trabalho Remota sem aviso de arquivo",
     "descricao": "Abre arquivos .rdp sem a pergunta sobre arquivos não assinados. Um .rdp malicioso também abre sem aviso. (WinUtil: RDP Unsigned File Warnings - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -837,6 +1140,7 @@
   },
   {
     "id": "avanc-ipv4-preferido",
+    "winutil": ["WPFTweaksIPv46"],
     "nome": "Preferir IPv4 ao IPv6",
     "descricao": "Mantém o IPv6 ligado, mas usa IPv4 primeiro (resolve lentidão em algumas redes). Escolha só um dos três ajustes de IPv6. (WinUtil: IPv6 - Set IPv4 as Preferred)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -849,6 +1153,7 @@
   },
   {
     "id": "avanc-sem-teredo",
+    "winutil": ["WPFTweaksTeredo"],
     "nome": "Desativar o Teredo",
     "descricao": "Desliga o túnel IPv6 sobre IPv4. Pode ajudar a conexão de jogos online; o Xbox app pode reclamar de NAT. Escolha só um dos três ajustes de IPv6. (WinUtil: Teredo - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -867,6 +1172,7 @@
   },
   {
     "id": "avanc-sem-ipv6",
+    "winutil": ["WPFTweaksDisableIPv6"],
     "nome": "Desativar o IPv6",
     "descricao": "Desliga o IPv6 em todas as placas de rede. Algumas redes e serviços (e partes do próprio Windows) esperam IPv6. Escolha só um dos três ajustes de IPv6. (WinUtil: IPv6 - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -885,6 +1191,7 @@
   },
   {
     "id": "avanc-bloquear-adobe",
+    "winutil": ["WPFTweaksBlockAdobeNet"],
     "nome": "Bloquear os servidores da Adobe",
     "descricao": "Baixa a lista de endereços da Adobe (Ruddernation-Designs/Adobe-URL-Block-List) e bloqueia no arquivo hosts. Só entram linhas que bloqueiam um endereço (0.0.0.0 ou 127.0.0.1 + nome); desfazer tira exatamente o que foi posto. (WinUtil: Adobe URL Block List)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -902,6 +1209,7 @@
   },
   {
     "id": "avanc-sono-s3",
+    "winutil": ["WPFToggleS3Sleep"],
     "nome": "Usar o modo de suspensão clássico (S3)",
     "descricao": "Troca o modo de espera moderno pelo S3: o PC suspende de verdade e não acorda sozinho na mochila. Em muitos notebooks novos o S3 não existe e a suspensão para de funcionar. (WinUtil: S3 Sleep)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -914,6 +1222,7 @@
   },
   {
     "id": "avanc-defender-sem-amostras",
+    "winutil": ["WPFTweaksTelemetry"],
     "nome": "Não enviar amostras de arquivos ao Defender",
     "descricao": "O Defender deixa de enviar arquivos suspeitos para análise na nuvem da Microsoft. Mais privacidade, mas a proteção contra ameaças novas fica mais fraca. (WinUtil: parte do Telemetry)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -931,6 +1240,7 @@
   },
   {
     "id": "avanc-sem-bitlocker",
+    "winutil": ["WPFTweaksDisableBitLocker"],
     "nome": "Desativar o BitLocker no disco do Windows",
     "descricao": "Descriptografa o disco C: (leva tempo e o disco fica legível por quem pegar o PC). Desfazer liga de novo só com o TPM: para ter a chave de recuperação, religue pelas Configurações. (WinUtil: BitLocker - Disable)",
     "categoria": "Avançado (por sua conta e risco)",
@@ -944,6 +1254,448 @@
         "desfazer": "Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly -ErrorAction Stop | Out-Null",
         "verificar": "$v = (New-Object -ComObject Shell.Application).NameSpace($env:SystemDrive + '\\').Self.ExtendedProperty('System.Volume.BitLockerProtection'); $null -eq $v -or [int]$v -in 0, 2"
       }
+    ]
+  },
+  {
+    "id": "app-windowsfeedbackhub",
+    "winutil": ["WPFAppxMicrosoft_WindowsFeedbackHub"],
+    "nome": "Remover: Hub de Comentários",
+    "descricao": "Manda sugestões e relatórios de erro para a Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Feedback Hub)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsFeedbackHub'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NBLGGH4R32N'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsFeedbackHub')" }
+    ]
+  },
+  {
+    "id": "app-gethelp",
+    "winutil": ["WPFAppxMicrosoft_GetHelp"],
+    "nome": "Remover: Obter Ajuda",
+    "descricao": "Guias e suporte da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Get Help)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.GetHelp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9PKDZBMV1H3T'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.GetHelp')" }
+    ]
+  },
+  {
+    "id": "app-outlookforwindows",
+    "winutil": ["WPFAppxMicrosoft_OutlookForWindows"],
+    "nome": "Remover: Outlook (novo)",
+    "descricao": "O novo Outlook que vem com o Windows (o do Office não é afetado). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Outlook for Windows)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.OutlookForWindows'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NRX63209R7B'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.OutlookForWindows')" }
+    ]
+  },
+  {
+    "id": "app-msteams",
+    "winutil": ["WPFAppxMSTeams"],
+    "nome": "Remover: Microsoft Teams",
+    "descricao": "Teams pessoal/trabalho. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Microsoft Teams)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'MSTeams'", "desfazer": "Install-TmdAppxDaLoja -IdLoja 'XP8BT8DW290MPQ'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'MSTeams')" }
+    ]
+  },
+  {
+    "id": "app-clipchamp-clipchamp",
+    "winutil": ["WPFAppxClipchamp_Clipchamp"],
+    "nome": "Remover: Clipchamp",
+    "descricao": "Editor de vídeo online da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Clipchamp)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Clipchamp.Clipchamp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9P1J8S7CCWWT'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Clipchamp.Clipchamp')" }
+    ]
+  },
+  {
+    "id": "app-microsoftofficehub",
+    "winutil": ["WPFAppxMicrosoft_MicrosoftOfficeHub"],
+    "nome": "Remover: Microsoft 365 (Office)",
+    "descricao": "Atalho para os apps e propaganda do Microsoft 365 (o Office instalado não é afetado). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Microsoft 365)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.MicrosoftOfficeHub'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRD29V9'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.MicrosoftOfficeHub')" }
+    ]
+  },
+  {
+    "id": "app-zunemusic",
+    "winutil": ["WPFAppxMicrosoft_ZuneMusic"],
+    "nome": "Remover: Media Player",
+    "descricao": "Player de música e vídeo do Windows. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Media Player)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.ZuneMusic'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJ3PT'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.ZuneMusic')" }
+    ]
+  },
+  {
+    "id": "app-bingsearch",
+    "winutil": ["WPFAppxMicrosoft_BingSearch"],
+    "nome": "Remover: Pesquisa Bing",
+    "descricao": "Integração do Bing com a busca do Windows. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Bing Search)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.BingSearch'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NZBF4GT040C'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.BingSearch')" }
+    ]
+  },
+  {
+    "id": "app-quickassist",
+    "winutil": ["WPFAppxMicrosoftCorporationII_QuickAssist"],
+    "nome": "Remover: Assistência Rápida",
+    "descricao": "Acesso remoto para alguém te ajudar (também usado em golpes). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Quick Assist)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'MicrosoftCorporationII.QuickAssist'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9P7BP5VNWKX5'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'MicrosoftCorporationII.QuickAssist')" }
+    ]
+  },
+  {
+    "id": "app-windows-devhome",
+    "winutil": ["WPFAppxMicrosoft_WindowsDevHome"],
+    "nome": "Remover: Dev Home",
+    "descricao": "Painel para programadores (descontinuado pela Microsoft). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Dev Home)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Windows.DevHome'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9N8MHTPHNGVV'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Windows.DevHome')" }
+    ]
+  },
+  {
+    "id": "app-crossdevice",
+    "winutil": ["WPFAppxMicrosoft_WindowsCrossDevice"],
+    "nome": "Remover: Dispositivos Móveis",
+    "descricao": "Liga o celular ao PC (câmera, notificações). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Mobile Devices)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'MicrosoftWindows.CrossDevice'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NTXGKQ8P7N0'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'MicrosoftWindows.CrossDevice')" }
+    ]
+  },
+  {
+    "id": "app-todos",
+    "winutil": ["WPFAppxMicrosoft_Todos"],
+    "nome": "Remover: Microsoft To Do",
+    "descricao": "Lista de tarefas da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: To Do)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Todos'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NBLGGH5R558'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Todos')" }
+    ]
+  },
+  {
+    "id": "app-powerautomatedesktop",
+    "winutil": ["WPFAppxMicrosoft_PowerAutomateDesktop"],
+    "nome": "Remover: Power Automate",
+    "descricao": "Automação de tarefas da Microsoft. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Power Automate)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.PowerAutomateDesktop'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NFTCH6J7FHV'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.PowerAutomateDesktop')" }
+    ]
+  },
+  {
+    "id": "app-yourphone",
+    "winutil": ["WPFAppxMicrosoft_YourPhone"],
+    "nome": "Remover: Vincular ao Celular",
+    "descricao": "Mensagens, fotos e chamadas do celular no PC. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Phone Link)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.YourPhone'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NMPJ99VJBWV'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.YourPhone')" }
+    ]
+  },
+  {
+    "id": "app-microsoftstickynotes",
+    "winutil": ["WPFAppxMicrosoft_MicrosoftStickyNotes"],
+    "nome": "Remover: Notas Autoadesivas",
+    "descricao": "Notinhas na área de trabalho. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Sticky Notes)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.MicrosoftStickyNotes'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NBLGGH4QGHW'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.MicrosoftStickyNotes')" }
+    ]
+  },
+  {
+    "id": "app-windowssoundrecorder",
+    "winutil": ["WPFAppxMicrosoft_WindowsSoundRecorder"],
+    "nome": "Remover: Gravador de Som",
+    "descricao": "Grava áudio do microfone. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Sound Recorder)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsSoundRecorder'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFHWKN'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsSoundRecorder')" }
+    ]
+  },
+  {
+    "id": "app-windowsalarms",
+    "winutil": ["WPFAppxMicrosoft_WindowsAlarms"],
+    "nome": "Remover: Relógio",
+    "descricao": "Alarmes, timer, cronômetro e sessões de foco. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Clock)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsAlarms'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJ3PR'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsAlarms')" }
+    ]
+  },
+  {
+    "id": "app-paint",
+    "winutil": ["WPFAppxMicrosoft_Paint"],
+    "nome": "Remover: Paint",
+    "descricao": "O Paint. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Paint)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Paint'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9PCFS5B6T72H'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Paint')" }
+    ]
+  },
+  {
+    "id": "app-windowsnotepad",
+    "winutil": ["WPFAppxMicrosoft_WindowsNotepad"],
+    "nome": "Remover: Bloco de Notas",
+    "descricao": "O Bloco de Notas (o antigo notepad.exe continua no sistema). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Notepad)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsNotepad'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9MSMLRH6LZF3'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsNotepad')" }
+    ]
+  },
+  {
+    "id": "app-screensketch",
+    "winutil": ["WPFAppxMicrosoft_ScreenSketch"],
+    "nome": "Remover: Ferramenta de Captura",
+    "descricao": "Print de tela com Win+Shift+S. Sem ele, o atalho para de funcionar. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Snipping Tool)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.ScreenSketch'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9MZ95KL8MR0L'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.ScreenSketch')" }
+    ]
+  },
+  {
+    "id": "app-copilot",
+    "winutil": ["WPFAppxMicrosoft_Copilot"],
+    "nome": "Remover: Copilot",
+    "descricao": "O app do Copilot. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Copilot)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Copilot'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NHT9RB2F4HD'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Copilot')" }
+    ]
+  },
+  {
+    "id": "app-windowscalculator",
+    "winutil": ["WPFAppxMicrosoft_WindowsCalculator"],
+    "nome": "Remover: Calculadora",
+    "descricao": "A Calculadora. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Calculator)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsCalculator'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFHVN5'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsCalculator')" }
+    ]
+  },
+  {
+    "id": "app-windowscamera",
+    "winutil": ["WPFAppxMicrosoft_WindowsCamera"],
+    "nome": "Remover: Câmera",
+    "descricao": "App da webcam. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Camera)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsCamera'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJBBG'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsCamera')" }
+    ]
+  },
+  {
+    "id": "app-windows-photos",
+    "winutil": ["WPFAppxMicrosoft_WindowsPhotos"],
+    "nome": "Remover: Fotos",
+    "descricao": "Visualizador de fotos padrão. Sem ele, imagens abrem em outro programa. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Photos)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Windows.Photos'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJBH4'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Windows.Photos')" }
+    ]
+  },
+  {
+    "id": "app-bingnews",
+    "winutil": ["WPFAppxMicrosoft_BingNews"],
+    "nome": "Remover: Notícias",
+    "descricao": "Notícias do MSN. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: News)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.BingNews'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFHVFW'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.BingNews')" }
+    ]
+  },
+  {
+    "id": "app-bingweather",
+    "winutil": ["WPFAppxMicrosoft_BingWeather"],
+    "nome": "Remover: Clima",
+    "descricao": "Previsão do tempo do MSN. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Weather)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.BingWeather'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJ3Q2'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.BingWeather')" }
+    ]
+  },
+  {
+    "id": "app-gamingapp",
+    "winutil": ["WPFAppxMicrosoft_GamingApp"],
+    "nome": "Remover: App Xbox",
+    "descricao": "Loja e Game Pass do Xbox no PC. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Xbox App)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.GamingApp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9MV0B5HZVK9Z'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.GamingApp')" }
+    ]
+  },
+  {
+    "id": "app-xboxgamingoverlay",
+    "winutil": ["WPFAppxMicrosoft_XboxGamingOverlay"],
+    "nome": "Remover: Xbox Game Bar",
+    "descricao": "Barra de jogo (Win+G): gravação, desempenho, chat. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Xbox Game Bar)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.XboxGamingOverlay'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NZKPSTSNW4P'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.XboxGamingOverlay')" }
+    ]
+  },
+  {
+    "id": "app-xboxidentityprovider",
+    "winutil": ["WPFAppxMicrosoft_XboxIdentityProvider"],
+    "nome": "Remover: Provedor de identidade Xbox",
+    "descricao": "Login da conta Xbox em jogos do PC. Sem ele, jogos com conta Xbox não entram. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Xbox Identity Provider)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.XboxIdentityProvider'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRD1HKW'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.XboxIdentityProvider')" }
+    ]
+  },
+  {
+    "id": "app-xboxspeechtotextoverlay",
+    "winutil": ["WPFAppxMicrosoft_XboxSpeechToTextOverlay"],
+    "nome": "Remover: Xbox: fala para texto",
+    "descricao": "Legendas de voz do chat de jogos. Remove para todos os usuários e das contas novas. Não está na Microsoft Store: o app Xbox reinstala quando precisar. (WinUtil: Xbox Speech To Text Overlay)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.XboxSpeechToTextOverlay'", "desfazer": "throw 'este app não está na Microsoft Store: reinstale pelo app Xbox'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.XboxSpeechToTextOverlay')" }
+    ]
+  },
+  {
+    "id": "app-xbox-tcui",
+    "winutil": ["WPFAppxMicrosoft_Xbox_TCUI"],
+    "nome": "Remover: Xbox TCUI",
+    "descricao": "Telas de amigos e convites do Xbox dentro dos jogos. Remove para todos os usuários e das contas novas. Não está na Microsoft Store: o app Xbox reinstala quando precisar. (WinUtil: Xbox TCUI)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Xbox.TCUI'", "desfazer": "throw 'este app não está na Microsoft Store: reinstale pelo app Xbox'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Xbox.TCUI')" }
+    ]
+  },
+  {
+    "id": "app-startexperiencesapp",
+    "winutil": ["WPFAppxMicrosoft_StartExperiencesApp"],
+    "nome": "Remover: Experiências do Iniciar",
+    "descricao": "Conteúdo e recomendações do menu Iniciar. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Start Experiences App)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.StartExperiencesApp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9PC1H9VN18CM'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.StartExperiencesApp')" }
+    ]
+  },
+  {
+    "id": "app-microsoftsolitairecollection",
+    "winutil": ["WPFAppxMicrosoft_MicrosoftSolitaireCollection"],
+    "nome": "Remover: Solitaire Collection",
+    "descricao": "Paciência e outros jogos de cartas (com propaganda). Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Solitaire Collection)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Remover apps"],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.MicrosoftSolitaireCollection'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFHWD2'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.MicrosoftSolitaireCollection')" }
+    ]
+  },
+  {
+    "id": "app-zunevideo",
+    "winutil": ["WPFAppxMicrosoft_ZuneVideo"],
+    "nome": "Remover: Filmes e TV",
+    "descricao": "Player e loja de vídeos. Remove para todos os usuários e das contas novas. Desfazer reinstala pela Microsoft Store. (WinUtil: Movies & TV)",
+    "categoria": "Apps do Windows (remover)",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.ZuneVideo'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJ3P2'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.ZuneVideo')" }
     ]
   }
 ]

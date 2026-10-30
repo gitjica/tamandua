@@ -1,5 +1,6 @@
 ﻿# Ajustes do Windows. O módulo quase não tem código: lê ajustes.json e entrega cada ajuste ao motor do núcleo
 # (Set-TmdAjuste / Get-TmdEstadoAjuste), que lê, guarda o valor de antes, escreve e confere.
+# Entradas com "acao": true são ações únicas (ponto de restauração, Limpeza de Disco...): Invoke-TmdAcaoAjuste, sem desfazer.
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -30,42 +31,36 @@ function Get-CatalogoAjustes {
     foreach ($a in ([IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json)) { $a }
 }
 
-# Na área de testes (registro redirecionado) só entram ajustes que são só registro e não pedem admin: serviço e
-# script mexeriam no sistema de verdade, e o que pede admin chamaria o UAC (os testes do motor cobrem esses).
+function Test-EhAcao {
+    param($Ajuste)
+    $p = $Ajuste.PSObject.Properties['acao']
+    $p -and $p.Value -eq $true
+}
+
+# Na área de testes (registro redirecionado) só entram ajustes que são só registro e não pedem admin: serviço, script e
+# ação mexeriam no sistema de verdade, e o que pede admin chamaria o UAC (os testes do motor cobrem esses).
 function Get-AjusteDisponivel {
     param([string]$Catalogo, [string]$RaizRegistro)
     foreach ($a in Get-CatalogoAjustes -Arquivo $Catalogo) {
-        if ($RaizRegistro -and ($a.requerAdmin -or @($a.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -gt 0)) { continue }
+        if ($RaizRegistro -and ((Test-EhAcao $a) -or $a.requerAdmin -or @($a.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -gt 0)) { continue }
         $a
     }
 }
 
-# Primeiro item da página: não é um ajuste (não tem estado nem desfazer), é a rede de segurança antes deles.
-$script:IdPontoRestauracao = 'seg-ponto-restauracao'
-# Ordem também é a ordem dos botões de preset na janela (vêm na ordem em que aparecem).
-$script:PresetsPontoRestauracao = @('Mínimo', 'Essencial', 'Avançado', 'Notebook', 'Desempenho')
-
 # Um alvo por ajuste, com o estado lido da máquina agora. Nada vem marcado: quem escolhe é você (ou um preset).
+# A ordem do catálogo é a ordem da página e a dos botões de preset (eles aparecem na ordem em que surgem).
 function Find-Alvos {
     param([string]$Catalogo = $script:ArquivoCatalogo, [string]$RaizRegistro = (Get-RaizRegistroPadrao))
 
-    if (-not $RaizRegistro) {
-        [pscustomobject]@{
-            Id = $script:IdPontoRestauracao; Nome = 'Criar ponto de restauração antes'; Categoria = 'Segurança'; Caminho = ''
-            Tamanho = [int64]0; Estado = 'NaoSeAplica'; Nivel = 'Normal'; Valor = $null; Risco = 'Baixo'
-            Detalhe = 'Um ponto de restauração do Windows antes dos outros ajustes marcados: se algo der errado, dá para voltar o sistema inteiro.'
-            Selecionado = $false; Destino = 'NaoSeAplica'; RequerAdmin = $true; Reversivel = $false; Presets = $script:PresetsPontoRestauracao
-            Mudancas = @('Liga a Proteção do Sistema no disco do Windows, se estiver desligada.', 'Cria o ponto (Checkpoint-Computer); leva de alguns segundos a alguns minutos.')
-        }
-    }
     foreach ($a in Get-AjusteDisponivel -Catalogo $Catalogo -RaizRegistro $RaizRegistro) {
+        $acao = Test-EhAcao $a
         [pscustomobject]@{
             Id          = $a.id
             Nome        = $a.nome
             Categoria   = $a.categoria
             Caminho     = ''
             Tamanho     = [int64]0
-            Estado      = Get-TmdEstadoAjuste -Ajuste $a -RaizRegistro $RaizRegistro
+            Estado      = if ($acao) { 'NaoSeAplica' } else { Get-TmdEstadoAjuste -Ajuste $a -RaizRegistro $RaizRegistro }
             Detalhe     = $a.descricao
             Nivel       = 'Normal'
             Valor       = $null
@@ -73,14 +68,16 @@ function Find-Alvos {
             Selecionado = $false
             Destino     = 'NaoSeAplica'
             RequerAdmin = [bool]$a.requerAdmin
-            Reversivel  = $true
+            Reversivel  = -not $acao
             Presets     = @($a.presets)
-            Mudancas    = @($a.mudancas | ForEach-Object { Format-MudancaCatalogo -Mudanca $_ })
+            # @( ) por fora: "if (...) { @(...) }" desmonta a lista e uma mudança só viraria texto solto.
+            Mudancas    = @(if ($acao) { "Faz uma vez (não tem desfazer): $($a.descricao)" } else { $a.mudancas | ForEach-Object { Format-MudancaCatalogo -Mudanca $_ } })
         }
     }
 }
 
 # Aplica pela definição do catálogo, achada pelo Id. O alvo recebido só diz QUAL ajuste; o que mudar vem daqui.
+# Ações marcadas com "primeiro" (o ponto de restauração) vão antes de tudo, venham em que posição vierem.
 function Invoke-Acao {
     param(
         [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Alvos,
@@ -91,19 +88,20 @@ function Invoke-Acao {
 
     $definicoes = @{}
     foreach ($a in Get-AjusteDisponivel -Catalogo $Catalogo -RaizRegistro $RaizRegistro) { $definicoes[$a.id] = $a }
-    # O ponto de restauração vai antes de qualquer ajuste, venha em que posição vier.
-    $ordenados = @($Alvos | Where-Object { [string]$_.Id -eq $script:IdPontoRestauracao }) + @($Alvos | Where-Object { [string]$_.Id -ne $script:IdPontoRestauracao })
+    $primeiro = {
+        $d = $definicoes[[string]$_.Id]
+        $d -and $d.PSObject.Properties['primeiro'] -and $d.primeiro -eq $true
+    }
+    $ordenados = @($Alvos | Where-Object $primeiro) + @($Alvos | Where-Object { -not (& $primeiro) })
     foreach ($alvo in $ordenados) {
         $id = [string]$alvo.Id
-        if ($id -eq $script:IdPontoRestauracao -and -not $RaizRegistro) {
-            New-TmdPontoRestauracao -Id $id -Simular:$Simular -Modulo 'ajustes'
-            continue
-        }
         if (-not $definicoes.ContainsKey($id)) {
             [pscustomobject]@{ Id = $id; Status = 'Erro'; Liberado = [int64]0; Motivo = 'ajuste desconhecido'; Mudancas = @() }
             continue
         }
-        Set-TmdAjuste -Ajuste $definicoes[$id] -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'ajustes'
+        $d = $definicoes[$id]
+        if (Test-EhAcao $d) { Invoke-TmdAcaoAjuste -Ajuste $d -Simular:$Simular -Modulo 'ajustes'; continue }
+        Set-TmdAjuste -Ajuste $d -Simular:$Simular -RaizRegistro $RaizRegistro -Modulo 'ajustes'
     }
 }
 

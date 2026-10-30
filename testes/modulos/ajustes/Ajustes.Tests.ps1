@@ -6,7 +6,7 @@ BeforeDiscovery {
     $texto = [IO.File]::ReadAllText((Join-Path $raizProjeto 'modulos\ajustes\ajustes.json'), [Text.Encoding]::UTF8)
     # Ida e volta de verdade (na chave de teste) só para os ajustes que são só registro; serviços vão por Mock.
     $ajustesCatalogo = @(foreach ($a in ($texto | ConvertFrom-Json)) {
-            if (@($a.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0) { @{ Id = $a.id; Ajuste = $a } }
+            if (-not $a.PSObject.Properties['acao'] -and @($a.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0) { @{ Id = $a.id; Ajuste = $a } }
         })
 }
 
@@ -18,10 +18,11 @@ BeforeAll {
     function New-RaizRegistro { "$script:ChaveTestes\$([guid]::NewGuid().ToString('N'))" }
     $catalogo = @(InModuleScope ajustes { Get-CatalogoAjustes })
     # O que a área de testes mostra: só registro e sem admin (igual a Get-AjusteDisponivel).
-    $soRegistro = @($catalogo | Where-Object { -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
-    $script:Categorias = 'Privacidade', 'Sistema', 'Explorador de Arquivos', 'Barra de tarefas e Iniciar', 'Aparência', 'Mouse e teclado',
+    $soRegistro = @($catalogo | Where-Object { -not $_.PSObject.Properties['acao'] -and -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
+    $script:Referencia = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'winutil-referencia.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $script:Categorias = 'Segurança', 'Limpeza (uma vez)', 'Privacidade', 'Sistema', 'Rede (DNS)', 'Apps do Windows (remover)', 'Explorador de Arquivos', 'Barra de tarefas e Iniciar', 'Aparência', 'Mouse e teclado',
     'Desempenho e jogos', 'Energia', 'Navegadores', 'Programas', 'Avançado (por sua conta e risco)'
-    $script:Presets = 'Mínimo', 'Essencial', 'Avançado', 'Notebook', 'Desempenho', 'Privacidade', 'Explorador'
+    $script:Presets = 'Mínimo', 'Essencial', 'Avançado', 'Notebook', 'Desempenho', 'Privacidade', 'Explorador', 'Remover apps'
     function Get-IdsPreset { param($P) @($catalogo | Where-Object { @($_.presets) -contains $P } | ForEach-Object { $_.id }) }
 }
 
@@ -51,7 +52,7 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
 
     It 'toda mudança de registro/serviço/tarefa declara padraoWindows; script tem desfazer e compila' {
         foreach ($a in $catalogo) {
-            foreach ($m in $a.mudancas) {
+            foreach ($m in @(if ($a.PSObject.Properties['mudancas']) { $a.mudancas })) {
                 if ($m.tipo -in 'Registro', 'Servico', 'Tarefa') { $m.PSObject.Properties.Name | Should -Contain 'padraoWindows' -Because $a.id }
                 if ($m.tipo -eq 'Script') {
                     $m.desfazer | Should -Not -BeNullOrEmpty -Because $a.id
@@ -88,11 +89,39 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         foreach ($a in $catalogo | Where-Object { $_.id -match '^(priv|sis)-' }) { ($a | ConvertTo-Json -Depth 5) | Should -Not -Match $seguranca -Because $a.id }
     }
 
-    It 'presets como no WinUtil: Mínimo dentro do Essencial, Essencial dentro do Avançado; Essencial e Notebook só risco baixo' {
-        $minimo = Get-IdsPreset 'Mínimo'; $essencial = Get-IdsPreset 'Essencial'; $avancado = Get-IdsPreset 'Avançado'
+    It 'tem TODOS os tweaks e apps do WinUtil (winutil-referencia.json), cada um com a chave original' {
+        $temos = @($catalogo | ForEach-Object { if ($_.PSObject.Properties['winutil']) { @($_.winutil) } })
+        foreach ($k in @($script:Referencia.tweaks) + @($script:Referencia.appx)) { $temos | Should -Contain $k -Because "o WinUtil tem $k" }
+        foreach ($k in $temos | Select-Object -Unique) { @($script:Referencia.tweaks) + @($script:Referencia.appx) | Should -Contain $k -Because "chave $k não existe no WinUtil" }
+    }
+
+    It 'os presets do WinUtil (Mínimo, Essencial = Standard, Avançado = Advanced, Remover apps = AppxDefault) estão inteiros nos nossos' {
+        foreach ($p in $script:Referencia.presets.PSObject.Properties) {
+            foreach ($k in @($p.Value)) {
+                @($catalogo | Where-Object { $_.PSObject.Properties['winutil'] -and @($_.winutil) -contains $k -and @($_.presets) -contains $p.Name }).Count |
+                    Should -BeGreaterThan 0 -Because "$k está no preset $($p.Name) do WinUtil"
+            }
+        }
+    }
+
+    It 'ações únicas: têm "executar" que compila, nenhuma mudança, e só o ponto de restauração vai primeiro' {
+        $acoes = @($catalogo | Where-Object { $_.PSObject.Properties['acao'] })
+        $acoes.Count | Should -BeGreaterOrEqual 4
+        foreach ($a in $acoes) {
+            $a.executar | Should -Not -BeNullOrEmpty -Because $a.id
+            $a.PSObject.Properties.Name | Should -Not -Contain 'mudancas' -Because $a.id
+            $erros = $null; $tokens = $null
+            [void][Management.Automation.Language.Parser]::ParseInput($a.executar, [ref]$tokens, [ref]$erros)
+            @($erros).Count | Should -Be 0 -Because $a.id
+        }
+        @($catalogo | Where-Object { $_.PSObject.Properties['primeiro'] } | ForEach-Object id) | Should -Be @('seg-ponto-restauracao')
+        $catalogo[0].id | Should -Be 'seg-ponto-restauracao' -Because 'é o primeiro da página e define a ordem dos botões de preset'
+    }
+
+    It 'presets: Mínimo dentro do Essencial e só risco baixo; Notebook sem nada que gaste bateria' {
+        $minimo = Get-IdsPreset 'Mínimo'; $essencial = Get-IdsPreset 'Essencial'
         foreach ($id in $minimo) { $essencial | Should -Contain $id -Because "$id está no Mínimo" }
-        foreach ($id in $essencial) { $avancado | Should -Contain $id -Because "$id está no Essencial" }
-        foreach ($p in 'Essencial', 'Mínimo') { foreach ($a in $catalogo | Where-Object { @($_.presets) -contains $p }) { $a.risco | Should -Be 'Baixo' -Because "$p/$($a.id)" } }
+        foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Mínimo' }) { $a.risco | Should -Be 'Baixo' -Because $a.id }
         foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Notebook' }) { $a.risco | Should -BeIn 'Baixo', 'Medio' -Because $a.id }
         foreach ($p in $script:Presets) { (Get-IdsPreset $p).Count | Should -BeGreaterOrEqual 2 -Because $p }
         # Notebook: nada que gaste bateria ou desligue a hibernação.
@@ -100,8 +129,8 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         (Get-IdsPreset 'Notebook') | Should -Not -Contain 'energia-sem-hibernacao'
     }
 
-    It 'os três ajustes de IPv6 mexem no mesmo valor e nenhum está em preset' {
-        foreach ($id in 'avanc-ipv4-preferido', 'avanc-sem-teredo', 'avanc-sem-ipv6') {
+    It 'escolhas exclusivas (IPv6, MPO, DNS) ficam fora dos presets' {
+        foreach ($id in @('avanc-ipv4-preferido', 'avanc-sem-teredo', 'avanc-sem-ipv6', 'avanc-sem-mpo', 'avanc-sem-mpo-total') + @($catalogo | Where-Object id -like 'rede-dns-*' | ForEach-Object id)) {
             @(($catalogo | Where-Object id -eq $id).presets).Count | Should -Be 0 -Because $id
         }
     }
@@ -199,11 +228,16 @@ Describe 'Find-Alvos e Invoke-Acao' {
         Test-Path -LiteralPath $raiz | Should -BeFalse
     }
 
-    It 'ponto de restauração vem antes dos ajustes, em qualquer ordem que chegue' {
-        Mock New-TmdPontoRestauracao -ModuleName ajustes { [pscustomobject]@{ Id = $Id; Status = 'Feito'; Liberado = [int64]0; Motivo = ''; Mudancas = @() } }
-        $r = @(Invoke-Acao -RaizRegistro '' -Alvos @([pscustomobject]@{ Id = 'formatar-disco' }, [pscustomobject]@{ Id = 'seg-ponto-restauracao' }))
-        ($r | ForEach-Object Id) -join ',' | Should -Be 'seg-ponto-restauracao,formatar-disco'
-        Should -Invoke New-TmdPontoRestauracao -ModuleName ajustes -Times 1 -Exactly
+    It 'ações vão pelo Invoke-TmdAcaoAjuste, e o ponto de restauração antes de tudo, em qualquer ordem que chegue' {
+        Mock Invoke-TmdAcaoAjuste -ModuleName ajustes { [pscustomobject]@{ Id = $Ajuste.id; Status = 'Feito'; Liberado = [int64]0; Motivo = ''; Mudancas = @() } }
+        $r = @(Invoke-Acao -RaizRegistro '' -Alvos @([pscustomobject]@{ Id = 'formatar-disco' }, [pscustomobject]@{ Id = 'acao-limpar-temporarios' }, [pscustomobject]@{ Id = 'seg-ponto-restauracao' }))
+        ($r | ForEach-Object Id) -join ',' | Should -Be 'seg-ponto-restauracao,formatar-disco,acao-limpar-temporarios'
+        Should -Invoke Invoke-TmdAcaoAjuste -ModuleName ajustes -Times 2 -Exactly
+    }
+
+    It 'na área de testes nenhuma ação aparece nem roda' {
+        @(Find-Alvos -RaizRegistro $raiz | Where-Object { $_.Id -like 'acao-*' -or $_.Id -eq 'seg-ponto-restauracao' }).Count | Should -Be 0
+        (Invoke-Acao -RaizRegistro $raiz -Alvos @([pscustomobject]@{ Id = 'acao-limpar-temporarios' })).Status | Should -Be 'Erro'
     }
 
     It 'TAMANDUA_REGISTRO_TESTE fora da área de testes é ignorado' {

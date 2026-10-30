@@ -43,6 +43,11 @@ function Get-TmdArvoreProtegida {
     )
     $x86 = [Environment]::GetFolderPath('ProgramFilesX86')
     if ($x86) { foreach ($s in 'logs', 'dumps', 'appcache\httpcache') { $excecoes += Join-Path $x86 "Steam\$s" } }
+    # Instaladores que o Windows Update reinstala sozinho (ajustes do WinUtil que os bloqueiam).
+    $excecoes += Join-Path $windows 'Installer\Razer'
+    foreach ($pf in @($env:ProgramW6432, [Environment]::GetFolderPath('ProgramFiles')) | Where-Object { $_ } | Select-Object -Unique) {
+        $excecoes += Join-Path $pf 'LogiDownloadAssistant'
+    }
     [pscustomobject]@{
         Arvores  = @($arvores | Where-Object { $_ } | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') } | Select-Object -Unique)
         Excecoes = @($excecoes | ForEach-Object { [IO.Path]::GetFullPath($_).TrimEnd('\') })

@@ -185,25 +185,133 @@ function Test-TmdEntradaPrecisaAdmin {
     }
 }
 
-# Ponto de restauração do Windows antes de mexer no sistema (o "Create Restore Point" do WinUtil). Liga a Proteção do
-# Sistema no disco do Windows se estiver desligada e libera criar mesmo com outro ponto nas últimas 24 h (só durante a criação).
-function New-TmdPontoRestauracao {
+# Ação única do catálogo ("acao": true, "executar": script): coisas que se fazem uma vez e não têm estado nem desfazer
+# (ponto de restauração, Limpeza de Disco, apagar temporários, abrir o O&O). O script roda dentro do núcleo e pode
+# devolver resultados de Remove-TmdItem: o espaço liberado é somado e o que foi pulado vira "Parcial".
+function Invoke-TmdAcaoAjuste {
     [CmdletBinding()]
-    param([string]$Id = 'seg-ponto-restauracao', [string]$Descricao = 'Tamanduá', [switch]$Simular, [string]$Modulo = 'ajustes')
-    $resultado = if ($Simular) { New-TmdResultadoAjuste -Id $Id -Status 'Simulado' -Mudancas @("cria um ponto de restauração em $env:SystemDrive") }
-    elseif (-not (Test-TmdAdministrador)) { New-TmdResultadoAjuste -Id $Id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador' }
+    param([Parameter(Mandatory)]$Ajuste, [switch]$Simular, [string]$Modulo = 'ajustes')
+    $id = [string](Get-Propriedade $Ajuste 'id')
+    $nome = [string](Get-Propriedade $Ajuste 'nome')
+    $executar = [string](Get-Propriedade $Ajuste 'executar')
+    $resultado = if (-not $executar) { New-TmdResultadoAjuste -Id $id -Status 'Erro' -Motivo 'ação sem "executar"' }
+    elseif ($Simular) { New-TmdResultadoAjuste -Id $id -Status 'Simulado' -Mudancas @("executa uma vez: $nome") }
+    elseif ((Get-Propriedade $Ajuste 'requerAdmin') -eq $true -and -not (Test-TmdAdministrador)) {
+        New-TmdResultadoAjuste -Id $id -Status 'Ignorado' -Motivo 'precisa de permissão de administrador'
+    }
     else {
         try {
-            Invoke-TmdCriarPontoRestauracao -Descricao $Descricao
-            New-TmdResultadoAjuste -Id $Id -Status 'Feito' -Mudancas @("ponto de restauração criado em $env:SystemDrive")
+            $saida = @(& ([scriptblock]::Create($executar)) | Where-Object { $_ -and $_.PSObject.Properties['Status'] })
+            $r = New-TmdResultadoAjuste -Id $id -Status 'Feito'
+            foreach ($s in $saida) { $r.Liberado += [int64](Get-Propriedade $s 'Liberado') }
+            $pulados = @($saida | Where-Object { $_.Status -notin 'Feito', 'Simulado' -and $_.Motivo -ne 'não existe mais' })
+            if ($pulados.Count -gt 0) { $r.Status = 'Parcial'; $r.Motivo = "$($pulados.Count) item(ns) pulado(s) (ex.: $($pulados[0].Motivo))" }
+            $r
         }
-        catch { New-TmdResultadoAjuste -Id $Id -Status 'Erro' -Motivo (Get-TmdExcecaoInterna $_.Exception).Message }
+        catch { New-TmdResultadoAjuste -Id $id -Status 'Erro' -Motivo (Get-TmdExcecaoInterna $_.Exception).Message }
     }
-    Write-TmdOperacao -Modulo $Modulo -Id $Id -Acao 'criar' -Caminho 'Ponto de restauração' -Status $resultado.Status -Motivo $resultado.Motivo -Simulado ([bool]$Simular)
+    Write-TmdOperacao -Modulo $Modulo -Id $id -Acao 'executar' -Caminho $nome -Status $resultado.Status -Liberado $resultado.Liberado `
+        -Motivo $resultado.Motivo -Simulado ([bool]$Simular)
     $resultado
 }
 
-# Isolado para os testes trocarem por Mock.
+# ---------- Leituras rápidas para os "verificar" do catálogo (várias páginas perguntam a mesma coisa) ----------
+
+$script:CacheLeitura = @{}
+
+function Get-TmdLeituraGuardada {
+    param([Parameter(Mandatory)][string]$Chave, [Parameter(Mandatory)][scriptblock]$Ler, [int]$Segundos = 20)
+    $g = $script:CacheLeitura[$Chave]
+    if ($g -and ([DateTime]::UtcNow - $g.Quando).TotalSeconds -lt $Segundos) { return , $g.Valor }
+    $valor = @(& $Ler)
+    $script:CacheLeitura[$Chave] = @{ Quando = [DateTime]::UtcNow; Valor = $valor }
+    , $valor
+}
+
+# App da Store instalado para o usuário atual? (uma leitura de Get-AppxPackage serve para os 34 apps do catálogo)
+function Test-TmdAppxInstalado {
+    param([Parameter(Mandatory)][string]$Nome)
+    $nomes = Get-TmdLeituraGuardada -Chave 'appx' -Ler { Get-AppxPackage -ErrorAction Stop | ForEach-Object { [string]$_.Name } }
+    @($nomes | Where-Object { $_ -like $Nome }).Count -gt 0
+}
+
+# Remove um app da Store para todos os usuários e da imagem (contas novas não ganham de novo).
+function Remove-TmdAppx {
+    param([Parameter(Mandatory)][string]$Nome)
+    foreach ($p in @(Get-AppxPackage -AllUsers -Name $Nome -ErrorAction Stop)) { Remove-AppxPackage -Package $p.PackageFullName -AllUsers -ErrorAction Stop }
+    Get-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Where-Object DisplayName -eq $Nome |
+        Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue | Out-Null
+    $script:CacheLeitura.Remove('appx')
+}
+
+# Reinstala um app pela Microsoft Store (winget, fonte msstore). "Já instalado" não é erro.
+function Install-TmdAppxDaLoja {
+    param([Parameter(Mandatory)][string]$IdLoja)
+    $r = Invoke-TmdPrograma -Arquivo 'winget.exe' -Argumentos "install --id $IdLoja --source msstore --accept-package-agreements --accept-source-agreements --disable-interactivity" -Modulo 'ajustes' -Id $IdLoja
+    $script:CacheLeitura.Remove('appx')
+    if ($r.Codigo -ne 0 -and $r.Codigo -ne -1978335135) { throw "winget terminou com código $($r.Codigo)" }
+}
+
+# DNS IPv4 principal de cada placa de rede física conectada.
+function Get-TmdDnsAtual {
+    Get-TmdLeituraGuardada -Chave 'dns' -Segundos 10 -Ler {
+        foreach ($a in @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq 'Up')) {
+            $s = @((Get-DnsClientServerAddress -InterfaceIndex $a.ifIndex -AddressFamily IPv4 -ErrorAction Stop).ServerAddresses)
+            if ($s.Count -gt 0) { [string]$s[0] } else { '' }
+        }
+    }
+}
+
+# Troca o DNS de todas as placas físicas conectadas (IPv4 e, se der, IPv6). Sem endereços: volta para o automático (DHCP).
+function Set-TmdDns {
+    param([string[]]$Ipv4 = @(), [string[]]$Ipv6 = @())
+    $placas = @(Get-NetAdapter -Physical -ErrorAction Stop | Where-Object Status -eq 'Up')
+    if ($placas.Count -eq 0) { throw 'nenhuma placa de rede conectada' }
+    foreach ($a in $placas) {
+        if ($Ipv4.Count -eq 0) { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ResetServerAddresses -ErrorAction Stop; continue }
+        try { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ServerAddresses ($Ipv4 + $Ipv6) -ErrorAction Stop }
+        catch { Set-DnsClientServerAddress -InterfaceIndex $a.ifIndex -ServerAddresses $Ipv4 -ErrorAction Stop }
+    }
+    $script:CacheLeitura.Remove('dns')
+    Clear-DnsClientCache -ErrorAction SilentlyContinue
+}
+
+# Bloqueia (ou libera, com -Liberar) a escrita de "Todos" numa pasta: o Windows Update não consegue reinstalar o que ia nela.
+function Set-TmdPastaBloqueada {
+    param([Parameter(Mandatory)][string]$Pasta, [switch]$Liberar)
+    if ($Liberar) {
+        if (-not (Test-Path -LiteralPath $Pasta)) { return }
+        $s = & icacls.exe $Pasta /remove:d '*S-1-1-0'
+    }
+    else {
+        [void][IO.Directory]::CreateDirectory($Pasta)
+        $s = & icacls.exe $Pasta /deny '*S-1-1-0:(W)'
+    }
+    if ($LASTEXITCODE -ne 0) { throw "icacls falhou: $(@($s) -join ' ')" }
+}
+
+function Test-TmdPastaBloqueada {
+    param([Parameter(Mandatory)][string]$Pasta)
+    if (-not (Test-Path -LiteralPath $Pasta)) { return $false }
+    @((Get-Acl -LiteralPath $Pasta).Access | Where-Object {
+            $_.AccessControlType -eq 'Deny' -and $_.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value -eq 'S-1-1-0'
+        }).Count -gt 0
+}
+
+# Apaga o conteúdo de uma pasta item por item pelo núcleo (Remove-TmdItem, com a própria pasta como única raiz).
+# Os temporários do próprio Tamanduá (tamandua-*: pedido, resposta e progresso do processo elevado) ficam.
+function Clear-TmdConteudoPasta {
+    param([Parameter(Mandatory)][string]$Pasta, [string]$Modulo = 'ajustes', [string]$Id = '')
+    if (-not [IO.Directory]::Exists($Pasta)) { return }
+    $raiz = [IO.Path]::GetFullPath($Pasta).TrimEnd('\')
+    foreach ($i in ([IO.DirectoryInfo]::new($raiz)).GetFileSystemInfos()) {
+        if ($i.Name -like 'tamandua-*') { continue }
+        Remove-TmdItem -Caminho $i.FullName -Raizes $raiz -Modulo $Modulo -Id $Id
+    }
+}
+
+# Ponto de restauração do Windows (isolado para Mock). Liga a Proteção do Sistema no disco do Windows se estiver
+# desligada e libera criar mesmo com outro ponto nas últimas 24 h, só durante a criação (o WinUtil deixa liberado).
 function Invoke-TmdCriarPontoRestauracao {
     param([string]$Descricao)
     Enable-ComputerRestore -Drive "$env:SystemDrive\" -ErrorAction Stop

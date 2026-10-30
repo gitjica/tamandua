@@ -47,7 +47,7 @@ Export-ModuleMember -Function @(
     'Test-TmdDesfazerPrecisaAdmin'
     'Invoke-TmdPrograma'
     'Set-TmdAjuste'
-    'New-TmdPontoRestauracao'
+    'Invoke-TmdAcaoAjuste'
     'Undo-TmdAjuste'
     'Get-TmdEstadoAjuste'
     'Test-TmdAjusteReversivel'

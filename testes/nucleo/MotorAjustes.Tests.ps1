@@ -202,31 +202,57 @@ Describe 'Serviços lidos pelo registro' {
     }
 }
 
-Describe 'Ponto de restauração' {
+Describe 'Ações únicas do catálogo' {
     BeforeEach {
         $env:TAMANDUA_DADOS = Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))
-        Mock Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo { }
+        $pasta = New-ArvoreFalsa -Pasta (Join-Path $TestDrive ([guid]::NewGuid().ToString('N'))) -Arquivos @{ 'a.tmp' = 'aaaa'; 'sub\b.tmp' = 'bb'; 'tamandua-pedido.json' = '{}' }
+        $acao = [pscustomobject]@{ id = 'acao-teste'; nome = 'Esvaziar pasta'; acao = $true; requerAdmin = $true; executar = "Clear-TmdConteudoPasta -Pasta '$pasta' -Id 'acao-teste'" }
     }
 
-    It 'simular não cria; sem admin é ignorado; com admin cria e registra no histórico' {
-        (New-TmdPontoRestauracao -Simular).Status | Should -Be 'Simulado'
+    It 'simular não roda; sem admin é ignorado; com admin roda, soma o liberado e registra no histórico' {
+        (Invoke-TmdAcaoAjuste -Ajuste $acao -Simular).Status | Should -Be 'Simulado'
+        Test-Path "$pasta\a.tmp" | Should -BeTrue
         Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $false }
-        (New-TmdPontoRestauracao).Status | Should -Be 'Ignorado'
-        Should -Invoke Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo -Times 0 -Exactly
+        (Invoke-TmdAcaoAjuste -Ajuste $acao).Status | Should -Be 'Ignorado'
+        Test-Path "$pasta\a.tmp" | Should -BeTrue
         Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
-        (New-TmdPontoRestauracao).Status | Should -Be 'Feito'
-        Should -Invoke Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo -Times 1 -Exactly
+        $r = Invoke-TmdAcaoAjuste -Ajuste $acao
+        $r.Status | Should -Be 'Feito'
+        $r.Liberado | Should -Be 6
+        Test-Path "$pasta\a.tmp" | Should -BeFalse
+        Test-Path "$pasta\sub" | Should -BeFalse
+        Test-Path "$pasta\tamandua-pedido.json" | Should -BeTrue -Because 'temporários do próprio Tamanduá ficam'
         $h = @(Get-TmdHistorico -Ultimos 1)[0]
-        $h.Caminho | Should -Be 'Ponto de restauração'
-        $h.Status | Should -Be 'Feito'
+        $h.Acao | Should -Be 'executar'
+        $h.Caminho | Should -Be 'Esvaziar pasta'
     }
 
-    It 'falha do Windows vira erro com o motivo' {
+    It 'item em uso: Parcial com o motivo' {
+        Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
+        $trava = [IO.File]::Open("$pasta\a.tmp", 'Open', 'Read', 'None')
+        try { $r = Invoke-TmdAcaoAjuste -Ajuste $acao } finally { $trava.Close() }
+        $r.Status | Should -Be 'Parcial'
+        $r.Motivo | Should -Match 'pulado'
+    }
+
+    It 'erro no script vira Erro com o motivo (ex.: ponto de restauração recusado)' {
         Mock Test-TmdAdministrador -ModuleName Tamandua.Nucleo { $true }
         Mock Invoke-TmdCriarPontoRestauracao -ModuleName Tamandua.Nucleo { throw 'A Proteção do Sistema está desligada pela política' }
-        $r = New-TmdPontoRestauracao
+        $r = Invoke-TmdAcaoAjuste -Ajuste ([pscustomobject]@{ id = 'seg'; nome = 'Ponto'; acao = $true; requerAdmin = $true; executar = "Invoke-TmdCriarPontoRestauracao -Descricao 'x'" })
         $r.Status | Should -Be 'Erro'
         $r.Motivo | Should -Match 'Proteção do Sistema'
+    }
+
+    It 'pasta bloqueada: Todos não escrevem; liberar tira só o bloqueio' {
+        $alvo = Join-Path $TestDrive "bloqueio-$([guid]::NewGuid().ToString('N'))"
+        InModuleScope Tamandua.Nucleo -Parameters @{ P = $alvo } {
+            param($P)
+            Test-TmdPastaBloqueada -Pasta $P | Should -BeFalse
+            Set-TmdPastaBloqueada -Pasta $P
+            Test-TmdPastaBloqueada -Pasta $P | Should -BeTrue
+            Set-TmdPastaBloqueada -Pasta $P -Liberar
+            Test-TmdPastaBloqueada -Pasta $P | Should -BeFalse
+        }
     }
 }
 

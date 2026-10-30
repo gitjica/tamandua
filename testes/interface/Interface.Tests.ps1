@@ -442,7 +442,7 @@ Describe 'Ajustes pela janela de verdade' {
         }
         # Na área de testes só entram os ajustes que são só registro: conta a partir do catálogo.
         $catalogo = @(foreach ($a in ([IO.File]::ReadAllText((Join-Path $script:RaizProjeto 'modulos\ajustes\ajustes.json'), [Text.Encoding]::UTF8) | ConvertFrom-Json)) { $a })
-        $soRegistro = @($catalogo | Where-Object { -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
+        $soRegistro = @($catalogo | Where-Object { -not $_.PSObject.Properties['acao'] -and -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
         $essencial = @($soRegistro | Where-Object { @($_.presets) -contains 'Essencial' }).Count
         $essencial | Should -BeGreaterThan 3
         $passos.Etapa | Should -Be 5

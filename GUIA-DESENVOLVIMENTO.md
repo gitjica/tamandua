@@ -478,6 +478,14 @@ Scripts rodam dentro do núcleo e podem usar `Read-TmdRegistro`/`Write-TmdRegist
 (`if ($LASTEXITCODE) { throw ... }`), senão o motor acha que deu certo. `verificar` roda toda vez que a página abre: precisa ser
 rápido e não exigir admin (sem admin, lançar = `Desconhecido`). Remoção de Appx, OneDrive, Edge e afins é `Script` com
 `desfazer` que reinstala pelo winget/Store, e chave inteira (menu clássico) é `Script` que cria/apaga a chave.
+Funções do núcleo feitas para os scripts: `Remove-TmdAppx`/`Install-TmdAppxDaLoja`/`Test-TmdAppxInstalado` (uma leitura do
+`Get-AppxPackage` guardada por 20 s serve aos 34 apps), `Set-TmdDns`/`Get-TmdDnsAtual`, `Set-TmdPastaBloqueada`/
+`Test-TmdPastaBloqueada` (nega escrita a "Todos"), `Clear-TmdConteudoPasta` (apaga pelo `Remove-TmdItem`, pulando `tamandua-*`).
+
+**Ações únicas** (`"acao": true`, `"executar": "<script>"`, sem `mudancas`): o que se faz uma vez e não tem estado nem desfazer
+— ponto de restauração, Limpeza de Disco, apagar temporários, abrir o O&O ShutUp10++. `Invoke-TmdAcaoAjuste` (núcleo) roda o
+script, soma o `Liberado` dos `Remove-TmdItem` que ele devolver (pulado = `Parcial`) e registra `executar` no histórico.
+`"primeiro": true` (só o ponto de restauração) vai antes de tudo; e, sem admin, o lote elevado roda antes do resto.
 
 Regras do catálogo (verificadas por teste automático em **todo** item):
 
@@ -488,18 +496,27 @@ Regras do catálogo (verificadas por teste automático em **todo** item):
 - O que mexe em segurança (Defender, UAC, SmartScreen, firewall, BitLocker) só existe na categoria
   **Avançado (por sua conta e risco)**, com risco Alto e fora de qualquer preset. Nada de `priv-`/`sis-` toca nisso.
 
-Catálogo atual: todos os tweaks do WinUtil (`config/tweaks.json`), 65 ajustes + o ponto de restauração, cada um com
-"(WinUtil: nome original)" na descrição. Diferenças de propósito:
-- Telemetria não mexe no Defender: o envio de amostras virou o ajuste avançado `avanc-defender-sem-amostras`.
-- Otimização de Entrega fica só no módulo Atualizações (mesmo valor; dois módulos com snapshot do mesmo valor se atrapalham).
+Catálogo atual: **tudo** da aba Tweaks do WinUtil — os 68 de `config/tweaks.json` e os 34 apps de `config/appx.json` —
+em 118 entradas, cada uma com `"winutil": ["<chave original>"]` e "(WinUtil: nome original)" na descrição.
+`testes/modulos/ajustes/winutil-referencia.json` é a cópia das chaves e presets do WinUtil (com a data da conferência); um
+teste falha se faltar qualquer chave ou se um preset do WinUtil não estiver inteiro no nosso. Para atualizar: baixar de novo
+`tweaks.json`, `appx.json` e `preset.json`, regenerar a referência e ver o que o teste aponta.
+Um tweak do WinUtil pode virar mais de um ajuste: DNS (combobox) virou um por provedor + "o mais rápido"; Multiplane Overlay,
+dois (compatibilidade e total); Windows AI, dois (IA + Recall); Ultimate Performance (ligar/desligar), um com desfazer.
+Diferenças de propósito:
+- Telemetria não mexe no Defender: o envio de amostras virou o ajuste avançado `avanc-defender-sem-amostras` (mesma chave).
+- Otimização de Entrega existe aqui e no módulo Atualizações (mesmo valor e mesmo alvo: aplicar num aparece aplicado no outro).
 - Serviços em manual deixa o Compartilhamento de Internet em manual, não desligado (o Hotspot móvel continua).
 - Remover Edge não usa `--delete-profile` (favoritos e senhas ficam). A lista da Adobe para o hosts é filtrada linha a linha.
 - Copilot/Recall por política reversível + remoção do app (o WinUtil mexe no `EndOfLife` do Appx, sem volta).
-- Ficaram de fora: Disk Cleanup e Temporários (o `limpar` e o `otimizar` fazem, sem `/ResetBase`), DNS e O&O ShutUp10.
-- Os três de IPv6 escrevem o mesmo valor: a descrição avisa para escolher um.
+- Remover app também tira da imagem (contas novas não ganham) e desfazer reinstala pela Store.
+- O&O ShutUp10++ só abre se a assinatura digital for da O&O; DNS desfaz para o automático (DHCP).
+- Escolhas exclusivas (IPv6, MPO, DNS) ficam fora dos presets e a descrição avisa para escolher uma.
 
-**Presets**: cada ajuste lista os presets de que faz parte, sem arquivo separado. Os do WinUtil (`config/preset.json`):
-`Mínimo` ⊂ `Essencial` ⊂ `Avançado` (teste garante a inclusão; Mínimo e Essencial só risco baixo). Mais: `Notebook`
+**Presets**: cada ajuste lista os presets de que faz parte, sem arquivo separado. Os do WinUtil (`config/preset.json`) estão
+inteiros nos nossos (teste): `Mínimo` (Minimal), `Essencial` (Standard), `Avançado` (Advanced) e `Remover apps` (AppxDefault);
+o WinUtil não segue Essencial ⊂ Avançado (a Limpeza de Disco só está no Standard), e nós também não. Mínimo só tem risco baixo
+e cabe no Essencial. Mais: `Notebook`
 (nada que gaste bateria nem desligue a hibernação; porcentagem da bateria, sem rede na espera, apps em segundo plano),
 `Desempenho` (PC de mesa: efeitos visuais, plano Desempenho Máximo, Modo de Jogo, sem hibernação, mouse sem aceleração),
 `Privacidade` e `Explorador`. Aplicar preset **só marca** os itens; o usuário ainda revisa e confirma. A ordem dos botões é a

@@ -95,6 +95,10 @@ Describe 'Pastas protegidas do sistema' {
         $x86 = [Environment]::GetFolderPath('ProgramFilesX86')
         (Test-TmdCaminhoSeguro -Caminho "$x86\Steam\logs\a.txt" -Raizes "$x86\Steam\logs" -Protecao @()).Ok | Should -BeTrue
         (Test-TmdCaminhoSeguro -Caminho "$x86\Steam\steamapps\common\Jogo" -Raizes "$x86\Steam" -Protecao @()).Ok | Should -BeFalse
+        (Test-TmdCaminhoSeguro -Caminho "$windows\Installer\Razer\setup.exe" -Raizes "$windows\Installer\Razer" -Protecao @()).Ok | Should -BeTrue
+        (Test-TmdCaminhoSeguro -Caminho "$windows\Installer\outro.msi" -Raizes "$windows\Installer" -Protecao @()).Ok | Should -BeFalse
+        $pf = [Environment]::GetFolderPath('ProgramFiles')
+        (Test-TmdCaminhoSeguro -Caminho "$pf\LogiDownloadAssistant\x.exe" -Raizes "$pf\LogiDownloadAssistant" -Protecao @()).Ok | Should -BeTrue
         (Test-TmdCaminhoSeguro -Caminho "$windows\ServiceProfiles\NetworkService\NTUSER.DAT.LOG1" -Raizes $windows -Protecao @()).Ok | Should -BeFalse
         (Test-TmdCaminhoSeguro -Caminho "$windows\System32\drivers\x.sys" -Raizes $windows -Protecao @()).Ok | Should -BeFalse
     }
