@@ -20,7 +20,7 @@ BeforeAll {
     # O que a área de testes mostra: só registro e sem admin (igual a Get-AjusteDisponivel).
     $soRegistro = @($catalogo | Where-Object { -not $_.PSObject.Properties['acao'] -and -not $_.requerAdmin -and @($_.mudancas | Where-Object { $_.tipo -ne 'Registro' }).Count -eq 0 })
     $script:Referencia = Get-Content -LiteralPath (Join-Path $PSScriptRoot 'winutil-referencia.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    $script:Categorias = 'Segurança', 'Limpeza (uma vez)', 'Privacidade', 'Sistema', 'Rede (DNS)', 'Apps do Windows (remover)', 'Explorador de Arquivos', 'Barra de tarefas e Iniciar', 'Aparência', 'Mouse e teclado',
+    $script:Categorias = 'Segurança', 'Limpeza (uma vez)', 'Privacidade', 'Sistema', 'Rede', 'Rede (DNS)', 'Apps do Windows (remover)', 'Explorador de Arquivos', 'Barra de tarefas e Iniciar', 'Aparência', 'Mouse e teclado',
     'Desempenho e jogos', 'Energia', 'Navegadores', 'Programas', 'Avançado (por sua conta e risco)'
     $script:Presets = 'Mínimo', 'Essencial', 'Avançado', 'Notebook', 'Desempenho', 'Privacidade', 'Explorador', 'Remover apps'
     function Get-IdsPreset { param($P) @($catalogo | Where-Object { @($_.presets) -contains $P } | ForEach-Object { $_.id }) }
@@ -93,6 +93,15 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         $temos = @($catalogo | ForEach-Object { if ($_.PSObject.Properties['winutil']) { @($_.winutil) } })
         foreach ($k in @($script:Referencia.tweaks) + @($script:Referencia.appx)) { $temos | Should -Contain $k -Because "o WinUtil tem $k" }
         foreach ($k in $temos | Select-Object -Unique) { @($script:Referencia.tweaks) + @($script:Referencia.appx) | Should -Contain $k -Because "chave $k não existe no WinUtil" }
+    }
+
+    It 'ajustes do Atlas OS dizem de onde vieram (arquivo do playbook e título original)' {
+        $atlas = @($catalogo | Where-Object { $_.PSObject.Properties['atlas'] })
+        $atlas.Count | Should -BeGreaterOrEqual 50
+        foreach ($a in $atlas) {
+            @($a.atlas)[0] | Should -Match '\.yml$' -Because $a.id
+            $a.descricao | Should -Match '\(Atlas: .+\)$' -Because $a.id
+        }
     }
 
     It 'os presets do WinUtil (Mínimo, Essencial = Standard, Avançado = Advanced, Remover apps = AppxDefault) estão inteiros nos nossos' {

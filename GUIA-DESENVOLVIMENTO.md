@@ -501,6 +501,12 @@ em 118 entradas, cada uma com `"winutil": ["<chave original>"]` e "(WinUtil: nom
 `testes/modulos/ajustes/winutil-referencia.json` é a cópia das chaves e presets do WinUtil (com a data da conferência); um
 teste falha se faltar qualquer chave ou se um preset do WinUtil não estiver inteiro no nosso. Para atualizar: baixar de novo
 `tweaks.json`, `appx.json` e `preset.json`, regenerar a referência e ver o que o teste aponta.
+Mais 72 ajustes do **Atlas OS** (`src/playbook/Configuration/tweaks`, GPL-3.0; usamos só os valores), com `"atlas": ["<arquivo>.yml"]`
+e "(Atlas: título original)" na descrição: os que são só registro e que um administrador consegue escrever. Ficaram de fora os que
+o WinUtil já tinha, os internos do Atlas (scripts, tema, foto de perfil, atalhos), os que enfraquecem a segurança (mitigações,
+Core Isolation, UAC sem área de trabalho segura, páginas do Segurança do Windows), os que exigem TrustedInstaller (o Atlas roda
+como TI: `Diagnostics\Performance`, `Component Based Servicing`, `ActivatableClassId`, índice de busca) e os de menu de contexto
+(viraram o módulo Menu de contexto).
 Um tweak do WinUtil pode virar mais de um ajuste: DNS (combobox) virou um por provedor + "o mais rápido"; Multiplane Overlay,
 dois (compatibilidade e total); Windows AI, dois (IA + Recall); Ultimate Performance (ligar/desligar), um com desfazer.
 Diferenças de propósito:

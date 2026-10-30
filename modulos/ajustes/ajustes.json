@@ -222,6 +222,395 @@
     ]
   },
   {
+    "id": "priv-sem-content-delivery",
+    "atlas": ["debloat/config-content-delivery.yml"],
+    "nome": "Sem propaganda espalhada pelo Windows",
+    "descricao": "Desliga de uma vez a \"entrega de conteúdo\": apps pré-instalados de parceiros, sugestões nas Configurações, na tela de bloqueio e no Iniciar, e avisos da conta Microsoft. (Atlas: Configure Content Delivery Manager)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "ContentDeliveryAllowed", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "FeatureManagementEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContentEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "RemediationRequired", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "OemPreInstalledAppsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "PreInstalledAppsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "PreInstalledAppsEverEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SilentInstalledAppsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-310093Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-338393Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-353694Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-353696Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SystemPaneSuggestionsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-338387Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "RotatingLockScreenOverlayEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-338388Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SubscribedContent-338389Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager", "nome": "SoftLandingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\SystemSettings\\AccountNotifications", "nome": "EnableAccountNotifications", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-propaganda-onedrive",
+    "atlas": ["privacy/advertising/disable-sync-provider-notifs.yml"],
+    "nome": "Explorador sem propaganda do OneDrive",
+    "descricao": "Some com as faixas de \"experimente o OneDrive/Microsoft 365\" no Explorador. (Atlas: Disable Sync Provider Notifications)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "ShowSyncProviderNotifications", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-sem-telemetria-office",
+    "atlas": ["privacy/apps/disable-office-telemetry.yml"],
+    "nome": "Sem telemetria do Office",
+    "descricao": "O Office para de mandar dados de uso e de participar do programa de melhoria. (Atlas: Disable Office Telemetry)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\office\\16.0\\common", "nome": "sendcustomerdata", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\office\\common\\clienttelemetry", "nome": "sendtelemetry", "valor": 3, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\office\\16.0\\common", "nome": "qmenable", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-telemetria-nvidia",
+    "atlas": ["privacy/apps/disable-nvidia-telemetry.yml"],
+    "nome": "Sem telemetria do painel da NVIDIA",
+    "descricao": "O Painel de Controle da NVIDIA deixa de enviar dados de uso. (Atlas: Disable NVIDIA Control Panel Telemetry)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\NVIDIA Corporation\\NVControlPanel2\\Client", "nome": "OptInOrOutPreference", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-terminar-configuracao",
+    "atlas": ["privacy/cloud/disable-suggest-ways-to-finish-setup.yml"],
+    "nome": "Sem a tela \"vamos terminar de configurar\"",
+    "descricao": "Para de aparecer, depois de atualizações, a tela que empurra conta Microsoft, OneDrive e Microsoft 365. (Atlas: Disable Suggested Ways to Finish Setting Up Your Device)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\UserProfileEngagement", "nome": "ScoobeSystemSettingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-sincronizar-configuracoes",
+    "atlas": ["privacy/cloud/disable-setting-sync.yml"],
+    "nome": "Não sincronizar configurações com a conta Microsoft",
+    "descricao": "Tema, senhas de Wi-Fi, idioma e acessibilidade deixam de ir para a nuvem. Num PC novo, você terá de configurar de novo. (Atlas: Disable Settings Sync)",
+    "categoria": "Privacidade",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync", "nome": "DisableSettingSync", "valor": 2, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync", "nome": "DisableSettingSyncUserOverride", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync", "nome": "DisableSyncOnPaidNetwork", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\SettingSync", "nome": "DisableWindowsSettingSync", "valor": 2, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Personalization", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\BrowserSettings", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Credentials", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Accessibility", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SettingSync\\Groups\\Windows", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\SettingSync", "nome": "SyncPolicy", "valor": 5, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-sincronizar-mensagens",
+    "atlas": ["privacy/cloud/disallow-message-cloud-sync.yml"],
+    "nome": "Não sincronizar mensagens de texto na nuvem",
+    "descricao": "Mensagens SMS/MMS do Vincular ao Celular não vão para a nuvem. (Atlas: Disallow Message Service Cloud Sync)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Messaging", "nome": "AllowMessageSync", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-permissoes-apps",
+    "atlas": ["privacy/config-app-permissions.yml"],
+    "nome": "Apps sem acesso ao diagnóstico e aos dados da conta",
+    "descricao": "Apps da Store não leem o diagnóstico de outros apps nem seu nome, foto e conta. (Atlas: Configure App Permissions)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\appDiagnostics", "nome": "Value", "valor": "Deny", "tipoValor": "String", "padraoWindows": "Allow" },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\CapabilityAccessManager\\ConsentStore\\userAccountInformation", "nome": "Value", "valor": "Deny", "tipoValor": "String", "padraoWindows": "Allow" }
+    ]
+  },
+  {
+    "id": "priv-media-player",
+    "atlas": ["privacy/config-windows-media-player.yml"],
+    "nome": "Windows Media Player sem coleta",
+    "descricao": "O Media Player antigo não busca informações online nem registra o que você toca. (Atlas: Configure Windows Media Player)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WMDRM", "nome": "DisableOnline", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\MediaPlayer\\Preferences", "nome": "AcceptedPrivacyStatement", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\MediaPlayer\\Preferences", "nome": "UsageTracking", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-experimentos",
+    "atlas": ["privacy/disable-experimentation.yml"],
+    "nome": "Sem experimentos da Microsoft",
+    "descricao": "A Microsoft não liga e desliga recursos de teste no seu Windows. (Atlas: Disable Experimentation)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\default\\System\\AllowExperimentation", "nome": "Value", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "priv-sem-camera-bloqueio",
+    "atlas": ["privacy/disable-lockscreen-camera.yml"],
+    "nome": "Sem câmera na tela de bloqueio",
+    "descricao": "Não dá para abrir a câmera sem desbloquear o PC. (Atlas: Disable Lockscreen Camera)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Personalization", "nome": "NoLockScreenCamera", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-rastreio-desempenho",
+    "atlas": ["privacy/disable-perf-track.yml"],
+    "nome": "Sem rastreio de desempenho do Windows",
+    "descricao": "Desliga o cenário de diagnóstico que registra lentidões e as manda para a Microsoft. (Atlas: Disable Performance Track)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WDI\\{9c5a40da-b965-4fc3-8781-88dd50a6299d}", "nome": "ScenarioExecutionEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-tela-privacidade-contas",
+    "atlas": ["privacy/disable-privacy-experience.yml"],
+    "nome": "Contas novas sem a tela de privacidade",
+    "descricao": "Novos usuários deste PC pulam as perguntas de privacidade da primeira entrada (os ajustes daqui valem para eles). (Atlas: Disable OOBE Privacy Experience)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\OOBE", "nome": "DisablePrivacyExperience", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-atualizar-voz",
+    "atlas": ["privacy/disable-speech-auto-updates.yml"],
+    "nome": "Sem baixar modelos de voz sozinho",
+    "descricao": "O Windows não baixa atualizações do reconhecimento de voz em segundo plano. (Atlas: Disable Automatic Updates Of Speech Data)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Speech", "nome": "AllowSpeechModelUpdate", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-apps-mais-usados",
+    "atlas": ["privacy/disable-user-tracking.yml"],
+    "nome": "Não registrar os apps mais usados",
+    "descricao": "O Windows deixa de contar quais programas você mais abre. (Atlas: Disable Most Frequently Used Applications)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "NoInstrumentation", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-idiomas-sites",
+    "atlas": ["privacy/disable-web-lang-list-access.yml"],
+    "nome": "Sites não veem sua lista de idiomas",
+    "descricao": "Um dado a menos para sites identificarem você. (Atlas: Disable Website Access to Language List)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\International\\User Profile", "nome": "HttpAcceptLanguageOptOut", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-relatorio-erros",
+    "atlas": ["privacy/disable-win-error-reporting.yml"],
+    "nome": "Sem Relatório de Erros do Windows (política)",
+    "descricao": "Quando um programa trava, o Windows não monta nem envia relatório (vale junto com o serviço desligado pela telemetria). (Atlas: Disable Windows Error Reporting)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting", "nome": "Disabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\PCHealth\\ErrorReporting", "nome": "DoReport", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting", "nome": "Disabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting", "nome": "DontShowUI", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\PCHealth\\ErrorReporting", "nome": "ShowUI", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting", "nome": "LoggingDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Error Reporting", "nome": "DontSendAdditionalData", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceInstall\\Settings", "nome": "DisableSendGenericDriverNotFoundToWER", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\DeviceInstall\\Settings", "nome": "DisableSendRequestAdditionalSoftwareToWER", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-telemetria-ativacao",
+    "atlas": ["privacy/telemetry/disable-activation-telemetry.yml"],
+    "nome": "Sem telemetria da ativação",
+    "descricao": "A ativação do Windows deixa de mandar dados extras para a Microsoft. (Atlas: Disable Key Management System Telemetry)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\CurrentVersion\\Software Protection Platform", "nome": "NoGenTicket", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-ceip",
+    "atlas": ["privacy/telemetry/disable-ceip.yml"],
+    "nome": "Fora do Programa de Aperfeiçoamento",
+    "descricao": "Sai do \"Programa de Aperfeiçoamento da Experiência do Usuário\" da Microsoft. (Atlas: Disable Customer Experience Improvement Program)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\AppV\\CEIP", "nome": "CEIPEnable", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\SQMClient\\Windows", "nome": "CEIPEnable", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-coleta-escrita",
+    "atlas": ["privacy/telemetry/disable-input-telemetry.yml"],
+    "nome": "Sem coleta de escrita à mão e digitação",
+    "descricao": "Caneta e teclado não mandam amostras nem estatísticas de digitação. (Atlas: Disable Input Telemetry)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\TabletPC", "nome": "PreventHandwritingDataSharing", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\HandwritingErrorReports", "nome": "PreventHandwritingErrorReports", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Input\\Settings", "nome": "InsightsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Input\\TIPC", "nome": "Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-spotlight",
+    "atlas": ["qol/disable-windows-spotlight.yml"],
+    "nome": "Sem Windows em Destaque (Spotlight)",
+    "descricao": "Some com as fotos e \"curiosidades\" da Microsoft na tela de bloqueio, nas Configurações e na central de ações, e com as sugestões de terceiros. (Atlas: Disable Windows Spotlight)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableWindowsSpotlightFeatures", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableWindowsSpotlightWindowsWelcomeExperience", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableWindowsSpotlightOnActionCenter", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableWindowsSpotlightOnSettings", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableThirdPartySuggestions", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-pedir-opiniao",
+    "atlas": ["qol/disable-windows-feedback.yml"],
+    "nome": "Windows não pede sua opinião",
+    "descricao": "Some com as notificações \"Como está sendo sua experiência?\". (Atlas: Disable Windows Feedback)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Siuf\\Rules", "nome": "NumberOfSIUFInPeriod", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\DataCollection", "nome": "DoNotShowFeedbackNotifications", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-telemetria-mrt",
+    "atlas": ["qol/windows-update/disable-msrt-telemetry.yml"],
+    "nome": "Ferramenta de Remoção de Malware sem relatório",
+    "descricao": "A ferramenta mensal da Microsoft continua limpando, mas não manda o que achou. (Atlas: Disable MSRT telemetry)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\MRT", "nome": "DontReportInfectionInformation", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-compartilhar-proximidade",
+    "atlas": ["qol/shell/disable-nearby-sharing.yml"],
+    "nome": "Sem Compartilhamento por Proximidade",
+    "descricao": "Desliga o envio de arquivos para PCs próximos por Bluetooth/Wi-Fi e as \"experiências compartilhadas\". (Atlas: Disable Shared Experiences)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CDP\\SettingsPage", "nome": "BluetoothLastDisabledNearShare", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CDP", "nome": "NearShareChannelUserAuthzPolicy", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CDP", "nome": "CdpSessionUserAuthzPolicy", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-continuar-celular",
+    "atlas": ["qol/disable-resume.yml"],
+    "nome": "Sem \"continuar do celular\"",
+    "descricao": "O PC não oferece continuar no computador o que você estava fazendo no celular. (Atlas: Disable Cross Device Resume)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\CrossDeviceResume\\Configuration", "nome": "IsResumeAllowed", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "priv-sem-escrita-ink",
+    "atlas": ["qol/config-windows-ink-workspace.yml"],
+    "nome": "Windows Ink sem sugestões de apps",
+    "descricao": "O espaço de trabalho da caneta não sugere apps da Store. (Atlas: Configure Windows Ink Workspace)",
+    "categoria": "Privacidade",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\PenWorkspace", "nome": "PenWorkspaceAppSuggestionsEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
     "id": "priv-outlook-classico",
     "winutil": ["WPFToggleNewOutlook"],
     "nome": "Ficar no Outlook clássico",
@@ -372,6 +761,175 @@
     ]
   },
   {
+    "id": "sis-sem-assistente-compatibilidade",
+    "atlas": ["privacy/disable-pca.yml"],
+    "nome": "Sem o Assistente de Compatibilidade de Programas",
+    "descricao": "Para de vigiar programas antigos e de mostrar \"este programa pode não ter sido instalado corretamente\", e desliga o inventário de apps. (Atlas: Disable Program Compatibility Assistant (PCA))",
+    "categoria": "Sistema",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat", "nome": "AITEnable", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat", "nome": "AllowTelemetry", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat", "nome": "DisableEngine", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat", "nome": "DisableInventory", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat", "nome": "DisablePCA", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\AppCompat", "nome": "DisableUAR", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-registro-rsop",
+    "atlas": ["privacy/disable-rsop-logging.yml"],
+    "nome": "Sem registro de políticas aplicadas (RSoP)",
+    "descricao": "Deixa de gravar o histórico de políticas de grupo a cada login. Só importa em empresas. (Atlas: Disable Resultant Set of Policy (RSoP) Logging)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\System", "nome": "RSoPLogging", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-dicas",
+    "atlas": ["qol/disable-tips.yml"],
+    "nome": "Sem dicas do Windows (política)",
+    "descricao": "Desliga as dicas de \"primeiros passos\" do Windows para todas as contas. (Atlas: Disable Tips)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableSoftLanding", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-config-sem-dicas",
+    "atlas": ["qol/disable-settings-tips.yml"],
+    "nome": "Configurações sem dicas online",
+    "descricao": "O app Configurações não baixa dicas e vídeos da internet. (Atlas: Disable Settings Tips)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\default\\Settings\\AllowOnlineTips", "nome": "value", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "AllowOnlineTips", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-conteudo-nuvem",
+    "atlas": ["qol/taskbar/disable-cloud-optimized-content.yml"],
+    "nome": "Sem conteúdo \"da nuvem\" na barra e no Iniciar",
+    "descricao": "A Microsoft não muda sozinha ícones fixados e itens do Iniciar. (Atlas: Disable Cloud Optimized Content on Taskbar)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\CloudContent", "nome": "DisableCloudOptimizedContent", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-autoplay",
+    "atlas": ["qol/shell/config-autorun.yml"],
+    "nome": "Sem AutoPlay ao conectar pendrive",
+    "descricao": "Conectar pendrive, celular ou cartão não abre nada sozinho (também protege de vírus de pendrive). (Atlas: Disable AutoRun)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\AutoplayHandlers", "nome": "DisableAutoplay", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 }
+    ]
+  },
+  {
+    "id": "sis-abrir-com-sem-loja",
+    "atlas": ["qol/explorer/no-internet-open-with.yml"],
+    "nome": "\"Abrir com\" sem procurar na Store",
+    "descricao": "Arquivo de tipo desconhecido não manda você para a Microsoft Store. (Atlas: Disable Internet File Association Service)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "NoInternetOpenWith", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-aviso-disco",
+    "atlas": ["qol/shell/disable-low-disk-warning.yml"],
+    "nome": "Sem aviso de pouco espaço em disco",
+    "descricao": "O Windows para de avisar quando um disco está quase cheio. (Atlas: Disable Low Disk Space Checks)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "NoLowDiskSpaceChecks", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-aviso-usb",
+    "atlas": ["qol/disable-usb-issues-notifications.yml"],
+    "nome": "Sem avisos de problemas no USB",
+    "descricao": "Some com os avisos de \"carregador fraco\" e de erro em aparelho USB. (Atlas: Disable Notify About USB Issues)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Shell\\USB", "nome": "NotifyOnUsbErrors", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Shell\\USB", "nome": "NotifyOnWeakCharger", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-sem-insider",
+    "atlas": ["qol/windows-update/disable-insider.yml"],
+    "nome": "Bloquear o programa Windows Insider",
+    "descricao": "Esconde a página do Insider e impede o PC de entrar em versões de teste do Windows. (Atlas: Restrict Windows Insider)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "ManagePreviewBuilds", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate", "nome": "ManagePreviewBuildsPolicyValue", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PreviewBuilds", "nome": "AllowBuildPreview", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PreviewBuilds", "nome": "EnableConfigFlighting", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\PreviewBuilds", "nome": "EnableExperimentation", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\WindowsSelfHost\\UI\\Visibility", "nome": "HideInsiderPage", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-atualizacao-sem-insistir",
+    "atlas": ["qol/windows-update/disable-nagging.yml"],
+    "nome": "Windows Update sem insistir",
+    "descricao": "\"Atualizar e desligar\" deixa de ser a opção padrão do menu Desligar, e some o link para a ferramenta de criação de mídia. (Atlas: Disable WU Nagging)",
+    "categoria": "Sistema",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU", "nome": "NoAUAsDefaultShutdownOption", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\WindowsUpdate\\UX\\Settings", "nome": "HideMCTLink", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-loja-sem-atualizar-sozinha",
+    "atlas": ["qol/disable-store-auto-updates.yml"],
+    "nome": "Microsoft Store sem atualizar apps sozinha",
+    "descricao": "Você decide quando atualizar os apps da Store. Correções de segurança dos apps também esperam você. (Atlas: Disable Automatic Updates for Apps in Store)",
+    "categoria": "Sistema",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsStore", "nome": "AutoDownload", "valor": 2, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
     "id": "expl-extensoes",
     "winutil": ["WPFToggleShowExt"],
     "nome": "Mostrar extensões de arquivo",
@@ -457,6 +1015,169 @@
         "desfazer": "Remove-Item -LiteralPath 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}' -Recurse -Force -ErrorAction SilentlyContinue; Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue",
         "verificar": "Test-Path -LiteralPath 'HKCU:\\Software\\Classes\\CLSID\\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\\InprocServer32'"
       }
+    ]
+  },
+  {
+    "id": "expl-sem-texto-atalho",
+    "atlas": ["qol/explorer/remove-shortcut-text.yml"],
+    "nome": "Atalhos sem \" - Atalho\" no nome",
+    "descricao": "Atalhos novos ficam com o nome do programa, sem o \" - Atalho\" no fim. (Atlas: Remove Shortcut Text)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\NamingTemplates", "nome": "ShortcutNameTemplate", "valor": "%s.lnk", "tipoValor": "String", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-detalhes-copia",
+    "atlas": ["qol/explorer/always-more-details-transfer.yml"],
+    "nome": "Cópias sempre com detalhes",
+    "descricao": "A janela de copiar/mover já abre com o gráfico de velocidade e o tempo restante. (Atlas: Show More Details by Default on Transfers)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\OperationStatusManager", "nome": "EnthusiastMode", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-sem-caixas-selecao",
+    "atlas": ["qol/explorer/disable-check-boxes.yml"],
+    "nome": "Explorador sem caixinhas de seleção",
+    "descricao": "Tira as caixinhas que aparecem ao lado dos arquivos. (Atlas: Disable Use Check Boxes to Select Items)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "AutoCheckSelect", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-modo-compacto",
+    "atlas": ["qol/explorer/use-compact-mode.yml"],
+    "nome": "Explorador no modo compacto",
+    "descricao": "Menos espaço entre os itens: cabe mais coisa na tela. (Atlas: Use Compact Mode)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "UseCompactMode", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-menu-completo-varios",
+    "atlas": ["qol/explorer/full-context-on-more-than-15-items.yml"],
+    "nome": "Menu completo com muitos arquivos selecionados",
+    "descricao": "Com mais de 15 arquivos selecionados, o botão direito continua mostrando \"Abrir\", \"Imprimir\" etc. (Atlas: Always Show the Full Context Menu On Items)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer", "nome": "MultipleInvokePromptMinimum", "valor": 100, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-sem-arquivos-office",
+    "atlas": ["qol/explorer/dont-show-office-files.yml"],
+    "nome": "Início do Explorador sem arquivos da nuvem",
+    "descricao": "O Início/Acesso rápido não mostra arquivos do Office e do OneDrive da sua conta. (Atlas: Don't Show Office Files)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer", "nome": "ShowCloudFilesInQuickAccess", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-sem-recentes",
+    "atlas": ["qol/explorer/hide-frequently-used-items.yml"],
+    "nome": "Sem arquivos recentes",
+    "descricao": "O Explorador, o Iniciar e as listas de atalho da barra deixam de guardar o que você abriu. (Atlas: Hide Recent Items)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Medio",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Privacidade"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer", "nome": "ShowFrequent", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer", "nome": "ShowRecent", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Start_TrackDocs", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "ClearRecentDocsOnExit", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "NoRecentDocsHistory", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Explorer", "nome": "NoRemoteDestinations", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-sem-procurar-atalhos",
+    "atlas": ["qol/explorer/disable-invalid-shortcuts-search.yml"],
+    "nome": "Sem procurar o destino de atalhos quebrados",
+    "descricao": "Atalho quebrado avisa na hora, em vez de vasculhar o disco atrás do arquivo. (Atlas: Disable Searching for Invalid Shortcuts)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "NoResolveSearch", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "NoResolveTrack", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-dica-rapida",
+    "atlas": ["qol/explorer/minimize-mouse-hover-time.yml"],
+    "nome": "Dica do arquivo aparece na hora",
+    "descricao": "A caixinha com tamanho e data aparece quase sem esperar ao passar o mouse. (Atlas: Minimize Mouse Hover Time for Item Info)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "MouseHoverTime", "valor": "20", "tipoValor": "String", "padraoWindows": "400" }
+    ]
+  },
+  {
+    "id": "expl-este-computador-sem-pastas",
+    "atlas": ["qol/explorer/disable-folders-this-pc.yml"],
+    "nome": "Este Computador só com as unidades",
+    "descricao": "Tira Documentos, Imagens, Músicas, Vídeos, Downloads, Área de Trabalho e Objetos 3D de \"Este Computador\" (continuam no painel da esquerda). (Atlas: Hide Folders from This PC)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{31C0DD25-9439-4F12-BF41-7FF4EDA38722}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{a0c69a99-21c8-4671-8703-7934162fcf1d}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{a0c69a99-21c8-4671-8703-7934162fcf1d}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{7d83ee9b-2244-4e70-b1f5-5393042af1e4}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{0ddd015d-b06c-45d5-8c4c-f59713854639}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{0ddd015d-b06c-45d5-8c4c-f59713854639}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{35286a68-3c57-41a1-bbb1-0eae73d76c95}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{f42ee2d3-909f-4907-8871-4c22fc0bf756}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FolderDescriptions\\{B4BFCC3A-DB2C-424C-B029-7FE99A87C641}\\PropertyBag", "nome": "ThisPCPolicy", "valor": "Hide", "tipoValor": "String", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "expl-busca-classica",
+    "atlas": ["qol/explorer/classic-search.yml"],
+    "nome": "Busca clássica no Explorador",
+    "descricao": "A caixa de busca do Explorador volta a ser a do Windows 10: mais rápida e sem sugestões da nuvem. (Atlas: Revert to Classic Search)",
+    "categoria": "Explorador de Arquivos",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Classes\\CLSID\\{1d64637d-31e9-4b06-9124-e83fb178ac6e}\\TreatAs", "nome": "", "valor": "{64bc32b5-4eec-4de7-972d-bd8bd0324537}", "tipoValor": "String", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Classes\\WOW6432Node\\CLSID\\{1d64637d-31e9-4b06-9124-e83fb178ac6e}\\TreatAs", "nome": "", "valor": "{64bc32b5-4eec-4de7-972d-bd8bd0324537}", "tipoValor": "String", "padraoWindows": null }
     ]
   },
   {
@@ -571,6 +1292,73 @@
     ]
   },
   {
+    "id": "barra-sem-chat",
+    "atlas": ["qol/taskbar/disable-windows-chat.yml"],
+    "nome": "Sem o ícone de Chat (Teams) na barra",
+    "descricao": "Tira o ícone do Chat do Teams pessoal da barra de tarefas. (Atlas: Disable Windows Chat)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Chat", "nome": "ChatIcon", "valor": 3, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "TaskbarMn", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "barra-sem-reuniao",
+    "atlas": ["qol/taskbar/hide-meet-now.yml"],
+    "nome": "Sem \"Reunir agora\" na barra",
+    "descricao": "Tira o ícone do Skype \"Reunir agora\" (Windows 10). (Atlas: Hide 'Meet Now' on Taskbar)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "HideSCAMeetNow", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-alt-tab-sem-abas",
+    "atlas": ["qol/shell/alt-tab-open-windows.yml"],
+    "nome": "Alt+Tab só com janelas",
+    "descricao": "O Alt+Tab deixa de mostrar cada aba do Edge como se fosse uma janela. (Atlas: Do Not Show Edge Tabs in Alt-Tab)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "MultiTaskingAltTabFilter", "valor": 3, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-iniciar-sem-sugestoes",
+    "atlas": ["qol/shell/no-recommendations-start-menu.yml"],
+    "nome": "Iniciar sem recomendações e avisos da conta",
+    "descricao": "O Iniciar deixa de sugerir apps e de mostrar avisos sobre a conta Microsoft. (Atlas: Disable Recommendations in the Start Menu)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Start_IrisRecommendations", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Start_AccountNotifications", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "barra-iniciar-mais-fixados",
+    "atlas": ["qol/shell/show-more-pins.yml"],
+    "nome": "Mais apps fixados no Iniciar",
+    "descricao": "O Iniciar mostra mais uma fileira de fixados e menos recomendações. (Atlas: Show More Pins in Start)",
+    "categoria": "Barra de tarefas e Iniciar",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Start_Layout", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
     "id": "aparencia-tema-escuro",
     "winutil": ["WPFToggleDarkMode"],
     "nome": "Tema escuro",
@@ -646,6 +1434,89 @@
     ]
   },
   {
+    "id": "aparencia-sem-iluminacao-dinamica",
+    "atlas": ["qol/disable-dynamic-lighting.yml"],
+    "nome": "Sem Iluminação Dinâmica",
+    "descricao": "O Windows não controla os LEDs RGB de teclado e mouse (deixa para o programa do fabricante). (Atlas: Disable Dynamic Lighting)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Lighting", "nome": "AmbientLightingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "aparencia-papel-parede-qualidade",
+    "atlas": ["qol/best-wallpaper-quality.yml"],
+    "nome": "Papel de parede sem compressão",
+    "descricao": "O Windows usa a imagem do papel de parede em qualidade máxima. (Atlas: Disable Wallpaper Compression)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "JPEGImportQuality", "valor": 100, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "aparencia-sem-peek",
+    "atlas": ["qol/taskbar/disable-desktop-peek.yml"],
+    "nome": "Sem \"espiar\" a área de trabalho",
+    "descricao": "Passar o mouse no canto da barra não deixa as janelas transparentes. (Atlas: Disable Show Desktop Peek on Taskbar)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "DisablePreviewDesktop", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "aparencia-sem-sacudir",
+    "atlas": ["qol/shell/disable-aero-shake.yml"],
+    "nome": "Sacudir uma janela não minimiza as outras",
+    "descricao": "Desliga o \"Aero Shake\", que minimiza tudo quando você chacoalha uma janela sem querer. (Atlas: Disable Aero Shake)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Explorador"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "DisallowShaking", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "aparencia-sem-sons-acessibilidade",
+    "atlas": ["qol/ease-of-access/disable-warning-sounds.yml"],
+    "nome": "Sem sons e atalhos de acessibilidade",
+    "descricao": "Sem bipes ao ligar recursos de acessibilidade, sem o atalho que abre ferramentas de toque e sem a leitura automática do Narrador. (Atlas: Disable Ease of Access Sounds)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility", "nome": "Warning Sounds", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility", "nome": "Sound on Activation", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility\\SlateLaunch", "nome": "LaunchAT", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Ease of Access", "nome": "selfscan", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Ease of Access", "nome": "selfvoice", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "aparencia-ocultar-sons-desligados",
+    "atlas": ["qol/hide-disabled-disconnected-sounds.yml"],
+    "nome": "Painel de Som sem aparelhos desligados",
+    "descricao": "A lista de dispositivos de som mostra só o que está conectado. (Atlas: Hide Disabled and Disconnected Devices in Sounds Panel)",
+    "categoria": "Aparência",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Multimedia\\Audio\\DeviceCpl", "nome": "ShowDisconnectedDevices", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Multimedia\\Audio\\DeviceCpl", "nome": "ShowHiddenDevices", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
     "id": "mouse-sem-aceleracao",
     "winutil": ["WPFToggleMouseAcceleration"],
     "nome": "Mouse sem aceleração",
@@ -702,6 +1573,103 @@
     ]
   },
   {
+    "id": "sis-desligar-mais-rapido",
+    "atlas": ["qol/startup-shutdown/decrease-shutdown-time.yml"],
+    "nome": "Desligar mais rápido",
+    "descricao": "O Windows espera 2 s (em vez de 5 a 20 s) por programas e serviços travados antes de fechá-los ao desligar. Um programa lento pode fechar sem salvar. (Atlas: Decrease Shutdown Time)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "HungAppTimeout", "valor": "2000", "tipoValor": "String", "padraoWindows": "5000" },
+      { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Desktop", "nome": "WaitToKillAppTimeOut", "valor": "2000", "tipoValor": "String", "padraoWindows": "20000" },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control", "nome": "WaitToKillServiceTimeout", "valor": "2000", "tipoValor": "String", "padraoWindows": "5000" }
+    ]
+  },
+  {
+    "id": "sis-iniciar-sem-atraso",
+    "atlas": ["qol/startup-shutdown/disable-startup-delay.yml"],
+    "nome": "Programas da inicialização sem atraso",
+    "descricao": "Os programas que abrem com o Windows começam na hora, sem a espera de ~10 s. (Atlas: Disable Startup Delay)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize", "nome": "StartupDelayInMSec", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "jogos-mmcss",
+    "atlas": ["performance/config-mmcss.yml"],
+    "nome": "Mais processador para jogos e áudio",
+    "descricao": "O agendador multimídia reserva 10% (em vez de 20%) do processador para tarefas de fundo enquanto você joga ou ouve música. (Atlas: Configure the Multimedia Class Scheduler Service)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Multimedia\\SystemProfile", "nome": "SystemResponsiveness", "valor": 10, "tipoValor": "DWord", "padraoWindows": 20 }
+    ]
+  },
+  {
+    "id": "jogos-prioridade-primeiro-plano",
+    "atlas": ["performance/system/win32-priority-separation.yml"],
+    "nome": "Prioridade para o programa em uso",
+    "descricao": "O programa da janela ativa ganha fatias maiores do processador. (Atlas: Prioritize Foreground Applications)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\PriorityControl", "nome": "Win32PrioritySeparation", "valor": 38, "tipoValor": "DWord", "padraoWindows": 2 }
+    ]
+  },
+  {
+    "id": "jogos-sem-game-bar",
+    "atlas": ["performance/disable-game-bar.yml"],
+    "nome": "Desligar a Xbox Game Bar e a gravação de jogos",
+    "descricao": "Sem Win+G nem gravação em segundo plano (Game DVR), que pesa em PCs mais fracos. Quem grava jogos pelo Windows perde isso. (Atlas: Disable Game Bar)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\System\\GameConfigStore", "nome": "GameDVR_Enabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\GameDVR", "nome": "AppCaptureEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\GameBar", "nome": "ShowStartupPanel", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\GameBar", "nome": "UseNexusForGameBarEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\GameDVR", "nome": "AllowGameDVR", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "jogos-sem-som-reduzido",
+    "atlas": ["qol/do-not-reduce-sounds.yml"],
+    "nome": "Não abaixar o som durante chamadas",
+    "descricao": "O jogo e a música continuam no volume normal quando entra uma chamada (Discord, Teams). (Atlas: Do Not Reduce Sounds While in a Call)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Baixo",
+    "requerAdmin": false,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKCU:\\SOFTWARE\\Microsoft\\Multimedia\\Audio", "nome": "UserDuckingPreference", "valor": 3, "tipoValor": "DWord", "padraoWindows": 1 }
+    ]
+  },
+  {
+    "id": "jogos-cache-icones-maior",
+    "atlas": ["qol/explorer/extend-cache.yml"],
+    "nome": "Cache de ícones maior",
+    "descricao": "O Explorador guarda até 4096 ícones na memória e redesenha menos. (Atlas: Extend Icon Cache)",
+    "categoria": "Desempenho e jogos",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer", "nome": "Max Cached Icons", "valor": "4096", "tipoValor": "String", "padraoWindows": null }
+    ]
+  },
+  {
     "id": "energia-sem-hibernacao",
     "winutil": ["WPFTweaksHiber"],
     "nome": "Desativar a hibernação",
@@ -749,6 +1717,60 @@
     "presets": ["Notebook"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Power\\PowerSettings\\f15576e8-98b7-4186-b944-eafa664402d9", "nome": "DCSettingIndex", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "sis-manutencao-sem-acordar",
+    "atlas": ["performance/config-automatic-maintenance.yml"],
+    "nome": "Manutenção automática sem acordar o PC",
+    "descricao": "A manutenção roda quando o PC já está ligado, em vez de acordá-lo de madrugada (e gastar bateria na mochila). (Atlas: Configure Automatic Maintenance)",
+    "categoria": "Energia",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Task Scheduler\\Maintenance", "nome": "WakeUp", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "rede-sem-llmnr",
+    "atlas": ["networking/disable-llmnr.yml"],
+    "nome": "Desligar o LLMNR",
+    "descricao": "Protocolo antigo de achar PCs na rede, usado em ataques em Wi-Fi público. Redes domésticas comuns não precisam dele. (Atlas: Disable LLMNR Protocol)",
+    "categoria": "Rede",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows NT\\DNSClient", "nome": "EnableMulticast", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "rede-smb-sem-limite",
+    "atlas": ["networking/shares/disable-smb-bandwidth-throttling.yml"],
+    "nome": "Pastas de rede sem limite de velocidade",
+    "descricao": "Copiar de pastas compartilhadas (NAS, outro PC) usa a rede toda, sem o freio do Windows. (Atlas: Disable SMB Bandwidth Throttling)",
+    "categoria": "Rede",
+    "risco": "Baixo",
+    "requerAdmin": true,
+    "presets": ["Avançado", "Desempenho"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanmanWorkstation\\Parameters", "nome": "DisableBandwidthThrottling", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
+    ]
+  },
+  {
+    "id": "rede-sem-acesso-anonimo",
+    "atlas": ["networking/shares/restrict-anonymous-access.yml"],
+    "nome": "Sem acesso anônimo a compartilhamentos",
+    "descricao": "Ninguém na rede lista seus compartilhamentos e contas sem estar logado. Aparelhos de rede muito antigos podem deixar de ver o PC. (Atlas: Restrict Anonymous Access)",
+    "categoria": "Rede",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": ["Avançado"],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Services\\LanManServer\\Parameters", "nome": "RestrictNullSessAccess", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa", "nome": "RestrictAnonymous", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Lsa", "nome": "RestrictAnonymousSAM", "valor": 1, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
   },
   {
@@ -1254,6 +2276,20 @@
         "desfazer": "Enable-BitLocker -MountPoint $env:SystemDrive -TpmProtector -UsedSpaceOnly -ErrorAction Stop | Out-Null",
         "verificar": "$v = (New-Object -ComObject Shell.Application).NameSpace($env:SystemDrive + '\\').Self.ExtendedProperty('System.Volume.BitLockerProtection'); $null -eq $v -or [int]$v -in 0, 2"
       }
+    ]
+  },
+  {
+    "id": "sis-memoria-kernel",
+    "atlas": ["performance/system/disable-paging.yml"],
+    "nome": "Núcleo do Windows sempre na memória",
+    "descricao": "O núcleo não vai para o arquivo de paginação e a memória não junta páginas iguais. Só faz sentido com bastante RAM (16 GB ou mais). (Atlas: Disable Paging Settings)",
+    "categoria": "Avançado (por sua conta e risco)",
+    "risco": "Medio",
+    "requerAdmin": true,
+    "presets": [],
+    "mudancas": [
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management", "nome": "DisablePagingExecutive", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 },
+      { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Memory Management", "nome": "DisablePageCombining", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
     ]
   },
   {
