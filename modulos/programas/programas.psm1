@@ -30,26 +30,70 @@ function Invoke-Winget {
     [pscustomobject]@{ Codigo = $LASTEXITCODE; Saida = $saida }
 }
 
-# IDs instalados que as fontes winget e msstore conhecem (pelo "winget export", que dá JSON em vez de tabela).
-function Get-WingetInstalado {
+# Vários comandos do winget ao mesmo tempo (cada um num runspace, chamado do mesmo jeito que Invoke-Winget, então a
+# saída vem igual). Devolve os resultados na ordem dos comandos. Deu problema no paralelo: roda um depois do outro.
+function Invoke-WingetVarios {
+    param([Parameter(Mandatory)][object[]]$Comandos)
+    $conjunto = $null
+    try {
+        $conjunto = [runspacefactory]::CreateRunspacePool(1, $Comandos.Count)
+        $conjunto.Open()
+        $tarefas = foreach ($c in $Comandos) {
+            $ps = [powershell]::Create()
+            $ps.RunspacePool = $conjunto
+            [void]$ps.AddScript({
+                    param([string[]]$Argumentos)
+                    $ErrorActionPreference = 'Continue'
+                    $saida = @(& winget @Argumentos 2>$null)
+                    [pscustomobject]@{ Codigo = $LASTEXITCODE; Saida = $saida }
+                }).AddArgument([string[]]$c)
+            [pscustomobject]@{ Ps = $ps; Espera = $ps.BeginInvoke() }
+        }
+        $resultados = foreach ($t in $tarefas) { try { @($t.Ps.EndInvoke($t.Espera))[0] } finally { $t.Ps.Dispose() } }
+        if (@($resultados).Count -ne $Comandos.Count) { throw 'faltou resultado de algum comando' }
+        $resultados
+    }
+    catch {
+        Write-Verbose "winget em paralelo falhou ($($_.Exception.Message)); rodando um de cada vez"
+        foreach ($c in $Comandos) { Invoke-Winget -Argumentos $c }
+    }
+    finally { if ($conjunto) { $conjunto.Close(); $conjunto.Dispose() } }
+}
+
+# O que está instalado e o que tem atualização, com o "winget export" e o "winget upgrade" rodando juntos
+# (antes um esperava o outro: ~0,7 s a menos para abrir a página).
+function Get-WingetEstado {
     $arquivo = New-TmdArquivoTemporario -Extensao '.json'
     try {
-        $r = Invoke-Winget -Argumentos @('export', '-o', $arquivo, '--disable-interactivity', '--accept-source-agreements')
-        if (-not (Test-Path -LiteralPath $arquivo)) { throw "winget export falhou (código $($r.Codigo))" }
-        $json = [IO.File]::ReadAllText($arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json
-        $ids = @{}
-        foreach ($fonte in @($json.Sources)) { foreach ($p in @($fonte.Packages)) { $ids[[string]$p.PackageIdentifier] = $true } }
-        $ids
+        $r = @(Invoke-WingetVarios -Comandos @(
+                , @('export', '-o', $arquivo, '--disable-interactivity', '--accept-source-agreements')
+                , @('upgrade', '--source', 'winget', '--disable-interactivity')
+            ))
+        [pscustomobject]@{
+            Instalados   = ConvertFrom-WingetExport -Arquivo $arquivo -Codigo $r[0].Codigo
+            Atualizacoes = ConvertFrom-WingetUpgrade -Saida $r[1].Saida
+        }
     }
     finally {
         Remove-TmdArquivoTemporario -Caminho $arquivo
     }
 }
 
+# IDs instalados que as fontes winget e msstore conhecem (pelo JSON do "winget export", em vez de tabela).
+function ConvertFrom-WingetExport {
+    param([string]$Arquivo, [int]$Codigo)
+    if (-not (Test-Path -LiteralPath $Arquivo)) { throw "winget export falhou (código $Codigo)" }
+    $json = [IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json
+    $ids = @{}
+    foreach ($fonte in @($json.Sources)) { foreach ($p in @($fonte.Packages)) { $ids[[string]$p.PackageIdentifier] = $true } }
+    $ids
+}
+
 # Id -> versão nova, pela tabela do "winget upgrade" (Nome, Id, Versão, Disponível).
 # As colunas saem das posições das palavras do cabeçalho: um Id longo encosta na versão com um espaço só.
-function Get-WingetAtualizacao {
-    $r = Invoke-Winget -Argumentos @('upgrade', '--source', 'winget', '--disable-interactivity')
+function ConvertFrom-WingetUpgrade {
+    param([AllowEmptyCollection()][object[]]$Saida = @())
+    $r = [pscustomobject]@{ Saida = $Saida }
     $mapa = @{}
     $linhas = @($r.Saida | ForEach-Object { ([string]$_ -split "`r")[-1] })
     $traco = -1
@@ -71,8 +115,9 @@ function Get-WingetAtualizacao {
 function Find-Alvos {
     param([string]$Catalogo = $script:ArquivoCatalogo)
 
-    $instalados = Get-WingetInstalado
-    $atualizacoes = Get-WingetAtualizacao
+    $estadoWinget = Get-WingetEstado
+    $instalados = $estadoWinget.Instalados
+    $atualizacoes = $estadoWinget.Atualizacoes
     $icones = $null
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) {
         $instalado = $instalados.ContainsKey($p.wingetId)
@@ -154,8 +199,9 @@ function Invoke-Acao {
     # Nome diferente do parâmetro: variáveis do PowerShell não diferenciam maiúsculas ($porId x $Catalogo).
     $porId = @{}
     foreach ($p in Get-CatalogoProgramas -Arquivo $Catalogo) { $porId[$p.id] = $p }
-    $instalados = Get-WingetInstalado
-    $atualizacoes = Get-WingetAtualizacao
+    $estadoWinget = Get-WingetEstado
+    $instalados = $estadoWinget.Instalados
+    $atualizacoes = $estadoWinget.Atualizacoes
     $comuns = @('--silent', '--disable-interactivity', '--accept-package-agreements', '--accept-source-agreements')
 
     foreach ($a in $Alvos) {

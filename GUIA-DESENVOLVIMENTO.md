@@ -661,6 +661,9 @@ do nome do módulo na CLI é erro.
     um quadro "pasta" com 4 miniaturas (como as pastas do menu Iniciar do Windows 11); clicar abre, "Voltar" ou Esc
     fecham. É só visual (`ConvertTo-LinhasComPastas`): a marca fica no alvo, a busca e a lista mostram tudo solto.
   - Sem preset na página Programas; os populares ficam na categoria normal deles (e nas pastas), sem estrela.
+  - `winget export` (instalados) e `winget upgrade` (atualizações) rodam juntos (`Invoke-WingetVarios`, um runspace
+    cada, mesmo jeito de chamar do `Invoke-Winget`; se o paralelo falhar, roda um de cada vez): ~1,7 s → ~1,1 s, com
+    o mesmo resultado. Nos testes, o Mock do `Invoke-WingetVarios` chama o `Invoke-Winget` falso um de cada vez.
   - Nos detalhes, o comando do winget aparece sempre, até com o programa instalado ("Instalado com: winget install ...").
   O que justificou cada programa vai para `testes/modulos/programas/fmhy-referencia.json`, que os testes conferem.
   Programa só da Microsoft Store tem `"fonte": "msstore"` e o ID da loja em `wingetId` (instala com `--source msstore`).

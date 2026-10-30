@@ -22,6 +22,10 @@ BeforeAll {
         $global:TmdTesteUpgrade = $script:TabelaUpgrade
         $global:TmdTesteCodigo = $Codigo
         $global:TmdTesteChamadas = [System.Collections.Generic.List[string]]::new()
+        # O paralelo chama o falso um de cada vez (a lógica de juntar os resultados é a mesma).
+        Mock Invoke-WingetVarios -ModuleName programas {
+            foreach ($c in $Comandos) { & (Get-Module programas) { param($a) Invoke-Winget -Argumentos $a } $c }
+        }
         Mock Invoke-Winget -ModuleName programas {
             $comando = $Argumentos -join ' '
             if ($Argumentos[0] -eq 'export') {
