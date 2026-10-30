@@ -143,7 +143,8 @@ $script:ScriptCarregarModulos = {
             RotuloAcao = if ($m.Manifesto -and $m.Manifesto['RotuloAcao']) { [string]$m.Manifesto['RotuloAcao'] } else { 'Aplicar' }
             Resultado = if ($m.Manifesto -and $m.Manifesto['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
             AvisoConfirmacao = if ($m.Manifesto -and $m.Manifesto['AvisoConfirmacao']) { [string]$m.Manifesto['AvisoConfirmacao'] } else { '' }
-            Visualizacao = if ($m.Manifesto -and $m.Manifesto['Visualizacao'] -eq 'Grade') { 'Grade' } else { 'Lista' }
+            # Grade é o padrão; o manifesto pode pedir lista (Visualizacao = 'Lista').
+            Visualizacao = if ($m.Manifesto -and $m.Manifesto['Visualizacao'] -eq 'Lista') { 'Lista' } else { 'Grade' }
             Dica      = if ($m.Manifesto -and $m.Manifesto['Dica']) { [string]$m.Manifesto['Dica'] } else { '' }
             # Grupos de escolha única (ex.: uma fonte e um tamanho); este bloco roda num runspace, sem as funções da janela.
             Grupos    = @(if ($m.Manifesto) {
@@ -151,7 +152,7 @@ $script:ScriptCarregarModulos = {
                         if ($g -is [hashtable] -and $g['Nome']) { [pscustomobject]@{ Nome = [string]$g['Nome']; Rotulo = [string]$g['Rotulo']; Vazio = [string]$g['Vazio'] } }
                     }
                 })
-            NomeItens = if ($m.Manifesto -and $m.Manifesto['NomeItens']) { [string]$m.Manifesto['NomeItens'] } else { 'programa|programas' }
+            NomeItens = if ($m.Manifesto -and $m.Manifesto['NomeItens']) { [string]$m.Manifesto['NomeItens'] } else { 'item|itens' }
         }
     }
 }
@@ -184,10 +185,10 @@ function Get-TmdModulosProvisorios {
                 RotuloAcao = if ($man['RotuloAcao']) { [string]$man['RotuloAcao'] } else { 'Aplicar' }
                 Resultado = if ($man['Resultado'] -eq 'Mudancas') { 'ajustar' } else { 'liberar' }
                 AvisoConfirmacao = if ($man['AvisoConfirmacao']) { [string]$man['AvisoConfirmacao'] } else { '' }
-                Visualizacao = if ($man['Visualizacao'] -eq 'Grade') { 'Grade' } else { 'Lista' }
+                Visualizacao = if ($man['Visualizacao'] -eq 'Lista') { 'Lista' } else { 'Grade' }
                 Dica = [string]$man['Dica']
                 Grupos = if ($man['Grupos']) { @(ConvertTo-TmdGruposManifesto $man['Grupos']) } else { @() }
-                NomeItens = if ($man['NomeItens']) { [string]$man['NomeItens'] } else { 'programa|programas' }
+                NomeItens = if ($man['NomeItens']) { [string]$man['NomeItens'] } else { 'item|itens' }
                 Provisorio = $true
             }
         }

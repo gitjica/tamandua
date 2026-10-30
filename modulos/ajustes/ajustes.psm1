@@ -73,7 +73,7 @@ function Find-Alvos {
             Tamanho     = [int64]0
             Estado      = $estado
             Desfaz      = $desfaz
-            Selo        = if ($desfaz) { 'aplicado · marcar desfaz' } else { '' }
+            Selo        = if ($desfaz) { 'aplicado' } else { '' }
             Detalhe     = $a.descricao
             Nivel       = 'Normal'
             Valor       = $null

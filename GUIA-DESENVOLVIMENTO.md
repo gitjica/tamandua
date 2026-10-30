@@ -195,7 +195,6 @@ Tamandua/
 │  │  ├─ status.psm1            # implementação
 │  │  └─ pagina.xaml            # OPCIONAL: página na interface; sem ela, usa página genérica
 │  ├─ limpar/
-│  ├─ instaladores/
 │  ├─ desinstalar/
 │  ├─ otimizar/
 │  ├─ ajustes/                  # + ajustes.json (catálogo declarativo) + presets.json
@@ -236,7 +235,6 @@ programa sabe dizer que algo está *faltando* (não dá pra avisar que falta alg
     Modulos = @(
         @{ Nome = 'status';       Grupo = 'Sistema';    Descricao = 'Painel do sistema (CPU, memória, disco, rede)' }
         @{ Nome = 'limpar';       Grupo = 'Limpeza';    Descricao = 'Temporários, caches de navegadores, apps e jogos, logs e Lixeira' }
-        @{ Nome = 'instaladores'; Grupo = 'Limpeza';    Descricao = 'Encontra instaladores esquecidos (.exe, .msi, .iso)' }
         @{ Nome = 'desinstalar';  Grupo = 'Programas';  Descricao = 'Desinstala programas e restos' }
         @{ Nome = 'programas';    Grupo = 'Programas';  Descricao = 'Instala e atualiza programas via winget' }
         @{ Nome = 'ajustes';      Grupo = 'Ajustes';    Descricao = 'Privacidade, desempenho e preferências (reversível)' }
@@ -623,7 +621,6 @@ o módulo só mostra ajustes de registro sem admin, e o motor recusa serviço e 
 |---|---|---|---|---|
 | `status` | CPU, memória, disco, rede, bateria, top processos, nota de saúde (CIM) | não | não | Mole |
 | `limpar` | Temporários (usuário e Windows), despejos e relatórios de erro, logs antigos do Windows, downloads do Windows Update, Otimização de Entrega, shaders, cache de navegadores (Chrome, Edge, Brave, Firefox; só cache), Discord, Spotify, Steam, Epic, Battle.net, Ubisoft, Lixeira | sim | parcial | Mole + swept |
-| `instaladores` | `.exe .msi .msix .iso .zip` em Downloads → Lixeira | sim | não | Mole |
 | `desinstalar` | Lista programas (Uninstall HKLM/HKCU/WOW6432 + Appx), roda o desinstalador, oferece restos → Lixeira | sim | depende | Mole |
 | `programas` | Catálogo por categoria (winget), instalar em lote, ver o que já está instalado, atualizar todos (`winget upgrade`) | sim | depende | WinUtil |
 | `ajustes` | Seção 8 | sim | parcial | WinUtil (melhorado) |
@@ -656,10 +653,7 @@ do nome do módulo na CLI é erro.
   Lixeira: `Get-TmdLixeira`/`Clear-TmdLixeira` no núcleo (SHQueryRecycleBin/SHEmptyRecycleBin), nunca vem marcada.
   Testes: `TAMANDUA_LIMPAR_RAIZ` (só dentro da pasta temporária real) troca Windows, ProgramData, AppData e Steam por
   subpastas dela e tira a exigência de admin — nenhum teste do limpar toca no sistema nem abre o UAC.
-- **instaladores:** reconfirma tamanho + data imediatamente antes de remover; se mudou, pula. O caminho sai do `Id` e a
-  extensão é conferida de novo (alvo forjado com `.pdf` ou `..\` é ignorado). Só vem marcado `.exe/.msi/.msix/.appx/.iso`
-  baixado há 7 dias ou mais; `.zip/.7z/.rar/.img` são risco médio. `.exe` numa subpasta com outros arquivos (ex.: `.dll`)
-  é tratado como **programa portátil já extraído**: risco médio, nunca marcado. Busca com mais de 20 mil arquivos não marca nada.
+- **instaladores:** retirado em 2026-10 (achar instaladores esquecidos em Downloads não ajudava; o Limpar e o Desinstalar cobrem o que importa).
   Lê a pasta Downloads real do registro (pode ter sido movida). Tudo vai para a Lixeira.
   Testes: `TAMANDUA_DOWNLOADS_TESTE` e `TAMANDUA_LIXEIRA_TESTE` (ambas só aceitas dentro do TEMP) trocam Downloads e Lixeira.
 - **desinstalar:** restos com `Risco = Medio`, desmarcados se o nome for ambíguo.
@@ -746,6 +740,7 @@ do nome do módulo na CLI é erro.
   nome em palavras inteiras), depois Tamanho do texto e Segoe UI. Cada quadro mostra "Aa" na própria fonte
   (`AmostraFonte` = `file:///arquivo#Família`, para o WPF pegar o arquivo certo). Tamanho: Auto (padrão, nada marcado),
   90 a 110%, ou Personalizado (70 a 130%, régua no painel; na CLI, `tam-97.5`).
+- **Grade em todas as páginas** (padrão; o manifesto pode pedir `Visualizacao = 'Lista'`, e o botão do alto troca). Página com 40+ itens e 4+ categorias vira pastas (Programas, Ajustes, Fonte); as outras ficam em seções com os quadros à vista. Sem imagem, o quadro mostra o ícone da categoria (`Get-GlifoCategoria`, por palavras do nome; o alvo pode mandar `Glifo`), e a pasta, o ícone grande. Páginas que só mostram (Status) trazem o detalhe e a barra no quadro; o Limpar mostra quanto libera; ajustes mostram a classificação. "não aplicado" não aparece no quadro. `NomeItens` no manifesto: "programa|programas", "ajuste|ajustes" (padrão "item|itens").
 - **Recursos genéricos da janela que a página Fonte usa** (servem para qualquer módulo):
   - Manifesto `Dica`: faixa de passos no alto da página. `Grupos` (`Nome`, `Rotulo`, `Vazio`): a barra de baixo diz o
     escolhido em cada grupo ("Fonte: Arial · Tamanho: automático"). `NomeItens` (`"opção|opções"`): o texto das pastas.
@@ -897,7 +892,7 @@ Cada etapa só começa com a anterior com testes verdes.
 5. **`limpar`** — primeiro módulo que escreve. Começa só com `%TEMP%` do usuário e `CrashDumps`; cada categoria nova = alvo novo + testes novos.
 6. **Motor de ajustes + Estado (snapshots) + Histórico** — com testes na sandbox de registro.
 7. **`ajustes`** — começando com ~10 itens de risco baixo em `HKCU` (sem admin), depois os de `HKLM`.
-8. **`analisar`** (retirado depois), 9. **`programas`**, 10. **`purgar`** (retirado depois), 11. **`instaladores`**, 12. **`desinstalar`**, 13. **`recursos`**, 14. **`otimizar`**, 15. **`reparos`**, 16. **`atualizacoes`**.
+8. **`analisar`** (retirado depois), 9. **`programas`**, 10. **`purgar`** (retirado depois), 11. **`instaladores`** (retirado depois), 12. **`desinstalar`**, 13. **`recursos`**, 14. **`otimizar`**, 15. **`reparos`**, 16. **`atualizacoes`**.
 
 Definição de pronto do MVP: etapas 1–7 entregues, interface e CLI funcionando, `-Simular` em tudo, log de operações, histórico com desfazer.
 
@@ -1004,7 +999,6 @@ tamandua menu                  # força o menu de texto
 tamandua modulos               # estado de cada módulo
 tamandua status
 tamandua limpar [-Simular] [-Sim] [-Itens chrome,lixeira]
-tamandua instaladores [-Simular] [-Sim]
 tamandua desinstalar [-Lista]
 tamandua programas [-Lista] [-Instalar id,id] [-Atualizar]
 tamandua ajustes [-Lista] [-Preset Essencial] [-Aplicar id,id] [-Desfazer id,id] [-Simular]

@@ -105,7 +105,7 @@ Describe 'Menu de contexto' {
         $alvo = @(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'menu-ext-11111111-2222-3333-4444-555555555555'
         $alvo.Estado | Should -Be 'Aplicado'
         $alvo.Desfaz | Should -BeTrue
-        $alvo.Selo | Should -Be 'aplicado · marcar desfaz'
+        $alvo.Selo | Should -Be 'aplicado'
         (Invoke-Acao -RaizRegistro $raiz -Alvos @($alvo)).Status | Should -Be 'Feito'
         Get-Valor $bloq '{11111111-2222-3333-4444-555555555555}' | Should -BeNullOrEmpty
         (@(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'menu-ext-11111111-2222-3333-4444-555555555555').Estado | Should -Be 'NaoAplicado'

@@ -119,7 +119,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "Apps de mapa e clima não acham onde você está, o fuso horário automático para de funcionar e o \"Localizar meu dispositivo\" fica desligado.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Essencial", "Avançado", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -203,7 +203,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "Em algumas versões do Windows a busca do menu Iniciar fica em branco ou demora para mostrar resultados.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": false,
     "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
@@ -342,7 +342,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Em outro computador com a mesma conta Microsoft, tema, senhas do Wi-Fi e preferências não vêm junto.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -381,7 +381,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "Algum app da Microsoft Store pode não mostrar seu nome ou foto da conta, ou pedir para entrar de novo.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -512,7 +512,7 @@
     "risco": "Baixo",
     "classificacao": "Opcional",
     "contratempo": "Quando um programa trava, o Windows não procura mais uma solução conhecida para o erro.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -689,7 +689,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "Os serviços continuam lá e ligam quando precisam, mas um recurso pouco usado pode demorar alguns segundos a mais na primeira vez.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -807,7 +807,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Apps da Microsoft Store (WhatsApp, Teams, Spotify da Store) param de mostrar notificações e de atualizar enquanto estão fechados.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado", "Notebook", "Desempenho"],
     "mudancas": [
@@ -823,7 +823,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Nenhuma notificação aparece: nem de mensagens, nem de lembretes, nem avisos do Windows.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": false,
     "presets": [],
     "mudancas": [
@@ -840,7 +840,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Programas muito antigos deixam de receber os consertos automáticos que o Windows aplica e podem não abrir.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -946,7 +946,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "O disco pode encher sem nenhum aviso; com o disco cheio, o Windows fica lento e atualizações falham.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1011,7 +1011,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Os apps da Microsoft Store ficam desatualizados até você abrir a Store e atualizar à mão (Biblioteca > Obter atualizações).",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1041,7 +1041,7 @@
     "risco": "Baixo",
     "classificacao": "Opcional",
     "contratempo": "Aparecem arquivos e pastas de sistema que o Windows escondia; apagar um deles pode estragar algum programa.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado", "Explorador"],
     "mudancas": [
@@ -1207,7 +1207,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Somem as listas de arquivos recentes do Explorador, do menu Iniciar e de \"Abrir recente\" em vários programas.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -1284,7 +1284,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "A busca dentro das pastas volta a ser a antiga: sem sugestões e às vezes mais lenta.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1387,7 +1387,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Usa uma opção escondida do Windows: uma atualização pode desligá-la ou deixar o menu Iniciar com cara estranha.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1511,7 +1511,7 @@
     "risco": "Baixo",
     "classificacao": "Opcional",
     "contratempo": "O Windows fica com cara mais simples: sem sombras, animações e fontes suavizadas em alguns lugares.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": false,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1727,7 +1727,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Ao desligar, programas abertos têm menos tempo para fechar: um documento não salvo pode se perder.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Desempenho"],
     "mudancas": [
@@ -1787,7 +1787,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Win+G não abre nada e não dá mais para gravar ou capturar jogos pela Xbox Game Bar.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1835,7 +1835,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "Some a opção Hibernar e a Inicialização Rápida: o computador demora um pouco mais para ligar; no notebook, a bateria acaba se ficar muito tempo em suspensão.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -1906,7 +1906,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "Impressoras ou computadores antigos da rede podem não ser achados pelo nome.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -1936,7 +1936,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Pastas compartilhadas de aparelhos antigos (NAS, roteador, impressora) que não pedem senha podem parar de abrir.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -2098,7 +2098,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "O Edge passa a mostrar \"Seu navegador é gerenciado pela sua organização\" (é assim que o Windows aplica essas regras).",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Notebook", "Privacidade"],
     "mudancas": [
@@ -2130,7 +2130,7 @@
     "risco": "Baixo",
     "classificacao": "Atencao",
     "contratempo": "O Brave passa a mostrar \"Gerenciado pela sua organização\" e alguns recursos (carteira, VPN, Leo) somem.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -2157,7 +2157,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "O Copilot some e recursos de IA do Windows (Recall, IA no Bloco de Notas e no Paint) param de funcionar; atualizações grandes podem trazer parte de volta.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -2225,7 +2225,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Com o disco quase cheio, uma atualização grande do Windows pode falhar por falta de espaço.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado"],
     "mudancas": [
@@ -2246,7 +2246,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Se um serviço travar, derruba junto os outros do mesmo processo (som, rede ou Wi-Fi podem cair juntos).",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2267,7 +2267,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Sem Linux no mesmo computador, o relógio do Windows fica com a hora errada (adiantado ou atrasado algumas horas).",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois acerte a hora em Configurações > Hora e idioma > Sincronizar agora.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois acerte a hora em Configurações > Hora e idioma > Sincronizar agora.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2283,7 +2283,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Em PCs sem o problema de tela piscando, pode deixar vídeos e jogos em janela um pouco mais pesados.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Desempenho"],
     "mudancas": [
@@ -2299,7 +2299,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "O Recall (linha do tempo de capturas da IA) deixa de existir nos PCs Copilot+.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": ["Avançado", "Privacidade"],
     "mudancas": [
@@ -2320,7 +2320,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Além do anterior, mexe no driver de vídeo: em alguns PCs piora o desempenho de vídeo ou a tela fica preta por um instante ao trocar de janela.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2360,7 +2360,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "O assistente da Logitech não reinstala sozinho; para usar o Logi Options+ ou G HUB, instale pelo site da Logitech.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2396,7 +2396,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Um arquivo .rdp malicioso (por e-mail, por exemplo) abre sem nenhum aviso.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2413,7 +2413,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Serviços que funcionam melhor por IPv6 podem ficar um pouco mais lentos.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2429,7 +2429,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "O app Xbox pode mostrar \"NAT estrito / Teredo não qualifica\" e o chat de grupo do Xbox pode falhar.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2451,7 +2451,7 @@
     "risco": "Alto",
     "classificacao": "Arriscado",
     "contratempo": "Algumas redes e serviços (e partes do próprio Windows, como o Grupo Doméstico e o Xbox) param de funcionar ou ficam lentos.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2473,7 +2473,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Programas da Adobe instalados de verdade (pagos) param de validar a licença e de atualizar.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2494,7 +2494,7 @@
     "risco": "Alto",
     "classificacao": "Arriscado",
     "contratempo": "Em muitos notebooks novos o S3 não existe: a suspensão para de funcionar ou o notebook não acorda (precisa desligar no botão).",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador. Se ele não acordar da suspensão, segure o botão de ligar até desligar e então desfaça.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador. Se ele não acordar da suspensão, segure o botão de ligar até desligar e então desfaça.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2510,7 +2510,7 @@
     "risco": "Alto",
     "classificacao": "Arriscado",
     "contratempo": "O Defender demora mais a reconhecer vírus novos, que ainda não estão na lista dele.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [
@@ -2552,7 +2552,7 @@
     "risco": "Medio",
     "classificacao": "Arriscado",
     "contratempo": "Com pouca memória (8 GB ou menos) o computador pode ficar mais lento ou fechar programas por falta de RAM.",
-    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado · marcar desfaz\"; marque e clique em Aplicar. Depois, reinicie o computador.",
+    "seAcontecer": "Desfaça na página Ajustes: o ajuste aparece como \"aplicado\"; marque e clique em Aplicar. Depois, reinicie o computador.",
     "requerAdmin": true,
     "presets": [],
     "mudancas": [

@@ -323,7 +323,7 @@ function Open-TmdPagina {
     $c.TextoDicaPagina.Text = $dica
     $c.DicaPagina.Visibility = if ($dica) { 'Visible' } else { 'Collapsed' }
     $nomeItens = [string](Get-ValorPropriedade $modulo 'NomeItens')
-    $script:NomeItens = if ($nomeItens) { $nomeItens } else { 'programa|programas' }
+    $script:NomeItens = if ($nomeItens) { $nomeItens } else { 'item|itens' }
     $c.BotaoSimular.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoAplicar.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
     $c.BotaoSimular.IsEnabled = $false
@@ -708,6 +708,8 @@ function Stop-TmdCargaPagina {
 
 # Quantos quadros da grade vão no primeiro desenho (numa tela grande cabem ~40).
 $script:QuadrosPrimeiroDesenho = 48
+# A partir de quantos itens uma página com 4+ categorias vira pastas (abaixo disso, seções com os quadros à vista).
+$script:ItensParaPastas = 40
 
 # -Inteira: põe a lista toda de uma vez (quem chama precisa achar um item nela logo em seguida, ex.: fechar pasta).
 function Update-TmdBusca {
@@ -724,10 +726,12 @@ function Update-TmdBusca {
         Set-TmdImagensLinha -Linhas $linhas
         foreach ($l in $linhas) { $l.Grande = $false }
         # Pastas de alternativas só na grade e sem busca (a busca acha o que está dentro delas).
-        # Página com muitas categorias (Programas): as categorias viram pastas e, dentro, os itens ficam separados por tipo.
-        # Com poucas (Desinstalar): só as pastas de alternativas, se houver.
+        # Página longa com muitas categorias (Programas, Ajustes, Fonte): as categorias viram pastas e, dentro, os itens
+        # ficam separados por tipo. Página curta (Limpar, Status, Reparos): seções com os quadros à vista, porque esconder
+        # um ou dois itens numa pasta só atrapalha. Com poucas categorias (Desinstalar): só as pastas de alternativas.
         if (-not $busca) {
-            if (@($linhas | Where-Object { $_.Tipo -eq 'Categoria' }).Count -ge 4) { $linhas = ConvertTo-LinhasPorCategoria -Linhas $linhas -Aberta $script:Estado.PastaAberta }
+            $longa = @($linhas | Where-Object { $_.Tipo -eq 'Alvo' }).Count -ge $script:ItensParaPastas
+            if ($longa -and @($linhas | Where-Object { $_.Tipo -eq 'Categoria' }).Count -ge 4) { $linhas = ConvertTo-LinhasPorCategoria -Linhas $linhas -Aberta $script:Estado.PastaAberta }
             else { $linhas = ConvertTo-LinhasComPastas -Linhas $linhas -PastaAberta $script:Estado.PastaAberta }
         }
     }

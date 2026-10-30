@@ -21,7 +21,7 @@
     "risco": "Medio",
     "classificacao": "Atencao",
     "contratempo": "Correções de segurança urgentes também chegam 4 dias depois.",
-    "seAcontecer": "Desfaça na página Atualizações (o item aparece como \"aplicado · marcar desfaz\") ou rode o Windows Update à mão quando sair uma correção grave.",
+    "seAcontecer": "Desfaça na página Atualizações (o item aparece como \"aplicado\") ou rode o Windows Update à mão quando sair uma correção grave.",
     "requerAdmin": true,
     "presets": ["Mais controle"],
     "mudancas": [

@@ -10,4 +10,6 @@
     Icone          = 'menu'
     RotuloAcao     = 'Aplicar'
     Resultado      = 'Mudancas'
+    # Texto das pastas na grade.
+    NomeItens = 'item|itens'
 }

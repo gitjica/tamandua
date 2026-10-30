@@ -4,7 +4,6 @@
 $script:IconesModulo = @{
     status       = [string][char]0xE9D9
     limpar       = [string][char]0xE74D
-    instaladores = [string][char]0xE896
     desinstalar  = [string][char]0xE738
     programas    = [string][char]0xE7B8
     ajustes      = [string][char]0xE9E9
@@ -72,6 +71,45 @@ function ConvertTo-ItemNavegacao {
     , $itens.ToArray()
 }
 
+# Ícone de cada categoria na grade (Segoe Fluent Icons), pelo nome dela. A ordem importa: "Rede (DNS)" é DNS antes de
+# Rede, "Caches do Windows" é cache antes de Windows. Sem acerto: sem ícone (o quadro mostra a inicial).
+$script:GlifosCategoria = [ordered]@{
+    'Privacidade'                      = 0xE72E
+    'Segurança'                        = 0xEA18
+    'DNS'                              = 0xE774
+    'Navegador'                        = 0xE774
+    'Cache'                            = 0xEDA2
+    'Disco'                            = 0xEDA2
+    'Relatório|log'                    = 0xE9F9
+    'Limpeza|Temporário|Lixeira'       = 0xE74D
+    'jogo'                             = 0xE7FC
+    'Desempenho'                       = 0xEC4A
+    'Itens do Windows'                 = 0xE8FD
+    'Programa'                         = 0xE7B8
+    'Apps'                             = 0xE71D
+    'Explorador'                       = 0xE8B7
+    'Barra de tarefas'                 = 0xE7C4
+    'Aparência|Estilo'                 = 0xE790
+    'Mouse|teclado'                    = 0xE962
+    'Energia'                          = 0xE945
+    'Rede'                             = 0xE701
+    'Avançado'                         = 0xE7BA
+    'Processo|Resumo'                  = 0xE9D9
+    'atualiza|Quando'                  = 0xE895
+    'Reinício'                         = 0xE7E8
+    'Desenvolvimento|virtualização'    = 0xE943
+    'Compatibilidade'                  = 0xE8F1
+    'Mídia|impressão'                  = 0xE749
+    'Sistema'                          = 0xE770
+}
+
+function Get-GlifoCategoria {
+    param([string]$Categoria)
+    if (-not $Categoria) { return '' }
+    foreach ($p in $script:GlifosCategoria.Keys) { if ($Categoria -match $p) { return [string][char]$script:GlifosCategoria[$p] } }
+    ''
+}
+
 # Linhas da lista de alvos, com um cabeçalho por categoria. -Busca filtra por nome, detalhe ou categoria.
 # -Escreve: módulo que altera o sistema; cada linha ganha uma caixa de seleção.
 # -Cache (Id -> linha): linhas já montadas para estes mesmos alvos são reusadas (só a marca é atualizada). A busca
@@ -121,7 +159,9 @@ function ConvertTo-LinhaAlvo {
             -RequerAdmin ((Get-ValorPropriedade $a 'RequerAdmin') -eq $true) -ReservaCaixa $Escreve.IsPresent `
             -IconePng (Get-ValorPropriedade $a 'IconePng') -Classe ([string](Get-ValorPropriedade $a 'Classificacao')) `
             -Estrela ((Get-ValorPropriedade $a 'Estrela') -eq $true) `
-            -Amostra ([string](Get-ValorPropriedade $a 'Amostra')) -AmostraFonte ([string](Get-ValorPropriedade $a 'AmostraFonte'))
+            -Amostra ([string](Get-ValorPropriedade $a 'Amostra')) -AmostraFonte ([string](Get-ValorPropriedade $a 'AmostraFonte')) `
+            -Glifo $(if (Get-ValorPropriedade $a 'Glifo') { [string](Get-ValorPropriedade $a 'Glifo') } elseif (-not (Get-ValorPropriedade $a 'IconePng')) { Get-GlifoCategoria -Categoria $categoria } else { '' }) `
+            -MostraDetalhe (-not $Escreve)
         if ($null -ne $Cache -and $id) { $Cache[$id] = $linha }
         $linhas.Add($linha)
     }
@@ -141,9 +181,11 @@ function New-LinhaAlvo {
         # Ajustes: Recomendado, Opcional, Atencao ou Arriscado (selo colorido). Programas: estrela do FMHY.
         [string]$Classe = '', [bool]$Estrela = $false,
         # Grade: texto grande no lugar do ícone (a página Fonte mostra "Aa" desenhado na própria fonte de AmostraFonte).
-        [string]$Amostra = '', [string]$AmostraFonte = ''
+        [string]$Amostra = '', [string]$AmostraFonte = '',
+        # Grade: ícone (Segoe Fluent Icons) no lugar da inicial, e o detalhe à vista no quadro (páginas que só mostram, como Status).
+        [string]$Glifo = '', [bool]$MostraDetalhe = $false
     )
-    $inicial = if ($Nome) { $Nome.Trim().Substring(0, 1).ToUpperInvariant() } else { '' }
+    $inicial = if ($Glifo) { $Glifo } elseif ($Nome) { $Nome.Trim().Substring(0, 1).ToUpperInvariant() } else { '' }
     $rotulo = if ($script:RotuloClasse.ContainsKey($Classe)) { $script:RotuloClasse[$Classe] } else { '' }
     [pscustomobject]@{
         Tipo = $Tipo; Id = $Id; Nome = $Nome; Categoria = $Categoria; Detalhe = $Detalhe; Estado = $Estado; Nivel = $Nivel
@@ -154,11 +196,14 @@ function New-LinhaAlvo {
         Estrela = $Estrela; Grande = $false
         # Sem AmostraFonte, a fonte da própria janela (o Binding não aceita texto vazio como fonte).
         Amostra = $Amostra; AmostraFonte = $(if ($AmostraFonte) { $AmostraFonte } else { 'Segoe UI' }); TemAmostra = [bool]$Amostra
+        TemGlifo = [bool]$Glifo; MostraDetalhe = $MostraDetalhe -and [bool]$Detalhe
+        TamanhoTexto = $(if ($Tamanho -gt 0) { Format-TamanhoTela $Tamanho } else { '' }); TemTamanho = $Tamanho -gt 0
         # Pastas: até 4 miniaturas (imagens, ou as amostras de texto dos itens) e os itens dentro. Toda linha tem as
         # propriedades (vazias): Binding que não acha a propriedade custa caro no WPF, multiplicado por cada quadro da grade.
         Mini0 = $null; Mini1 = $null; Mini2 = $null; Mini3 = $null; Membros = $null
         MiniTexto0 = ''; MiniTexto1 = ''; MiniTexto2 = ''; MiniTexto3 = ''
         MiniFonte0 = 'Segoe UI'; MiniFonte1 = 'Segoe UI'; MiniFonte2 = 'Segoe UI'; MiniFonte3 = 'Segoe UI'; TemMiniTexto = $false
+        GlifoPasta = ''; TemGlifoPasta = $false
     }
 }
 
@@ -236,8 +281,8 @@ function ConvertTo-LinhasPorCategoria {
     , $saida.ToArray()
 }
 
-# Como contar os itens de uma pasta: "singular|plural" (o manifesto pode trocar; a página Fonte usa "opção|opções").
-$script:NomeItens = 'programa|programas'
+# Como contar os itens de uma pasta: "singular|plural" (NomeItens no manifesto: "programa|programas", "opção|opções").
+$script:NomeItens = 'item|itens'
 
 function New-LinhaPasta {
     param([string]$Tipo, [string]$Nome, [string]$Categoria = '', [object[]]$Membros)
@@ -263,6 +308,11 @@ function New-LinhaPasta {
             $i++
         }
         $linha.TemMiniTexto = $i -gt 0
+    }
+    # Nem imagem nem amostra (Ajustes): o ícone da categoria, grande.
+    if ($i -eq 0) {
+        $comGlifo = @($Membros | Where-Object { $_.TemGlifo })
+        if ($comGlifo.Count -gt 0) { $linha.GlifoPasta = $comGlifo[0].Inicial; $linha.TemGlifoPasta = $true }
     }
     $linha.Membros = $Membros
     $linha
@@ -437,7 +487,7 @@ function ConvertTo-AlvoHistorico {
 # O que o Histórico diz de uma operação no painel de detalhes: como desfazer, ou por que não dá.
 function Get-MotivoHistorico {
     param($Operacao, [string]$Acao, [bool]$Reversivel)
-    $paginaAjustes = 'Para voltar ao padrão do Windows, marque o ajuste na página Ajustes (o selo diz "aplicado · marcar desfaz").'
+    $paginaAjustes = 'Para voltar ao padrão do Windows, marque o ajuste na página Ajustes (o selo diz "aplicado"; marcar desfaz).'
     if ($Reversivel) { return "Desfazer volta o ajuste '$($Operacao.Id)' para o valor salvo antes de ele ser aplicado." }
     if ($Operacao.Simulado) { return 'Foi só uma simulação: nada mudou, então não há o que desfazer.' }
     if ($Acao -eq 'ajustar' -and [string]$Operacao.Motivo -eq 'já estava aplicado') { return "Já estava aplicado antes (por outra ferramenta): o Tamanduá não mudou nada aqui. $paginaAjustes" }

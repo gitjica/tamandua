@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 $raiz = Split-Path -Parent $PSScriptRoot
 $arquivo = Join-Path $raiz 'modulos\ajustes\ajustes.json'
 
-$desfazer = 'Desfaça na página Ajustes: o ajuste aparece como "aplicado · marcar desfaz"; marque e clique em Aplicar.'
+$desfazer = 'Desfaça na página Ajustes: o ajuste aparece como "aplicado"; marque e clique em Aplicar.'
 $reiniciar = "$desfazer Depois, reinicie o computador."
 
 # id = classificação, contratempo, se acontecer. Recomendado/Opcional sem contratempo não precisam de texto.

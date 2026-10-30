@@ -12,4 +12,6 @@
     RotuloAcao       = 'Desinstalar'
     Resultado        = 'Mudancas'
     AvisoConfirmacao = 'O desinstalador de cada programa vai abrir: responda a ele. Restos vão para a Lixeira.'
+    # Texto das pastas na grade.
+    NomeItens = 'programa|programas'
 }

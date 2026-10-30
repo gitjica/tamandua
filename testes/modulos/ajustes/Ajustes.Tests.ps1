@@ -295,7 +295,7 @@ Describe 'Find-Alvos e Invoke-Acao' {
         $alvo = @(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'expl-extensoes'
         $alvo.Estado | Should -Be 'Aplicado'
         $alvo.Desfaz | Should -BeTrue
-        $alvo.Selo | Should -Be 'aplicado · marcar desfaz'
+        $alvo.Selo | Should -Be 'aplicado'
         $alvo.Mudancas[0] | Should -Match 'DESFEITO: volta ao padrão do Windows'
         (@(Find-Alvos -RaizRegistro $raiz) | Where-Object Id -eq 'expl-ocultos').Desfaz | Should -BeFalse
 

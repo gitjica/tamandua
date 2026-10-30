@@ -360,6 +360,12 @@
                             <Viewbox StretchDirection="DownOnly" MaxWidth="46" MaxHeight="40"><TextBlock Text="{Binding MiniTexto3}" FontFamily="{Binding MiniFonte3}" FontSize="22"/></Viewbox>
                         </UniformGrid>
                     </Border>
+                    <!-- Pasta de itens que só têm ícone de categoria (Ajustes): o ícone grande da categoria -->
+                    <Border x:Name="PastaGlifo" Width="112" Height="112" CornerRadius="12" Background="{DynamicResource SuperficieLateral}"
+                            HorizontalAlignment="Center" Visibility="Collapsed">
+                        <TextBlock Text="{Binding GlifoPasta}" Style="{DynamicResource Icone}" FontSize="44" Foreground="{DynamicResource Acento}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
                     <!-- Amostra grande no lugar do ícone (página Fonte: "Aa" desenhado na própria fonte) -->
                     <TextBlock x:Name="AmostraGrande" Text="{Binding Amostra}" FontFamily="{Binding AmostraFonte}" FontSize="32" Height="46"
                                HorizontalAlignment="Center" TextAlignment="Center" Visibility="Collapsed"/>
@@ -383,11 +389,29 @@
                     </Grid>
                     <TextBlock x:Name="NomeQuadro" Text="{Binding Nome}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis"
                                MaxHeight="34" Margin="0,8,0,4"/>
-                    <Border x:Name="Selo" CornerRadius="4" Padding="6,1" HorizontalAlignment="Center"
-                            Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
-                        <TextBlock x:Name="TextoSelo" Text="{Binding Selo}" FontSize="10" Foreground="{DynamicResource TextoSecundario}"
-                                   TextTrimming="CharacterEllipsis" MaxWidth="130"/>
-                    </Border>
+                    <!-- Páginas que só mostram (Status): o valor à vista, com a barra de uso -->
+                    <TextBlock x:Name="DetalheQuadro" Text="{Binding Detalhe}" FontSize="10.5" Foreground="{DynamicResource TextoSecundario}"
+                               TextAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="30" Margin="0,0,0,4"
+                               Visibility="Collapsed"/>
+                    <ProgressBar x:Name="BarraQuadro" Style="{DynamicResource BarraValor}" Value="{Binding Valor}" Width="100"
+                                 HorizontalAlignment="Center" Margin="0,0,0,4" Visibility="Collapsed"/>
+                    <WrapPanel HorizontalAlignment="Center">
+                        <!-- Quanto o item libera (Limpar) -->
+                        <Border x:Name="TamanhoQuadro" CornerRadius="4" Padding="6,1" Margin="2,0" Background="{DynamicResource AcentoFundo}"
+                                Visibility="Collapsed">
+                            <TextBlock Text="{Binding TamanhoTexto}" FontSize="10" Foreground="{DynamicResource Acento}"/>
+                        </Border>
+                        <!-- Classificação do ajuste (Recomendado, Atenção, Arriscado) -->
+                        <Border x:Name="ClasseQuadro" CornerRadius="4" Padding="6,1" Margin="2,0" Background="{DynamicResource SuperficieLateral}"
+                                Visibility="Collapsed" ToolTip="{Binding DicaClasse}">
+                            <TextBlock x:Name="TextoClasseQuadro" Text="{Binding RotuloClasse}" FontSize="10" Foreground="{DynamicResource TextoSecundario}"/>
+                        </Border>
+                        <Border x:Name="Selo" CornerRadius="4" Padding="6,1" Margin="2,0"
+                                Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
+                            <TextBlock x:Name="TextoSelo" Text="{Binding Selo}" FontSize="10" Foreground="{DynamicResource TextoSecundario}"
+                                       TextTrimming="CharacterEllipsis" MaxWidth="130"/>
+                        </Border>
+                    </WrapPanel>
                 </StackPanel>
             </Grid>
         </Grid>
@@ -434,6 +458,50 @@
                 <Setter TargetName="PastaTexto" Property="Visibility" Value="Visible"/>
                 <Setter TargetName="PastaGrande" Property="Visibility" Value="Collapsed"/>
             </DataTrigger>
+            <DataTrigger Binding="{Binding TemGlifoPasta}" Value="True">
+                <Setter TargetName="PastaGlifo" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="PastaGrande" Property="Visibility" Value="Collapsed"/>
+            </DataTrigger>
+            <!-- Ícone da categoria no lugar da inicial -->
+            <DataTrigger Binding="{Binding TemGlifo}" Value="True">
+                <Setter TargetName="LetraInicial" Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets"/>
+                <Setter TargetName="LetraInicial" Property="FontWeight" Value="Normal"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding MostraDetalhe}" Value="True">
+                <Setter TargetName="DetalheQuadro" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Quadro" Property="Height" Value="156"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemValor}" Value="True">
+                <Setter TargetName="BarraQuadro" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Nivel}" Value="Atencao">
+                <Setter TargetName="DetalheQuadro" Property="Foreground" Value="{DynamicResource Aviso}"/>
+                <Setter TargetName="BarraQuadro" Property="Foreground" Value="{DynamicResource Aviso}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Nivel}" Value="Critico">
+                <Setter TargetName="DetalheQuadro" Property="Foreground" Value="{DynamicResource Perigo}"/>
+                <Setter TargetName="BarraQuadro" Property="Foreground" Value="{DynamicResource Perigo}"/>
+            </DataTrigger>
+            <!-- Ajuste: classificação e estado ("aplicado · marcar desfaz") podem precisar de duas linhas -->
+            <DataTrigger Binding="{Binding TemClasse}" Value="True">
+                <Setter TargetName="ClasseQuadro" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Quadro" Property="Height" Value="152"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding TemTamanho}" Value="True">
+                <Setter TargetName="TamanhoQuadro" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Classe}" Value="Recomendado">
+                <Setter TargetName="ClasseQuadro" Property="Background" Value="{DynamicResource SucessoFundo}"/>
+                <Setter TargetName="TextoClasseQuadro" Property="Foreground" Value="{DynamicResource Sucesso}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Classe}" Value="Atencao">
+                <Setter TargetName="ClasseQuadro" Property="Background" Value="{DynamicResource AvisoFundo}"/>
+                <Setter TargetName="TextoClasseQuadro" Property="Foreground" Value="{DynamicResource Aviso}"/>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Classe}" Value="Arriscado">
+                <Setter TargetName="ClasseQuadro" Property="Background" Value="{DynamicResource PerigoFundo}"/>
+                <Setter TargetName="TextoClasseQuadro" Property="Foreground" Value="{DynamicResource Perigo}"/>
+            </DataTrigger>
             <DataTrigger Binding="{Binding Tipo}" Value="Pasta">
                 <Setter TargetName="FundoPasta" Property="Visibility" Value="Visible"/>
                 <Setter TargetName="FundoInicial" Property="Visibility" Value="Collapsed"/>
@@ -447,6 +515,10 @@
             </DataTrigger>
             <DataTrigger Binding="{Binding TemSelo}" Value="True">
                 <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
+            </DataTrigger>
+            <!-- Na grade, "não aplicado" em todo quadro só faz barulho: fica só o que está aplicado ou parcial -->
+            <DataTrigger Binding="{Binding Selo}" Value="não aplicado">
+                <Setter TargetName="Selo" Property="Visibility" Value="Collapsed"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Estado}" Value="Aplicado">
                 <Setter TargetName="Selo" Property="Background" Value="{DynamicResource SucessoFundo}"/>

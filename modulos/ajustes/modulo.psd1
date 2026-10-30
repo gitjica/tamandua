@@ -11,4 +11,6 @@
     RotuloAcao     = 'Aplicar'
     # Resultado de Invoke-Acao fala de mudanças, não de espaço liberado.
     Resultado      = 'Mudancas'
+    # Texto das pastas na grade.
+    NomeItens = 'ajuste|ajustes'
 }

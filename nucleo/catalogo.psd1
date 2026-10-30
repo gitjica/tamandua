@@ -4,7 +4,6 @@
     Modulos = @(
         @{ Nome = 'status';       Titulo = 'Status';        Grupo = 'Sistema';    Descricao = 'Painel do sistema (CPU, memória, disco, rede)' }
         @{ Nome = 'limpar';       Titulo = 'Limpar';        Grupo = 'Limpeza';    Descricao = 'Temporários, caches de navegadores, apps e jogos, logs e Lixeira' }
-        @{ Nome = 'instaladores'; Titulo = 'Instaladores';  Grupo = 'Limpeza';    Descricao = 'Encontra instaladores esquecidos (.exe, .msi, .iso)' }
         @{ Nome = 'desinstalar';  Titulo = 'Desinstalar';   Grupo = 'Programas';  Descricao = 'Desinstala programas e restos' }
         @{ Nome = 'programas';    Titulo = 'Programas';     Grupo = 'Programas';  Descricao = 'Instala e atualiza programas via winget' }
         @{ Nome = 'ajustes';      Titulo = 'Ajustes';       Grupo = 'Ajustes';    Descricao = 'Todos os tweaks do WinUtil: privacidade, desempenho, apps e preferências' }

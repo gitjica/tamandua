@@ -180,7 +180,7 @@ Describe 'Tarefas em segundo plano' {
         }
         Wait-Tarefas
         $r.Erro | Should -BeNullOrEmpty
-        $r.Saida.Count | Should -Be 12
+        $r.Saida.Count | Should -Be 11
         ($r.Saida | Where-Object Nome -eq 'status').Estado | Should -Be 'ok'
         ($r.Saida | Where-Object Nome -eq 'atualizacoes').Titulo | Should -Be 'Atualizações'
     }
@@ -239,7 +239,7 @@ Describe 'Janela de verdade' {
     It 'abre no projeto real, mostra os módulos e carrega o status' {
         $r = Invoke-InterfaceTeste -Raiz $script:RaizProjeto
         $r.Carregou | Should -BeTrue
-        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 13 -Because '12 do catálogo + a página Histórico'
+        @($r.Modulos | Where-Object Tipo -eq 'Modulo').Count | Should -Be 12 -Because '11 do catálogo + a página Histórico'
         @($r.Modulos | Where-Object Tipo -eq 'Modulo')[-1].Nome | Should -Be 'historico'
         $r.Titulo | Should -Be 'Status'
         $r.Mensagem | Should -BeNullOrEmpty
@@ -563,13 +563,13 @@ Describe 'Seleção e resultado (funções puras)' {
             $linhas = ConvertTo-LinhaAlvo -Alvos @($A[0], $A[1]) -Escreve
             $script:NomeItens = 'opção|opções'
             try { $pasta = New-LinhaPasta -Tipo 'Secao' -Nome 'Sem serifa' -Membros @($linhas | Where-Object Tipo -eq 'Alvo') }
-            finally { $script:NomeItens = 'programa|programas' }
+            finally { $script:NomeItens = 'item|itens' }
             $pasta.Selo | Should -Be "$([char]0x2713) Arial"
             $pasta.TemMiniTexto | Should -BeTrue
             "$($pasta.MiniTexto0)|$($pasta.MiniFonte1)" | Should -Be 'Aa|Verdana'
             $linhas[1].Selecionado = $false
             $linhas[0].Selecionado = $false
-            (New-LinhaPasta -Tipo 'Secao' -Nome 'Sem serifa' -Membros @($linhas | Where-Object Tipo -eq 'Alvo')).Selo | Should -Be '2 programas'
+            (New-LinhaPasta -Tipo 'Secao' -Nome 'Sem serifa' -Membros @($linhas | Where-Object Tipo -eq 'Alvo')).Selo | Should -Be '2 itens'
         }
     }
 
@@ -711,7 +711,8 @@ Describe 'Ajustes pela janela de verdade' {
                             3 { $p.Confirmacao = $c.TextoStatus.Text; & $clicar $c.BotaoAplicar }
                             4 {
                                 $p.Final = $c.TextoStatus.Text
-                                $p.Aplicados = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Estado -eq 'Aplicado' }).Count
+                                # Na grade, Ajustes mostra pastas: conta os próprios ajustes.
+                                $p.Aplicados = @(& (Get-Module Interface) { $script:Estado.Alvos } | Where-Object { $_.Estado -eq 'Aplicado' }).Count
                                 $relogio.Stop()
                                 $tela.Janela.Close()
                             }

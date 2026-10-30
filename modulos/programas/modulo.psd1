@@ -13,4 +13,6 @@
     Resultado         = 'Mudancas'
     # Vai junto da pergunta de confirmação (CLI e interface).
     AvisoConfirmacao  = 'Ao confirmar, você aceita as licenças dos programas escolhidos. Alguns instaladores pedem permissão de administrador.'
+    # Texto das pastas na grade.
+    NomeItens = 'programa|programas'
 }

@@ -1,6 +1,6 @@
 # Tamanduá
 
-Limpeza, ajustes e manutenção profunda para Windows. 12 módulos: status, limpar, instaladores, desinstalar, programas, ajustes, menu de contexto, fonte, recursos, atualizações, otimizar e reparos.
+Limpeza, ajustes e manutenção profunda para Windows. 11 módulos: status, limpar, desinstalar, programas, ajustes, menu de contexto, fonte, recursos, atualizações, otimizar e reparos.
 
 ## Como abrir
 
@@ -36,7 +36,6 @@ Ele pede permissão de administrador uma vez (dá para recusar: abre assim mesmo
 ```powershell
 .\tamandua.ps1            # abre a interface (pede admin uma vez, como o WinUtil; recusar abre assim mesmo)
 .\tamandua.ps1 status     # painel do sistema: saúde, CPU, memória, discos, rede, bateria, processos
-.\tamandua.ps1 instaladores -Simular   # instaladores, ISOs e compactados esquecidos em Downloads (vão para a Lixeira)
 .\tamandua.ps1 programas -Itens vlc,7zip   # instala (ou atualiza) pelo winget, perguntando antes
 .\tamandua.ps1 programas -Itens atualizar-tudo   # winget upgrade --all
 .\tamandua.ps1 desinstalar      # programas instalados; na janela, marque e confirme (o desinstalador de cada um abre)
