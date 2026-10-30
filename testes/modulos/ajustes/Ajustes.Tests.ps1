@@ -118,21 +118,52 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         $catalogo[0].id | Should -Be 'seg-ponto-restauracao' -Because 'é o primeiro da página e define a ordem dos botões de preset'
     }
 
-    It 'presets: Mínimo dentro do Essencial e só risco baixo; Notebook sem nada que gaste bateria' {
+    It 'presets completos (clicar troca a seleção inteira): Mínimo ⊂ Essencial ⊂ Avançado e Desempenho; Notebook = Essencial sem localização + bateria' {
         $minimo = Get-IdsPreset 'Mínimo'; $essencial = Get-IdsPreset 'Essencial'
         foreach ($id in $minimo) { $essencial | Should -Contain $id -Because "$id está no Mínimo" }
+        foreach ($p in 'Avançado', 'Desempenho') { $ids = Get-IdsPreset $p; foreach ($id in $essencial) { $ids | Should -Contain $id -Because "$id está no Essencial ($p)" } }
+        $notebook = Get-IdsPreset 'Notebook'
+        foreach ($id in $essencial | Where-Object { $_ -ne 'priv-localizacao' }) { $notebook | Should -Contain $id -Because "$id está no Essencial (Notebook)" }
+        # Bastante coisa marcada: os presets são para usar, não de enfeite.
+        $essencial.Count | Should -BeGreaterOrEqual 30
+        (Get-IdsPreset 'Avançado').Count | Should -BeGreaterOrEqual 50
+    }
+
+    It 'Essencial é para qualquer um: risco baixo (fora o que o próprio WinUtil põe no Standard) e não tira apps do dia a dia' {
+        $standard = @($script:Referencia.presets.'Essencial')
+        foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Essencial' }) {
+            if ($a.risco -ne 'Baixo') { @($a.winutil | Where-Object { $_ -in $standard }).Count | Should -BeGreaterThan 0 -Because "$($a.id) é $($a.risco) e não vem do Standard" }
+        }
+        foreach ($p in 'Essencial', 'Notebook', 'Desempenho', 'Avançado') {
+            $ids = Get-IdsPreset $p
+            foreach ($app in 'app-windowscalculator', 'app-windowsalarms', 'app-windows-photos', 'app-windowsnotepad', 'app-paint', 'app-screensketch', 'app-windowscamera') {
+                $ids | Should -Not -Contain $app -Because "$p não pode tirar $app"
+            }
+        }
+        (Get-IdsPreset 'Desempenho') | Should -Not -Contain 'app-gamingapp' -Because 'quem joga usa o app Xbox'
+    }
+
+    It 'Mínimo só risco baixo; Notebook sem nada que gaste bateria nem mude o fuso automático' {
         foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Mínimo' }) { $a.risco | Should -Be 'Baixo' -Because $a.id }
         foreach ($a in $catalogo | Where-Object { @($_.presets) -contains 'Notebook' }) { $a.risco | Should -BeIn 'Baixo', 'Medio' -Because $a.id }
+        (Get-IdsPreset 'Notebook') | Should -Not -Contain 'priv-localizacao'
         foreach ($p in $script:Presets) { (Get-IdsPreset $p).Count | Should -BeGreaterOrEqual 2 -Because $p }
         # Notebook: nada que gaste bateria ou desligue a hibernação.
         (Get-IdsPreset 'Notebook') | Should -Not -Contain 'energia-desempenho-maximo'
         (Get-IdsPreset 'Notebook') | Should -Not -Contain 'energia-sem-hibernacao'
     }
 
-    It 'escolhas exclusivas (IPv6, MPO, DNS) ficam fora dos presets' {
-        foreach ($id in @('avanc-ipv4-preferido', 'avanc-sem-teredo', 'avanc-sem-ipv6', 'avanc-sem-mpo', 'avanc-sem-mpo-total') + @($catalogo | Where-Object id -like 'rede-dns-*' | ForEach-Object id)) {
-            @(($catalogo | Where-Object id -eq $id).presets).Count | Should -Be 0 -Because $id
+    It 'escolhas exclusivas (IPv6, MPO, DNS): no máximo uma por preset; IPv6 em nenhum' {
+        $grupos = @{
+            IPv6 = @('avanc-ipv4-preferido', 'avanc-sem-teredo', 'avanc-sem-ipv6')
+            MPO  = @('avanc-sem-mpo', 'avanc-sem-mpo-total')
+            DNS  = @($catalogo | Where-Object id -like 'rede-dns-*' | ForEach-Object id)
         }
+        foreach ($p in $script:Presets) {
+            $ids = Get-IdsPreset $p
+            foreach ($g in $grupos.Keys) { @($grupos[$g] | Where-Object { $_ -in $ids }).Count | Should -BeLessOrEqual 1 -Because "$p tem mais de um de $g" }
+        }
+        foreach ($id in $grupos.IPv6) { @(($catalogo | Where-Object id -eq $id).presets).Count | Should -Be 0 -Because $id }
     }
 }
 

@@ -405,7 +405,7 @@ Describe 'Ajustes pela janela de verdade' {
                             1 {
                                 $p.Marcados = $c.TextoStatus.Text
                                 # Marca mais um item clicando na caixa de verdade (fora do preset).
-                                $linha = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Id -eq 'priv-bing-iniciar' })[0]
+                                $linha = @($c.ListaAlvos.ItemsSource | Where-Object { $_.Id -eq 'priv-outlook-classico' })[0]
                                 $fila = [System.Collections.Generic.Queue[object]]::new()
                                 $fila.Enqueue($c.ListaAlvos.ItemContainerGenerator.ContainerFromItem($linha))
                                 $caixa = $null

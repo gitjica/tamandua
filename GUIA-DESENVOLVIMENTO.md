@@ -513,13 +513,26 @@ Diferenças de propósito:
 - O&O ShutUp10++ só abre se a assinatura digital for da O&O; DNS desfaz para o automático (DHCP).
 - Escolhas exclusivas (IPv6, MPO, DNS) ficam fora dos presets e a descrição avisa para escolher uma.
 
-**Presets**: cada ajuste lista os presets de que faz parte, sem arquivo separado. Os do WinUtil (`config/preset.json`) estão
-inteiros nos nossos (teste): `Mínimo` (Minimal), `Essencial` (Standard), `Avançado` (Advanced) e `Remover apps` (AppxDefault);
-o WinUtil não segue Essencial ⊂ Avançado (a Limpeza de Disco só está no Standard), e nós também não. Mínimo só tem risco baixo
-e cabe no Essencial. Mais: `Notebook`
-(nada que gaste bateria nem desligue a hibernação; porcentagem da bateria, sem rede na espera, apps em segundo plano),
-`Desempenho` (PC de mesa: efeitos visuais, plano Desempenho Máximo, Modo de Jogo, sem hibernação, mouse sem aceleração),
-`Privacidade` e `Explorador`. Aplicar preset **só marca** os itens; o usuário ainda revisa e confirma. A ordem dos botões é a
+**Presets**: cada ajuste lista os presets de que faz parte, sem arquivo separado. Clicar num preset **troca** a seleção inteira,
+então cada preset é completo sozinho. Os do WinUtil (`config/preset.json`) estão inteiros nos nossos (teste), mas os nossos vão
+além — os do WinUtil marcam pouco:
+- `Mínimo` (5): o Minimal do WinUtil + ponto de restauração. Só risco baixo.
+- `Essencial` (34): para qualquer usuário. O Standard do WinUtil + toda a privacidade básica, extensões visíveis, tela azul com
+  detalhes, caminhos longos, Configurações sem propaganda, Shift×5 sem Teclas de Aderência e remoção só dos apps-propaganda
+  (Notícias, Bing, Clipchamp, Paciência, Microsoft 365, Hub de Comentários...). Risco baixo, fora o que o Standard exige.
+- `Avançado` (60): Essencial + o Advanced do WinUtil (Widgets, OneDrive, IA, Recall, menu clássico, busca da Loja, Iniciar
+  antigo) + Edge/Brave limpos, apps em segundo plano, armazenamento reservado, DNS mais rápido, Iniciar sem Recomendados,
+  Explorador em Este Computador, ocultos visíveis e mais apps (Copilot, Clima, Teams, Outlook novo, Assistência Rápida...).
+- `Notebook` (38): Essencial sem a localização (fuso automático em viagem) + bateria na barra, sem rede no modo de espera,
+  apps em segundo plano, sem Widgets. Nada que gaste bateria nem desligue a hibernação.
+- `Desempenho` (45): Essencial + efeitos visuais, plano Desempenho Máximo, Modo de Jogo, sem hibernação, mouse sem aceleração,
+  MPO em compatibilidade, DNS mais rápido. Mantém os apps do Xbox.
+- `Privacidade` (26): toda a privacidade + IA/Recall + Edge/Brave + DNS do AdGuard + apps do Bing/Copilot.
+- `Explorador` (13): Explorador e barra de tarefas com jeito de Windows 10. `Remover apps` (18): o AppxDefault do WinUtil.
+Regras com teste: Mínimo ⊂ Essencial ⊂ Avançado e Desempenho; Notebook ⊇ Essencial − localização; Essencial ≥ 30 e Avançado ≥ 50;
+nenhum preset do dia a dia tira Calculadora, Relógio, Fotos, Bloco de Notas, Paint, Captura ou Câmera; no máximo um item de cada
+escolha exclusiva (DNS, MPO) por preset e nenhum de IPv6; segurança (Defender, BitLocker) em nenhum. Aplicar preset **só marca**
+os itens; o usuário ainda revisa e confirma. A ordem dos botões é a
 de aparição (o ponto de restauração vem primeiro e define Mínimo, Essencial, Avançado, Notebook, Desempenho). O mecanismo é
 genérico: qualquer módulo cujos alvos tenham `Presets` ganha os botões "Marcar:" e `-Preset <nome>` na CLI; `-Itens a,b` marca por id.
 

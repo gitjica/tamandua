@@ -9,7 +9,7 @@
     "categoria": "Segurança",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
+    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "executar": "Invoke-TmdCriarPontoRestauracao -Descricao 'Tamanduá'"
   },
   {
@@ -33,7 +33,7 @@
     "categoria": "Limpeza (uma vez)",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": ["Essencial"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "executar": "[void](Invoke-TmdPrograma -Arquivo 'cleanmgr.exe' -Argumentos ('/d ' + $env:SystemDrive + ' /VERYLOWDISK') -Modulo 'ajustes' -Id 'acao-limpeza-disco'); $r = Invoke-TmdPrograma -Arquivo 'dism.exe' -Argumentos '/Online /Cleanup-Image /StartComponentCleanup /ResetBase' -Modulo 'ajustes' -Id 'acao-limpeza-disco'; if ($r.Codigo -ne 0) { throw ('o DISM terminou com código ' + $r.Codigo) }"
   },
   {
@@ -185,7 +185,7 @@
     "categoria": "Privacidade",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Privacidade"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Search", "nome": "BingSearchEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
     ]
@@ -198,7 +198,7 @@
     "categoria": "Privacidade",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Privacidade"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Device Metadata", "nome": "PreventDeviceMetadataFromNetwork", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
     ]
@@ -211,7 +211,7 @@
     "categoria": "Privacidade",
     "risco": "Medio",
     "requerAdmin": false,
-    "presets": ["Avançado"],
+    "presets": ["Avançado", "Privacidade"],
     "mudancas": [
       {
         "tipo": "Script",
@@ -229,7 +229,7 @@
     "categoria": "Programas",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": [],
+    "presets": ["Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Office\\16.0\\Outlook\\Preferences", "nome": "UseNewOutlook", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Office\\16.0\\Outlook\\Options\\General", "nome": "DoNewOutlookAutoMigration", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
@@ -244,7 +244,7 @@
     "categoria": "Sistema",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Mínimo", "Essencial", "Avançado", "Desempenho"],
+    "presets": ["Mínimo", "Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
       { "tipo": "Servico", "nome": "CscService", "inicializacao": "Disabled", "padraoWindows": "Manual" },
       { "tipo": "Servico", "nome": "MapsBroker", "inicializacao": "Manual", "padraoWindows": "AutomaticDelayedStart" },
@@ -273,7 +273,7 @@
     "categoria": "Sistema",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": [],
+    "presets": ["Avançado", "Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\StorageSense\\Parameters\\StoragePolicy", "nome": "01", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
@@ -286,7 +286,7 @@
     "categoria": "Sistema",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem", "nome": "LongPathsEnabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 }
     ]
@@ -299,7 +299,7 @@
     "categoria": "Sistema",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\CrashControl", "nome": "DisplayParameters", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SYSTEM\\CurrentControlSet\\Control\\CrashControl", "nome": "DisableEmoticon", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
@@ -313,7 +313,7 @@
     "categoria": "Sistema",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System", "nome": "VerboseStatus", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
     ]
@@ -339,7 +339,7 @@
     "categoria": "Sistema",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": [],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer", "nome": "SettingsPageVisibility", "valor": "hide:home", "tipoValor": "String", "padraoWindows": null }
     ]
@@ -352,7 +352,7 @@
     "categoria": "Sistema",
     "risco": "Medio",
     "requerAdmin": false,
-    "presets": ["Notebook", "Desempenho"],
+    "presets": ["Avançado", "Notebook", "Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications", "nome": "GlobalUserDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": 0 }
     ]
@@ -392,7 +392,7 @@
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Explorador"],
+    "presets": ["Avançado", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "Hidden", "valor": 1, "tipoValor": "DWord", "padraoWindows": 2 }
     ]
@@ -404,7 +404,7 @@
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Explorador"],
+    "presets": ["Avançado", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "LaunchTo", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
     ]
@@ -417,7 +417,7 @@
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Explorador"],
+    "presets": ["Avançado", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Classes\\CLSID\\{f874310e-b6b7-47dc-bc84-b9e6b38f5903}", "nome": "System.IsPinnedToNameSpaceTree", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Classes\\CLSID\\{e88865ea-0e1c-4e20-9aa6-edcd0212c87c}", "nome": "System.IsPinnedToNameSpaceTree", "valor": 0, "tipoValor": "DWord", "padraoWindows": null }
@@ -480,7 +480,7 @@
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": [],
+    "presets": ["Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced", "nome": "TaskbarAl", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
@@ -519,7 +519,7 @@
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado", "Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\current\\device\\Start", "nome": "HideRecommendedSection", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\PolicyManager\\current\\device\\Education", "nome": "IsEducationEnvironment", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
@@ -560,7 +560,7 @@
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": ["Avançado"],
+    "presets": ["Avançado", "Notebook", "Desempenho"],
     "mudancas": [
       {
         "tipo": "Script",
@@ -614,7 +614,7 @@
     "categoria": "Aparência",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": [],
+    "presets": ["Explorador"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility", "nome": "DynamicScrollbars", "valor": 0, "tipoValor": "DWord", "padraoWindows": 1 }
     ]
@@ -668,7 +668,7 @@
     "categoria": "Mouse e teclado",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Desempenho"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Control Panel\\Accessibility\\StickyKeys", "nome": "Flags", "valor": "506", "tipoValor": "String", "padraoWindows": "510" }
     ]
@@ -695,7 +695,7 @@
     "categoria": "Desempenho e jogos",
     "risco": "Baixo",
     "requerAdmin": false,
-    "presets": ["Desempenho"],
+    "presets": ["Avançado", "Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\GameBar", "nome": "AllowAutoGameMode", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Microsoft\\GameBar", "nome": "AutoGameModeEnabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null }
@@ -837,7 +837,7 @@
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Privacidade"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Set-TmdDns -Ipv4 '94.140.14.14', '94.140.15.15' -Ipv6 '2a10:50c0::ad1:ff', '2a10:50c0::ad2:ff'", "desfazer": "Set-TmdDns", "verificar": "$d = @(Get-TmdDnsAtual); $d.Count -gt 0 -and @($d | Where-Object { $_ -ne '94.140.14.14' }).Count -eq 0" }
     ]
@@ -863,7 +863,7 @@
     "categoria": "Rede (DNS)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado", "Desempenho"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "$c = @(@{ V4 = @('8.8.8.8', '8.8.4.4'); V6 = @('2001:4860:4860::8888', '2001:4860:4860::8844') }, @{ V4 = @('1.1.1.1', '1.0.0.1'); V6 = @('2606:4700:4700::1111', '2606:4700:4700::1001') }); $melhor = $null; $tempo = [double]::MaxValue; foreach ($x in $c) { $p = @(Test-Connection -ComputerName $x.V4[0] -Count 3 -ErrorAction SilentlyContinue); if ($p.Count -gt 0) { $m = ($p | Measure-Object -Property ResponseTime -Average).Average; if ($m -lt $tempo) { $tempo = $m; $melhor = $x } } }; if (-not $melhor) { throw 'nem o Google nem a Cloudflare responderam' }; Set-TmdDns -Ipv4 $melhor.V4 -Ipv6 $melhor.V6", "desfazer": "Set-TmdDns", "verificar": "@(Get-TmdDnsAtual | Where-Object { $_ -notin '8.8.8.8', '1.1.1.1' }).Count -eq 0 -and @(Get-TmdDnsAtual).Count -gt 0" }
     ]
@@ -876,7 +876,7 @@
     "categoria": "Navegadores",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Privacidade"],
+    "presets": ["Avançado", "Notebook", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\EdgeUpdate", "nome": "CreateDesktopShortcutDefault", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Edge", "nome": "PersonalizationReportingEnabled", "valor": 0, "tipoValor": "DWord", "padraoWindows": null },
@@ -905,7 +905,7 @@
     "categoria": "Navegadores",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveRewardsDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\BraveSoftware\\Brave", "nome": "BraveWalletDisabled", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
@@ -929,7 +929,7 @@
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": ["Avançado"],
+    "presets": ["Avançado", "Privacidade"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\WindowsCopilot", "nome": "TurnOffWindowsCopilot", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsAI", "nome": "DisableAIDataAnalysis", "valor": 1, "tipoValor": "DWord", "padraoWindows": null },
@@ -988,7 +988,7 @@
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado"],
     "mudancas": [
       {
         "tipo": "Script",
@@ -1037,7 +1037,7 @@
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Desempenho"],
     "mudancas": [
       { "tipo": "Registro", "caminho": "HKLM:\\SOFTWARE\\Microsoft\\Windows\\Dwm", "nome": "OverlayTestMode", "valor": 5, "tipoValor": "DWord", "padraoWindows": null }
     ]
@@ -1050,7 +1050,7 @@
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",
     "requerAdmin": true,
-    "presets": ["Avançado"],
+    "presets": ["Avançado", "Privacidade"],
     "mudancas": [
       {
         "tipo": "Script",
@@ -1264,7 +1264,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.WindowsFeedbackHub'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NBLGGH4R32N'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.WindowsFeedbackHub')" }
     ]
@@ -1277,7 +1277,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.GetHelp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9PKDZBMV1H3T'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.GetHelp')" }
     ]
@@ -1290,7 +1290,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.OutlookForWindows'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NRX63209R7B'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.OutlookForWindows')" }
     ]
@@ -1303,7 +1303,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'MSTeams'", "desfazer": "Install-TmdAppxDaLoja -IdLoja 'XP8BT8DW290MPQ'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'MSTeams')" }
     ]
@@ -1316,7 +1316,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Clipchamp.Clipchamp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9P1J8S7CCWWT'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Clipchamp.Clipchamp')" }
     ]
@@ -1329,7 +1329,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.MicrosoftOfficeHub'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRD29V9'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.MicrosoftOfficeHub')" }
     ]
@@ -1355,7 +1355,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.BingSearch'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NZBF4GT040C'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.BingSearch')" }
     ]
@@ -1368,7 +1368,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Avançado", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'MicrosoftCorporationII.QuickAssist'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9P7BP5VNWKX5'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'MicrosoftCorporationII.QuickAssist')" }
     ]
@@ -1381,7 +1381,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Windows.DevHome'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9N8MHTPHNGVV'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Windows.DevHome')" }
     ]
@@ -1407,7 +1407,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Avançado", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Todos'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NBLGGH5R558'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Todos')" }
     ]
@@ -1420,7 +1420,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.PowerAutomateDesktop'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NFTCH6J7FHV'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.PowerAutomateDesktop')" }
     ]
@@ -1524,7 +1524,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Avançado", "Privacidade", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.Copilot'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9NHT9RB2F4HD'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.Copilot')" }
     ]
@@ -1576,7 +1576,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Privacidade", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.BingNews'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFHVFW'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.BingNews')" }
     ]
@@ -1589,7 +1589,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Avançado", "Privacidade", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.BingWeather'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJ3Q2'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.BingWeather')" }
     ]
@@ -1667,7 +1667,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.StartExperiencesApp'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9PC1H9VN18CM'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.StartExperiencesApp')" }
     ]
@@ -1680,7 +1680,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": ["Remover apps"],
+    "presets": ["Essencial", "Avançado", "Notebook", "Desempenho", "Remover apps"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.MicrosoftSolitaireCollection'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFHWD2'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.MicrosoftSolitaireCollection')" }
     ]
@@ -1693,7 +1693,7 @@
     "categoria": "Apps do Windows (remover)",
     "risco": "Baixo",
     "requerAdmin": true,
-    "presets": [],
+    "presets": ["Avançado"],
     "mudancas": [
       { "tipo": "Script", "aplicar": "Remove-TmdAppx -Nome 'Microsoft.ZuneVideo'", "desfazer": "Install-TmdAppxDaLoja -IdLoja '9WZDNCRFJ3P2'", "verificar": "-not (Test-TmdAppxInstalado -Nome 'Microsoft.ZuneVideo')" }
     ]
