@@ -1,5 +1,6 @@
 # Abre o Tamandua direto do GitHub, sem baixar nada a mao. No PowerShell:
 #
+#   irm gitjica.github.io/tamandua | iex     (docs/index.html, que roda este arquivo)
 #   irm https://raw.githubusercontent.com/gitjica/tamandua/main/instalar.ps1 | iex
 #
 # Baixa a versao mais nova (o ZIP do GitHub), coloca em %LOCALAPPDATA%\Tamandua\app (troca a versao anterior; o

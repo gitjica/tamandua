@@ -7,11 +7,16 @@ Limpeza, ajustes e manutenção profunda para Windows. 10 módulos: status, limp
 **Jeito mais rápido**: abra o PowerShell (botão direito no Iniciar > Terminal) e cole:
 
 ```powershell
-irm https://raw.githubusercontent.com/gitjica/tamandua/main/instalar.ps1 | iex
+irm gitjica.github.io/tamandua | iex
 ```
 
 Ele baixa a versão mais nova do GitHub, guarda em `%LOCALAPPDATA%\Tamandua\app` e abre. Rodar de novo atualiza
-(o histórico e as configurações ficam). Só funciona com o repositório público.
+(o histórico e as configurações ficam). O endereço curto é a página do GitHub Pages (`docs/index.html`, que também é
+um script: para o PowerShell o HTML é comentário e sobra só a linha abaixo). O endereço completo continua valendo:
+
+```powershell
+irm https://raw.githubusercontent.com/gitjica/tamandua/main/instalar.ps1 | iex
+```
 
 **Ou baixando**: baixe a pasta inteira (no GitHub: **Code > Download ZIP**, e extraia) e dê dois cliques em **`Tamandua.cmd`**.
 Ele pede permissão de administrador uma vez (dá para recusar: abre assim mesmo, e o que precisar pede na hora).

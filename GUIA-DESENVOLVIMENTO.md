@@ -690,8 +690,10 @@ do nome do módulo na CLI é erro.
     clicar abre, "Voltar" ou Esc fecham. Dentro, o `grupo` de cada programa (`$Grupos`) vira subtítulo ("Players de
     vídeo"...). Categoria de um item só (o "Atualizar tudo") aparece direto, do tamanho das pastas (`Grande`). É só
     visual: a marca fica no alvo, a busca e a lista mostram tudo solto. Páginas com poucas categorias continuam com as
-    pastas de alternativas (`ConvertTo-LinhasComPastas`). A grade é centralizada; o subtítulo tem a largura das colunas
-    (`LarguraLinhaGrade`, recalculada no SizeChanged da lista).
+    pastas de alternativas (`ConvertTo-LinhasComPastas`). Os quadros esticam para preencher a linha
+    (`LarguraQuadro`/`LarguraPasta`, mínimo 150/196) e o subtítulo tem a largura das colunas (`LarguraLinhaGrade`);
+    os três são recalculados no SizeChanged da lista. Comando curto: `docs/index.html` (GitHub Pages) é HTML e script
+    ao mesmo tempo, e roda o `instalar.ps1`.
   - Sem preset na página Programas; os populares ficam na categoria normal deles (e nas pastas), sem estrela.
   - **Sem winget** (Windows LTSC/IoT não traz o "Instalador de Aplicativo"): a página abre do mesmo jeito (tudo "não
     verificado") e, ao instalar, `Install-TmdWinget` (`nucleo/Winget.ps1`) instala o winget antes: última versão do

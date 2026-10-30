@@ -26,3 +26,23 @@ Describe '<Relativo>' -ForEach $arquivos {
         $erros | Should -BeNullOrEmpty
     }
 }
+
+Describe 'docs/index.html (página do GitHub Pages que também é o script do "irm gitjica.github.io/tamandua | iex")' {
+    BeforeAll {
+        $caminho = Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'docs\index.html'
+        $bytes = [System.IO.File]::ReadAllBytes($caminho)
+    }
+
+    It 'é só ASCII e sem BOM, como o instalar.ps1' {
+        @($bytes | Where-Object { $_ -gt 127 }).Count | Should -Be 0
+    }
+
+    It 'para o PowerShell, o HTML é comentário e só sobra a linha que roda o instalar.ps1' {
+        $tokens = $null
+        $erros = $null
+        $ast = [System.Management.Automation.Language.Parser]::ParseInput([Text.Encoding]::ASCII.GetString($bytes), [ref]$tokens, [ref]$erros)
+        $erros | Should -BeNullOrEmpty
+        @($ast.EndBlock.Statements | ForEach-Object { $_.Extent.Text }) |
+            Should -Be @('irm https://raw.githubusercontent.com/gitjica/tamandua/main/instalar.ps1 | iex')
+    }
+}

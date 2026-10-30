@@ -47,13 +47,21 @@ function Initialize-TmdTela {
 
     $c.ListaModulos.Add_SelectionChanged({ Invoke-TmdProtegido { Open-TmdPaginaSelecionada } })
     $c.ListaAlvos.Add_SelectionChanged({ Invoke-TmdProtegido { Show-TmdDetalhe } })
-    # Grade: o subtítulo de categoria tem a largura exata das colunas de quadros que cabem (quadro de 150 + borda e
-    # margem = 160), e não a da janela; assim a grade centralizada fica centralizada também com subtítulos.
+    # Grade: os quadros esticam para preencher a linha (sem sobra nas laterais). Cabem tantas colunas de no mínimo 150
+    # (pastas de categoria: 196) quanto a largura deixa; borda e margem somam 10. O subtítulo de categoria tem a largura
+    # dessas colunas, e não a da janela.
     $lista = $c.ListaAlvos
+    $lista.Resources['LarguraQuadro'] = [double]150
+    $lista.Resources['LarguraPasta'] = [double]196
     $lista.Resources['LarguraLinhaGrade'] = [double]632
     $lista.Add_SizeChanged({
-            $colunas = [math]::Max(1, [math]::Floor(($lista.ActualWidth - 36) / 160))
-            $lista.Resources['LarguraLinhaGrade'] = [double]($colunas * 160 - 8)
+            $disponivel = $lista.ActualWidth - 36
+            $colunas = [math]::Max(1, [math]::Floor($disponivel / 160))
+            $quadro = [math]::Max(150, [math]::Floor($disponivel / $colunas) - 10)
+            $lista.Resources['LarguraQuadro'] = [double]$quadro
+            $lista.Resources['LarguraLinhaGrade'] = [double]($colunas * ($quadro + 10) - 8)
+            $colunas = [math]::Max(1, [math]::Floor($disponivel / 206))
+            $lista.Resources['LarguraPasta'] = [double][math]::Max(196, [math]::Floor($disponivel / $colunas) - 10)
         }.GetNewClosure())
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
     $c.BotaoAtualizar.Add_Click({ Invoke-TmdProtegido { Open-TmdPagina -Nome $script:Estado.ModuloAtual -Forcar } })

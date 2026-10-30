@@ -325,7 +325,7 @@
     <DataTemplate x:Key="ModeloGrade">
         <Grid>
             <TextBlock x:Name="RotuloCategoria" Text="{Binding Nome}" FontSize="11" Foreground="{DynamicResource TextoSutil}" Visibility="Collapsed"/>
-            <Grid x:Name="Quadro" Width="150" Height="132" ToolTip="{Binding Detalhe}">
+            <Grid x:Name="Quadro" Width="{DynamicResource LarguraQuadro}" Height="132" ToolTip="{Binding Detalhe}">
                 <CheckBox x:Name="Caixa" Style="{DynamicResource Caixa}" IsChecked="{Binding Selecionado, Mode=OneWay}"
                           HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Visibility="Collapsed"
                           AutomationProperties.Name="{Binding Nome}"/>
@@ -387,7 +387,7 @@
                 <Setter TargetName="Estrela" Property="Visibility" Value="Visible"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding Tipo}" Value="Secao">
-                <Setter TargetName="Quadro" Property="Width" Value="196"/>
+                <Setter TargetName="Quadro" Property="Width" Value="{DynamicResource LarguraPasta}"/>
                 <Setter TargetName="Quadro" Property="Height" Value="196"/>
                 <Setter TargetName="PastaGrande" Property="Visibility" Value="Visible"/>
                 <Setter TargetName="Icone40" Property="Visibility" Value="Collapsed"/>
@@ -397,7 +397,7 @@
             </DataTrigger>
             <!-- Item solto entre as pastas de categoria (o "Atualizar tudo"): do tamanho delas, para a grade não desalinhar -->
             <DataTrigger Binding="{Binding Grande}" Value="True">
-                <Setter TargetName="Quadro" Property="Width" Value="196"/>
+                <Setter TargetName="Quadro" Property="Width" Value="{DynamicResource LarguraPasta}"/>
                 <Setter TargetName="Quadro" Property="Height" Value="196"/>
                 <Setter TargetName="Icone40" Property="Width" Value="112"/>
                 <Setter TargetName="Icone40" Property="Height" Value="112"/>
