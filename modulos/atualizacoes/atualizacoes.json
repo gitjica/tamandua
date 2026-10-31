@@ -31,7 +31,7 @@
   },
   {
     "id": "wu-sem-reinicio-automatico",
-    "nome": "Não reiniciar sozinho com você usando o computador",
+    "nome": "Não reiniciar sozinho enquanto você usa",
     "descricao": "O Windows espera você reiniciar quando houver alguém conectado, em vez de reiniciar sozinho fora do horário ativo.",
     "categoria": "Reinício",
     "risco": "Baixo",
@@ -59,7 +59,7 @@
   },
   {
     "id": "wu-sem-p2p",
-    "nome": "Não compartilhar atualizações com outros computadores",
+    "nome": "Não compartilhar atualizações com outros PCs",
     "descricao": "Baixa as atualizações só da Microsoft. A Otimização de Entrega para de usar sua conexão para mandar atualizações a outros computadores (da internet ou da sua rede).",
     "categoria": "O que atualizar",
     "risco": "Baixo",

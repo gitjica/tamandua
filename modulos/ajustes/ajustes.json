@@ -336,7 +336,7 @@
   {
     "id": "priv-sem-sincronizar-configuracoes",
     "atlas": ["privacy/cloud/disable-setting-sync.yml"],
-    "nome": "Não sincronizar configurações com a conta Microsoft",
+    "nome": "Não sincronizar configurações na conta",
     "descricao": "Tema, senhas de Wi-Fi, idioma e acessibilidade deixam de ir para a nuvem. Num PC novo, você terá de configurar de novo. (Atlas: Disable Settings Sync)",
     "categoria": "Privacidade",
     "risco": "Medio",
@@ -375,7 +375,7 @@
   {
     "id": "priv-permissoes-apps",
     "atlas": ["privacy/config-app-permissions.yml"],
-    "nome": "Apps sem acesso ao diagnóstico e aos dados da conta",
+    "nome": "Apps sem acesso a diagnóstico e conta",
     "descricao": "Apps da Store não leem o diagnóstico de outros apps nem seu nome, foto e conta. (Atlas: Configure App Permissions)",
     "categoria": "Privacidade",
     "risco": "Baixo",
@@ -609,7 +609,7 @@
   {
     "id": "priv-sem-telemetria-mrt",
     "atlas": ["qol/windows-update/disable-msrt-telemetry.yml"],
-    "nome": "Ferramenta de Remoção de Malware sem relatório",
+    "nome": "Remoção de Malware (MRT) sem relatório",
     "descricao": "A ferramenta mensal da Microsoft continua limpando, mas não manda o que achou. (Atlas: Disable MSRT telemetry)",
     "categoria": "Privacidade",
     "risco": "Baixo",
@@ -702,7 +702,7 @@
   {
     "id": "sis-wpbt",
     "winutil": ["WPFTweaksWPBT"],
-    "nome": "Bloquear programas embutidos no firmware (WPBT)",
+    "nome": "Bloquear programas do firmware (WPBT)",
     "descricao": "O Windows deixa de rodar programas que o fabricante grava na BIOS/UEFI (ex.: utilitários que voltam sozinhos depois de formatar). Rastreadores antifurto de fabricante deixam de funcionar. (WinUtil: WPBT)",
     "categoria": "Sistema",
     "risco": "Baixo",
@@ -759,7 +759,7 @@
   {
     "id": "sis-login-detalhado",
     "winutil": ["WPFToggleVerboseLogon"],
-    "nome": "Mostrar o que o Windows faz ao entrar e desligar",
+    "nome": "Detalhes do Windows ao entrar e desligar",
     "descricao": "Em vez de \"Bem-vindo\", mostra cada etapa (ajuda a ver onde trava). (WinUtil: Logon Verbose Mode)",
     "categoria": "Sistema",
     "risco": "Baixo",
@@ -834,7 +834,7 @@
   {
     "id": "sis-sem-assistente-compatibilidade",
     "atlas": ["privacy/disable-pca.yml"],
-    "nome": "Sem o Assistente de Compatibilidade de Programas",
+    "nome": "Sem o Assistente de Compatibilidade",
     "descricao": "Para de vigiar programas antigos e de mostrar \"este programa pode não ter sido instalado corretamente\", e desliga o inventário de apps. (Atlas: Disable Program Compatibility Assistant (PCA))",
     "categoria": "Sistema",
     "risco": "Medio",
@@ -898,7 +898,7 @@
   {
     "id": "sis-sem-conteudo-nuvem",
     "atlas": ["qol/taskbar/disable-cloud-optimized-content.yml"],
-    "nome": "Sem conteúdo \"da nuvem\" na barra e no Iniciar",
+    "nome": "Sem conteúdo da nuvem na barra e Iniciar",
     "descricao": "A Microsoft não muda sozinha ícones fixados e itens do Iniciar. (Atlas: Disable Cloud Optimized Content on Taskbar)",
     "categoria": "Sistema",
     "risco": "Baixo",
@@ -1173,7 +1173,7 @@
   {
     "id": "expl-menu-completo-varios",
     "atlas": ["qol/explorer/full-context-on-more-than-15-items.yml"],
-    "nome": "Menu completo com muitos arquivos selecionados",
+    "nome": "Menu completo com muitos arquivos",
     "descricao": "Com mais de 15 arquivos selecionados, o botão direito continua mostrando \"Abrir\", \"Imprimir\" etc. (Atlas: Always Show the Full Context Menu On Items)",
     "categoria": "Explorador de Arquivos",
     "risco": "Baixo",
@@ -1295,7 +1295,7 @@
   {
     "id": "expl-finalizar-tarefa",
     "winutil": ["WPFTweaksEndTaskOnTaskbar"],
-    "nome": "\"Finalizar tarefa\" no botão direito da barra de tarefas",
+    "nome": "\"Finalizar tarefa\" no botão direito da barra",
     "descricao": "Fecha um programa travado direto pela barra de tarefas (Windows 11 23H2 ou mais novo). (WinUtil: End Task With Right Click)",
     "categoria": "Barra de tarefas e Iniciar",
     "risco": "Baixo",
@@ -1677,7 +1677,7 @@
   {
     "id": "acess-teclas-aderentes",
     "winutil": ["WPFToggleStickyKeys"],
-    "nome": "Shift 5 vezes não liga as Teclas de Aderência",
+    "nome": "Shift 5 vezes não liga Teclas de Aderência",
     "descricao": "Desliga o atalho que abre as Teclas de Aderência ao apertar Shift cinco vezes (comum em jogos). (WinUtil: Sticky Keys)",
     "categoria": "Mouse e teclado",
     "risco": "Baixo",
@@ -1781,7 +1781,7 @@
   {
     "id": "jogos-sem-game-bar",
     "atlas": ["performance/disable-game-bar.yml"],
-    "nome": "Desligar a Xbox Game Bar e a gravação de jogos",
+    "nome": "Sem Xbox Game Bar e gravação de jogos",
     "descricao": "Sem Win+G nem gravação em segundo plano (Game DVR), que pesa em PCs mais fracos. Quem grava jogos pelo Windows perde isso. (Atlas: Disable Game Bar)",
     "categoria": "Desempenho e jogos",
     "risco": "Medio",
@@ -2314,7 +2314,7 @@
   {
     "id": "avanc-sem-mpo-total",
     "winutil": ["WPFMultiplaneOverlay"],
-    "nome": "Desativar o Multiplane Overlay (MPO) por completo",
+    "nome": "Desligar o MPO (Multiplane Overlay)",
     "descricao": "Como o anterior, e também desliga as sobreposições no driver de vídeo. Só se o modo de compatibilidade não resolveu. Escolha só um dos dois. (WinUtil: Multiplane Overlay - Fully Disabled)",
     "categoria": "Avançado (por sua conta e risco)",
     "risco": "Medio",

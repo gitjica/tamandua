@@ -92,8 +92,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource Borda}"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="CornerRadius" Value="8"/>
-        <Setter Property="Padding" Value="14,12"/>
-        <Setter Property="Margin" Value="0,0,0,12"/>
+        <Setter Property="Padding" Value="16,14"/>
+        <Setter Property="Margin" Value="0,0,0,14"/>
     </Style>
     <Style x:Key="TituloCartao" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11"/>
@@ -445,21 +445,8 @@
                 <Setter TargetName="Icone40" Property="Visibility" Value="Collapsed"/>
                 <Setter TargetName="NomeQuadro" Property="FontSize" Value="14"/>
                 <Setter TargetName="NomeQuadro" Property="FontWeight" Value="SemiBold"/>
+                <Setter TargetName="NomeQuadro" Property="MaxHeight" Value="40"/>
                 <Setter TargetName="Selo" Property="Visibility" Value="Visible"/>
-            </DataTrigger>
-            <!-- Item solto entre as pastas de categoria (o "Atualizar tudo"): do tamanho delas, para a grade não desalinhar -->
-            <DataTrigger Binding="{Binding Grande}" Value="True">
-                <Setter TargetName="Quadro" Property="Width" Value="{DynamicResource LarguraPasta}"/>
-                <Setter TargetName="Quadro" Property="Height" Value="196"/>
-                <Setter TargetName="Icone40" Property="Width" Value="112"/>
-                <Setter TargetName="Icone40" Property="Height" Value="112"/>
-                <Setter TargetName="FundoInicial" Property="CornerRadius" Value="12"/>
-                <Setter TargetName="FundoInicial" Property="Background" Value="{DynamicResource SuperficieLateral}"/>
-                <Setter TargetName="LetraInicial" Property="FontSize" Value="44"/>
-                <Setter TargetName="Imagem" Property="Width" Value="64"/>
-                <Setter TargetName="Imagem" Property="Height" Value="64"/>
-                <Setter TargetName="NomeQuadro" Property="FontSize" Value="14"/>
-                <Setter TargetName="NomeQuadro" Property="FontWeight" Value="SemiBold"/>
             </DataTrigger>
             <DataTrigger Binding="{Binding TemAmostra}" Value="True">
                 <Setter TargetName="AmostraGrande" Property="Visibility" Value="Visible"/>
@@ -539,6 +526,21 @@
             <DataTrigger Binding="{Binding Estado}" Value="Parcial">
                 <Setter TargetName="Selo" Property="Background" Value="{DynamicResource AvisoFundo}"/>
                 <Setter TargetName="TextoSelo" Property="Foreground" Value="{DynamicResource Aviso}"/>
+            </DataTrigger>
+            <!-- Item solto entre as pastas de categoria ("Atualizar tudo", "Criar ponto de restauração"): do tamanho delas. Fica por último: vence o "ajuste é mais alto" (TemClasse) -->
+            <DataTrigger Binding="{Binding Grande}" Value="True">
+                <Setter TargetName="Quadro" Property="Width" Value="{DynamicResource LarguraPasta}"/>
+                <Setter TargetName="Quadro" Property="Height" Value="196"/>
+                <Setter TargetName="Icone40" Property="Width" Value="92"/>
+                <Setter TargetName="Icone40" Property="Height" Value="92"/>
+                <Setter TargetName="FundoInicial" Property="CornerRadius" Value="12"/>
+                <Setter TargetName="FundoInicial" Property="Background" Value="{DynamicResource SuperficieLateral}"/>
+                <Setter TargetName="LetraInicial" Property="FontSize" Value="38"/>
+                <Setter TargetName="Imagem" Property="Width" Value="64"/>
+                <Setter TargetName="Imagem" Property="Height" Value="64"/>
+                <Setter TargetName="NomeQuadro" Property="FontSize" Value="14"/>
+                <Setter TargetName="NomeQuadro" Property="FontWeight" Value="SemiBold"/>
+                <Setter TargetName="NomeQuadro" Property="MaxHeight" Value="40"/>
             </DataTrigger>
         </DataTemplate.Triggers>
     </DataTemplate>

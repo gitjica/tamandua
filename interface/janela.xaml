@@ -62,7 +62,7 @@
                             <Grid>
                                 <TextBlock x:Name="RotuloGrupo" Text="{Binding Rotulo}" Style="{DynamicResource RotuloGrupo}" Margin="0" Visibility="Collapsed"/>
                                 <DockPanel x:Name="LinhaModulo">
-                                    <TextBlock DockPanel.Dock="Left" Style="{DynamicResource Icone}" Text="{Binding Icone}" Width="22"/>
+                                    <TextBlock x:Name="IconeModulo" DockPanel.Dock="Left" Style="{DynamicResource Icone}" Text="{Binding Icone}" Width="22"/>
                                     <TextBlock x:Name="Marcador" DockPanel.Dock="Right" Style="{DynamicResource Icone}" FontSize="12"
                                                Text="{Binding Marcador}" ToolTip="{Binding Motivo}"/>
                                     <TextBlock x:Name="Nome" Text="{Binding Rotulo}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
@@ -88,6 +88,8 @@
                                 <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True">
                                     <Setter TargetName="Nome" Property="Foreground" Value="{DynamicResource Acento}"/>
                                     <Setter TargetName="Nome" Property="FontWeight" Value="SemiBold"/>
+                                    <!-- O ícone da página aberta acompanha a cor do nome -->
+                                    <Setter TargetName="IconeModulo" Property="Foreground" Value="{DynamicResource Acento}"/>
                                 </DataTrigger>
                             </DataTemplate.Triggers>
                         </DataTemplate>
@@ -265,26 +267,26 @@
                         <TextBlock Text="Clique num quadro para ver aqui exatamente o que ele mostra ou altera. Nas páginas que mudam algo, o clique também marca o quadro; nada muda antes de você confirmar." TextWrapping="Wrap"
                                    Foreground="{DynamicResource TextoSecundario}" LineHeight="20"/>
                         <!-- Como ler os quadros: os mesmos selos e marcas da grade -->
-                        <Border Style="{DynamicResource Cartao}" Margin="0,14,0,0">
+                        <Border Style="{DynamicResource Cartao}" Margin="0,16,0,14">
                             <StackPanel>
                                 <TextBlock Text="Como ler os quadros" Style="{DynamicResource TituloCartao}"/>
-                                <DockPanel Margin="0,4,0,6">
+                                <DockPanel Margin="0,6,0,10">
                                     <Border Width="22" Height="16" CornerRadius="4" BorderThickness="1.5" BorderBrush="{DynamicResource Acento}" Margin="0,2,8,0" VerticalAlignment="Top"/>
                                     <TextBlock Text="marcado: entra quando você aplicar" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,0,0,6">
+                                <DockPanel Margin="0,0,0,10">
                                     <Border CornerRadius="5" Padding="7,2" Background="{DynamicResource SucessoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
                                         <TextBlock Text="aplicado" FontSize="10.5" Foreground="{DynamicResource Sucesso}"/>
                                     </Border>
                                     <TextBlock Text="já está assim (marcar desfaz)" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,0,0,6">
+                                <DockPanel Margin="0,0,0,10">
                                     <Border CornerRadius="5" Padding="7,2" Background="{DynamicResource AvisoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
                                         <TextBlock Text="Atenção" FontSize="10.5" Foreground="{DynamicResource Aviso}"/>
                                     </Border>
                                     <TextBlock Text="tem um porém; leia antes" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
-                                <DockPanel Margin="0,0,0,6">
+                                <DockPanel Margin="0,0,0,10">
                                     <Border CornerRadius="5" Padding="7,2" Background="{DynamicResource PerigoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
                                         <TextBlock Text="Arriscado" FontSize="10.5" Foreground="{DynamicResource Perigo}"/>
                                     </Border>

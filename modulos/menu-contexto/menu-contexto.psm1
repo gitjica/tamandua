@@ -32,7 +32,7 @@ $script:ItensWindows = @(
         Explicacao = 'Mandar o arquivo para o Copilot.' }
     @{ Id = 'menu-pastas-trabalho'; Nome = 'Pastas de Trabalho'; Clsid = @('{E61BF828-5E63-4287-BEF1-60B1A4FDE0E3}'); Recomendado = $true
         Explicacao = 'Sincronização de pastas de empresa (Work Folders). Em casa, não serve para nada.' }
-    @{ Id = 'menu-arquivos-offline'; Nome = 'Arquivos offline (Sempre disponível offline)'; Clsid = @('{474C98EE-CF3D-41f5-80E3-4AAB0AB04301}'); Recomendado = $true
+    @{ Id = 'menu-arquivos-offline'; Nome = 'Arquivos offline (sempre disponível)'; Clsid = @('{474C98EE-CF3D-41f5-80E3-4AAB0AB04301}'); Recomendado = $true
         Explicacao = 'Cópia offline de pastas de rede de empresa.' }
     @{ Id = 'menu-fixar-iniciar'; Nome = 'Fixar no Iniciar'; Clsid = @('{470C0EBD-5D73-4d58-9CED-E91E22E23282}', '{a2a9545d-a0c2-42b4-9708-a0b2badd77c8}')
         Explicacao = 'Continua dando para fixar pelo próprio Iniciar.' }
@@ -68,7 +68,7 @@ $script:ItensWindows = @(
     @{ Id = 'menu-novo-contato'; Nome = 'Novo > Contato'; Novo = @('.contact\ShellNew'); Recomendado = $true; Explicacao = 'Some do submenu "Novo".' }
     @{ Id = 'menu-novo-biblioteca'; Nome = 'Novo > Biblioteca'; Novo = @('.library-ms\ShellNew'); Recomendado = $true; Explicacao = 'Some do submenu "Novo".' }
     @{ Id = 'menu-novo-zip'; Nome = 'Novo > Pasta compactada'; Novo = @('.zip\CompressedFolder\ShellNew'); Explicacao = 'Some do submenu "Novo" (compactar arquivos continua pelo "Enviar para").' }
-    @{ Id = 'menu-enviar-para-limpo'; Nome = 'Enviar para: sem e-mail, fax, Documentos e Bluetooth'; EnviarPara = $true; Recomendado = $true
+    @{ Id = 'menu-enviar-para-limpo'; Nome = 'Enviar para: sem e-mail, fax e afins'; EnviarPara = $true; Recomendado = $true
         Explicacao = 'Esconde esses atalhos do "Enviar para". Pendrives, área de trabalho e pasta compactada ficam.' }
 )
 

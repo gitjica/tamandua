@@ -4,7 +4,7 @@
 $script:IconesModulo = @{
     status       = [string][char]0xE9D9
     limpar       = [string][char]0xE74D
-    desinstalar  = [string][char]0xE738
+    desinstalar  = [string][char]0xECAA
     programas    = [string][char]0xE7B8
     ajustes      = [string][char]0xE9E9
     'menu-contexto' = [string][char]0xE8FD
