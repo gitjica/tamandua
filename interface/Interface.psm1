@@ -39,6 +39,7 @@ function Start-TmdInterface {
     Set-TmdTamanhoJanela -Janela $tela.Janela
     Initialize-TmdTela -Tela $tela -Raiz $Raiz -AoCarregar $AoCarregar
     foreach ($v in $script:Preferencias.Visao.Keys) { $script:Estado.Visao[$v] = $script:Preferencias.Visao[$v] }
+    $script:Estado.PaginaInicial = $script:Preferencias.UltimaPagina
     if ($FecharAposSeg -gt 0) {
         $script:RelogioFechar = New-Object System.Windows.Threading.DispatcherTimer
         $script:RelogioFechar.Interval = [TimeSpan]::FromSeconds($FecharAposSeg)

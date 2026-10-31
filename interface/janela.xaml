@@ -101,12 +101,12 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Padding="16,12">
+                <Border Grid.Row="0" BorderBrush="{DynamicResource Borda}" BorderThickness="0,0,0,1" Padding="20,16,20,14">
                     <DockPanel>
                         <!-- Presets do módulo (ex.: Essencial), numa linha abaixo do título (quebra se não couber).
                              Só aparece se algum alvo tiver Presets. -->
-                        <DockPanel x:Name="PainelPresets" DockPanel.Dock="Bottom" Margin="0,10,0,0" Visibility="Collapsed">
-                            <TextBlock Text="Marcar:" Foreground="{DynamicResource TextoSecundario}" VerticalAlignment="Center"/>
+                        <DockPanel x:Name="PainelPresets" DockPanel.Dock="Bottom" Margin="0,12,0,0" Visibility="Collapsed">
+                            <TextBlock Text="Marcar:" Foreground="{DynamicResource TextoSecundario}" VerticalAlignment="Top" Margin="0,6,4,0"/>
                             <ItemsControl x:Name="ListaPresets" AutomationProperties.Name="Presets">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
@@ -115,7 +115,7 @@
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Button Content="{Binding}" Margin="6,0,0,0" Padding="10,4" ToolTip="Marca só os itens deste grupo"/>
+                                        <Button Content="{Binding}" Margin="0,0,6,6" Padding="12,5" ToolTip="Marca só os itens deste grupo"/>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
@@ -126,11 +126,11 @@
                             <TextBlock x:Name="IconeVisao" Style="{DynamicResource Icone}" Text="&#xE8FD;"/>
                         </Button>
                         <StackPanel>
-                            <TextBlock x:Name="TituloPagina" FontSize="17" FontWeight="SemiBold"/>
-                            <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,0"/>
+                            <TextBlock x:Name="TituloPagina" FontSize="19" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="SubtituloPagina" Foreground="{DynamicResource TextoSecundario}" Margin="0,4,0,0"/>
                             <!-- Passos da página (Dica no manifesto), ex.: como trocar a fonte -->
-                            <Border x:Name="DicaPagina" Background="{DynamicResource AcentoFundo}" CornerRadius="6" Padding="10,6"
-                                    Margin="0,8,0,0" Visibility="Collapsed">
+                            <Border x:Name="DicaPagina" Background="{DynamicResource AcentoFundo}" CornerRadius="8" Padding="12,9"
+                                    Margin="0,12,0,0" Visibility="Collapsed">
                                 <DockPanel>
                                     <Button x:Name="FecharDica" DockPanel.Dock="Right" Style="{DynamicResource BotaoIcone}" VerticalAlignment="Top"
                                             Margin="8,-2,-4,0" ToolTip="Fechar (não aparece mais nesta página)" AutomationProperties.Name="Fechar dica">
@@ -151,12 +151,12 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid>
-                                <TextBlock x:Name="RotuloCategoria" Text="{Binding Nome}" FontSize="11" Foreground="{DynamicResource TextoSutil}"
+                                <TextBlock x:Name="RotuloCategoria" Text="{Binding Nome}" FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource TextoSecundario}"
                                            Visibility="Collapsed"/>
                                 <Grid x:Name="LinhaAlvo">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="270"/>
+                                        <ColumnDefinition Width="330"/>
                                         <ColumnDefinition Width="110"/>
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
@@ -174,14 +174,14 @@
                                     <ProgressBar x:Name="Barra" Grid.Column="2" Style="{DynamicResource BarraValor}" Value="{Binding Valor}"
                                                  Margin="0,0,14,0" VerticalAlignment="Center" Visibility="Collapsed"/>
                                     <!-- Classificação do ajuste (Recomendado, Opcional, Atenção, Arriscado): no lugar da barra, que ajuste não tem -->
-                                    <Border x:Name="Classe" Grid.Column="2" CornerRadius="4" Padding="7,1" Margin="0,0,14,0" HorizontalAlignment="Left"
+                                    <Border x:Name="Classe" Grid.Column="2" CornerRadius="5" Padding="8,2" Margin="0,0,14,0" HorizontalAlignment="Left"
                                             VerticalAlignment="Center" Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed"
                                             ToolTip="{Binding DicaClasse}">
                                         <TextBlock x:Name="TextoClasse" Text="{Binding RotuloClasse}" FontSize="11" Foreground="{DynamicResource TextoSecundario}"/>
                                     </Border>
                                     <TextBlock x:Name="Detalhe" Grid.Column="3" Text="{Binding Detalhe}" Foreground="{DynamicResource TextoSecundario}"
                                                TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
-                                    <Border x:Name="Selo" Grid.Column="4" CornerRadius="4" Padding="7,1" Margin="10,0,0,0"
+                                    <Border x:Name="Selo" Grid.Column="4" CornerRadius="5" Padding="8,2" Margin="10,0,0,0"
                                             Background="{DynamicResource SuperficieLateral}" Visibility="Collapsed">
                                         <TextBlock x:Name="TextoSelo" Text="{Binding Selo}" FontSize="11" Foreground="{DynamicResource TextoSecundario}"/>
                                     </Border>
@@ -258,7 +258,7 @@
 
             <!-- Painel de detalhes -->
             <Border Grid.Column="2" Background="{DynamicResource Fundo}" BorderBrush="{DynamicResource Borda}" BorderThickness="1,0,0,0">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="16">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Padding="18,18,18,16">
                 <StackPanel>
                     <TextBlock Text="Detalhes" FontSize="11" Foreground="{DynamicResource TextoSutil}" Margin="0,0,0,8"/>
                     <StackPanel x:Name="PainelSemSelecao">
@@ -273,20 +273,20 @@
                                     <TextBlock Text="marcado: entra quando você aplicar" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,6">
-                                    <Border CornerRadius="4" Padding="6,1" Background="{DynamicResource SucessoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
-                                        <TextBlock Text="aplicado" FontSize="10" Foreground="{DynamicResource Sucesso}"/>
+                                    <Border CornerRadius="5" Padding="7,2" Background="{DynamicResource SucessoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
+                                        <TextBlock Text="aplicado" FontSize="10.5" Foreground="{DynamicResource Sucesso}"/>
                                     </Border>
                                     <TextBlock Text="já está assim (marcar desfaz)" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,6">
-                                    <Border CornerRadius="4" Padding="6,1" Background="{DynamicResource AvisoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
-                                        <TextBlock Text="Atenção" FontSize="10" Foreground="{DynamicResource Aviso}"/>
+                                    <Border CornerRadius="5" Padding="7,2" Background="{DynamicResource AvisoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
+                                        <TextBlock Text="Atenção" FontSize="10.5" Foreground="{DynamicResource Aviso}"/>
                                     </Border>
                                     <TextBlock Text="tem um porém; leia antes" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
                                 <DockPanel Margin="0,0,0,6">
-                                    <Border CornerRadius="4" Padding="6,1" Background="{DynamicResource PerigoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
-                                        <TextBlock Text="Arriscado" FontSize="10" Foreground="{DynamicResource Perigo}"/>
+                                    <Border CornerRadius="5" Padding="7,2" Background="{DynamicResource PerigoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
+                                        <TextBlock Text="Arriscado" FontSize="10.5" Foreground="{DynamicResource Perigo}"/>
                                     </Border>
                                     <TextBlock Text="só se souber o que faz" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
                                 </DockPanel>
@@ -306,8 +306,8 @@
                     </StackPanel>
                     <!-- Detalhes do item: cabeçalho com selos e cartões (sobre, contratempo, o que acontece) -->
                     <StackPanel x:Name="PainelDetalhe" Visibility="Collapsed">
-                        <TextBlock x:Name="DetalheNome" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap"/>
-                        <TextBlock x:Name="DetalheCategoria" Foreground="{DynamicResource TextoSecundario}" Margin="0,2,0,8"/>
+                        <TextBlock x:Name="DetalheNome" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="DetalheCategoria" Foreground="{DynamicResource TextoSecundario}" Margin="0,3,0,10"/>
                         <WrapPanel x:Name="DetalheSelos" Margin="0,0,0,10"/>
                         <!-- Prévia de texto na fonte do item (página Fonte) -->
                         <Border x:Name="CartaoAmostra" Style="{DynamicResource Cartao}" Visibility="Collapsed">
@@ -370,7 +370,7 @@
         <Border Grid.Row="2" BorderBrush="{DynamicResource Borda}" BorderThickness="0,1,0,0" Background="{DynamicResource Superficie}">
             <StackPanel>
                 <ProgressBar x:Name="BarraTarefa" Style="{DynamicResource BarraTarefa}" IsIndeterminate="True" Visibility="Hidden"/>
-                <DockPanel Margin="16,10" LastChildFill="True">
+                <DockPanel Margin="20,12" LastChildFill="True">
                     <Button x:Name="BotaoAplicar" DockPanel.Dock="Right" Style="{DynamicResource BotaoPrincipal}" Content="Aplicar"
                             Margin="8,0,0,0" Visibility="Collapsed"/>
                     <Button x:Name="BotaoSimular" DockPanel.Dock="Right" Content="Simular" Margin="8,0,0,0" Visibility="Collapsed"/>

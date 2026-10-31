@@ -429,9 +429,9 @@ function Find-Alvos { foreach ($i in 1..120) { [pscustomobject]@{ Id = "p$i"; No
         Start-TmdInterface -Raiz $raiz -AoCarregar $aoCarregar -FecharAposSeg 30
         $r = $global:TmdTesteGrade
         Remove-Variable -Name TmdTesteGrade -Scope Global
-        $r.AoAvisar | Should -Be 121 -Because 'quem é avisado de "carregou" já acha a lista completa (120 + o cabeçalho)'
+        $r.AoAvisar | Should -Be 120 -Because 'quem é avisado de "carregou" já acha a lista completa (módulo só de leitura: painel corrido, sem cabeçalho)'
         $r.LogoDepois | Should -Be 48 -Because 'no primeiro desenho vão só os primeiros quadros'
-        $r.NoFim | Should -Be 121
+        $r.NoFim | Should -Be 120
     }
 
     It 'módulo que falha ao buscar: a janela continua de pé e mostra o erro' {

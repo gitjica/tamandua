@@ -41,7 +41,19 @@ function Test-Requisitos {
 }
 
 # Nome do recurso -> 'ligado' | 'desligado'. Recursos que não existem nesta edição não aparecem. Só leitura, sem admin.
+# -Rapido (para mostrar a página): lê do registro do Windows (CBS\Notifications\OptionalFeatures, Selection 1/0), ~0,1 s
+# contra ~2,4 s do Win32_OptionalFeature; sem essa chave, cai no CIM. Ligar e desligar sempre decidem pelo CIM.
 function Get-EstadoRecurso {
+    param([switch]$Rapido)
+    if ($Rapido) {
+        $chave = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\Notifications\OptionalFeatures'
+        $mapa = @{}
+        foreach ($k in @(Get-ChildItem -LiteralPath $chave -ErrorAction SilentlyContinue)) {
+            $selecao = (Get-ItemProperty -LiteralPath $k.PSPath -ErrorAction SilentlyContinue).PSObject.Properties['Selection']
+            if ($selecao) { $mapa[$k.PSChildName] = if ([int]$selecao.Value -eq 1) { 'ligado' } else { 'desligado' } }
+        }
+        if ($mapa.Count -gt 0) { return $mapa }
+    }
     $mapa = @{}
     foreach ($f in Get-CimInstance -ClassName Win32_OptionalFeature) {
         $mapa[[string]$f.Name] = switch ([int]$f.InstallState) { 1 { 'ligado' } 2 { 'desligado' } default { 'outro' } }
@@ -50,7 +62,7 @@ function Get-EstadoRecurso {
 }
 
 function Find-Alvos {
-    $estados = Get-EstadoRecurso
+    $estados = Get-EstadoRecurso -Rapido
     foreach ($nome in $script:Recursos.Keys) {
         $r = $script:Recursos[$nome]
         $existe = $estados.ContainsKey($nome) -and $estados[$nome] -ne 'outro'

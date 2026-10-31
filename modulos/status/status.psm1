@@ -164,12 +164,12 @@ function ConvertTo-AlvoStatus {
     }
 
     if ($null -eq $Leitura.Processos) {
-        $itens.Add((New-ItemStatus 'processos' 'Processos' 'Processos que mais usam memória' -Desconhecido))
+        $itens.Add((New-ItemStatus 'processos' 'Processos' 'Mais memória em uso' -Desconhecido))
     }
     $n = 0
     foreach ($p in @($Leitura.Processos | Where-Object { $_ })) {
         $n++
-        $itens.Add((New-ItemStatus "processo-$n" $p.Nome 'Processos que mais usam memória' (Format-TmdTamanho $p.MemoriaBytes)))
+        $itens.Add((New-ItemStatus "processo-$n" $p.Nome 'Mais memória em uso' (Format-TmdTamanho $p.MemoriaBytes)))
     }
 
     $itens.Insert(0, (Get-ItemSaude -Itens $itens))

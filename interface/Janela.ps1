@@ -55,7 +55,7 @@ $script:ArquivoPreferencias = ''
 $script:Preferencias = $null
 
 function New-TmdPreferencias {
-    @{ Tema = ''; Visao = @{}; Largura = 0; Altura = 0; Maximizada = $false; DicasFechadas = @() }
+    @{ Tema = ''; Visao = @{}; Largura = 0; Altura = 0; Maximizada = $false; DicasFechadas = @(); UltimaPagina = '' }
 }
 
 function Read-TmdPreferencias {
@@ -71,6 +71,7 @@ function Read-TmdPreferencias {
         if ($j.PSObject.Properties['Largura']) { $p.Largura = [double]$j.Largura }
         if ($j.PSObject.Properties['Altura']) { $p.Altura = [double]$j.Altura }
         if ($j.PSObject.Properties['Maximizada']) { $p.Maximizada = [bool]$j.Maximizada }
+        if ($j.PSObject.Properties['UltimaPagina'] -and [string]$j.UltimaPagina -match '^[a-z0-9-]+$') { $p.UltimaPagina = [string]$j.UltimaPagina }
         if ($j.PSObject.Properties['DicasFechadas']) { $p.DicasFechadas = @($j.DicasFechadas | ForEach-Object { [string]$_ }) }
     }
     catch { Write-Verbose "preferências ilegíveis, usando o padrão: $($_.Exception.Message)" }

@@ -746,6 +746,13 @@ do nome do módulo na CLI é erro.
   `<dados>\config\interface.json` (tema escolhido no botão, grade/lista por página, tamanho da janela, dicas fechadas),
   só com `Start-TmdInterface -LembrarPreferencias` (o `tamandua.ps1` liga; testes nunca). Voltar a uma página já lida
   reaproveita as linhas montadas (`LinhasPorPagina`; Ajustes ~0,45 s -> ~0,2 s). O Histórico não mostra simulações.
+  A janela abre na última página usada (`UltimaPagina`; a leitura antecipada do começo lê essa, `-Preferida`), e a
+  leitura em segundo plano começa pelas páginas lentas (`$script:PaginasLentas`). Com uma pasta aberta, a barra
+  "Marcar:" ganha "Toda a pasta" / "Nada da pasta" (o que já está aplicado não entra, como nos presets). Páginas só de
+  leitura (Status) viram um painel corrido, com a categoria pequena no alto do quadro (`Sobre`). A barra de baixo diz
+  o que vai acontecer: quantos desfazem, se pede administrador, se vai para a Lixeira, quantos arriscados.
+  Recursos: a página lê o estado pelo registro (CBS\Notifications\OptionalFeatures, ~0,1 s); ligar e desligar decidem
+  pelo CIM (~2,4 s), na hora. Escala da janela: texto 11/12,5/13/14/17/19, espaçamentos de 4 em 4.
 - **Recursos genéricos da janela que a página Fonte usa** (servem para qualquer módulo):
   - Manifesto `Dica`: faixa de passos no alto da página. `Grupos` (`Nome`, `Rotulo`, `Vazio`): a barra de baixo diz o
     escolhido em cada grupo ("Fonte: Arial · Tamanho: automático"). `NomeItens` (`"opção|opções"`): o texto das pastas.

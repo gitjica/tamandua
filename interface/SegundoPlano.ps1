@@ -199,10 +199,12 @@ function Get-TmdModulosProvisorios {
 # Lê a primeira página do catálogo ao mesmo tempo que a lista de módulos carrega (ao abrir o programa).
 # Confere os requisitos só desse módulo; se ele não estiver ok, devolve sem alvos e a janela segue o caminho normal.
 $script:ScriptPrimeiraPagina = {
-    param([string]$Nucleo, [string]$Raiz)
+    param([string]$Nucleo, [string]$Raiz, [string]$Preferida = '')
     $ErrorActionPreference = 'Stop'
     if (-not (Get-Module Tamandua.Nucleo | Where-Object Path -eq $Nucleo)) { Import-Module -Name $Nucleo -Force -DisableNameChecking -Global }
-    $primeiro = @((Get-TmdCatalogo -Raiz $Raiz).Modulos)[0]
+    # A página usada por último (preferências), se ainda existe no catálogo; senão, a primeira.
+    $catalogo = @((Get-TmdCatalogo -Raiz $Raiz).Modulos)
+    $primeiro = @($catalogo | Where-Object { $Preferida -and $_['Nome'] -eq $Preferida }) + $catalogo | Select-Object -First 1
     if (-not $primeiro) { return }
     $m = Get-TmdModulo -Raiz $Raiz -Nome $primeiro['Nome']
     $ok = $m -and $m.Estado -eq 'ok'

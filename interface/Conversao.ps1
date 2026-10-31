@@ -198,6 +198,8 @@ function New-LinhaAlvo {
         # Sem AmostraFonte, a fonte da própria janela (o Binding não aceita texto vazio como fonte).
         Amostra = $Amostra; AmostraFonte = $(if ($AmostraFonte) { $AmostraFonte } else { 'Segoe UI' }); TemAmostra = [bool]$Amostra
         TemGlifo = [bool]$Glifo; MostraDetalhe = $MostraDetalhe -and [bool]$Detalhe
+        # Grade sem seções (Status): a categoria escrita pequena no alto do quadro.
+        Sobre = ''
         TamanhoTexto = $(if ($Tamanho -gt 0) { Format-TamanhoTela $Tamanho } else { '' }); TemTamanho = $Tamanho -gt 0
         # Pastas: até 4 miniaturas (imagens, ou as amostras de texto dos itens) e os itens dentro. Toda linha tem as
         # propriedades (vazias): Binding que não acha a propriedade custa caro no WPF, multiplicado por cada quadro da grade.
@@ -395,6 +397,13 @@ function Get-ResumoSelecao {
     $texto = if ($marcadas.Count -eq 1) { '1 selecionado' } else { "$($marcadas.Count) selecionados" }
     if ($bytes -gt 0) { $texto += " · $(Format-TamanhoTela $bytes)" }
     $alvos = @($marcadas | ForEach-Object { $_.Alvo })
+    # O que vai acontecer, antes de confirmar: desfazer, administrador, Lixeira e arriscados.
+    $desfaz = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Desfaz') -eq $true }).Count
+    if ($desfaz -gt 0) { $texto += " · $desfaz $(if ($desfaz -eq 1) { 'desfaz' } else { 'desfazem' })" }
+    if (@($marcadas | Where-Object { $_.RequerAdmin }).Count -gt 0) { $texto += ' · pede administrador' }
+    if (@($alvos | Where-Object { (Get-ValorPropriedade $_ 'Destino') -eq 'Lixeira' }).Count -gt 0) { $texto += ' · vai para a Lixeira' }
+    $risco = @($alvos | Where-Object { (Get-ValorPropriedade $_ 'Classificacao') -eq 'Arriscado' -and (Get-ValorPropriedade $_ 'Desfaz') -ne $true }).Count
+    if ($risco -gt 0) { $texto += " · $risco $(if ($risco -eq 1) { 'arriscado' } else { 'arriscados' })" }
     [pscustomobject]@{
         Quantidade      = $marcadas.Count
         Bytes           = $bytes

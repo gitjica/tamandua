@@ -30,6 +30,8 @@ function Initialize-TmdTela {
         PastaApertada = $null
         # Linhas já montadas da página atual (Id -> linha), para a busca e as pastas não remontarem tudo.
         CacheLinhas   = @{}
+        # Página aberta por último (preferências): a janela começa por ela.
+        PaginaInicial = ''
         # As mesmas linhas, guardadas por página (ver Get-TmdCacheLinhasPagina).
         LinhasPorPagina = @{}
         # Cartão de valor e redesenho das marcas em andamento (para um não disparar o outro).
@@ -223,7 +225,7 @@ function Start-TmdCargaModulos {
     Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo 'Carregando módulos' -Texto 'Verificando o que está disponível nesta máquina.'
     # Ao mesmo tempo, já lê a primeira página: quando a lista chegar, ela abre sem esperar mais.
     $script:Estado.Inicial = @{ Pronto = $false; Nome = $null; Alvos = $null; Erro = $null }
-    [void](Start-TmdTarefa -Script $script:ScriptPrimeiraPagina -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz } `
+    [void](Start-TmdTarefa -Script $script:ScriptPrimeiraPagina -Parametros @{ Nucleo = $script:Estado.Nucleo; Raiz = $script:Estado.Raiz; Preferida = $script:Estado.PaginaInicial } `
             -AoTerminar {
             param($saida, $erro)
             $inicial = $script:Estado.Inicial
@@ -304,6 +306,13 @@ function Update-TmdListaDeVerdade {
     if (-not $script:Estado.Esperando -and -not $script:Estado.TarefaPagina) { Start-TmdAntecipacao }
 }
 
+# Página que a leitura antecipada do começo lê: a usada por último (preferências), se ela existe; senão, a primeira.
+function Get-TmdNomePaginaInicial {
+    $preferida = [string]$script:Estado.PaginaInicial
+    if ($preferida -and @($script:Estado.Modulos | Where-Object { $_.Nome -eq $preferida }).Count -gt 0) { return $preferida }
+    [string]@($script:Estado.Modulos)[0].Nome
+}
+
 function Select-TmdModuloInicial {
     $itens = @($script:Tela.Controles.ListaModulos.ItemsSource | Where-Object { $_.Tipo -eq 'Modulo' })
     if ($itens.Count -eq 0) {
@@ -311,9 +320,11 @@ function Select-TmdModuloInicial {
         Complete-TmdCargaInicial
         return
     }
-    # O primeiro módulo disponível; a página Histórico só abre de início se não houver nenhum módulo.
+    # A página usada por último, se está disponível; senão, o primeiro módulo disponível. A página Histórico só abre
+    # de início se não houver nenhum módulo.
     $modulos = @($itens | Where-Object { $_.Nome -ne $script:PaginaHistorico.Nome })
-    $primeiro = @($modulos | Where-Object { $_.Estado -eq 'ok' } | Select-Object -First 1)
+    $primeiro = @($modulos | Where-Object { $_.Estado -eq 'ok' -and $script:Estado.PaginaInicial -and $_.Nome -eq $script:Estado.PaginaInicial })
+    if ($primeiro.Count -eq 0) { $primeiro = @($modulos | Where-Object { $_.Estado -eq 'ok' } | Select-Object -First 1) }
     if ($primeiro.Count -eq 0) { $primeiro = @($modulos | Select-Object -First 1) }
     if ($primeiro.Count -eq 0) { $primeiro = @($itens[0]) }
     $script:Tela.Controles.ListaModulos.SelectedItem = $primeiro[0]
@@ -346,6 +357,11 @@ function Open-TmdPagina {
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
     $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
+    # Lembra a página para a próxima vez (o Histórico não: ele não é um módulo que dá para ler antes).
+    if ($script:Preferencias -and (Get-ValorPropriedade $modulo 'Especial') -ne $true -and $script:Preferencias.UltimaPagina -ne $Nome) {
+        $script:Preferencias.UltimaPagina = $Nome
+        Save-TmdPreferencias
+    }
     $dica = [string](Get-ValorPropriedade $modulo 'Dica')
     $c.TextoDicaPagina.Text = $dica
     $fechada = $script:Preferencias -and @($script:Preferencias.DicasFechadas) -contains $Nome
@@ -375,8 +391,8 @@ function Open-TmdPagina {
     $guardavel = Test-TmdPaginaGuardavel -Modulo $modulo
     # A primeira página, lida enquanto a lista de módulos carregava: usa uma vez e descarta.
     $inicial = $script:Estado.Inicial
-    # Ela é sempre a primeira do catálogo; abrir outra página antes disso descarta a leitura inicial.
-    if ($inicial -and -not $inicial.Pronto -and $Nome -ne @($script:Estado.Modulos)[0].Nome) { $script:Estado.Inicial = $inicial = $null }
+    # Ela é a página inicial (a usada por último, ou a primeira do catálogo); abrir outra antes disso descarta a leitura.
+    if ($inicial -and -not $inicial.Pronto -and $Nome -ne (Get-TmdNomePaginaInicial)) { $script:Estado.Inicial = $inicial = $null }
     if ($inicial -and -not $Forcar) {
         if (-not $inicial.Pronto) {
             Show-TmdMensagem -Icone ([string][char]0xE895) -Titulo "Carregando $($modulo.Titulo)" -Texto 'Isso roda em segundo plano; a janela continua respondendo.'
@@ -469,13 +485,35 @@ function Show-TmdPaginaLida {
     if ($m.Escreve) {
         $c.BotaoSimular.IsEnabled = $true
         $c.BotaoAplicar.IsEnabled = $true
-        $presets = Get-PresetAlvo -Alvos $script:Estado.Alvos
-        if ($presets.Count -gt 0) {
-            $c.ListaPresets.ItemsSource = $presets
-            $c.PainelPresets.Visibility = 'Visible'
-        }
     }
+    Update-TmdBarraPresets
 }
+
+# Barra "Marcar:": os presets do módulo e, com uma pasta aberta, marcar ou desmarcar a pasta inteira.
+$script:MarcarPasta = 'Toda a pasta'
+$script:DesmarcarPasta = 'Nada da pasta'
+function Update-TmdBarraPresets {
+    $c = $script:Tela.Controles
+    $m = Get-TmdModuloAtual
+    # foreach desmonta a lista (Get-PresetAlvo devolve o array inteiro como um objeto só).
+    $itens = @(if ($m -and $m.Escreve) { foreach ($p in (Get-PresetAlvo -Alvos $script:Estado.Alvos)) { $p } })
+    $daPasta = @(Get-TmdAlvosPastaAberta)
+    # Pasta de escolha única (uma fonte, um tamanho) não tem "marcar todos".
+    if ($daPasta.Count -gt 1 -and @($daPasta | Where-Object { [string](Get-ValorPropriedade $_ 'Exclusivo') }).Count -eq 0) {
+        $itens = @($script:MarcarPasta, $script:DesmarcarPasta) + $itens
+    }
+    $c.ListaPresets.ItemsSource = if ($itens.Count -gt 0) { $itens } else { $null }
+    $c.PainelPresets.Visibility = if ($itens.Count -gt 0) { 'Visible' } else { 'Collapsed' }
+}
+
+# Alvos que dá para marcar na pasta aberta agora (os quadros dela na tela).
+function Get-TmdAlvosPastaAberta {
+    if (-not $script:Estado.PastaAberta) { return }
+    foreach ($l in @($script:Tela.Controles.ListaAlvos.ItemsSource)) { if ($l.Tipo -eq 'Alvo' -and $l.TemCaixa -and $l.Alvo) { $l.Alvo } }
+}
+
+# Páginas que levam mais de 1 s para ler (medido: Ajustes ~1,5-2,5 s, Programas ~1-1,5 s): lidas antes das outras.
+$script:PaginasLentas = @('ajustes', 'programas', 'limpar', 'desinstalar')
 
 # Depois que a primeira página aparece, lê as outras em segundo plano, uma por vez, na ordem da barra lateral:
 # quando o usuário clicar, a página abre na hora. Só leitura (Find-Alvos); nada é alterado.
@@ -484,7 +522,11 @@ function Start-TmdAntecipacao {
     if ($script:Estado.ListaProvisoria) { return }
     if ($null -eq $script:Estado.Fila) {
         $script:Estado.Fila = [System.Collections.Generic.Queue[string]]::new()
-        foreach ($m in $script:Estado.Modulos) { if (Test-TmdPaginaGuardavel -Modulo $m) { $script:Estado.Fila.Enqueue($m.Nome) } }
+        # As que mais demoram para ler vêm primeiro (são as que mais fariam esperar); depois, a ordem da barra lateral.
+        $guardaveis = @($script:Estado.Modulos | Where-Object { Test-TmdPaginaGuardavel -Modulo $_ } | ForEach-Object Nome)
+        foreach ($nome in @($script:PaginasLentas | Where-Object { $guardaveis -contains $_ }) + @($guardaveis | Where-Object { $script:PaginasLentas -notcontains $_ })) {
+            $script:Estado.Fila.Enqueue($nome)
+        }
     }
     if ($script:Estado.Antecipando) { return }
     while ($script:Estado.Fila.Count -gt 0) {
@@ -598,6 +640,20 @@ function Test-TmdCliqueNaCaixa {
 
 function Select-TmdPreset {
     param([Parameter(Mandatory)][string]$Preset)
+    if ($Preset -in $script:MarcarPasta, $script:DesmarcarPasta) {
+        $marcar = $Preset -eq $script:MarcarPasta
+        $n = 0
+        foreach ($a in @(Get-TmdAlvosPastaAberta)) {
+            # Como nos presets: o que já está aplicado (marcar desfaz) não entra no "marcar todos".
+            $a.Selecionado = $marcar -and (Get-ValorPropriedade $a 'Desfaz') -ne $true
+            if ($a.Selecionado) { $n++ }
+        }
+        Exit-TmdConfirmacao
+        Update-TmdMarcasNaTela
+        Update-TmdBarraAcao
+        if ($marcar) { Set-TmdStatus "$n marcado(s) nesta pasta · $((Get-TmdResumoAtual).Texto) · nada é alterado sem confirmação" }
+        return
+    }
     $n = Set-SelecaoPreset -Alvos $script:Estado.Alvos -Preset $Preset
     Exit-TmdConfirmacao
     Update-TmdBusca
@@ -768,7 +824,13 @@ function Update-TmdBusca {
         # Página longa com muitas categorias (Programas, Ajustes, Fonte): as categorias viram pastas e, dentro, os itens
         # ficam separados por tipo. Página curta (Limpar, Status, Reparos): seções com os quadros à vista, porque esconder
         # um ou dois itens numa pasta só atrapalha. Com poucas categorias (Desinstalar): só as pastas de alternativas.
-        if (-not $busca) {
+        # Página que só mostra (Status): um painel corrido, sem quebrar em seções de 1 ou 2 quadros; a categoria vai
+        # escrita pequena no alto de cada quadro.
+        if (-not $modulo.Escreve) {
+            foreach ($l in $linhas) { if ($l.Tipo -eq 'Alvo') { $l.Sobre = $l.Categoria } }
+            $linhas = @($linhas | Where-Object { $_.Tipo -ne 'Categoria' })
+        }
+        elseif (-not $busca) {
             $longa = @($linhas | Where-Object { $_.Tipo -eq 'Alvo' }).Count -ge $script:ItensParaPastas
             if ($longa -and @($linhas | Where-Object { $_.Tipo -eq 'Categoria' }).Count -ge 4) { $linhas = ConvertTo-LinhasPorCategoria -Linhas $linhas -Aberta $script:Estado.PastaAberta }
             else { $linhas = ConvertTo-LinhasComPastas -Linhas $linhas -PastaAberta $script:Estado.PastaAberta }
@@ -1011,6 +1073,7 @@ function Open-TmdPasta {
     $alvo = if (-not $Nome -and $anterior) { @($linhas | Where-Object { $_.Tipo -in 'Pasta', 'Secao' -and $_.Nome -eq $anterior })[0] } else { $linhas[0] }
     if ($alvo) { $c.ListaAlvos.ScrollIntoView($alvo) }
     Show-TmdDetalhe
+    Update-TmdBarraPresets
 }
 
 # Linha (DataContext) do quadro onde o evento do mouse aconteceu, ou $null.
