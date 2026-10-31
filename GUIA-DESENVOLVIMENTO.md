@@ -741,6 +741,11 @@ do nome do módulo na CLI é erro.
   (`AmostraFonte` = `file:///arquivo#Família`, para o WPF pegar o arquivo certo). Tamanho: Auto (padrão, nada marcado),
   90 a 110%, ou Personalizado (70 a 130%, régua no painel; na CLI, `tam-97.5`).
 - **Grade em todas as páginas** (padrão; o manifesto pode pedir `Visualizacao = 'Lista'`, e o botão do alto troca). Página com 40+ itens e 4+ categorias vira pastas (Programas, Ajustes, Fonte); as outras ficam em seções com os quadros à vista. Sem imagem, o quadro mostra o ícone da categoria (`Get-GlifoCategoria`, por palavras do nome; o alvo pode mandar `Glifo`), e a pasta, o ícone grande. Páginas que só mostram (Status) trazem o detalhe e a barra no quadro; o Limpar mostra quanto libera; ajustes mostram a classificação. "não aplicado" não aparece no quadro. `NomeItens` no manifesto: "programa|programas", "ajuste|ajustes" (padrão "item|itens").
+- **Conforto da janela:** clicar em qualquer parte do quadro (ou da linha) marca e desmarca; Espaço faz o mesmo pelo
+  teclado. Toda página tem `Dica` (passos) no manifesto, com um × que fecha de vez naquela página. Preferências em
+  `<dados>\config\interface.json` (tema escolhido no botão, grade/lista por página, tamanho da janela, dicas fechadas),
+  só com `Start-TmdInterface -LembrarPreferencias` (o `tamandua.ps1` liga; testes nunca). Voltar a uma página já lida
+  reaproveita as linhas montadas (`LinhasPorPagina`; Ajustes ~0,45 s -> ~0,2 s). O Histórico não mostra simulações.
 - **Recursos genéricos da janela que a página Fonte usa** (servem para qualquer módulo):
   - Manifesto `Dica`: faixa de passos no alto da página. `Grupos` (`Nome`, `Rotulo`, `Vazio`): a barra de baixo diz o
     escolhido em cada grupo ("Fonte: Arial · Tamanho: automático"). `NomeItens` (`"opção|opções"`): o texto das pastas.

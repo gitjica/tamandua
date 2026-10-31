@@ -11,4 +11,6 @@
     RotuloAcao       = 'Executar'
     Resultado        = 'Mudancas'
     AvisoConfirmacao = 'Itens com escudo pedem permissão de administrador (uma vez para todos).'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = 'Clique nas tarefas e em Executar. São seguras e podem ser repetidas sempre que quiser.'
 }

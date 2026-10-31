@@ -12,4 +12,6 @@
     Resultado      = 'Mudancas'
     # Texto das pastas na grade.
     NomeItens = 'item|itens'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = '1. Clique nos itens que quer tirar do botão direito (ou use Marcar).   2. Aplicar: o Explorador reinicia sozinho. Um item "aplicado", se marcado, volta para o menu.'
 }

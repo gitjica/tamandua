@@ -10,4 +10,6 @@
     RotuloAcao       = 'Aplicar'
     Resultado        = 'Mudancas'
     AvisoConfirmacao = 'Vai pedir permissão de administrador uma vez. Desligar o Windows Update de vez não é oferecido.'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = 'Escolha como o Windows Update se comporta (ou use Marcar). Nada aqui desliga as atualizações de segurança.'
 }

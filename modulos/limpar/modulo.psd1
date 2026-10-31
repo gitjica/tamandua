@@ -9,4 +9,6 @@
     ContratoMinimo = 1
     Icone          = 'vassoura'
     RotuloAcao     = 'Limpar'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = '1. Clique no que quer limpar (cada quadro diz quanto libera; o mais seguro já vem marcado).   2. Simular mostra o que sairia, sem apagar nada.   3. Limpar.'
 }

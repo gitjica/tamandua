@@ -251,7 +251,10 @@ function Start-InterfaceGrafica {
         if (-not $modulo.ExportedFunctions.ContainsKey('Start-TmdInterface')) {
             return 'interface\Interface.psm1 não tem a função Start-TmdInterface'
         }
-        & $modulo.ExportedFunctions['Start-TmdInterface'] -Raiz $Raiz | Out-Null
+        # Interface antiga (sem -LembrarPreferencias) também abre.
+        $parametros = @{ Raiz = $Raiz }
+        if ($modulo.ExportedFunctions['Start-TmdInterface'].Parameters.ContainsKey('LembrarPreferencias')) { $parametros['LembrarPreferencias'] = $true }
+        & $modulo.ExportedFunctions['Start-TmdInterface'] @parametros | Out-Null
         return $null
     }
     catch {

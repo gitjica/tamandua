@@ -13,4 +13,6 @@
     Resultado      = 'Mudancas'
     # Texto das pastas na grade.
     NomeItens = 'ajuste|ajustes'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = '1. Use Marcar para um conjunto pronto (Essencial é o mais seguro) ou abra as pastas e clique nos ajustes.   2. Simular mostra o que muda.   3. Aplicar. Tudo volta pelo Histórico; um ajuste "aplicado", se marcado, é desfeito.'
 }

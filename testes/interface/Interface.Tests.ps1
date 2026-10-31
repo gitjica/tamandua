@@ -573,6 +573,29 @@ Describe 'Seleção e resultado (funções puras)' {
         }
     }
 
+    It 'preferências: grava e lê de volta; arquivo estragado ou com valor errado vira o padrão' {
+        $arquivo = Join-Path $TestDrive 'prefs\interface.json'
+        InModuleScope Interface -Parameters @{ F = $arquivo } {
+            param($F)
+            $script:ArquivoPreferencias = $F
+            $script:Preferencias = New-TmdPreferencias
+            $script:Preferencias.Tema = 'escuro'
+            $script:Preferencias.Visao['ajustes'] = 'Lista'
+            $script:Preferencias.Largura = 1300
+            $script:Preferencias.DicasFechadas = @('limpar')
+            Save-TmdPreferencias
+            $p = Read-TmdPreferencias -Arquivo $F
+            "$($p.Tema)|$($p.Visao['ajustes'])|$($p.Largura)|$($p.DicasFechadas -join ',')" | Should -Be 'escuro|Lista|1300|limpar'
+            [IO.File]::WriteAllText($F, '{ "Tema": "roxo", "Visao": { "ajustes": "Mosaico" }, quebrado')
+            $p = Read-TmdPreferencias -Arquivo $F
+            "$($p.Tema)|$($p.Visao.Count)" | Should -Be '|0'
+            [IO.File]::WriteAllText($F, '{ "Tema": "roxo", "Visao": { "ajustes": "Mosaico", "limpar": "Lista" } }')
+            $p = Read-TmdPreferencias -Arquivo $F
+            "$($p.Tema)|$($p.Visao.Keys -join ',')" | Should -Be '|limpar'
+            $script:ArquivoPreferencias = ''
+        }
+    }
+
     It 'Histórico: cada linha sem caixa diz por que não dá para desfazer' {
         InModuleScope Interface {
             $ops = @(

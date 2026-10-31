@@ -10,4 +10,6 @@
     RotuloAcao       = 'Ligar ou desligar'
     Resultado        = 'Mudancas'
     AvisoConfirmacao = 'Vai pedir permissão de administrador uma vez. Quase todos pedem reinício para terminar.'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = 'Marcar inverte o recurso: o que está desligado liga, o que está ligado desliga. Quase todos pedem para reiniciar o computador depois.'
 }

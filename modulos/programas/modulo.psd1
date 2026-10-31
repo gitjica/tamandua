@@ -15,4 +15,6 @@
     AvisoConfirmacao  = 'Ao confirmar, você aceita as licenças dos programas escolhidos. Alguns instaladores pedem permissão de administrador.'
     # Texto das pastas na grade.
     NomeItens = 'programa|programas'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = '1. Abra uma pasta e clique nos programas que quer (o selo verde diz o que já está instalado).   2. Instalar ou atualizar: tudo pelo winget, sem abrir instaladores.'
 }

@@ -11,4 +11,6 @@
     RotuloAcao       = 'Executar'
     Resultado        = 'Mudancas'
     AvisoConfirmacao = 'Vai pedir permissão de administrador uma vez. Alguns reparos levam vários minutos.'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = 'Para quando algo estiver quebrado: clique no reparo e em Executar. Alguns levam vários minutos.'
 }

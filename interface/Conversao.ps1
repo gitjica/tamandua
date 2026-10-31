@@ -20,6 +20,7 @@ $script:IconesModulo = @{
 $script:PaginaHistorico = [pscustomobject]@{
     Nome = 'historico'; Titulo = 'Histórico'; Grupo = 'Registro'; Estado = 'ok'; Motivo = ''; Escreve = $true
     Descricao = 'O que o Tamanduá já fez. Ajustes podem ser desfeitos daqui.'; RotuloAcao = 'Desfazer'; Especial = $true
+    Dica = 'Clique num ajuste feito pelo Tamanduá e em Desfazer: ele volta ao que era antes. Simulações não aparecem aqui (não mudaram nada).'
 }
 $script:CorStatusHistorico = @{ Erro = 'Critico'; Parcial = 'Atencao' }
 $script:IconePadrao = [string][char]0xE74C

@@ -1,4 +1,4 @@
-<!-- Janela principal. Sem eventos nem code-behind: Interface.psm1 liga tudo pelos x:Name.
+﻿<!-- Janela principal. Sem eventos nem code-behind: Interface.psm1 liga tudo pelos x:Name.
      Cores e estilos só por DynamicResource (tema-*.xaml e estilos.xaml são carregados depois). -->
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -132,6 +132,10 @@
                             <Border x:Name="DicaPagina" Background="{DynamicResource AcentoFundo}" CornerRadius="6" Padding="10,6"
                                     Margin="0,8,0,0" Visibility="Collapsed">
                                 <DockPanel>
+                                    <Button x:Name="FecharDica" DockPanel.Dock="Right" Style="{DynamicResource BotaoIcone}" VerticalAlignment="Top"
+                                            Margin="8,-2,-4,0" ToolTip="Fechar (não aparece mais nesta página)" AutomationProperties.Name="Fechar dica">
+                                        <TextBlock Style="{DynamicResource Icone}" Text="&#xE711;" FontSize="10"/>
+                                    </Button>
                                     <TextBlock Style="{DynamicResource Icone}" Text="&#xE946;" Foreground="{DynamicResource Acento}" Margin="0,2,8,0"
                                                VerticalAlignment="Top"/>
                                     <TextBlock x:Name="TextoDicaPagina" TextWrapping="Wrap" Foreground="{DynamicResource Texto}" LineHeight="19"/>
@@ -258,26 +262,47 @@
                 <StackPanel>
                     <TextBlock Text="Detalhes" FontSize="11" Foreground="{DynamicResource TextoSutil}" Margin="0,0,0,8"/>
                     <StackPanel x:Name="PainelSemSelecao">
-                        <TextBlock Text="Escolha um item para ver exatamente o que ele mostra ou altera." TextWrapping="Wrap"
-                                   Foreground="{DynamicResource TextoSutil}" LineHeight="20"/>
-                        <StackPanel Margin="0,16,0,0">
-                            <DockPanel Margin="0,0,0,6">
-                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Aviso}" Margin="0,0,8,0"/>
-                                <TextBlock Text="atenção" Foreground="{DynamicResource TextoSecundario}"/>
-                            </DockPanel>
-                            <DockPanel Margin="0,0,0,6">
-                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Perigo}" Margin="0,0,8,0"/>
-                                <TextBlock Text="crítico, faltando ou quebrado" Foreground="{DynamicResource TextoSecundario}"/>
-                            </DockPanel>
-                            <DockPanel Margin="0,0,0,6">
-                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource Sucesso}" Margin="0,0,8,0"/>
-                                <TextBlock Text="aplicado" Foreground="{DynamicResource TextoSecundario}"/>
-                            </DockPanel>
-                            <DockPanel>
-                                <TextBlock Style="{DynamicResource Icone}" Text="&#xE83D;" FontSize="11" Width="10" Margin="0,0,8,0"/>
-                                <TextBlock Text="pede permissão de administrador" Foreground="{DynamicResource TextoSecundario}"/>
-                            </DockPanel>
-                        </StackPanel>
+                        <TextBlock Text="Clique num quadro para ver aqui exatamente o que ele mostra ou altera. Nas páginas que mudam algo, o clique também marca o quadro; nada muda antes de você confirmar." TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextoSecundario}" LineHeight="20"/>
+                        <!-- Como ler os quadros: os mesmos selos e marcas da grade -->
+                        <Border Style="{DynamicResource Cartao}" Margin="0,14,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Como ler os quadros" Style="{DynamicResource TituloCartao}"/>
+                                <DockPanel Margin="0,4,0,6">
+                                    <Border Width="22" Height="16" CornerRadius="4" BorderThickness="1.5" BorderBrush="{DynamicResource Acento}" Margin="0,2,8,0" VerticalAlignment="Top"/>
+                                    <TextBlock Text="marcado: entra quando você aplicar" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,6">
+                                    <Border CornerRadius="4" Padding="6,1" Background="{DynamicResource SucessoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
+                                        <TextBlock Text="aplicado" FontSize="10" Foreground="{DynamicResource Sucesso}"/>
+                                    </Border>
+                                    <TextBlock Text="já está assim (marcar desfaz)" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,6">
+                                    <Border CornerRadius="4" Padding="6,1" Background="{DynamicResource AvisoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
+                                        <TextBlock Text="Atenção" FontSize="10" Foreground="{DynamicResource Aviso}"/>
+                                    </Border>
+                                    <TextBlock Text="tem um porém; leia antes" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
+                                </DockPanel>
+                                <DockPanel Margin="0,0,0,6">
+                                    <Border CornerRadius="4" Padding="6,1" Background="{DynamicResource PerigoFundo}" Margin="0,2,8,0" VerticalAlignment="Top">
+                                        <TextBlock Text="Arriscado" FontSize="10" Foreground="{DynamicResource Perigo}"/>
+                                    </Border>
+                                    <TextBlock Text="só se souber o que faz" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
+                                </DockPanel>
+                                <DockPanel>
+                                    <TextBlock Style="{DynamicResource Icone}" Text="&#xE83D;" FontSize="12" Width="22" Margin="0,0,8,0"/>
+                                    <TextBlock Text="pede permissão de administrador" TextWrapping="Wrap" Foreground="{DynamicResource TextoSecundario}"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+                        <Border Style="{DynamicResource Cartao}">
+                            <StackPanel>
+                                <TextBlock Text="Atalhos" Style="{DynamicResource TituloCartao}"/>
+                                <TextBlock TextWrapping="Wrap" LineHeight="20" Foreground="{DynamicResource TextoSecundario}"
+                                           Text="Clique ou Espaço: marca e desmarca&#10;Ctrl+F: buscar nesta página&#10;Enter: abre a pasta · Esc: volta&#10;F5: lê a página de novo"/>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
                     <!-- Detalhes do item: cabeçalho com selos e cartões (sobre, contratempo, o que acontece) -->
                     <StackPanel x:Name="PainelDetalhe" Visibility="Collapsed">

@@ -30,6 +30,11 @@ function Initialize-TmdTela {
         PastaApertada = $null
         # Linhas já montadas da página atual (Id -> linha), para a busca e as pastas não remontarem tudo.
         CacheLinhas   = @{}
+        # As mesmas linhas, guardadas por página (ver Get-TmdCacheLinhasPagina).
+        LinhasPorPagina = @{}
+        # Cartão de valor e redesenho das marcas em andamento (para um não disparar o outro).
+        MostrandoValor = $false
+        RedesenhandoMarcas = $false
         # Páginas já lidas (nome -> Alvos e Quando) e a leitura antecipada em andamento. Ver Start-TmdAntecipacao.
         Cache         = @{}
         Geracao       = 0
@@ -64,6 +69,17 @@ function Initialize-TmdTela {
             $lista.Resources['LarguraPasta'] = [double][math]::Max(196, [math]::Floor($disponivel / $colunas) - 10)
         }.GetNewClosure())
     $c.CampoBusca.Add_TextChanged({ Invoke-TmdProtegido { Update-TmdBusca } })
+    # Dica da página fechada: não volta mais naquela página (fica nas preferências).
+    $c.FecharDica.Add_Click({
+            Invoke-TmdProtegido {
+                $script:Tela.Controles.DicaPagina.Visibility = 'Collapsed'
+                $nome = $script:Estado.ModuloAtual
+                if ($nome -and $script:Preferencias -and @($script:Preferencias.DicasFechadas) -notcontains $nome) {
+                    $script:Preferencias.DicasFechadas = @($script:Preferencias.DicasFechadas) + $nome
+                    Save-TmdPreferencias
+                }
+            }
+        })
     # Cartão de valor (tamanho personalizado da página Fonte): régua e campo andam juntos.
     $c.ReguaValor.Add_ValueChanged({ Invoke-TmdProtegido { Set-TmdValorDoCartao -Valor ([math]::Round($script:Tela.Controles.ReguaValor.Value, 1)) } })
     $c.CampoValor.Add_LostFocus({ Invoke-TmdProtegido { Read-TmdCampoValor } })
@@ -102,9 +118,10 @@ function Initialize-TmdTela {
                     Open-TmdPasta -Nome $(if ($linha.Tipo -ne 'Voltar') { $linha.Nome } else { '' })
                     $evento.Handled = $true
                 }
-                # Escolha única (página Fonte): clicar no quadro já escolhe (ou desfaz a escolha), sem mirar na caixinha.
-                elseif ($linha -and $linha -eq $apertada -and $linha.Tipo -eq 'Alvo' -and $linha.TemCaixa -and $linha.Alvo -and
-                    [string](Get-ValorPropriedade $linha.Alvo 'Exclusivo') -and -not (Test-TmdCliqueNaCaixa -Origem $evento.OriginalSource)) {
+                # Clicar em qualquer parte do quadro (ou da linha) marca ou desmarca, sem mirar na caixinha. Marcar não
+                # muda nada: aplicar sempre pede confirmação.
+                elseif ($linha -and $linha -eq $apertada -and $linha.Tipo -eq 'Alvo' -and $linha.TemCaixa -and
+                    -not (Test-TmdCliqueNaCaixa -Origem $evento.OriginalSource)) {
                     Set-TmdSelecao -Linha $linha -Selecionado (-not $linha.Selecionado) -Redesenhar
                 }
             }
@@ -123,6 +140,8 @@ function Initialize-TmdTela {
             Invoke-TmdProtegido {
                 $novo = if ($script:Tela.Tema -eq 'claro') { 'escuro' } else { 'claro' }
                 Set-TmdTema -Tela $script:Tela -Tema $novo
+                # Escolhido no botão: fica (sem escolher, segue o tema do Windows).
+                if ($script:Preferencias) { $script:Preferencias.Tema = $novo; Save-TmdPreferencias }
             }
         })
     $Tela.Janela.Add_PreviewKeyDown({
@@ -135,6 +154,14 @@ function Initialize-TmdTela {
                 $script:Tela.Controles.ListaAlvos.SelectedItem -and $script:Tela.Controles.ListaAlvos.SelectedItem.Tipo -in 'Pasta', 'Secao', 'Voltar') {
                 $sel = $script:Tela.Controles.ListaAlvos.SelectedItem
                 Invoke-TmdProtegido { Open-TmdPasta -Nome $(if ($sel.Tipo -ne 'Voltar') { $sel.Nome } else { '' }) }
+                $e.Handled = $true
+            }
+            # Espaço marca ou desmarca o item selecionado na lista (teclado, sem mouse).
+            elseif ($e.Key -eq 'Space' -and $script:Tela.Controles.ListaAlvos.IsKeyboardFocusWithin -and
+                $script:Tela.Controles.ListaAlvos.SelectedItem -and $script:Tela.Controles.ListaAlvos.SelectedItem.Tipo -eq 'Alvo' -and
+                $script:Tela.Controles.ListaAlvos.SelectedItem.TemCaixa) {
+                $sel = $script:Tela.Controles.ListaAlvos.SelectedItem
+                Invoke-TmdProtegido { Set-TmdSelecao -Linha $sel -Selecionado (-not $sel.Selecionado) -Redesenhar }
                 $e.Handled = $true
             }
             elseif ($e.Key -eq 'Escape' -and $script:Estado.PastaAberta -and -not $script:Tela.Controles.CampoBusca.IsKeyboardFocused) {
@@ -314,14 +341,15 @@ function Open-TmdPagina {
     Stop-TmdCargaPagina -Silencioso
     $script:Estado.ModuloAtual = $Nome
     $script:Estado.Alvos = @()
-    $script:Estado.CacheLinhas = @{}
+    $script:Estado.CacheLinhas = Get-TmdCacheLinhasPagina -Nome $Nome
     $script:Estado.PastaAberta = ''
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
     $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
     $dica = [string](Get-ValorPropriedade $modulo 'Dica')
     $c.TextoDicaPagina.Text = $dica
-    $c.DicaPagina.Visibility = if ($dica) { 'Visible' } else { 'Collapsed' }
+    $fechada = $script:Preferencias -and @($script:Preferencias.DicasFechadas) -contains $Nome
+    $c.DicaPagina.Visibility = if ($dica -and -not $fechada) { 'Visible' } else { 'Collapsed' }
     $nomeItens = [string](Get-ValorPropriedade $modulo 'NomeItens')
     $script:NomeItens = if ($nomeItens) { $nomeItens } else { 'item|itens' }
     $c.BotaoSimular.Visibility = if ($modulo.Escreve) { 'Visible' } else { 'Collapsed' }
@@ -397,7 +425,8 @@ function Open-TmdPagina {
         }
         else {
             # @( ) por fora: "$x = if (...) { @(...) }" desmonta o array e um item só vira escalar.
-            $alvos = @(if ($contexto.Especial) { ConvertTo-AlvoHistorico -Operacoes @($saida) } else { $saida })
+            # Histórico: simulações ficam de fora (não mudaram nada e escondiam o que foi feito de verdade).
+            $alvos = @(if ($contexto.Especial) { ConvertTo-AlvoHistorico -Operacoes @($saida | Where-Object { (Get-ValorPropriedade $_ 'Simulado') -ne $true }) } else { $saida })
             $agora = Get-Date
             if ($contexto.Guardavel -and $contexto.Geracao -eq $script:Estado.Geracao) { $script:Estado.Cache[$contexto.Nome] = @{ Alvos = $alvos; Quando = $agora } }
             Show-TmdPaginaLida -Saida $alvos -StatusDepois $contexto.StatusDepois -Quando $agora
@@ -427,7 +456,7 @@ function Show-TmdPaginaLida {
     param([object[]]$Saida, $StatusDepois, [datetime]$Quando)
     $c = $script:Tela.Controles
     $script:Estado.Alvos = @($Saida)
-    $script:Estado.CacheLinhas = @{}
+    $script:Estado.CacheLinhas = Get-TmdCacheLinhasPagina -Nome $script:Estado.ModuloAtual
     Update-TmdBusca
     $m = Get-TmdModuloAtual
     if ($StatusDepois) { Set-TmdStatus $StatusDepois.Texto $StatusDepois.Cor }
@@ -488,7 +517,17 @@ function Start-TmdAntecipacao {
 # Depois de alterar o sistema, nada do que foi lido antes vale mais.
 function Clear-TmdCache {
     $script:Estado.Cache = @{}
+    $script:Estado.LinhasPorPagina = @{}
     $script:Estado.Geracao++
+}
+
+# Linhas já montadas de cada página (Id -> linha). Voltar a uma página já lida reaproveita as linhas e as imagens
+# (montar as 190 de Ajustes levava ~0,4 s). Só valem para os mesmos objetos de alvo: página lida de novo monta de novo.
+function Get-TmdCacheLinhasPagina {
+    param([string]$Nome)
+    if (-not $Nome) { return @{} }
+    if (-not $script:Estado.LinhasPorPagina.ContainsKey($Nome)) { $script:Estado.LinhasPorPagina[$Nome] = @{} }
+    $script:Estado.LinhasPorPagina[$Nome]
 }
 
 # Marca ou desmarca um alvo. A marca fica no próprio alvo, então sobrevive à busca.
@@ -740,7 +779,10 @@ function Update-TmdBusca {
             Show-TmdMensagem -Icone ([string][char]0xE721) -Titulo 'Nada encontrado' -Texto "Nenhum item desta página corresponde a “$busca”."
         }
         else {
-            Show-TmdMensagem -Icone ([string][char]0xE73E) -Titulo 'Nada a fazer aqui' -Texto 'O módulo não encontrou nenhum item.'
+            if ((Get-ValorPropriedade $modulo 'Especial') -eq $true) {
+                Show-TmdMensagem -Icone ([string][char]0xE81C) -Titulo 'Nada feito ainda' -Texto 'O que o Tamanduá fizer de verdade (limpar, aplicar, instalar) aparece aqui, com a data. Simulações não entram.'
+            }
+            else { Show-TmdMensagem -Icone ([string][char]0xE73E) -Titulo 'Nada a fazer aqui' -Texto 'Esta página não achou nenhum item nesta máquina.' }
         }
         return
     }
@@ -799,6 +841,7 @@ function Switch-TmdVisao {
     $m = Get-TmdModuloAtual
     if (-not $m) { return }
     $script:Estado.Visao[$m.Nome] = if (Test-TmdEmGrade) { 'Lista' } else { 'Grade' }
+    if ($script:Preferencias) { $script:Preferencias.Visao[$m.Nome] = $script:Estado.Visao[$m.Nome]; Save-TmdPreferencias }
     Set-TmdVisao
     Update-TmdBusca
 }

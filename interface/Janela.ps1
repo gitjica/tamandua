@@ -6,7 +6,7 @@ $script:NomesControles = @(
     'PainelSemSelecao', 'PainelDetalhe', 'DetalheNome', 'DetalheCategoria', 'DetalheTexto', 'DetalheEstado', 'DetalheId'
     'DetalheSelos', 'CartaoProblema', 'TituloProblema', 'DetalheProblema', 'TituloSolucao', 'DetalheSolucao', 'CartaoMudancas', 'DetalheMudancas'
     'BarraTarefa', 'BotaoAplicar', 'BotaoSimular', 'BotaoAtualizar', 'BotaoCancelar', 'TextoStatus'
-    'DicaPagina', 'TextoDicaPagina', 'CartaoAmostra', 'TextoAmostra', 'CartaoValor', 'TituloValor', 'UnidadeValor', 'CampoValor', 'ReguaValor', 'DicaValor'
+    'DicaPagina', 'TextoDicaPagina', 'FecharDica', 'CartaoAmostra', 'TextoAmostra', 'CartaoValor', 'TituloValor', 'UnidadeValor', 'CampoValor', 'ReguaValor', 'DicaValor'
 )
 
 function Import-TmdXaml {
@@ -46,6 +46,64 @@ function Set-TmdTema {
     # Sol no escuro (para voltar ao claro), lua no claro.
     $Tela.Controles.IconeTema.Text = if ($Tema -eq 'escuro') { [string][char]0xE706 } else { [string][char]0xE708 }
     Set-TmdBarraTituloEscura -Janela $Tela.Janela -Escura ($Tema -eq 'escuro')
+}
+
+# Preferências da janela, em <dados>\config\interface.json: tema escolhido no botão (sem escolha, segue o Windows),
+# grade ou lista por página, tamanho da janela e as dicas de página fechadas. Só quando o programa abre de verdade
+# (Start-TmdInterface -LembrarPreferencias): testes e capturas nunca leem nem gravam. Arquivo ilegível = padrão.
+$script:ArquivoPreferencias = ''
+$script:Preferencias = $null
+
+function New-TmdPreferencias {
+    @{ Tema = ''; Visao = @{}; Largura = 0; Altura = 0; Maximizada = $false; DicasFechadas = @() }
+}
+
+function Read-TmdPreferencias {
+    param([Parameter(Mandatory)][string]$Arquivo)
+    $p = New-TmdPreferencias
+    if (-not [IO.File]::Exists($Arquivo)) { return $p }
+    try {
+        $j = [IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8) | ConvertFrom-Json
+        if ($j.PSObject.Properties['Tema'] -and [string]$j.Tema -in 'claro', 'escuro') { $p.Tema = [string]$j.Tema }
+        if ($j.PSObject.Properties['Visao'] -and $j.Visao) {
+            foreach ($v in $j.Visao.PSObject.Properties) { if ([string]$v.Value -in 'Grade', 'Lista') { $p.Visao[$v.Name] = [string]$v.Value } }
+        }
+        if ($j.PSObject.Properties['Largura']) { $p.Largura = [double]$j.Largura }
+        if ($j.PSObject.Properties['Altura']) { $p.Altura = [double]$j.Altura }
+        if ($j.PSObject.Properties['Maximizada']) { $p.Maximizada = [bool]$j.Maximizada }
+        if ($j.PSObject.Properties['DicasFechadas']) { $p.DicasFechadas = @($j.DicasFechadas | ForEach-Object { [string]$_ }) }
+    }
+    catch { Write-Verbose "preferências ilegíveis, usando o padrão: $($_.Exception.Message)" }
+    $p
+}
+
+# Grava as preferências atuais (se estiverem ligadas). Falhar aqui nunca atrapalha a janela.
+function Save-TmdPreferencias {
+    if (-not $script:ArquivoPreferencias -or -not $script:Preferencias) { return }
+    try {
+        [void][IO.Directory]::CreateDirectory((Split-Path -Parent $script:ArquivoPreferencias))
+        [IO.File]::WriteAllText($script:ArquivoPreferencias, ($script:Preferencias | ConvertTo-Json -Depth 4), (New-Object Text.UTF8Encoding $false))
+    }
+    catch { Write-Verbose "não deu para guardar as preferências: $($_.Exception.Message)" }
+}
+
+# Tamanho guardado (cabendo na tela) e, ao fechar, guarda o de agora (o "normal", mesmo maximizada).
+function Set-TmdTamanhoJanela {
+    param([Parameter(Mandatory)]$Janela)
+    $p = $script:Preferencias
+    $area = [System.Windows.SystemParameters]::WorkArea
+    if ($p.Largura -ge $Janela.MinWidth -and $p.Altura -ge $Janela.MinHeight) {
+        $Janela.Width = [math]::Min($p.Largura, $area.Width)
+        $Janela.Height = [math]::Min($p.Altura, $area.Height)
+    }
+    if ($p.Maximizada) { $Janela.WindowState = 'Maximized' }
+    $Janela.Add_Closing({
+            $j = $args[0]
+            $normal = if ($j.WindowState -eq 'Normal') { New-Object Windows.Rect(0, 0, $j.ActualWidth, $j.ActualHeight) } else { $j.RestoreBounds }
+            if (-not $normal.IsEmpty -and $normal.Width -gt 0) { $script:Preferencias.Largura = [math]::Round($normal.Width); $script:Preferencias.Altura = [math]::Round($normal.Height) }
+            $script:Preferencias.Maximizada = $j.WindowState -eq 'Maximized'
+            Save-TmdPreferencias
+        })
 }
 
 # Tema do Windows para apps (Configurações > Personalização > Cores). Só leitura.

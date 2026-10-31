@@ -14,4 +14,6 @@
     AvisoConfirmacao = 'O desinstalador de cada programa vai abrir: responda a ele. Restos vão para a Lixeira.'
     # Texto das pastas na grade.
     NomeItens = 'programa|programas'
+    # Passos mostrados no alto da página (dá para fechar).
+    Dica = '1. Clique nos programas que quer tirar.   2. Desinstalar: o desinstalador de cada um abre, um de cada vez. Depois, as pastas que eles deixarem aparecem aqui para mandar para a Lixeira.'
 }
