@@ -129,7 +129,18 @@ Describe 'Regras do catálogo (seção 8 do guia)' {
         $atlas.Count | Should -BeGreaterOrEqual 50
         foreach ($a in $atlas) {
             @($a.atlas)[0] | Should -Match '\.yml$' -Because $a.id
-            $a.descricao | Should -Match '\(Atlas: .+\)$' -Because $a.id
+            $a.origem | Should -Match '^Atlas: .+' -Because $a.id
+        }
+    }
+
+    It 'textos para gente: sem etiqueta técnica no meio da explicação e sem mandar para a página em que você já está' {
+        foreach ($a in $catalogo) {
+            $a.descricao | Should -Not -Match '\((WinUtil|Atlas):' -Because "$($a.id): a origem fica no campo origem (rodapé dos detalhes)"
+            foreach ($campo in 'descricao', 'contratempo', 'seAcontecer') {
+                $texto = if ($a.PSObject.Properties[$campo]) { [string]$a.$campo } else { '' }
+                $texto | Should -Not -Match 'Desfaça na página Ajustes' -Because "$($a.id).$($campo): você já está na página Ajustes"
+                $texto | Should -Not -Match 'o anterior' -Because "$($a.id).$($campo): na grade não existe 'anterior'"
+            }
         }
     }
 

@@ -986,7 +986,8 @@ function Show-TmdDetalhe {
     else {
         $d = Get-DetalheAlvo -Linha $linha
         $c.DetalheEstado.Text = Get-TextoEstadoAlvo -Linha $linha
-        $c.DetalheId.Text = "id: $($linha.Id)"
+        $origem = if ($linha.Alvo) { [string](Get-ValorPropriedade $linha.Alvo 'Origem') } else { '' }
+        $c.DetalheId.Text = if ($origem) { "id: $($linha.Id) · base: $origem" } else { "id: $($linha.Id)" }
     }
     Show-TmdCartoesDetalhe -Detalhe $d
     # Prévia de texto (fontes: o quadro tem "Aa" desenhado numa fonte) e o valor que o item pede (tamanho personalizado).

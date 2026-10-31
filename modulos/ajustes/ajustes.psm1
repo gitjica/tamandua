@@ -82,6 +82,8 @@ function Find-Alvos {
             Classificacao = Get-CampoTexto $a 'classificacao'
             Contratempo = Get-CampoTexto $a 'contratempo'
             SeAcontecer = Get-CampoTexto $a 'seAcontecer'
+            # De onde o ajuste veio (ex.: "WinUtil: Telemetry"): só no rodapé dos detalhes, não no meio do texto.
+            Origem      = Get-CampoTexto $a 'origem'
             Selecionado = $false
             Destino     = 'NaoSeAplica'
             RequerAdmin = [bool]$a.requerAdmin

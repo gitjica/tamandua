@@ -278,7 +278,7 @@ function Get-ItemMenu {
 # Opcional: o resto, inclusive os itens de programas (o item some do menu, o programa continua funcionando).
 function Get-ClassificacaoItem {
     param([hashtable]$Item)
-    $volta = 'Desfaça na página Menu de contexto: o item aparece como "aplicado"; marque e clique em Aplicar.'
+    $volta = 'Para voltar: marque este item (ele aparece como "aplicado") e clique em Aplicar.'
     if ($Item.ContainsKey('Classico')) {
         return @{ Classificacao = 'Recomendado'; SeAcontecer = $volta
             Contratempo = 'Alguns itens que apps novos (da Microsoft Store) põem só no menu do Windows 11 não aparecem no clássico.' }

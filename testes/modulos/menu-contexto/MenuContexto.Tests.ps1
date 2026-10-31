@@ -78,7 +78,7 @@ Describe 'Menu de contexto' {
                 $c = Get-ClassificacaoItem -Item $i
                 $c.Classificacao | Should -Be 'Atencao' -Because $i.Id
                 $c.Contratempo | Should -Not -BeNullOrEmpty -Because $i.Id
-                $c.SeAcontecer | Should -Match 'Desfaça'
+                $c.SeAcontecer | Should -Match '^Para voltar: marque este item'
             }
         }
     }
