@@ -706,7 +706,7 @@ Describe 'Ajustes pela janela de verdade' {
                         if ($c.BarraTarefa.Visibility -eq 'Visible') { return }
                         switch ($p.Etapa) {
                             0 {
-                                $p.Presets = @($c.ListaPresets.ItemsSource) -join ','
+                                $p.Presets = @($c.ListaPresets.ItemsSource | ForEach-Object Nome) -join ','
                                 $p.PresetsVisivel = [string]$c.PainelPresets.Visibility
                                 $recipiente = $c.ListaPresets.ItemContainerGenerator.ContainerFromIndex(0)
                                 & $clicar ([System.Windows.Media.VisualTreeHelper]::GetChild($recipiente, 0))

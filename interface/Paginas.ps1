@@ -32,6 +32,8 @@ function Initialize-TmdTela {
         CacheLinhas   = @{}
         # Página aberta por último (preferências): a janela começa por ela.
         PaginaInicial = ''
+        # Preset escolhido por último na página (destacado na barra "Marcar:" até alguma marca mudar à mão).
+        PresetAtivo = ''
         # As mesmas linhas, guardadas por página (ver Get-TmdCacheLinhasPagina).
         LinhasPorPagina = @{}
         # Cartão de valor e redesenho das marcas em andamento (para um não disparar o outro).
@@ -100,7 +102,8 @@ function Initialize-TmdTela {
     $c.ListaPresets.AddHandler([System.Windows.Controls.Primitives.ButtonBase]::ClickEvent, [System.Windows.RoutedEventHandler] {
             $evento = $args[1]
             Invoke-TmdProtegido {
-                $nome = [string]$evento.OriginalSource.DataContext
+                $dados = $evento.OriginalSource.DataContext
+                $nome = if ($dados -and $dados.PSObject.Properties['Nome']) { [string]$dados.Nome } else { [string]$dados }
                 if ($nome) { Select-TmdPreset -Preset $nome }
             }
         })
@@ -354,6 +357,7 @@ function Open-TmdPagina {
     $script:Estado.Alvos = @()
     $script:Estado.CacheLinhas = Get-TmdCacheLinhasPagina -Nome $Nome
     $script:Estado.PastaAberta = ''
+    $script:Estado.PresetAtivo = ''
     Exit-TmdConfirmacao
     $c.TituloPagina.Text = $modulo.Titulo
     $c.SubtituloPagina.Text = if ($modulo.Descricao) { "$($modulo.Grupo) · $($modulo.Descricao)" } else { $modulo.Grupo }
@@ -502,7 +506,15 @@ function Update-TmdBarraPresets {
     if ($daPasta.Count -gt 1 -and @($daPasta | Where-Object { [string](Get-ValorPropriedade $_ 'Exclusivo') }).Count -eq 0) {
         $itens = @($script:MarcarPasta, $script:DesmarcarPasta) + $itens
     }
-    $c.ListaPresets.ItemsSource = if ($itens.Count -gt 0) { $itens } else { $null }
+    # Objetos para a janela: o preset escolhido por último fica destacado (Ativo).
+    $botoes = @(foreach ($i in $itens) {
+            $daPasta = $i -in $script:MarcarPasta, $script:DesmarcarPasta
+            [pscustomobject]@{
+                Nome = $i; Ativo = -not $daPasta -and $i -eq $script:Estado.PresetAtivo
+                Dica = if ($daPasta) { 'Vale só para os itens desta pasta' } else { 'Marca só os itens deste conjunto (desmarca o resto)' }
+            }
+        })
+    $c.ListaPresets.ItemsSource = if ($botoes.Count -gt 0) { $botoes } else { $null }
     $c.PainelPresets.Visibility = if ($itens.Count -gt 0) { 'Visible' } else { 'Collapsed' }
 }
 
@@ -592,6 +604,8 @@ function Set-TmdSelecao {
     $pede = if ($Selecionado -and $Linha.Alvo) { Get-ValorPropriedade $Linha.Alvo 'PedeValor' } else { $null }
     if ($pede -and $null -eq (Get-ValorPropriedade $Linha.Alvo 'ValorEscolhido')) { Set-TmdValorEscolhido -Linha $Linha -Valor ([double]$pede.Padrao) -SemRedesenhar; $mudou = $true }
     if ($mudou) { Update-TmdMarcasNaTela }
+    # Marca mudada à mão: já não é mais "o preset tal".
+    if ($script:Estado.PresetAtivo) { $script:Estado.PresetAtivo = ''; Update-TmdBarraPresets }
     Exit-TmdConfirmacao
     Update-TmdBarraAcao
 }
@@ -650,12 +664,17 @@ function Select-TmdPreset {
         }
         Exit-TmdConfirmacao
         Update-TmdMarcasNaTela
+        $script:Estado.PresetAtivo = ''
+        Update-TmdBarraPresets
         Update-TmdBarraAcao
         if ($marcar) { Set-TmdStatus "$n marcado(s) nesta pasta · $((Get-TmdResumoAtual).Texto) · nada é alterado sem confirmação" }
         return
     }
     $n = Set-SelecaoPreset -Alvos $script:Estado.Alvos -Preset $Preset
+    # "Nenhum" desmarca tudo: nada fica destacado.
+    $script:Estado.PresetAtivo = if ($Preset -ne 'Nenhum') { $Preset } else { '' }
     Exit-TmdConfirmacao
+    Update-TmdBarraPresets
     Update-TmdBusca
     Update-TmdBarraAcao
     if ($Preset -ne 'Nenhum') { Set-TmdStatus "Preset $($Preset): $n marcado(s) · $((Get-TmdResumoAtual).Texto) · nada é alterado sem confirmação" }
